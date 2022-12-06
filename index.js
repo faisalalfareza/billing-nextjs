@@ -7,7 +7,7 @@ const hostname = 'localhost';
 const port = process.env.port || 3000;
 
 // when using middleware `hostname` and `port` must be provided below
-const cookiesMiddleware = require('universal-cookie-express');
+// const cookiesMiddleware = require('universal-cookie-express');
 
 const app = next({ dev, hostname, port });
 const handle = app.getRequestHandler();
@@ -35,7 +35,7 @@ app
 
       }
     })
-    .use(cookiesMiddleware())
+    // .use(cookiesMiddleware())
     .listen(port, (err) => {
 
       if (err) throw err;

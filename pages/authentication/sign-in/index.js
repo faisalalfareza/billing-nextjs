@@ -107,7 +107,7 @@ function SignIn() {
     axios.post(url, credential, config)
       .then((response) => {
         setLoadingSubmit(false);
-        processAuthenticateResult(response.data.result, "/");
+        processAuthenticateResult(response.data.result, "/dashboards");
       })
       .catch((error) => {
         setLoadingSubmit(false);
@@ -144,7 +144,7 @@ function SignIn() {
           redirectUrl = authenticateResult.returnUrl;
       }
       
-      login(
+      processSetToken(
           authenticateResult.accessToken,
           authenticateResult.encryptedAccessToken,
           authenticateResult.expireInSeconds,
@@ -156,13 +156,14 @@ function SignIn() {
       Router.push("/authentication/sign-in");
     }
   }
-  function login(accessToken, encryptedAccessToken, expireInSeconds, rememberMe, twoFactorRememberClientToken, redirectUrl) {
+  function processSetToken(accessToken, encryptedAccessToken, expireInSeconds, rememberMe, twoFactorRememberClientToken, redirectUrl) {
     const tokenExpireDate = (new Date(new Date().getTime() + 1000 * expireInSeconds));
     setCookie('accessToken', accessToken, { path: '/',  expires: tokenExpireDate})
     setCookie('encryptedAccessToken', encryptedAccessToken, {path: '/', expires: tokenExpireDate})
 
     Router.push(redirectUrl);
   }
+  function getCurrentLoginInformations(params) {}
 
 
   return (
