@@ -1,0 +1,61 @@
+html,
+body {
+  padding: 0;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
+    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+
+.modal {
+  text-align: center;
+  padding: 0 !important;
+}
+
+.modal:before {
+  content: '';
+  display: inline-block;
+  height: 100%;
+  vertical-align: middle;
+}
+
+.modal-dialog {
+  display: inline-block;
+  text-align: left;
+  vertical-align: middle;
+}
+
+
+.swal2-title { line-height: initial !important; }
+.MuiGrid-root.MuiGrid-container.css-ie3pnq-MuiGrid-root,
+.MuiGrid-root.MuiGrid-container.css-nx7vfx-MuiGrid-root {
+  padding-left: 2rem !important;
+  padding-right: 2rem !important;
+}
+.MuiGrid-root.css-1442ydi-MuiGrid-root {
+  align-self: center !important;
+}
+.MuiBox-root.css-15lhspc { 
+  /* box-shadow: -1rem 10rem 1.25rem 3rem rgb(0 0 0 / 20%), 0rem 0.4375rem 0.625rem -0.3125rem rgb(64 64 64 / 20%) !important;  */
+  box-shadow: -1rem 1rem 25rem 2rem rgb(0 0 0 / 30%), 0rem 0.4375rem 0.625rem -0.3125rem rgb(64 64 64 / 20%) !important;
+  border-radius: 0px 80px 80px 80px !important;
+  /* border-top: 8px solid rgba(59, 59, 152,1.0) !important; */
+  height: auto !important;
+  padding: 1.5rem !important;
+  background-position: center !important;
+}
+img.MuiBox-root.css-10qqidj {
+  filter: drop-shadow(8px -15px 0.5px rgba(47, 53, 66,0.2)) !important;
+}
+/* .MuiBox-root.css-1275x5e {
+  background-image: linear-gradient(to bottom right, rgba(245, 246, 250,1.0), rgba(255, 255, 255,1.0)) !important;
+} */

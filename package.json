@@ -1,0 +1,81 @@
+{
+  "name": "nextjs-material-dashboard-2-pro",
+  "version": "1.0.0",
+  "private": true,
+  "author": "Creative Tim",
+  "license": "SEE LICENSE IN <https://www.creative-tim.com/license>",
+  "description": "NextJS version of Material Dashboard 2 PRO by Creative Tim",
+  "bugs": {
+    "url": "https://github.com/creativetimofficial/ct-nextjs-material-dashboard-pro/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/creativetimofficial/ct-nextjs-material-dashboard-pro.git"
+  },
+  "engines": {
+    "node": "14 || 15 || 16",
+    "npm": ">=6"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "export": "next build && next export",
+    "start": "node index.js",
+    "lint": "next lint",
+    "install:clean": "rm -rf node_modules/ && rm -rf package-lock.json && npm install && npm start",
+    "install:peer-deps": "npm install --legacy-peer-deps"
+  },
+  "dependencies": {
+    "@asseinfo/react-kanban": "2.2.0",
+    "@babel/preset-react": "7.14.5",
+    "@emotion/cache": "11.7.1",
+    "@emotion/react": "^11.10.4",
+    "@emotion/server": "11.4.0",
+    "@emotion/styled": "^11.8.1",
+    "@fullcalendar/common": "5.9.0",
+    "@fullcalendar/daygrid": "5.9.0",
+    "@fullcalendar/interaction": "5.9.0",
+    "@fullcalendar/react": "5.9.0",
+    "@fullcalendar/timegrid": "5.9.0",
+    "@hookform/resolvers": "^2.9.9",
+    "@mui/icons-material": "5.4.4",
+    "@mui/material": "^5.10.9",
+    "@mui/styled-engine-sc": "^5.10.6",
+    "axios": "^1.1.3",
+    "chart.js": "3.4.1",
+    "chroma-js": "2.4.2",
+    "dropzone": "5.9.2",
+    "flatpickr": "4.6.9",
+    "formik": "2.2.9",
+    "helper": "0.0.13",
+    "html-react-parser": "1.4.8",
+    "jsvectormap": "1.4.5",
+    "next": "latest",
+    "next-pwa": "5.5.4",
+    "next-transpile-modules": "^9.1.0",
+    "react": "^17.0.2",
+    "react-cookie": "^4.1.1",
+    "react-dom": "^17.0.2",
+    "react-flatpickr": "3.10.7",
+    "react-github-btn": "1.2.1",
+    "react-hook-form": "^7.38.0",
+    "react-images-viewer": "1.7.1",
+    "react-quill": "1.3.5",
+    "react-table": "7.7.0",
+    "reactstrap": "^9.1.5",
+    "regenerator-runtime": "0.13.9",
+    "styled-components": "^5.3.6",
+    "stylis": "4.0.13",
+    "stylis-plugin-rtl": "^2.1.1",
+    "sweetalert2": "^11.6.8",
+    "uuid": "8.3.2",
+    "yup": "^0.32.11"
+  },
+  "devDependencies": {
+    "@types/node": "17.0.4",
+    "@types/react": "17.0.38",
+    "eslint": "^8.10.0",
+    "eslint-config-next": "^12.1.0",
+    "typescript": "4.5.4"
+  }
+}
