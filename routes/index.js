@@ -35,6 +35,7 @@ Coded by www.creative-tim.com
 */
 
 // NextJS Material Dashboard 2 PRO components
+import React, { useState, useEffect } from "react";
 import MDAvatar from "../components/MDAvatar";
 
 // @mui icons
@@ -47,7 +48,7 @@ const main = [
   {
     type: "collapse",
     name: "Brooklyn Alice",
-    key: "brooklyn-alice",
+    key: "username",
     icon: <MDAvatar src={profilePicture.src} alt="Brooklyn Alice" size="sm" />,
     collapse: [
       {
@@ -65,6 +66,7 @@ const main = [
     nameOnHeader: "Dashboards",
     key: "dashboards",
     route: "/dashboards",
+    permission: "Pages.Tenant.Dashboard",
     icon: <Icon fontSize="medium">dashboard</Icon>,
     noCollapse: true,
   },
@@ -74,6 +76,7 @@ const main = [
     nameOnHeader: "Company Officer",
     key: "company-officer",
     route: "/app/company-officer",
+    permission: "Pages.Tenants.CompanyOfficer",
     icon: <Icon fontSize="medium">person_add</Icon>,
     noCollapse: true,
   },
@@ -85,23 +88,25 @@ const main = [
     name: "Nomor Seri FP",
     nameOnHeader: "Nomor Seri Faktur Pajak (NSFP)",
     key: "nsfp",
+    permission: "Pages.Tenants.GenerateNoSeriFP",
     icon: <Icon fontSize="medium">apps</Icon>,
     collapse: [
-      { name: "Generate", nameOnHeader: "Generate Faktur Pajak", key: "generate", route: "/app/nsfp/generate" },
-      { name: "Upload Batch", nameOnHeader: "Upload Batch Faktur Pajak", key: "upload-batch", route: "/app/nsfp/upload-batch" },
-      { name: "List", nameOnHeader: "List Faktur Pajak", key: "list", route: "/app/nsfp/list" },
+      { name: "Generate", nameOnHeader: "Generate Faktur Pajak", key: "generate", route: "/app/nsfp/generate", permission: "Pages.Tenants.GenerateNoSeriFP.Create" },
+      { name: "Upload Batch", nameOnHeader: "Upload Batch Faktur Pajak", key: "upload-batch", route: "/app/nsfp/upload-batch", permission: "Pages.Tenants.GenerateNoSeriFP.Create" },
+      { name: "List", nameOnHeader: "List Faktur Pajak", key: "list", route: "/app/nsfp/list", permission: "Pages.Tenants.GenerateNoSeriFP.List" },
     ],
   },
   {
     type: "collapse",
     name: "Faktur Pajak",
     key: "fp",
+    permission: "Pages.Tajak",
     icon: <Icon fontSize="medium">content_paste</Icon>,
     collapse: [
-      { name: "Input", key: "", route: "" },
-      { name: "Upload", key: "", route: "" },
-      { name: "List", key: "", route: "" },
-      { name: "Export to CSV", key: "", route: "" },
+      { name: "Input", key: "", route: "", permission: "Pages.Tenants.FakturPajak.Input" },
+      { name: "Upload", key: "", route: "", permission: "Pages.Tenants.FakturPajak.CreateUpload" },
+      { name: "List", key: "", route: "", permission: "Pages.Tenants.FakturPajak.List" },
+      { name: "Export to CSV", key: "", route: "", permission: "" },
     ],
   },
 
@@ -111,10 +116,11 @@ const main = [
     type: "collapse",
     name: "Surat Setoran Pajak",
     key: "ssp",
+    permission: "Pages.Tenants.SSP",
     icon: <Icon fontSize="medium">receipt_long</Icon>,
     collapse: [
-      { name: "SSP by Booking Code", key: "", route: "" },
-      { name: "SSP by Month", key: "", route: "" }
+      { name: "SSP by Booking Code", key: "", route: "", permission: "Pages.Tenants.SSP.ListBookCode" },
+      { name: "SSP by Month", key: "", route: "", permission: "Pages.Tenants.SSP.ListMonth" }
     ],
   },
 ]; 

@@ -1,18 +1,3 @@
-/**
-=========================================================
-* NextJS Material Dashboard 2 PRO - v2.0.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/nextjs-material-dashboard-pro
-* Copyright 2022 Creative Tim (https://www.creative-tim.com)
-
-Coded by www.creative-tim.com
-
- =========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*/
-
 import { useState } from "react";
 import Swal from "sweetalert2";
 
@@ -30,22 +15,24 @@ import MDBox from "/components/MDBox";
 import MDTypography from "/components/MDTypography";
 import MDButton from "/components/MDButton";
 
+// Data
+import axios from "axios";
+import getConfig from 'next/config';
+import { useCookies } from 'react-cookie';
+const { publicRuntimeConfig } = getConfig();
 
-function DataTableRowActions({ record, openModalonEdit }) {
+
+function DataTableRowActions({ record, openModalonEdit, onDeleted }) {
+  const [{ accessToken, encryptedAccessToken }] = useCookies();
   const [menu, setMenu] = useState(false);
 
   const openMenu = (event) => setMenu(event.currentTarget);
   const closeMenu = () => setMenu(false);
 
-  const editOfficer = () => setTimeout(() => openModalonEdit(record.action), 0);
+  const editOfficer = () => {
+    setTimeout(() => openModalonEdit(record.action), 0);
+  }
   const deleteOfficer = () => {
-    // const swalWithBootstrapButtons = Swal.mixin({
-    //   customClass: {
-    //     confirmButton: 'btn btn-success',
-    //     cancelButton: 'btn btn-danger'
-    //   },
-    //   buttonsStyling: false
-    // });
     Swal.fire({
       title: 'Delete Company Officer',
       text: "Are you sure to delete "+record.action.officerName+"? this will remove it permanently from their related company.",
@@ -57,16 +44,34 @@ function DataTableRowActions({ record, openModalonEdit }) {
       reverseButtons: true
     }).then((result) => {
       if (result.isConfirmed) {
+        deleteCompanyOfficer(record.action);
+      }
+    })
+  };
+
+  const deleteCompanyOfficer = async (record) => {
+    const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CompanyOfficer/DeleteCompanyOfficer`;
+    const config = {
+      headers: {Authorization: "Bearer " + accessToken},
+      params: {
+        'coCode': record.coCode, 
+        'officerName': record.officerName
+      }
+    };
+    axios
+      .delete(url, config)
+      .then(res => {
         Swal.fire({
           title: 'Officer Deleted',
           text: "Officer "+record.action.officerName+" has been deleted from "+record.action.coName+".",
           icon: 'success',
           showConfirmButton: true,
-          timer: 3000,
           timerProgressBar: true,
-        })
-      }
-    })
+          timer: 3000,
+        }).then(() => {
+          setTimeout(() => onDeleted(), 0);
+        });
+      });
   };
 
   return (
@@ -90,7 +95,7 @@ function DataTableRowActions({ record, openModalonEdit }) {
         keepMounted
       >
         <MenuItem onClick={editOfficer}>Edit Officer</MenuItem>
-        <Divider sx={{ margin: "0.5rem 0" }} />
+        {/* <Divider sx={{ margin: "0.5rems 0" }} /> */}
         <MenuItem onClick={deleteOfficer}>
           <MDTypography variant="button" color="error" fontWeight="regular">
             Delete Officer
@@ -110,6 +115,7 @@ DataTableRowActions.defaultProps = {
 DataTableRowActions.propTypes = {
   record: PropTypes.any.isRequired,
   openModalonEdit: PropTypes.func,
+  onDeleted: PropTypes.func,
 };
 
 export default DataTableRowActions;

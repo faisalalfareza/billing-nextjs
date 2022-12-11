@@ -35,7 +35,7 @@ module.exports = withTM({
   },
   publicRuntimeConfig: {
     apiUrl: process.env.NODE_ENV === 'development'
-        ? 'http://18.141.209.135:1006/api' // development api http://18.141.209.135:1001/api
-        : 'http://localhost:3000/api' // production api
+        ? 'http://18.141.209.135:1006' // development api http://18.141.209.135:1001/api
+        : 'http://localhost:3000' // production api
   },
 });

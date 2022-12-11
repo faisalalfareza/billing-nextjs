@@ -37,7 +37,7 @@ function Dashboards() {
     if (e) e.preventDefault();
     setLoadingRefresh(true);
 
-    const url = `${publicRuntimeConfig.apiUrl}/services/app/Dashboard/GetAvailableFPNo`;
+    const url = `${publicRuntimeConfig.apiUrl}/api/services/app/Dashboard/GetAvailableFPNo`;
     const config = {headers: {Authorization: "Bearer " + accessToken}};
     axios
       .get(url, config)
@@ -47,7 +47,7 @@ function Dashboards() {
         setAvailableFPNo(availableFPNoList);
 
         setLoadingRefresh(false);
-      });
+      }).catch((error) => setLoadingRefresh(false));
   };
   
   const showTopAvailableFPNoOnWidget = () => {

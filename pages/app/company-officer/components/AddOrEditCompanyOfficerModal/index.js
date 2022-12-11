@@ -1,19 +1,4 @@
-/**
-=========================================================
-* NextJS Material Dashboard 2 PRO - v2.0.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/nextjs-material-dashboard-pro
-* Copyright 2022 Creative Tim (https://www.creative-tim.com)
-
-Coded by www.creative-tim.com
-
- =========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*/
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Swal from "sweetalert2";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
@@ -30,22 +15,112 @@ import Autocomplete from "@mui/material/Autocomplete";
 import MDBox from "/components/MDBox";
 import MDTypography from "/components/MDTypography";
 import MDButton from "/components/MDButton";
-
-// import FormField from "/pagesComponents/pages/users/new-user/components/FormField";
 import FormField from "/pagesComponents/FormField";
+
+// Data
+import axios from "axios";
+import getConfig from 'next/config';
+import { useCookies } from 'react-cookie';
+const { publicRuntimeConfig } = getConfig();
 
 
 function AddOrEditCompanyOfficerModal({ isOpen, params, onModalChanged }) {
   const [modalOpen, setModalOpen] = useState(true);
-  if (isOpen) {  
-    // const [modalOpen, setModalOpen] = useState(true);
-    const openModal = () => setModalOpen(true);
-    const toggleModal = () => setModalOpen(true);
-    const closeModal = () => {
-      setModalOpen(false);
-      setTimeout(() => onModalChanged(), 0);
+  const [{ accessToken, encryptedAccessToken }] = useCookies();
+  const [isLoadingSubmit, setLoadingSubmit] = useState(false);
+
+  useEffect(() => {
+    getMsCompanyDropdown();
+  }, []);
+
+  const [companyList, setCompany] = useState([]);
+  const getMsCompanyDropdown = async (e) => {
+    if (e) e.preventDefault();
+
+    const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CompanyOfficer/GetMsCompanyDropdown`;
+    const config = {headers: {Authorization: "Bearer " + accessToken}};
+    axios
+      .get(url, config)
+      .then(res => {
+        let companyList = res.data.result;
+        companyList = [
+          {"coCode":"MSU","coName":"PT. MAHKOTA SENTOSA UTAMA"},
+          {"coCode":"MSV","coName":"PT. MAHKOTA SENTOSA UTAMA"},
+          {"coCode":"IS","coName":"PT Indo Sejati"},
+          {"coCode":"SCo","coName":"SimCorp"}
+        ];
+        companyList = companyList.map(e => (e.coCode + " - " + e.coName).toUpperCase());
+        setCompany(companyList);
+      });
+  };
+
+  const createOrUpdateCompanyOfficer = async (values, actions) => {
+    setLoadingSubmit(true);
+
+    const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CompanyOfficer/CreateOrUpdateCompanyOfficer`;
+    const config = {
+      headers: {
+        Authorization: "Bearer " + accessToken,
+        'Content-Type': 'application/json'
+      }
     };
 
+    let company = values.company.split(" - ");
+    let loginName = JSON.parse(localStorage.getItem("informations")).user.userName;
+    const body = {
+      inputUN: loginName,
+      coCode: company[0],
+      coName: company[1],
+      officerName: (params == undefined) ? values.officerName : params.officerName,
+      officerNameNew: values.officerName,
+      title: values.officerTitle,
+      flag: (params == undefined) ? 1 : 2
+    };
+    console.log("CompanyOfficer/CreateOrUpdateCompanyOfficer ", body);
+
+    axios
+      .post(url, body, config)
+      .then(res => {
+        if (res.data.success) {
+          if (params == undefined) { // Add Company Officer
+            Swal.fire({
+              title: 'New Officer Added',
+              text: "Officer "+values.officerName+" has been successfully added to "+values.company+".",
+              icon: 'success',
+              showConfirmButton: true,
+              timerProgressBar: true,
+              timer: 3000,
+            }).then(() => {
+              setLoadingSubmit(false);
+              actions.resetForm();
+              closeModal();
+            });
+          } else { // Update Company Officer
+            Swal.fire({
+              title: 'Officer Updated',
+              text: "Officer "+values.officerName+" in "+values.company+" has been successfully updated.",
+              icon: 'success',
+              showConfirmButton: true,
+              timerProgressBar: true,
+              timer: 3000,
+            }).then((result) => {
+              setLoadingSubmit(false);
+              actions.resetForm();
+              closeModal();
+            });
+          }
+        }
+      }).catch((error) => setLoadingSubmit(false));
+  };
+
+  const openModal = () => setModalOpen(true);
+  const toggleModal = () => setModalOpen(true);
+  const closeModal = () => {
+    setModalOpen(false);
+    setTimeout(() => onModalChanged(), 0);
+  };
+
+  if (isOpen) {  
     const schemeModels = {
       formId: "company-officer-form",
       formField: {
@@ -104,51 +179,9 @@ function AddOrEditCompanyOfficerModal({ isOpen, params, onModalChanged }) {
     });
     const submitForm = async (values, actions) => {
       await sleep(1000);
-  
-      if (params == undefined) { // Add Company Officer
-        Swal.fire({
-          title: 'New Officer Added',
-          text: "Officer "+values.officerName+" has been successfully added to "+values.company+".",
-          icon: 'success',
-          showConfirmButton: true,
-          timer: 3000,
-          timerProgressBar: true,
-        }).then((result) => {
-          actions.setSubmitting(false);
-          actions.resetForm();
-          closeModal();
-        });
-      } else { // Update Company Officer
-        Swal.fire({
-          title: 'Officer Updated',
-          text: "Officer "+values.officerName+" in "+values.company+" has been successfully updated.",
-          icon: 'success',
-          showConfirmButton: true,
-          timer: 3000,
-          timerProgressBar: true,
-        }).then((result) => {
-          actions.setSubmitting(false);
-          actions.resetForm();
-          closeModal();
-        });
-      }
+      createOrUpdateCompanyOfficer(values, actions);
     };
 
-    const companyResponse = {
-      "result":[
-          {"coCode":"MSU","coName":"PT. MAHKOTA SENTOSA UTAMA"},
-          {"coCode":"MSV","coName":"PT. MAHKOTA SENTOSA UTAMA"},
-          {"coCode":"IS","coName":"PT Indo Sejati"},
-          {"coCode":"SCo","coName":"SimCorp"}
-      ], 
-      "targetUrl":null,
-      "success":true,
-      "error":null,
-      "unAuthorizedRequest":false,
-      "__abp":true
-    }
-    let companyList = companyResponse.result.map(e => (e.coCode + " - " + e.coName).toUpperCase());
-    
 
     return (
       <Modal 
@@ -168,6 +201,14 @@ function AddOrEditCompanyOfficerModal({ isOpen, params, onModalChanged }) {
               officerName: officerNameV,
               officerTitle: officerTitleV
             } = values;
+
+            const isValifForm = () => {
+              return (
+                checkingSuccessInput(companyV, errors.company) && 
+                checkingSuccessInput(officerNameV, errors.officerName) && 
+                checkingSuccessInput(officerTitleV, errors.officerTitle)
+              ) ? true : false;
+            };
 
             return (
               <Form id={schemeModels.formId} autoComplete="off">
@@ -242,8 +283,11 @@ function AddOrEditCompanyOfficerModal({ isOpen, params, onModalChanged }) {
                     </MDButton>
                     <MDBox ml={{ xs: 0, sm: 1 }} mt={{ xs: 1, sm: 0 }}>
                       <MDButton type="submit" variant="gradient" color="primary" sx={{ height: "100%" }}
-                        disabled={isSubmitting}>
-                          {params == undefined ? "Add" : "Update"} Officer
+                        disabled={!isValifForm() || isLoadingSubmit}>
+                          {isLoadingSubmit 
+                            ? (params == undefined ? "Adding Officer.." : "Updating Officer..")
+                            : (params == undefined ? "Add Officer" : "Update Officer")
+                          }
                       </MDButton>
                     </MDBox>
                   </MDBox>

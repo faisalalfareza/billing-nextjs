@@ -15,6 +15,7 @@ Coded by www.creative-tim.com
 
 // prop-types is a library for typechecking of props
 import PropTypes from "prop-types";
+import { useState, useEffect } from "react";
 
 // @mui material components
 import Container from "@mui/material/Container";
@@ -30,40 +31,52 @@ import typography from "/assets/theme/base/typography";
 
 function Footer({ light }) {
   const { size } = typography;
+  const [app, setAppInfo] = useState(undefined);
 
-  return (
-    <MDBox position="absolute" width="100%" bottom={0} py={4}>
-      <Container>
-        <MDBox
-          width="100%"
-          display="flex"
-          flexDirection={{ xs: "column", lg: "row" }}
-          // justifyContent="space-between"
-          alignItems="center"
-          justifyContent="center"
-          px={1.5}
-        >
+  useEffect(() => {
+    let getApp = localStorage.getItem("application");
+    if (getApp != undefined) {
+      getApp = JSON.parse(getApp);
+      setAppInfo(getApp);
+    }
+  }, []);
+
+  if (app != undefined) {
+    return (
+      <MDBox position="absolute" width="100%" bottom={0} py={4}>
+        <Container>
           <MDBox
+            width="100%"
             display="flex"
-            textAlign="center"
-            justifyContent="center"
+            flexDirection={{ xs: "column", lg: "row" }}
+            // justifyContent="space-between"
             alignItems="center"
-            lineHeight="1"
-            flexWrap="wrap"
-            color={"rgb(212 218 232)"}
-            fontSize={"12px"}
-            fontWeight="medium"
-            fontFamily="monospace"
-            pt={1} pr={3} pb={1} pl={3} 
-            borderRadius="3"
-            bgColor="white"
+            justifyContent="center"
+            px={1.5}
           >
-            Tax v5.0.0.0 [20220915]
+            <MDBox
+              display="flex"
+              textAlign="center"
+              justifyContent="center"
+              alignItems="center"
+              lineHeight="1"
+              flexWrap="wrap"
+              color={"rgb(212 218 232)"}
+              fontSize={"12px"}
+              fontWeight="medium"
+              fontFamily="monospace"
+              pt={1} pr={3} pb={1} pl={3} 
+              borderRadius="3"
+              bgColor="white"
+            >
+              Tax v{app.version} [{new Date(app.releaseDate).toUTCString().slice(5, 16)}]
+            </MDBox>
           </MDBox>
-        </MDBox>
-      </Container>
-    </MDBox>
-  );
+        </Container>
+      </MDBox>
+    );
+  } else
+    return false;
 }
 
 // Setting default props for the Footer
