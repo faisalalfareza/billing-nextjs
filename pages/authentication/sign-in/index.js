@@ -31,7 +31,9 @@ import { useCookies } from 'react-cookie';
 const { publicRuntimeConfig } = getConfig();
 
 
-function SignIn() {
+function SignIn(props) {
+  const {} = props;
+
   const [isLoadingSubmit, setLoadingSubmit] = useState(false);
   
   const [userNameOrEmailAddressVF, setUserNameOrEmailAddress] = useState("");
@@ -284,3 +286,9 @@ function SignIn() {
 }
 
 export default SignIn;
+
+export async function getStaticProps() {
+  return {
+    props: {}
+  }
+} 

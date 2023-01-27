@@ -187,8 +187,8 @@ function Main({ Component, pageProps }) {
   ); 
 }
 
- function MyApp({ Component, pageProps,emotionCache = clientSideEmotionCache, }) {
-
+function MyApp({ Component, pageProps, emotionCache = clientSideEmotionCache }) {
+  
   return (
     <>
     <MaterialUIControllerProvider>

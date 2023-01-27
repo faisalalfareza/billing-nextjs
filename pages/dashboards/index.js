@@ -24,32 +24,34 @@ import { useCookies } from 'react-cookie';
 const { publicRuntimeConfig } = getConfig();
 
 
-function Dashboards() {
+function Dashboards(props) {
+  const { availableFPNoList } = props || {};
+
   const [{ accessToken, encryptedAccessToken }] = useCookies();
   const [isLoadingRefresh, setLoadingRefresh] = useState(false);
 
-  useEffect(() => {
-    getAvailableFPNo();
-  }, []);
+  // useEffect(() => {
+  //   getAvailableFPNo();
+  // }, []);
 
-  const [availableFPNoList, setAvailableFPNo] = useState([]);
-  const getAvailableFPNo = async (e) => {
-    if (e) e.preventDefault();
-    setLoadingRefresh(true);
+  // const [availableFPNoList, setAvailableFPNo] = useState([]);
+  // const getAvailableFPNo = async (e) => {
+  //   if (e) e.preventDefault();
+  //   setLoadingRefresh(true);
 
-    const url = `${publicRuntimeConfig.apiUrl}/api/services/app/Dashboard/GetAvailableFPNo`;
-    const config = {headers: {Authorization: "Bearer " + accessToken}};
-    axios
-      .get(url, config)
-      .then(res => {
-        let availableFPNoList = res.data.result;
-        availableFPNoList = availableFPNoList.sort((a, b) => a.totalFPNo - b.totalFPNo);
-        setAvailableFPNo(availableFPNoList);
+  //   const url = `${publicRuntimeConfig.apiUrl}/api/services/app/Dashboard/GetAvailableFPNo`;
+  //   const config = {headers: {Authorization: "Bearer " + accessToken}};
+  //   axios
+  //     .get(url, config)
+  //     .then(res => {
+  //       let availableFPNoList = res.data.result;
+  //       availableFPNoList = availableFPNoList.sort((a, b) => a.totalFPNo - b.totalFPNo);
+  //       setAvailableFPNo(availableFPNoList);
 
-        setLoadingRefresh(false);
-      }).catch((error) => setLoadingRefresh(false));
-  };
-  
+  //       setLoadingRefresh(false);
+  //     }).catch((error) => setLoadingRefresh(false));
+  // };
+
   const showTopAvailableFPNoOnWidget = () => {
     if (availableFPNoList && availableFPNoList.length) {
       const count = availableFPNoList.length;
@@ -68,11 +70,6 @@ function Dashboards() {
                 value: "+55%",
                 label: "since last month",
               }}
-              // dropdown={{
-              //   action: openSalesDropdown,
-              //   menu: renderMenu(salesDropdown, closeSalesDropdown),
-              //   value: salesDropdownValue,
-              // }}
             />
           </Grid>
         );
@@ -148,4 +145,34 @@ function Dashboards() {
   );
 }
 
+Dashboards.getAvailableFPNo = async (e) => {
+  if (e) e.preventDefault();
+  setLoadingRefresh(true);
+
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/Dashboard/GetAvailableFPNo`;
+  const config = {headers: {Authorization: "Bearer " + accessToken}};
+  axios
+    .get(url, config)
+    .then(res => {
+      let listOfavailableFPNo = res.data.result;
+      listOfavailableFPNo = listOfavailableFPNo.sort((a, b) => a.totalFPNo - b.totalFPNo);
+      // setAvailableFPNo(listOfavailableFPNo);
+      setLoadingRefresh(false);
+
+      return listOfavailableFPNo;
+    }).catch((error) => setLoadingRefresh(false));
+};
+
 export default Dashboards;
+ 
+export async function getStaticProps() {
+  const response = await fetch(`${publicRuntimeConfig.apiUrl}/api/services/app/Dashboard/GetAvailableFPNo`);
+  const data = await response.json();
+   
+  return {
+    props: {
+      availableFPNoList: data.result
+    },
+    revalidate: 5
+  };
+}

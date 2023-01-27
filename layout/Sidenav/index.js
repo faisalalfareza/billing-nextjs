@@ -363,13 +363,4 @@ Sidenav.propTypes = {
   routes: PropTypes.arrayOf(PropTypes.object).isRequired,
 };
 
-export async function getStaticProps() {
-  return {
-    props: {
-      routes: routes
-    },
-    // revalidate: 10000,
-  };
-}
-
 export default Sidenav;
