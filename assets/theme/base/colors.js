@@ -40,9 +40,9 @@ const colors = {
 
   selectedThemeColor: {
     main: "#5f27cd",
-    focus: "#8a3ee6",
-    gradient1: "#5846d8",
-    gradient2: "#8a3ee6"
+    focus: "#10569E",
+    gradient1: "#6CC3EE",
+    gradient2: "#10569E",
   },
 
   black: {

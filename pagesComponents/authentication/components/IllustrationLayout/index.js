@@ -13,34 +13,28 @@ Coded by www.creative-tim.com
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
 
-// prop-types is a library for typechecking of props
 import PropTypes from "prop-types";
-
-// @mui material components
 import Grid from "@mui/material/Grid";
-import Link from "@mui/material/Link";
 
-// NextJS Material Dashboard 2 PRO components
 import MDBox from "/components/MDBox";
 import MDTypography from "/components/MDTypography";
 
-// NextJS Material Dashboard 2 PRO examples
+import { useMaterialUIController } from "/context";
+
 import DefaultNavbar from "/layout/Navbars/DefaultNavbar";
 import PageLayout from "/layout/LayoutContainers/PageLayout";
+
 import Footer from "/pagesComponents/authentication/components/Footer";
 
-// NextJS Material Dashboard 2 PRO page layout routes
 import pageRoutes from "/routes/page.routes";
 
-// NextJS Material Dashboard 2 PRO context
-import { useMaterialUIController } from "/context";
 import brandWhite from "../../../../assets/images/app-logo-on-dark.png";
 import brandBuilding from "../../../../assets/images/Building-Vector-PNG-HD-Quality.png";
 
 function IllustrationLayout({
   header,
-  title,
-  description,
+  formTitle,
+  formDescription,
   illustration,
   children,
 }) {
@@ -79,11 +73,7 @@ function IllustrationLayout({
           >
             <Grid container alignItems="center">
               <Grid item xs={12} sm={3} pl={5} pr={5}>
-                <MDBox
-                  component="img"
-                  src={brandWhite.src}
-                  width={"5rem"}
-                />
+                <MDBox component="img" src={brandWhite.src} width={"5rem"} />
               </Grid>
               <Grid item xs={12} sm={9} mt={3} pl={5} pr={5}>
                 <MDBox>
@@ -93,20 +83,34 @@ function IllustrationLayout({
                 </MDBox>
                 <MDBox mb={1}>
                   <MDTypography variant="h1" color="white" letterSpacing="-3px">
-                    Tax System──
+                    Billing Residence Application
                   </MDTypography>
                 </MDBox>
                 <MDBox mb={2}>
-                  <MDTypography variant="body2" color="white" fontWeight="regular" lineHeight="1">
-                    Manage company officers, tax invoices along with serial numbers, and tax deposit letters.
+                  <MDTypography
+                    variant="body2"
+                    color="white"
+                    fontWeight="regular"
+                    lineHeight="1"
+                  >
+                    Manage company officers, tax invoices along with serial
+                    numbers, and tax deposit letters.
                   </MDTypography>
                 </MDBox>
               </Grid>
-              
             </Grid>
           </MDBox>
         </Grid>
-        <Grid item xs={11} sm={8} md={6} lg={4} xl={3} sx={{ mx: "auto" }} zIndex="1">
+        <Grid
+          item
+          xs={11}
+          sm={8}
+          md={6}
+          lg={4}
+          xl={3}
+          sx={{ mx: "auto" }}
+          zIndex="1"
+        >
           <MDBox
             display="flex"
             flexDirection="column"
@@ -118,11 +122,11 @@ function IllustrationLayout({
                 <>
                   <MDBox mb={1} textAlign="center">
                     <MDTypography variant="h4" fontWeight="bold">
-                      {title}
+                      {formTitle}
                     </MDTypography>
                   </MDBox>
                   <MDTypography variant="body2" color="text" lineHeight="1">
-                    {description}
+                    {formDescription}
                   </MDTypography>
                 </>
               ) : (
@@ -150,16 +154,16 @@ function IllustrationLayout({
 // Setting default values for the props of IllustrationLayout
 IllustrationLayout.defaultProps = {
   header: "",
-  title: "",
-  description: "",
+  formTitle: "",
+  formDescription: "",
   illustration: "",
 };
 
 // Typechecking props for the IllustrationLayout
 IllustrationLayout.propTypes = {
   header: PropTypes.node,
-  title: PropTypes.string,
-  description: PropTypes.string,
+  formTitle: PropTypes.string,
+  formDescription: PropTypes.string,
   children: PropTypes.node.isRequired,
   illustration: PropTypes.oneOfType([PropTypes.string, PropTypes.object])
     .isRequired,

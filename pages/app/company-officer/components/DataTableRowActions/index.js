@@ -1,26 +1,21 @@
 import { useState } from "react";
-import Swal from "sweetalert2";
-
-// prop-types is a library for typechecking of props
+import { useCookies } from "react-cookie";
 import PropTypes from "prop-types";
+import Swal from "sweetalert2";
+import axios from "axios";
 
-// @mui material components
 import Icon from "@mui/material/Icon";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import Divider from "@mui/material/Divider";
 
-// NextJS Material Dashboard 2 PRO components
+import getConfig from "next/config";
+
 import MDBox from "/components/MDBox";
 import MDTypography from "/components/MDTypography";
 import MDButton from "/components/MDButton";
 
-// Data
-import axios from "axios";
-import getConfig from 'next/config';
-import { useCookies } from 'react-cookie';
 const { publicRuntimeConfig } = getConfig();
-
 
 function DataTableRowActions({ record, openModalonEdit, onDeleted }) {
   const [{ accessToken, encryptedAccessToken }] = useCookies();
@@ -29,56 +24,64 @@ function DataTableRowActions({ record, openModalonEdit, onDeleted }) {
   const openMenu = (event) => setMenu(event.currentTarget);
   const closeMenu = () => setMenu(false);
 
+  // EDIT - COMPANY OFFICER
   const editOfficer = () => {
     setTimeout(() => openModalonEdit(record.action), 0);
-  }
+  };
+
+  // DELETE - COMPANY OFFICER
   const deleteOfficer = () => {
     Swal.fire({
-      title: 'Delete Company Officer',
-      text: "Are you sure to delete "+record.action.officerName+"? this will remove it permanently from their related company.",
-      icon: 'warning',
+      title: "Delete Company Officer",
+      text:
+        "Are you sure to delete " +
+        record.action.officerName +
+        "? this will remove it permanently from their related company.",
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Yes, delete it!',
-      reverseButtons: true
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+      reverseButtons: true,
     }).then((result) => {
       if (result.isConfirmed) {
         deleteCompanyOfficer(record.action);
       }
-    })
+    });
   };
-
   const deleteCompanyOfficer = async (record) => {
     const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CompanyOfficer/DeleteCompanyOfficer`;
     const config = {
-      headers: {Authorization: "Bearer " + accessToken},
+      headers: { Authorization: "Bearer " + accessToken },
       params: {
-        'coCode': record.coCode, 
-        'officerName': record.officerName
-      }
+        coCode: record.coCode,
+        officerName: record.officerName,
+      },
     };
-    axios
-      .delete(url, config)
-      .then(res => {
-        Swal.fire({
-          title: 'Officer Deleted',
-          text: "Officer "+record.action.officerName+" has been deleted from "+record.action.coName+".",
-          icon: 'success',
-          showConfirmButton: true,
-          timerProgressBar: true,
-          timer: 3000,
-        }).then(() => {
-          setTimeout(() => onDeleted(), 0);
-        });
-      });
+
+    axios.delete(url, config).then((res) => {
+      Swal.fire({
+        title: "Officer Deleted",
+        text:
+          "Officer " +
+          record.action.officerName +
+          " has been deleted from " +
+          record.action.coName +
+          ".",
+        icon: "success",
+        showConfirmButton: true,
+        timerProgressBar: true,
+        timer: 3000,
+      }).then(() => setTimeout(() => onDeleted(), 0));
+    });
   };
 
   return (
     <MDBox display="flex" alignItems="center">
       <MDButton
         variant={menu ? "contained" : "outlined"}
-        color="dark" size="small"
+        color="dark"
+        size="small"
         onClick={openMenu}
         aria-haspopup="true"
       >

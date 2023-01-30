@@ -1,5 +1,5 @@
 /** @type {import('next').NextConfig} */
-const withPWA = require('next-pwa');
+const withPWA = require("next-pwa");
 
 const withTM = require("next-transpile-modules")([
   "next-pwa",
@@ -12,11 +12,11 @@ const withTM = require("next-transpile-modules")([
   "@fullcalendar/timegrid",
   "react-github-btn",
 ]);
-const runtimeCaching = require('next-pwa/cache');
+const runtimeCaching = require("next-pwa/cache");
 
 module.exports = withTM({
   pwa: {
-    dest: 'public',
+    dest: "public",
     runtimeCaching,
   },
   reactStrictMode: false,
@@ -24,18 +24,19 @@ module.exports = withTM({
     return [
       {
         source: "/",
-        // destination: "/dashboards",
         destination: "/authentication/sign-in",
         permanent: true,
       },
     ];
   },
   serverRuntimeConfig: {
-      secret: 'THIS IS USED TO SIGN AND VERIFY JWT TOKENS, REPLACE IT WITH YOUR OWN SECRET, IT CAN BE ANY STRING'
+    secret:
+      "THIS IS USED TO SIGN AND VERIFY JWT TOKENS, REPLACE IT WITH YOUR OWN SECRET, IT CAN BE ANY STRING",
   },
   publicRuntimeConfig: {
-    apiUrl: process.env.NODE_ENV === 'development'
-        ? 'http://18.141.209.135:1006' // development api 'http://18.141.209.135:1001/api'
-        : 'http://18.141.209.135:1006' // production api 'http://localhost:3000'
+    apiUrl:
+      process.env.NODE_ENV === "development"
+        ? "http://18.141.209.135:1006" // development api 'http://18.141.209.135:1001/api'
+        : "http://18.141.209.135:1006", // production api 'http://localhost:3000'
   },
 });

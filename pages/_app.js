@@ -1,7 +1,7 @@
-import Head from 'next/head';
-import '../styles/globals.css';
-import '../styles/nextjs-argon-dashboard.css';
-import { AppProps } from 'next/app';
+import Head from "next/head";
+import "../styles/globals.css";
+import "../styles/nextjs-argon-dashboard.css";
+import { AppProps } from "next/app";
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/router";
 // @emotion
@@ -14,7 +14,7 @@ import Icon from "@mui/material/Icon";
 import MDBox from "../components/MDBox";
 // @emotion/react components
 import { CacheProvider } from "@emotion/react";
-import { CookiesProvider } from 'react-cookie';
+import { CookiesProvider } from "react-cookie";
 // @fullcalendar styles
 import "@fullcalendar/common/main.css";
 import "@fullcalendar/daygrid/main.css";
@@ -114,9 +114,8 @@ function Main({ Component, pageProps }) {
     document.scrollingElement.scrollTop = 0;
   }, [pathname]);
 
-  const brandIcon = (transparentSidenav && !darkMode) || whiteSidenav 
-    ? brandDark 
-    : brandWhite;
+  const brandIcon =
+    (transparentSidenav && !darkMode) || whiteSidenav ? brandDark : brandWhite;
 
   const configsButton = (
     <MDBox
@@ -152,7 +151,7 @@ function Main({ Component, pageProps }) {
             <Sidenav
               color={sidenavColor}
               brand={brandIcon}
-              brandName="Tax System"
+              brandName="BILLING SYSTEM"
               routes={routes.main}
               onMouseEnter={handleOnMouseEnter}
               onMouseLeave={handleOnMouseLeave}
@@ -173,7 +172,7 @@ function Main({ Component, pageProps }) {
           <Sidenav
             color={sidenavColor}
             brand={brandIcon}
-            brandName="Tax System"
+            brandName="BILLING SYSTEM"
             routes={routes.main}
             onMouseEnter={handleOnMouseEnter}
             onMouseLeave={handleOnMouseLeave}
@@ -184,51 +183,53 @@ function Main({ Component, pageProps }) {
       )}
       {layout === "vr" && <Configurator />}
     </ThemeProvider>
-  ); 
+  );
 }
 
-function MyApp({ Component, pageProps, emotionCache = clientSideEmotionCache }) {
-  
+function MyApp({
+  Component,
+  pageProps,
+  emotionCache = clientSideEmotionCache,
+}) {
   return (
     <>
-    <MaterialUIControllerProvider>
-      <CacheProvider value={emotionCache}>
-        <CookiesProvider>
-          <Head>
-            <meta charSet="utf-8" />
-            <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
-            <meta
-              name="viewport"
-              content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no"
-            />
-            <meta name="description" content="Description" />
-            <meta name="keywords" content="Keywords" />
-            <title>Tax System | Powered by NextJS & PWA</title>
+      <MaterialUIControllerProvider>
+        <CacheProvider value={emotionCache}>
+          <CookiesProvider>
+            <Head>
+              <meta charSet="utf-8" />
+              <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
+              <meta
+                name="viewport"
+                content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no"
+              />
+              <meta name="description" content="Description" />
+              <meta name="keywords" content="Keywords" />
+              <title>BILLING SYSTEM | Powered by NextJS & PWA</title>
 
-            <link rel="manifest" href="/manifest.json" />
-            <link
-              href={"/icons/favicon-16x16.png"}
-              rel="icon"
-              type="image/png"
-              sizes="16x16"
-            />
-            <link
-              href="/icons/favicon-32x32.png"
-              rel="icon"
-              type="image/png"
-              sizes="32x32"
-            />
-            <link rel="apple-touch-icon" href="/apple-icon.png"></link>
-            <meta name="theme-color" content="#317EFB" />
-          </Head>
+              <link rel="manifest" href="/manifest.json" />
+              <link
+                href={"/icons/favicon-16x16.png"}
+                rel="icon"
+                type="image/png"
+                sizes="16x16"
+              />
+              <link
+                href="/icons/favicon-32x32.png"
+                rel="icon"
+                type="image/png"
+                sizes="32x32"
+              />
+              <link rel="apple-touch-icon" href="/apple-icon.png"></link>
+              <meta name="theme-color" content="#317EFB" />
+            </Head>
 
-          <Main Component={Component} pageProps={pageProps} />
-          
-        </CookiesProvider>
-      </CacheProvider>
-    </MaterialUIControllerProvider>
+            <Main Component={Component} pageProps={pageProps} />
+          </CookiesProvider>
+        </CacheProvider>
+      </MaterialUIControllerProvider>
     </>
-  )
+  );
 }
 
 export default MyApp;
