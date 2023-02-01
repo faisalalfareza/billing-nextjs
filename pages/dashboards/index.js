@@ -1,28 +1,24 @@
 import { useState, useEffect } from "react";
+import { useCookies } from "react-cookie";
+import axios from "axios";
 
-// @mui material components
-import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
+import Grid from "@mui/material/Grid";
 import Icon from "@mui/material/Icon";
 
-// NextJS Material Dashboard 2 PRO components
-import MDBox from "/components/MDBox";
-import MDTypography from "/components/MDTypography";
-import MDButton from "/components/MDButton";
+import getConfig from "next/config";
 
-// NextJS Material Dashboard 2 PRO examples
+import MDBox from "/components/MDBox";
+import MDButton from "/components/MDButton";
+import MDTypography from "/components/MDTypography";
+
 import DashboardLayout from "/layout/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "/layout/Navbars/DashboardNavbar";
-import Footer from "/layout/Footer";
-import DefaultStatisticsCard from "./components/DefaultStatisticsCard";
 import DataTable from "/layout/Tables/DataTable";
+import DefaultStatisticsCard from "./components/DefaultStatisticsCard";
+import Footer from "/layout/Footer";
 
-// Data
-import axios from "axios";
-import getConfig from 'next/config';
-import { useCookies } from 'react-cookie';
 const { publicRuntimeConfig } = getConfig();
-
 
 function Dashboards(props) {
   const { availableFPNoList } = props || {};
@@ -55,7 +51,7 @@ function Dashboards(props) {
   const showTopAvailableFPNoOnWidget = () => {
     if (availableFPNoList && availableFPNoList.length) {
       const count = availableFPNoList.length;
-      const column = (count > 3 ? 3 : 4);
+      const column = count > 3 ? 3 : 4;
 
       let contents = [];
       availableFPNoList.forEach((el, i) => {
@@ -86,11 +82,10 @@ function Dashboards(props) {
         { Header: "Company Name", accessor: "coName" },
         { Header: "Total Batch Stock", accessor: "totalFPNo", align: "right" },
       ],
-      rows: availableFPNoList
-    }
+      rows: availableFPNoList,
+    };
   };
-  
-  
+
   return (
     <DashboardLayout>
       <DashboardNavbar />
@@ -106,20 +101,27 @@ function Dashboards(props) {
                 </MDBox>
                 <MDBox mb={2}>
                   <MDTypography variant="body2" color="text">
-                    Tax invoice serial number is the serial number given by the Directorate General of Taxes (DGT) to Taxable Entrepreneurs with a certain mechanism.
+                    Tax invoice serial number is the serial number given by the
+                    Directorate General of Taxes (DGT) to Taxable Entrepreneurs
+                    with a certain mechanism.
                   </MDTypography>
                 </MDBox>
               </Grid>
               <Grid item xs={12} md={4} sx={{ textAlign: "right" }}>
-                <MDButton variant="outlined" color="secondary" onClick={(e) => getAvailableFPNo(e)}>
-                  <Icon>refresh</Icon>&nbsp; {isLoadingRefresh ? "Refreshing.." : "Refresh"}
+                <MDButton
+                  variant="outlined"
+                  color="secondary"
+                  onClick={(e) => getAvailableFPNo(e)}
+                >
+                  {/* <Icon>refresh</Icon>&nbsp; {isLoadingRefresh ? "Refreshing.." : "Refresh"} */}
+                  <Icon>refresh</Icon>&nbsp; Refresh
                 </MDButton>
               </Grid>
             </Grid>
           </Grid>
 
           {showTopAvailableFPNoOnWidget()}
-      
+
           <Grid item xs={12}>
             <Card>
               <MDBox pt={3} px={3}>
@@ -145,34 +147,53 @@ function Dashboards(props) {
   );
 }
 
-Dashboards.getAvailableFPNo = async (e) => {
-  if (e) e.preventDefault();
-  setLoadingRefresh(true);
-
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/Dashboard/GetAvailableFPNo`;
-  const config = {headers: {Authorization: "Bearer " + accessToken}};
-  axios
-    .get(url, config)
-    .then(res => {
-      let listOfavailableFPNo = res.data.result;
-      listOfavailableFPNo = listOfavailableFPNo.sort((a, b) => a.totalFPNo - b.totalFPNo);
-      // setAvailableFPNo(listOfavailableFPNo);
-      setLoadingRefresh(false);
-
-      return listOfavailableFPNo;
-    }).catch((error) => setLoadingRefresh(false));
-};
-
 export default Dashboards;
- 
+
+export async function getAvailableFPNo() {
+  const response = await fetch(
+    `${publicRuntimeConfig.apiUrl}/api/services/app/Dashboard/GetAvailableFPNo`
+  );
+  let data = await response.json();
+  data = data.result.sort((a, b) => a.totalFPNo - b.totalFPNo);
+
+  return data;
+}
+
 export async function getStaticProps() {
-  const response = await fetch(`${publicRuntimeConfig.apiUrl}/api/services/app/Dashboard/GetAvailableFPNo`);
-  const data = await response.json();
-   
+  let availableFPNoList = await getAvailableFPNo();
+  if (availableFPNoList.length == 0) {
+    availableFPNoList = [
+      {
+        companyID: 1,
+        coName: "PT SANDIEGO HILLS MEMORIAL PARK",
+        coCode: "16500",
+        totalFPNo: 2354,
+      },
+      {
+        companyID: 2,
+        coName: "PT GUNUNG HALIMUN ELOK",
+        coCode: "A0067",
+        totalFPNo: 3456,
+      },
+      {
+        companyID: 3,
+        coName: "KSO ORANGE COUNTY TOWER G",
+        coCode: "KOC",
+        totalFPNo: 8565,
+      },
+      {
+        companyID: 4,
+        coName: "PT. MAHKOTA SENTOSA UTAMA",
+        coCode: "MSU",
+        totalFPNo: 1232,
+      },
+    ];
+  }
+
   return {
     props: {
-      availableFPNoList: data.result
+      availableFPNoList: availableFPNoList,
     },
-    revalidate: 5
+    revalidate: 5,
   };
 }
