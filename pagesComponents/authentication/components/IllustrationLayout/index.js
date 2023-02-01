@@ -29,7 +29,7 @@ import Footer from "/pagesComponents/authentication/components/Footer";
 import pageRoutes from "/routes/page.routes";
 
 import brandWhite from "../../../../assets/images/app-logo-on-dark.png";
-import brandBuilding from "../../../../assets/images/Building-Vector-PNG-HD-Quality.png";
+import brandBuilding from "../../../../assets/images/bg-login.svg";
 
 function IllustrationLayout({
   header,
@@ -61,7 +61,7 @@ function IllustrationLayout({
             darkMode ? background.default : white.main,
         }}
       >
-        <Grid item xs={12} lg={6}>
+        {/* <Grid item xs={12} lg={6}>
           <MDBox
             display={{ xs: "none", lg: "flex" }}
             width="calc(100% - 2rem)"
@@ -100,7 +100,7 @@ function IllustrationLayout({
               </Grid>
             </Grid>
           </MDBox>
-        </Grid>
+        </Grid> */}
         <Grid
           item
           xs={11}
@@ -117,11 +117,21 @@ function IllustrationLayout({
             justifyContent="center"
             height="100vh"
           >
-            <MDBox py={3} px={3} textAlign="center">
+            <MDBox
+              py={3}
+              px={3}
+              textAlign="center"
+              bgColor="primary"
+              borderRadius="lg"
+              variant="gradient"
+              shadow="xl"
+              pr={0.5}
+              zIndex="1"
+            >
               {!header ? (
                 <>
                   <MDBox mb={1} textAlign="center">
-                    <MDTypography variant="h4" fontWeight="bold">
+                    <MDTypography variant="h4" fontWeight="bold" color="light">
                       {formTitle}
                     </MDTypography>
                   </MDBox>
@@ -133,14 +143,25 @@ function IllustrationLayout({
                 header
               )}
             </MDBox>
-            <MDBox p={3}>{children}</MDBox>
+            <MDBox
+              p={3}
+              pt={8}
+              mt={-6}
+              ml={-4}
+              mr={-4}
+              shadow="lg"
+              bgColor="white"
+              borderRadius="xl"
+            >
+              {children}
+            </MDBox>
           </MDBox>
         </Grid>
 
         <MDBox
           component="img"
           src={brandBuilding.src}
-          width={"50%"}
+          width={"100%"}
           position="absolute"
           alignSelf="flex-end"
           opacity={0.2}
