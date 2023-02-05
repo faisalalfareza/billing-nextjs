@@ -205,7 +205,7 @@ function MyApp({
               />
               <meta name="description" content="Description" />
               <meta name="keywords" content="Keywords" />
-              <title>BILLING SYSTEM | Powered by NextJS & PWA</title>
+              <title>Billing System</title>
 
               <link rel="manifest" href="/manifest.json" />
               <link

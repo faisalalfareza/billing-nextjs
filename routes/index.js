@@ -43,13 +43,18 @@ import Icon from "@mui/material/Icon";
 
 // Images
 import profilePicture from "../assets/images/team-3.jpg";
+let loginName = "";
+if (typeof window !== "undefined") {
+  // Perform localStorage action
+  loginName = JSON.parse(localStorage.getItem("informations")).user.userName;
+}
 
 const main = [
   {
     type: "collapse",
-    name: "Brooklyn Alice",
+    name: "loginName",
     key: "username",
-    icon: <MDAvatar src={profilePicture.src} alt="Brooklyn Alice" size="sm" />,
+    icon: <MDAvatar src={profilePicture.src} alt="loginName" size="sm" />,
     collapse: [
       {
         name: "Logout",

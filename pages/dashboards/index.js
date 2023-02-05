@@ -17,6 +17,8 @@ import DashboardNavbar from "/layout/Navbars/DashboardNavbar";
 import DataTable from "/layout/Tables/DataTable";
 import DefaultStatisticsCard from "./components/DefaultStatisticsCard";
 import Footer from "/layout/Footer";
+import dashboardImage from "/assets/images/coming-soon.svg";
+import Image from "next/image";
 
 const { publicRuntimeConfig } = getConfig();
 
@@ -89,58 +91,18 @@ function Dashboards(props) {
   return (
     <DashboardLayout>
       <DashboardNavbar />
-      <MDBox py={3}>
-        <Grid container spacing={3}>
-          <Grid item xs={12}>
-            <Grid container alignItems="center">
-              <Grid item xs={12} md={8}>
-                <MDBox mb={1}>
-                  <MDTypography variant="h5">
-                    Total Available No. Seri Faktur Pajak
-                  </MDTypography>
-                </MDBox>
-                <MDBox mb={2}>
-                  <MDTypography variant="body2" color="text">
-                    Tax invoice serial number is the serial number given by the
-                    Directorate General of Taxes (DGT) to Taxable Entrepreneurs
-                    with a certain mechanism.
-                  </MDTypography>
-                </MDBox>
-              </Grid>
-              <Grid item xs={12} md={4} sx={{ textAlign: "right" }}>
-                <MDButton
-                  variant="outlined"
-                  color="secondary"
-                  onClick={(e) => getAvailableFPNo(e)}
-                >
-                  {/* <Icon>refresh</Icon>&nbsp; {isLoadingRefresh ? "Refreshing.." : "Refresh"} */}
-                  <Icon>refresh</Icon>&nbsp; Refresh
-                </MDButton>
-              </Grid>
-            </Grid>
-          </Grid>
-
-          {showTopAvailableFPNoOnWidget()}
-
-          <Grid item xs={12}>
-            <Card>
-              <MDBox pt={3} px={3}>
-                <MDTypography variant="h5" fontWeight="medium">
-                  List of Company չ Total Branch Stock
-                </MDTypography>
-              </MDBox>
-              <MDBox py={1}>
-                <DataTable
-                  table={showTopAvailableFPNoOnTasklist()}
-                  entriesPerPage={false}
-                  showTotalEntries={false}
-                  isSorted={false}
-                  noEndBorder
-                />
-              </MDBox>
-            </Card>
-          </Grid>
-        </Grid>
+      <MDBox py={3} display="flex" justifyContent="center" height="80vh">
+        {dashboardImage.src ? (
+          <Image
+            src={dashboardImage.src}
+            alt="coming soon"
+            width={500}
+            height={500}
+            quality={100}
+          />
+        ) : (
+          dashboardImage
+        )}
       </MDBox>
       {/* <Footer /> */}
     </DashboardLayout>
