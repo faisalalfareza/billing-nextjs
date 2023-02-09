@@ -110,8 +110,8 @@ const colors = {
     },
 
     info: {
-      main: "#49a3f1",
-      state: "#1A73E8",
+      main: "#6CC3EE",
+      state: "rgba(108, 195, 238, 0.56)",
     },
 
     success: {

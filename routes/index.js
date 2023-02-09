@@ -166,7 +166,7 @@ const main = [
         name: "Water Reading",
         nameOnHeader: "Water Reading",
         key: "water-reading",
-        route: "/app/nsfp/generate",
+        route: "/app/water-reading",
         permission: "Pages.Tenants.GenerateNoSeriFP.Create",
       },
       {
