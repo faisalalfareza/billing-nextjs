@@ -87,7 +87,7 @@ const main = [
   },
 
   { type: "divider", key: "divider-1" },
-  { type: "title", title: "", key: "title-fp" },
+  { type: "title", title: "Master", key: "title-master" },
   {
     type: "collapse",
     name: "Master",
@@ -98,9 +98,9 @@ const main = [
     collapse: [
       {
         name: "Master Site",
-        nameOnHeader: "Master Site",
+        nameOnHeader: "Site",
         key: "master-site",
-        route: "/app/nsfp/generate",
+        route: "/app/master/site",
         permission: "Pages.Tenants.GenerateNoSeriFP.Create",
       },
       {
@@ -166,7 +166,7 @@ const main = [
         name: "Water Reading",
         nameOnHeader: "Water Reading",
         key: "water-reading",
-        route: "/app/water-reading",
+        route: "/app/transaction/water-reading",
         permission: "Pages.Tenants.GenerateNoSeriFP.Create",
       },
       {
@@ -409,6 +409,11 @@ main.forEach((e) => {
 });
 
 const routes = {
+  main,
+  filtered,
+};
+
+export const protectedRoute = {
   main,
   filtered,
 };

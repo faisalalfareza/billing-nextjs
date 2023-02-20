@@ -186,38 +186,47 @@ function SignIn(props) {
     const url = `${publicRuntimeConfig.apiUrl}/api/services/app/Session/GetCurrentLoginInformations`;
     const config = { headers: { Authorization: "Bearer " + accessToken } };
 
-    axios.get(url, config).then((res) => {
-      const informations = res.data.result;
-      const { application, tenant, user } = informations;
-      localStorage.setItem("informations", JSON.stringify(informations));
-      localStorage.setItem("application", JSON.stringify(application));
+    axios
+      .get(url, config)
+      .then((res) => {
+        const informations = res.data.result;
+        const { application, tenant, user } = informations;
+        localStorage.setItem("informations", JSON.stringify(informations));
+        localStorage.setItem("application", JSON.stringify(application));
 
-      getUserPermissions(accessToken), getUserProfilePicture(accessToken);
+        getUserPermissions(accessToken), getUserProfilePicture(accessToken);
 
-      setLoadingSubmit(false);
-      Router.push(redirectUrl);
-    });
+        Router.push(redirectUrl);
+      })
+      .catch((error) => setLoadingSubmit(false));
   }
   function getUserPermissions(accessToken) {
     const url = `${publicRuntimeConfig.apiUrl}/AbpUserConfiguration/GetAll`;
     const config = { headers: { Authorization: "Bearer " + accessToken } };
 
-    axios.get(url, config).then((res) => {
-      const { allPermissions, grantedPermissions } = res.data.result.auth;
-      localStorage.setItem(
-        "grantedPermissions",
-        JSON.stringify(grantedPermissions)
-      );
-    });
+    axios
+      .get(url, config)
+      .then((res) => {
+        const { allPermissions, grantedPermissions } = res.data.result.auth;
+        localStorage.setItem("allPermissions", JSON.stringify(allPermissions));
+        localStorage.setItem(
+          "grantedPermissions",
+          JSON.stringify(grantedPermissions)
+        );
+      })
+      .catch((error) => setLoadingSubmit(false));
   }
   function getUserProfilePicture(accessToken) {
     const url = `${publicRuntimeConfig.apiUrl}/api/services/app/Profile/GetProfilePicture`;
     const config = { headers: { Authorization: "Bearer " + accessToken } };
 
-    axios.get(url, config).then((res) => {
-      const { profilePicture } = res.data.result;
-      localStorage.setItem("profilePicture", profilePicture);
-    });
+    axios
+      .get(url, config)
+      .then((res) => {
+        const { profilePicture } = res.data.result;
+        localStorage.setItem("profilePicture", profilePicture);
+      })
+      .catch((error) => setLoadingSubmit(false));
   }
 
   return (

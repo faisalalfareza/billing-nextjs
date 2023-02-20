@@ -20,6 +20,18 @@ import MDInput from "/components/MDInput";
 import FormField from "/pagesComponents/FormField";
 import Autocomplete from "@mui/material/Autocomplete";
 import { useMaterialUIController } from "/context";
+import getConfig from "next/config";
+const { publicRuntimeConfig } = getConfig();
+import * as React from "react";
+import Backdrop from "@mui/material/Backdrop";
+import Box from "@mui/material/Box";
+import Modal from "@mui/material/Modal";
+import Fade from "@mui/material/Fade";
+import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
+import ModalWaterReading from "/pagesComponents/app/water-reading/ModalWaterReading";
+import SiteDropdown from "/pagesComponents/dropdown/Site";
+
 // Data
 import dataTableData from "/pagesComponents/applications/data-tables/data/dataTableData";
 import { useEffect, useState } from "react";
@@ -28,8 +40,19 @@ import { useEffect, useState } from "react";
 export default function WaterReading(props) {
   const [controller] = useMaterialUIController();
   const { darkMode } = controller;
-  const { dataProject, dataCluster } = props;
-  console.warn("props", props);
+  const { dataProject, dataSite } = props;
+  const [open, setOpen] = useState(false);
+  const [dataCluster, setDataCluster] = useState([]);
+  const [site, setSite] = useState(null);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+  const [isLoading, setLoading] = useState(false);
+
+  const chooseSite = (val) => {
+    setSite(val);
+  };
+
+  console.log("site------", site);
 
   const defaultProps = {
     options: dataProject,
@@ -150,36 +173,62 @@ export default function WaterReading(props) {
   const [tasklist, setTasklist] = useState({ columns: columns, rows: [] });
 
   const fetchData = async (data) => {
-    const url = `${publicRuntimeConfig.apiUrl}/api/services/app/TAXList/GetTaxList`;
-    const clusterCode = data.cluster.map((e) => e.clusterCode);
-    let body = {
-      filter: "",
-      projectCode: data.project.projectCode,
-      clusterCode: clusterCode,
-      sorting: undefined,
-      maxResultCount: 100,
-      skipCount: 0,
-    };
-    axios.post(url, body).then((response) => {
-      console.log(response.data.result);
-      const result = response.data.result.items;
-      const list = [];
-      const row = result.map((e, i) => {
-        list.push({
-          no: i + 1,
-          project: e.projectCode,
-          cluster: e.clusterCode,
-          unitcode: e.unitCode,
-          unitno: e.unitNo,
-          prev: 0,
-          curr: 1,
+    const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetWaterReadingList`;
+    axios
+      .get(url, {
+        params: {
+          SiteId: site.siteId,
+          ProjectCode: formValues.project.projectCode,
+          ClusterName: formValues.cluster[0].clusterCode,
+          MaxResultCount: 1000,
+          SkipCount: 0,
+        },
+      })
+      .then((response) => {
+        // handle success
+        console.log("suksesssss");
+        console.log(response.data.result);
+        const result = response.data.result.items;
+        const list = [];
+        const row = result.map((e, i) => {
+          list.push({
+            no: i + 1,
+            project: e.projectCode,
+            cluster: e.clusterCode,
+            unitcode: e.unitCode,
+            unitno: e.unitNo,
+            prev: e.prevRead,
+            curr: e.currentRead,
+          });
         });
+        return setTasklist({
+          columns: columns,
+          rows: list,
+        });
+      })
+      .catch((error) => {
+        // handle error
       });
-      return setTasklist({
-        columns: columns,
-        rows: list,
-      });
-    });
+    // axios.post(url, body).then((response) => {
+    //   console.log(response.data.result);
+    //   const result = response.data.result.items;
+    //   const list = [];
+    //   const row = result.map((e, i) => {
+    //     list.push({
+    //       no: i + 1,
+    //       project: e.projectCode,
+    //       cluster: e.clusterCode,
+    //       unitcode: e.unitCode,
+    //       unitno: e.unitNo,
+    //       prev: 0,
+    //       curr: 1,
+    //     });
+    //   });
+    //   return setTasklist({
+    //     columns: columns,
+    //     rows: list,
+    //   });
+    // });
   };
 
   if (typeof window !== "undefined") {
@@ -192,9 +241,31 @@ export default function WaterReading(props) {
     }
   });
 
+  const onProjectChange = (val) => {
+    setLoading(true);
+    const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetDropdownClusterByProject?ProjectId=${val.projectId}`;
+    axios
+      .get(url)
+      .then((res) => {
+        setDataCluster(res.data.result);
+        setLoading(false);
+      })
+      .catch((err) => console.log(err));
+  };
+
+  const propsSite = {
+    name: "site",
+    label: "Site Name",
+    placeholder: "Type Site",
+    type: "text",
+    isRequired: false,
+    errorMsg: "Site is required.",
+    defaultValue: "",
+  };
+
   return (
     <DashboardLayout>
-      {/* <DashboardNavbar /> */}
+      <DashboardNavbar />
       <MDBox
         p={3}
         color="light"
@@ -204,24 +275,18 @@ export default function WaterReading(props) {
         shadow="lg"
         opacity={1}
       >
-        <MDTypography fontWeight="light" variant="h6" color="light">
+        {/* <MDTypography fontWeight="light" variant="h6" color="light">
           Site Name
-        </MDTypography>
+        </MDTypography> */}
         <Grid container spacing={3}>
-          <Grid item xs={12} sm={9}>
-            <Autocomplete
-              defaultValue="USD"
-              options={["BTC", "CNY", "EUR", "GBP", "INR", "USD"]}
-              renderInput={(params) => (
-                <MDInput {...params} variant="standard" color="light" />
-              )}
-            />
+          <Grid item xs={12} sm={12}>
+            <SiteDropdown chooseSite={chooseSite} />
           </Grid>
-          <Grid item xs={12} sm={3}>
+          {/* <Grid item xs={12} sm={3}>
             <MDButton variant="gradient" color="primary">
               Set Site
             </MDButton>
-          </Grid>
+          </Grid> */}
         </Grid>
       </MDBox>
       <MDBox py={3}>
@@ -256,7 +321,7 @@ export default function WaterReading(props) {
                         resetForm,
                         /* and other goodies */
                       }) => {
-                        // setformValues(values);
+                        setformValues(values);
                         getFormData(values);
                         return (
                           <Form id={form.formId} autoComplete="off">
@@ -265,7 +330,7 @@ export default function WaterReading(props) {
                                 <Grid item xs={12} sm={6}>
                                   <Autocomplete
                                     disableCloseOnSelect
-                                    includeInputInList={true}
+                                    // includeInputInList={true}
                                     options={dataProject}
                                     key={project.name}
                                     value={values.project}
@@ -281,14 +346,15 @@ export default function WaterReading(props) {
                                           option.projectName
                                         : "Nothing selected"
                                     }
-                                    onChange={(e, value) =>
+                                    onChange={(e, value) => {
                                       setFieldValue(
                                         project.name,
                                         value !== null
                                           ? value
                                           : initialValues[project.name]
-                                      )
-                                    }
+                                      );
+                                      onProjectChange(value);
+                                    }}
                                     noOptionsText="No results"
                                     renderInput={(params) => (
                                       <FormField
@@ -430,9 +496,14 @@ export default function WaterReading(props) {
                     </MDButton>
                   </Grid>
                   <Grid item xs={12} md={3}>
-                    <MDButton variant="gradient" color="primary">
+                    <MDButton
+                      variant="gradient"
+                      color="primary"
+                      onClick={handleOpen}
+                    >
                       <Icon>add</Icon>&nbsp; Upload
                     </MDButton>
+                    <ModalWaterReading show={open} handleCloseP={handleClose} />
                   </Grid>
                 </Grid>
               </Grid>
@@ -446,21 +517,23 @@ export default function WaterReading(props) {
 }
 
 export async function getStaticProps(context) {
-  const resProject = await fetch(
-    `${publicRuntimeConfig.apiUrl}/api/services/app/TAXList/getDataProject?userID=2`
-  );
+  const urlP = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetDropdownProject`;
+  console.log("urlP-----------------", urlP);
+  const resProject = await fetch(urlP);
   let listProject = await resProject.json();
   const dataProject = listProject.result;
+  // const dataProject = [];
 
-  const resCluster = await fetch(
-    `${publicRuntimeConfig.apiUrl}/api/services/app/TAXList/getDataCuster?ProjectID=1`
+  const resSite = await fetch(
+    `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetDropdownSite`
   );
-  let listCluster = await resCluster.json();
-  const dataCluster = listCluster.result;
+
+  let listSite = await resSite.json();
+  const dataSite = listSite.result;
   return {
     props: {
       dataProject,
-      dataCluster,
+      dataSite,
     },
     revalidate: 60,
   };
