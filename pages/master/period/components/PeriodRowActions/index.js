@@ -98,13 +98,13 @@ function PeriodRowActions({ record, openModalonEdit, onDeleted }) {
         onClose={closeMenu}
         keepMounted
       >
-        <MenuItem onClick={editSite}>Edit Site</MenuItem>
+        <MenuItem onClick={editSite}>Edit Period</MenuItem>
         {/* <Divider sx={{ margin: "0.5rems 0" }} /> */}
-        <MenuItem onClick={confirmDelete}>
+        {/* <MenuItem onClick={confirmDelete}>
           <MDTypography variant="button" color="error" fontWeight="regular">
-            Delete Site
+            Delete Period
           </MDTypography>
-        </MenuItem>
+        </MenuItem> */}
       </Menu>
     </MDBox>
   );

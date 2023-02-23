@@ -42,6 +42,9 @@ export default function MasterPeriod(props) {
       setSite(currentSite);
     }
   }, []);
+  useEffect(() => {
+    fetchData();
+  }, [site]);
 
   //dari sini
   const [isLoading, setLoading] = useState(false);
@@ -53,6 +56,7 @@ export default function MasterPeriod(props) {
         { Header: "Period Name", accessor: "periodName" },
         { Header: "Start Date", accessor: "startDate" },
         { Header: "End Date", accessor: "endDate" },
+        { Header: "Close Date", accessor: "closeDate" },
 
         {
           Header: "Status",
@@ -105,7 +109,7 @@ export default function MasterPeriod(props) {
   const chooseSite = (val) => {
     setSite(val);
     localStorage.setItem("site", JSON.stringify(val));
-    fetchData();
+    // fetchData();
   };
 
   const fetchData = async (data) => {
@@ -114,7 +118,7 @@ export default function MasterPeriod(props) {
       .get(url, {
         params: {
           SiteId: site?.siteId,
-          SiteName: site?.siteName,
+          // SiteName: site?.siteName,
           MaxResultCount: 1000,
           SkipCount: 0,
         },
@@ -126,17 +130,25 @@ export default function MasterPeriod(props) {
         const row = result.map((e, i) => {
           list.push({
             no: i + 1,
-            project: e.siteId,
-            cluster: e.siteId,
-            status: e.isActive,
+            closeDate: e.closeDate,
+            endDate: e.endDate,
+            isActive: e.isActive,
+            periodName: e.periodName,
+            periodNumber: e.periodNumber,
             siteId: e.siteId,
+            startDate: e.startDate,
             siteName: e.siteName,
+            periodId: e.periodId,
             action: {
-              project: e.siteId,
-              cluster: e.siteId,
-              status: e.isActive,
+              closeDate: e.closeDate,
+              endDate: e.endDate,
+              isActive: e.isActive,
+              periodName: e.periodName,
+              periodNumber: e.periodNumber,
               siteId: e.siteId,
+              startDate: e.startDate,
               siteName: e.siteName,
+              periodId: e.periodId,
             },
           });
         });
@@ -169,14 +181,19 @@ export default function MasterPeriod(props) {
               key="site-dropdown"
               value={site}
               getOptionLabel={(option) =>
-                option.siteName ? option.siteName + "" : ""
+                option.siteName ? option.siteId + " - " + option.siteName : ""
               }
               onChange={(e, value) => {
                 chooseSite(value);
               }}
               noOptionsText="No results"
               renderInput={(params) => (
-                <TextField {...params} label="Site Name" variant="standard" />
+                <TextField
+                  {...params}
+                  label="Site Name"
+                  variant="standard"
+                  color="dark"
+                />
               )}
             />
           </Grid>

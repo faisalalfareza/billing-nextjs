@@ -39,20 +39,7 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
   const [modalOpen, setModalOpen] = useState(true);
   const [{ accessToken, encryptedAccessToken }] = useCookies();
   const [isLoadingSubmit, setLoadingSubmit] = useState(false);
-  const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
+  const [no, setNo] = useState(null);
 
   const schemeModels = {
     formId: "period-form",
@@ -125,13 +112,20 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
     statusActive,
   } = schemeModels.formField;
 
+  var customParseFormat = require("dayjs/plugin/customParseFormat");
+  dayjs.extend(customParseFormat);
+
   const initialValues = {
-    [periodNumber.name]: null,
-    [periodName.name]: null,
-    [startDate.name]: null,
-    [endDate.name]: null,
-    [closeDate.name]: null,
-    [statusActive.name]: true,
+    [periodNumber.name]: params ? params.periodNumber : no,
+    [periodName.name]: params ? params.periodName : null,
+    [startDate.name]: params
+      ? dayjs(params.startDate).format("YYYY-MM-DD")
+      : null,
+    [endDate.name]: params ? dayjs(params.endDate).format("YYYY-MM-DD") : null,
+    [closeDate.name]: params
+      ? dayjs(params.closeDate).format("YYYY-MM-DD")
+      : null,
+    [statusActive.name]: params ? params.isActive : true,
   };
 
   const [formValues, setformValues] = useState(initialValues);
@@ -143,14 +137,16 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
 
   const getLastPeriodNo = (val) => {
     // setLoading(true);
+    console.log("site-----", site);
     const url = `${publicRuntimeConfig.apiUrl}/api/services/app/MasterBilling/GetLastPeriodNo`;
     axios
       .get(url, {
         params: {
-          SiteId: formValues.siteId?.siteId,
+          SiteId: site?.siteId,
         },
       })
       .then((res) => {
+        setNo(res.data.result);
         setformValues((prevState) => ({
           ...prevState,
           periodNumber: res.data.result,
@@ -162,7 +158,7 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
   };
   useEffect(() => {
     getLastPeriodNo();
-  }, []);
+  }, [isOpen]);
 
   const addDate = (val) => {
     return dayjs(val).add(1, "day");
@@ -171,26 +167,14 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
     setLoadingSubmit(false);
 
     const url = `${publicRuntimeConfig.apiUrl}/api/services/app/MasterBilling/CreateMasterPeriod`;
+    const urlUpdate = `${publicRuntimeConfig.apiUrl}/api/services/app/MasterBilling/UpdateMasterPeriod`;
     const config = {
       headers: {
         Authorization: "Bearer " + accessToken,
         "Content-Type": "application/json",
       },
     };
-
-    console.log("vel------", values);
-    let perName = dayjs(values.periodName).month();
-    console.log("upil-----", perName);
-    let loginName = JSON.parse(localStorage.getItem("informations")).user
-      .userName;
     const body = {
-      // inputUN: loginName,
-      // coCode: periodNumber[0],
-      // coName: periodNumber[1],
-      // periodName: params == undefined ? values.periodName : params.periodName,
-      // officerNameNew: values.periodName,
-      // title: values.startDate,
-      // flag: params == undefined ? 1 : 2,
       siteId: site.siteId,
       periodMonth: addDate(values.periodName),
       periodYear: addDate(values.periodName),
@@ -202,20 +186,17 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
     };
     console.log("CompanyOfficer/CreateOrUpdateCompanyOfficer ", body);
 
-    axios
-      .post(url, body, config)
-      .then((res) => {
-        if (res.data.success) {
-          if (params == undefined) {
-            // Add Period ID Period
+    if (!params) {
+      axios
+        .post(url, body, config)
+        .then((res) => {
+          if (res.data.success) {
             Swal.fire({
               title: "New Period Added",
               text:
                 "Period " +
-                values.periodName +
-                " has been successfully added to " +
                 values.periodNumber +
-                ".",
+                " has been successfully added",
               icon: "success",
               showConfirmButton: true,
               timerProgressBar: true,
@@ -225,8 +206,15 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
               actions.resetForm();
               closeModal();
             });
-          } else {
-            // Update Period ID Period
+          }
+        })
+        .catch((error) => setLoadingSubmit(false));
+    } else {
+      body.periodId = params.periodId;
+      axios
+        .put(urlUpdate, body, config)
+        .then((res) => {
+          if (res.data.success) {
             Swal.fire({
               title: "Period Updated",
               text:
@@ -245,9 +233,9 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
               closeModal();
             });
           }
-        }
-      })
-      .catch((error) => setLoadingSubmit(false));
+        })
+        .catch((error) => setLoadingSubmit(false));
+    }
   };
 
   const openModal = () => setModalOpen(true);
@@ -256,6 +244,19 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
     setModalOpen(false);
     setTimeout(() => onModalChanged(), 0);
   };
+
+  console.log("params--------", params);
+  if (params) {
+    // setformValues((prevState) => ({
+    //   ...prevState,
+    //   [periodNumber.name]: params.periodNumber,
+    //   [periodName.name]: params.periodName,
+    //   [startDate.name]: params.startDate,
+    //   [endDate.name]: params.endDate,
+    //   [closeDate.name]: params.closeDate,
+    //   [statusActive.name]: params.isActive,
+    // }));
+  }
 
   if (isOpen) {
     let schemeValidations = Yup.object().shape({
@@ -272,19 +273,19 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
       //   : Yup.string().notRequired(),
     });
 
-    let getCompany =
-      params != undefined
-        ? params.coCode + " - " + params.coName
-        : periodNumber.defaultValue;
-    let getOfficerName =
-      params != undefined ? params.periodName : periodName.defaultValue;
-    let getOfficerTitle =
-      params != undefined ? params.title : startDate.defaultValue;
-    const schemeInitialValues = {
-      [periodNumber.name]: getCompany,
-      [periodName.name]: getOfficerName,
-      [startDate.name]: getOfficerTitle,
-    };
+    // let getCompany =
+    //   params != undefined
+    //     ? params.coCode + " - " + params.coName
+    //     : periodNumber.defaultValue;
+    // let getOfficerName =
+    //   params != undefined ? params.periodName : periodName.defaultValue;
+    // let getOfficerTitle =
+    //   params != undefined ? params.title : startDate.defaultValue;
+    // const schemeInitialValues = {
+    //   [periodNumber.name]: getCompany,
+    //   [periodName.name]: getOfficerName,
+    //   [startDate.name]: getOfficerTitle,
+    // };
 
     const checkingSuccessInput = (value, error) => {
       return value != undefined && value != "" && value.length > 0 && !error;
@@ -465,6 +466,7 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
                           <FormControlLabel
                             control={
                               <Checkbox
+                                disabled={!formValues.statusActive}
                                 name={statusActive.name}
                                 checked={formValues.statusActive}
                                 onChange={(e) => {
