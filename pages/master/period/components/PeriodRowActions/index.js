@@ -89,23 +89,25 @@ function PeriodRowActions({ record, openModalonEdit, onDeleted }) {
         Actions&nbsp;
         <Icon>keyboard_arrow_down</Icon>
       </MDButton>
-      <Menu
-        anchorEl={menu}
-        anchorReference={null}
-        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-        // transformOrigin={{ vertical: "top", horizontal: "left" }}
-        open={Boolean(menu)}
-        onClose={closeMenu}
-        keepMounted
-      >
-        <MenuItem onClick={editSite}>Edit Period</MenuItem>
-        {/* <Divider sx={{ margin: "0.5rems 0" }} /> */}
-        {/* <MenuItem onClick={confirmDelete}>
+      {record.isActive && (
+        <Menu
+          anchorEl={menu}
+          anchorReference={null}
+          anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+          // transformOrigin={{ vertical: "top", horizontal: "left" }}
+          open={Boolean(menu)}
+          onClose={closeMenu}
+          keepMounted
+        >
+          <MenuItem onClick={editSite}>Edit</MenuItem>
+          {/* <Divider sx={{ margin: "0.5rems 0" }} /> */}
+          {/* <MenuItem onClick={confirmDelete}>
           <MDTypography variant="button" color="error" fontWeight="regular">
             Delete Period
           </MDTypography>
         </MenuItem> */}
-      </Menu>
+        </Menu>
+      )}
     </MDBox>
   );
 }

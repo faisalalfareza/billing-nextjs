@@ -19,29 +19,39 @@ import { styled } from "@mui/material/styles";
 
 export default styled(Drawer)(({ theme, ownerState }) => {
   const { palette, boxShadows, transitions, breakpoints, functions } = theme;
-  const { transparentSidenav, whiteSidenav, coloredSidenav, miniSidenav, darkMode } =
-    ownerState;
+  const {
+    transparentSidenav,
+    whiteSidenav,
+    coloredSidenav,
+    miniSidenav,
+    darkMode,
+  } = ownerState;
 
   const sidebarWidth = 250;
-  const { transparent, gradients, white, selectedThemeColor, background } = palette;
+  const { transparent, gradients, white, selectedThemeColor, background } =
+    palette;
   const { xxl } = boxShadows;
   const { pxToRem, linearGradient } = functions;
 
   let backgroundValue = darkMode
     ? background.sidenav
     : coloredSidenav
-      ? linearGradient(selectedThemeColor.gradient1, selectedThemeColor.gradient2)
-      : linearGradient(selectedThemeColor.gradient1, selectedThemeColor.gradient2);
-      // linearGradient(gradients.dark.main, gradients.dark.state);
+    ? linearGradient(selectedThemeColor.gradient1, selectedThemeColor.gradient2)
+    : linearGradient(
+        selectedThemeColor.gradient1,
+        selectedThemeColor.gradient2
+      );
+  // linearGradient(gradients.dark.main, gradients.dark.state);
 
   if (transparentSidenav) {
     backgroundValue = transparent.main;
-  } 
-  else if (whiteSidenav) {
+  } else if (whiteSidenav) {
     backgroundValue = white.main;
-  } 
-  else if (coloredSidenav) {
-    backgroundValue = linearGradient(selectedThemeColor.gradient1, selectedThemeColor.gradient2);
+  } else if (coloredSidenav) {
+    backgroundValue = linearGradient(
+      selectedThemeColor.gradient1,
+      selectedThemeColor.gradient2
+    );
   }
 
   // styles for the sidenav when miniSidenav={false}
@@ -93,6 +103,7 @@ export default styled(Drawer)(({ theme, ownerState }) => {
     "& .MuiDrawer-paper": {
       boxShadow: xxl,
       border: "none",
+      zIndex: 1,
 
       ...(miniSidenav ? drawerCloseStyles() : drawerOpenStyles()),
     },

@@ -167,7 +167,7 @@ function IllustrationLayout({
           opacity={0.2}
         />
       </Grid>
-      <Footer dark />
+      {/* <Footer dark /> */}
     </PageLayout>
   );
 }

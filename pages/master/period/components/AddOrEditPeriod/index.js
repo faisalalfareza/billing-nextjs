@@ -34,6 +34,7 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
+import Popup from "../../../../../pagesComponents/app/Popup";
 
 function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
   const [modalOpen, setModalOpen] = useState(true);
@@ -157,7 +158,9 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
       .catch((err) => console.log(err));
   };
   useEffect(() => {
-    getLastPeriodNo();
+    if (site) {
+      getLastPeriodNo();
+    }
   }, [isOpen]);
 
   const addDate = (val) => {
@@ -208,7 +211,15 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
             });
           }
         })
-        .catch((error) => setLoadingSubmit(false));
+        .catch((error) => {
+          setLoadingSubmit(false);
+          console.log("error-----", error.response.data.error.message);
+          Swal.fire({
+            title: "Error",
+            icon: "error",
+            text: error.response.data.error.message,
+          });
+        });
     } else {
       body.periodId = params.periodId;
       axios
@@ -234,7 +245,11 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
             });
           }
         })
-        .catch((error) => setLoadingSubmit(false));
+        .catch((error) => {
+          setLoadingSubmit(false);
+          console.log("error-----", error);
+          // <Popup icon={error} text={error.message} title="Error"/>
+        });
     }
   };
 
@@ -260,17 +275,20 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
 
   if (isOpen) {
     let schemeValidations = Yup.object().shape({
-      // [periodNumber.name]: periodNumber.isRequired
-      //   ? Yup.string().required(periodNumber.errorMsg)
-      //   : Yup.string().notRequired(),
-      // [periodName.name]: periodName.isRequired
-      //   ? Yup.string()
-      //       .required(periodName.errorMsg)
-      //       .max(periodName.maxLength, periodName.invalidMaxLengthMsg)
-      //   : Yup.string().notRequired(),
-      // [startDate.name]: startDate.isRequired
-      //   ? Yup.string().required(startDate.errorMsg)
-      //   : Yup.string().notRequired(),
+      [startDate.name]: startDate.isRequired
+        ? Yup.date().required(startDate.errorMsg)
+        : Yup.date().notRequired(),
+      [periodName.name]: periodName.isRequired
+        ? Yup.string()
+            .required(periodName.errorMsg)
+            .max(periodName.maxLength, periodName.invalidMaxLengthMsg)
+        : Yup.string().notRequired(),
+      [endDate.name]: endDate.isRequired
+        ? Yup.date().required(endDate.errorMsg)
+        : Yup.date().notRequired(),
+      [closeDate.name]: closeDate.isRequired
+        ? Yup.date().required(closeDate.errorMsg)
+        : Yup.date().notRequired(),
     });
 
     // let getCompany =
@@ -348,7 +366,7 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
                     <Grid container spacing={3}>
                       <Grid item xs={12} sm={12}>
                         <FormField
-                          // disabled
+                          disabled
                           type={periodNumber.type}
                           label={
                             periodNumber.label +
@@ -385,6 +403,7 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
                                 {...params}
                                 variant="standard"
                                 fullWidth
+                                error={errors.periodName && touched.periodName}
                                 helperText={
                                   errors.periodName && touched.periodName
                                     ? periodName.errorMsg
@@ -461,29 +480,31 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
                           )}
                         />
                       </Grid>
-                      <Grid item xs={12} sm={12}>
-                        <FormGroup>
-                          <FormControlLabel
-                            control={
-                              <Checkbox
-                                disabled={!formValues.statusActive}
-                                name={statusActive.name}
-                                checked={formValues.statusActive}
-                                onChange={(e) => {
-                                  console.log(e.target.checked);
-                                  setFieldValue(
-                                    statusActive.name,
-                                    e.target.checked != null
-                                      ? e.target.checked
-                                      : initialValues[statusActive.name]
-                                  );
-                                }}
-                              />
-                            }
-                            label="Active"
-                          />
-                        </FormGroup>
-                      </Grid>
+                      {params && (
+                        <Grid item xs={12} sm={12}>
+                          <FormGroup>
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  disabled={!formValues.statusActive}
+                                  name={statusActive.name}
+                                  checked={formValues.statusActive}
+                                  onChange={(e) => {
+                                    console.log(e.target.checked);
+                                    setFieldValue(
+                                      statusActive.name,
+                                      e.target.checked != null
+                                        ? e.target.checked
+                                        : initialValues[statusActive.name]
+                                    );
+                                  }}
+                                />
+                              }
+                              label="Active"
+                            />
+                          </FormGroup>
+                        </Grid>
+                      )}
                     </Grid>
                   </MDBox>
                 </ModalBody>

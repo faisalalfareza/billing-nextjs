@@ -64,7 +64,7 @@ export default function MasterPeriod(props) {
           Cell: ({ value }) => {
             return (
               <MDBadgeDot
-                color={value ? "success" : "danger"}
+                color={value ? "success" : "error"}
                 size="sm"
                 badgeContent={value ? "Active" : "Inactive"}
               />

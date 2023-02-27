@@ -100,14 +100,14 @@ const main = [
         name: "Master Site",
         nameOnHeader: "Site",
         key: "master-site",
-        route: "/app/master/site",
+        route: "/master/site",
         permission: "Pages.Tenants.GenerateNoSeriFP.Create",
       },
       {
         name: "Master Period",
         nameOnHeader: "Master Period",
         key: "master-period",
-        route: "/app/nsfp/upload-batch",
+        route: "/master/period",
         permission: "Pages.Tenants.GenerateNoSeriFP.Create",
       },
       {
@@ -166,7 +166,7 @@ const main = [
         name: "Water Reading",
         nameOnHeader: "Water Reading",
         key: "water-reading",
-        route: "/app/transaction/water-reading",
+        route: "/transaction/water-reading",
         permission: "Pages.Tenants.GenerateNoSeriFP.Create",
       },
       {
