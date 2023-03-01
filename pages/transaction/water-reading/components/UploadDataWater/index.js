@@ -90,7 +90,7 @@ function UploadDataWater({ isOpen, onModalChanged, site }) {
   };
 
   const schemeModels = {
-    formId: "period-form",
+    formId: "water-upload-form",
     formField: {
       project: {
         name: "project",
