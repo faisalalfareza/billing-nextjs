@@ -55,9 +55,6 @@ import {
   setOpenConfigurator,
 } from "/context";
 
-import routes from "../../../routes/index";
-
-
 function DashboardNavbar({ absolute, light, isMini }) {
   const [navbarType, setNavbarType] = useState();
   const [controller, dispatch] = useMaterialUIController();
@@ -69,23 +66,7 @@ function DashboardNavbar({ absolute, light, isMini }) {
     darkMode,
   } = controller;
   const [openMenu, setOpenMenu] = useState(false);
-
-  let route = useRouter().pathname.split("/").slice(1);
-  route.forEach((r,i) => {
-    let findRoute = i > 0 
-      ? routes.filtered.find(e => (e.key == r) && (e.childOf == route[i - 1].name))
-      : routes.filtered.find(e => e.key == r);
-    if (findRoute != undefined) {
-      route[i] = {
-        name: r,
-        nameOnHeader: findRoute.nameOnHeader,
-        childOf: findRoute.childOf
-      };
-    } 
-  });
-  let title = route[route.length - 1].nameOnHeader != undefined
-    ? route[route.length - 1].nameOnHeader
-    : route[route.length - 1].name;
+  const route = useRouter().pathname.split("/").slice(1);
 
   useEffect(() => {
     // Setting the navbar type
@@ -99,7 +80,7 @@ function DashboardNavbar({ absolute, light, isMini }) {
     function handleTransparentNavbar() {
       setTransparentNavbar(
         dispatch,
-        (fixedNavbar && window.scrollY === 0) || !fixedNavbar,
+        (fixedNavbar && window.scrollY === 0) || !fixedNavbar
       );
     }
 
@@ -117,7 +98,8 @@ function DashboardNavbar({ absolute, light, isMini }) {
   }, [dispatch, fixedNavbar]);
 
   const handleMiniSidenav = () => setMiniSidenav(dispatch, !miniSidenav);
-  const handleConfiguratorOpen = () => setOpenConfigurator(dispatch, !openConfigurator);
+  const handleConfiguratorOpen = () =>
+    setOpenConfigurator(dispatch, !openConfigurator);
   const handleOpenMenu = (event) => setOpenMenu(event.currentTarget);
   const handleCloseMenu = () => setOpenMenu(false);
 
@@ -178,7 +160,7 @@ function DashboardNavbar({ absolute, light, isMini }) {
         >
           <Breadcrumbs
             icon="home"
-            title={title}
+            title={route[route.length - 1]}
             route={route}
             light={light}
           />
