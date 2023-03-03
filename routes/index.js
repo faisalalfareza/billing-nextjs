@@ -1,22 +1,5 @@
-/**
-=========================================================
-* NextJS Material Dashboard 2 PRO - v2.0.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/nextjs-material-dashboard-pro
-* Copyright 2022 Creative Tim (https://www.creative-tim.com)
-
-Coded by www.creative-tim.com
-
- =========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*/
-
 /** 
-  All of the routes for the NextJS Material Dashboard 2 PRO are added here,
   You can add a new route, customize the routes and delete the routes here.
-
   Once you add a new route on this file it will be visible automatically on
   the Sidenav.
 
@@ -34,32 +17,30 @@ Coded by www.creative-tim.com
   10. The `title` key is only for the item with the type of `title` and its used for the title text on the Sidenav.
 */
 
-// NextJS Material Dashboard 2 PRO components
 import React, { useState, useEffect } from "react";
-import MDAvatar from "../components/MDAvatar";
-
-// @mui icons
 import Icon from "@mui/material/Icon";
 
-// Images
+import MDAvatar from "../components/MDAvatar";
+
 import profilePicture from "../assets/images/team-3.jpg";
-let loginName = "";
-if (typeof window !== "undefined") {
-  // Perform localStorage action
-  loginName = JSON.parse(localStorage.getItem("informations")).user.userName;
-}
+
+let permissions = getPermission();
+console.log("Permissions: ", permissions);
 
 const main = [
   {
     type: "collapse",
-    name: "loginName",
+    name: "Brooklyn Alice",
     key: "username",
-    icon: <MDAvatar src={profilePicture.src} alt="loginName" size="sm" />,
+    icon: <MDAvatar src={profilePicture.src} alt="Brooklyn Alice" size="sm" />,
     collapse: [
       {
         name: "Logout",
         key: "logout",
         route: "/authentication/sign-in",
+        onClick: function () {
+          return;
+        },
       },
     ],
   },
@@ -85,8 +66,6 @@ const main = [
     icon: <Icon fontSize="medium">person_add</Icon>,
     noCollapse: true,
   },
-
-  { type: "divider", key: "divider-1" },
   { type: "title", title: "Master", key: "title-master" },
   {
     type: "collapse",
@@ -296,6 +275,8 @@ const main = [
       },
     ],
   },
+  { type: "divider", key: "divider-1" },
+  { type: "title", title: "Faktur Pajak (FP)", key: "title-fp" },
   {
     type: "collapse",
     name: "Nomor Seri FP",
@@ -327,76 +308,135 @@ const main = [
       },
     ],
   },
-  // {
-  //   type: "collapse",
-  //   name: "Faktur Pajak",
-  //   key: "fp",
-  //   permission: "Pages.Tajak",
-  //   icon: <Icon fontSize="medium">content_paste</Icon>,
-  //   collapse: [
-  //     {
-  //       name: "Input",
-  //       key: "",
-  //       route: "",
-  //       permission: "Pages.Tenants.FakturPajak.Input",
-  //     },
-  //     {
-  //       name: "Upload",
-  //       key: "",
-  //       route: "",
-  //       permission: "Pages.Tenants.FakturPajak.CreateUpload",
-  //     },
-  //     {
-  //       name: "List",
-  //       key: "",
-  //       route: "",
-  //       permission: "Pages.Tenants.FakturPajak.List",
-  //     },
-  //     { name: "Export to CSV", key: "", route: "", permission: "" },
-  //   ],
-  // },
+  {
+    type: "collapse",
+    name: "Faktur Pajak",
+    nameOnHeader: "Faktur Pajak (FP)",
+    key: "fp",
+    permission: "Pages.Tenants.FakturPajak",
+    icon: <Icon fontSize="medium">content_paste</Icon>,
+    collapse: [
+      {
+        name: "Input",
+        nameOnHeader: "Input Faktur Pajak",
+        key: "input",
+        route: "",
+        permission: "Pages.Tenants.FakturPajak.Input",
+      },
+      {
+        name: "Upload",
+        nameOnHeader: "Upload Faktur Pajak",
+        key: "upload",
+        route: "",
+        permission: "Pages.Tenants.FakturPajak.CreateUpload",
+      },
+      {
+        name: "List",
+        key: "list",
+        nameOnHeader: "List Faktur Pajak",
+        route: "",
+        permission: "Pages.Tenants.FakturPajak.List",
+      },
+      {
+        name: "Export to CSV",
+        nameOnHeader: "Export Faktur Pajak to CSV",
+        key: "export",
+        route: "",
+        permission: "",
+      },
+    ],
+  },
 
   // { type: "divider", key: "divider-2" },
-  // { type: "title", title: "Surat Setoran Pajak (SSP)", key: "title-ssp" },
+  { type: "title", title: "Surat Setoran Pajak (SSP)", key: "title-ssp" },
+  {
+    type: "collapse",
+    name: "Surat Setoran Pajak",
+    nameOnHeader: "Surat Setoran Pajak (SSP)",
+    key: "ssp",
+    permission: "Pages.Tenants.SSP",
+    icon: <Icon fontSize="medium">receipt_long</Icon>,
+    collapse: [
+      {
+        name: "SSP by Booking Code",
+        key: "ssp-by-bookcode",
+        route: "",
+        permission: "Pages.Tenants.SSP.ListBookCode",
+      },
+      {
+        name: "SSP by Month",
+        key: "ssp-by-month",
+        route: "",
+        permission: "Pages.Tenants.SSP.ListMonth",
+      },
+    ],
+  },
+
+  // { type: "divider", key: "divider-3" },
+  // { type: "title", title: "React Components Samples", key: "title-components" },
   // {
   //   type: "collapse",
-  //   name: "Surat Setoran Pajak",
-  //   key: "ssp",
-  //   permission: "Pages.Tenants.SSP",
-  //   icon: <Icon fontSize="medium">receipt_long</Icon>,
+  //   name: "Components",
+  //   nameOnHeader: "React Components Samples",
+  //   key: "components",
   //   collapse: [
   //     {
-  //       name: "SSP by Booking Code",
-  //       key: "",
-  //       route: "",
-  //       permission: "Pages.Tenants.SSP.ListBookCode",
+  //       name: "Upload Excel",
+  //       key: "comp-upload-excel",
+  //       route: "/app/nsfp/upload-batch",
   //     },
   //     {
-  //       name: "SSP by Month",
-  //       key: "",
-  //       route: "",
-  //       permission: "Pages.Tenants.SSP.ListMonth",
+  //       name: "Dropdown",
+  //       key: "comp-dropdown",
+  //       route: "/app/nsfp/upload-batch",
   //     },
   //   ],
   // },
 ];
+console.log("Routes (Before): ", main);
 
-let filtered = [];
-main.forEach((e) => {
+let filteredMain = [];
+permissions &&
+  main.forEach((p) => {
+    if (p.type == "collapse" && p.permission != undefined) {
+      //Parent
+      if (checkPermission(p.permission)) {
+        // Check parrent permissions
+
+        let selected_c = [];
+        if (p.collapse != undefined || !p.noCollapse) {
+          // Child
+          p.collapse.forEach((c) => {
+            if (c.permission != undefined && checkPermission(c.permission))
+              // Check child permissions
+              selected_c.push(c);
+          });
+          p.collapse = selected_c;
+
+          if (selected_c.length > 0) filteredMain.push(p);
+        } else filteredMain.push(p);
+      }
+    } else filteredMain.push(p);
+  });
+
+let reformatedMain = [];
+filteredMain.forEach((e) => {
   if (e.noCollapse) {
-    filtered.push({
+    // No child
+    reformatedMain.push({
       nameOnHeader: e.nameOnHeader != undefined ? e.nameOnHeader : e.name,
       key: e.key,
       route: e.route,
     });
   } else {
-    filtered.push({
+    // Childs
+    reformatedMain.push({
       nameOnHeader: e.nameOnHeader != undefined ? e.nameOnHeader : e.name,
       key: e.key,
     });
     if (e.collapse != undefined && e.collapse.length > 0) {
       e.collapse.forEach((e_c) => {
-        filtered.push({
+        reformatedMain.push({
           nameOnHeader:
             e_c.nameOnHeader != undefined ? e_c.nameOnHeader : e_c.name,
           childOf: e.key,
@@ -410,12 +450,30 @@ main.forEach((e) => {
 
 const routes = {
   main,
-  filtered,
+  filteredMain,
+  reformatedMain,
 };
-
-export const protectedRoute = {
-  main,
-  filtered,
-};
+console.log("Routes (After): ", filteredMain);
+console.log("Routes (After - Reformated): ", reformatedMain);
 
 export default routes;
+
+export function getPermission() {
+  if (typeof window !== "undefined") {
+    return JSON.parse(localStorage.getItem("allPermissions"));
+  }
+
+  return;
+}
+
+export function checkPermission(testPermission, checkingOn = "Routes") {
+  if (permissions != null || permissions != undefined) {
+    let checking =
+      permissions[testPermission] &&
+      ["true", true].indexOf(permissions[testPermission]) != -1;
+    // console.log("[Chechking on "+checkingOn+"] "+testPermission, checking);
+    return checking;
+  }
+
+  return;
+}

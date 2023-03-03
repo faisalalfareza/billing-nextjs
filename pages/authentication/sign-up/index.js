@@ -26,14 +26,14 @@ import MDInput from "/components/MDInput";
 import MDButton from "/components/MDButton";
 
 // Authentication layout components
-import CoverLayout from "/pagesComponents/authentication/components/CoverLayout";
+import IllustrationLayout from "/pagesComponents/authentication/components/IllustrationLayout";
 
 // Images
 import bgImage from "/assets/images/bg-sign-up-cover.jpeg";
 
 function Cover() {
   return (
-    <CoverLayout image={bgImage}>
+    <IllustrationLayout image={bgImage}>
       <Card>
         <MDBox
           variant="gradient"
@@ -120,7 +120,7 @@ function Cover() {
           </MDBox>
         </MDBox>
       </Card>
-    </CoverLayout>
+    </IllustrationLayout>
   );
 }
 

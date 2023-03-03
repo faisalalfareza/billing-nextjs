@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCookies } from "react-cookie";
 import { Formik, Form } from "formik";
 import Swal from "sweetalert2";
@@ -19,6 +19,7 @@ import MDButton from "/components/MDButton";
 
 import IllustrationLayout from "/pagesComponents/authentication/components/IllustrationLayout";
 import FormField from "/pagesComponents/FormField";
+import appInfo from "/appinfo.json";
 
 const { publicRuntimeConfig } = getConfig();
 
@@ -76,6 +77,10 @@ function SignIn(props) {
     [userNameOrEmailAddress.name]: userNameOrEmailAddress.defaultValue,
     [password.name]: password.defaultValue,
   };
+
+  useEffect(() => {
+    document.getElementsByName(userNameOrEmailAddress.name)[0].focus();
+  }, []);
 
   const checkingSuccessInput = (value, error) => {
     return value != undefined && value != "" && value.length > 0 && !error;
@@ -194,13 +199,12 @@ function SignIn(props) {
         localStorage.setItem("informations", JSON.stringify(informations));
         localStorage.setItem("application", JSON.stringify(application));
 
-        getUserPermissions(accessToken), getUserProfilePicture(accessToken);
-
-        Router.push(redirectUrl);
+        getUserPermissions(accessToken, redirectUrl),
+          getUserProfilePicture(accessToken);
       })
       .catch((error) => setLoadingSubmit(false));
   }
-  function getUserPermissions(accessToken) {
+  function getUserPermissions(accessToken, redirectUrl) {
     const url = `${publicRuntimeConfig.apiUrl}/AbpUserConfiguration/GetAll`;
     const config = { headers: { Authorization: "Bearer " + accessToken } };
 
@@ -213,6 +217,9 @@ function SignIn(props) {
           "grantedPermissions",
           JSON.stringify(grantedPermissions)
         );
+
+        // Router.replace(redirectUrl, Router.asPath);
+        window.open(redirectUrl, "_self");
       })
       .catch((error) => setLoadingSubmit(false));
   }
@@ -231,7 +238,7 @@ function SignIn(props) {
 
   return (
     <IllustrationLayout
-      formTitle="Billing Residence Application"
+      formTitle={appInfo.formTitle}
       formDescription=""
       illustration={bgImage}
     >

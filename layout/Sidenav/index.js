@@ -1,63 +1,48 @@
-/**
-=========================================================
-* NextJS Material Dashboard 2 PRO - v2.0.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/nextjs-material-dashboard-pro
-* Copyright 2022 Creative Tim (https://www.creative-tim.com)
-
-Coded by www.creative-tim.com
-
- =========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*/
-
 import { useEffect, useState } from "react";
+import { useCookies } from "react-cookie";
+import PropTypes from "prop-types";
 
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/router";
 
-// prop-types is a library for typechecking of props.
-import PropTypes from "prop-types";
-
-// @mui material components
 import List from "@mui/material/List";
 import Divider from "@mui/material/Divider";
 import MuiLink from "@mui/material/Link";
 import Icon from "@mui/material/Icon";
 
-// NextJS Material Dashboard 2 PRO components
 import MDBox from "/components/MDBox";
 import MDTypography from "/components/MDTypography";
 
-// NextJS Material Dashboard 2 PRO examples
-import SidenavCollapse from "/layout/Sidenav/SidenavCollapse";
-import SidenavList from "/layout/Sidenav/SidenavList";
-import SidenavItem from "/layout/Sidenav/SidenavItem";
-
-// NextJS Material Dashboard 2 PRO routes
-import routes from "../../routes";
-
-// Custom styles for the Sidenav
-import SidenavRoot from "/layout/Sidenav/SidenavRoot";
-import sidenavLogoLabel from "/layout/Sidenav/styles/sidenav";
-
-// NextJS Material Dashboard 2 PRO context
 import {
   useMaterialUIController,
   setMiniSidenav,
   setTransparentSidenav,
   setWhiteSidenav,
-  setSelectedColorSidenav
+  setSelectedColorSidenav,
 } from "/context";
 
+import SidenavCollapse from "/layout/Sidenav/SidenavCollapse";
+import SidenavList from "/layout/Sidenav/SidenavList";
+import SidenavItem from "/layout/Sidenav/SidenavItem";
+import SidenavRoot from "/layout/Sidenav/SidenavRoot";
+import sidenavLogoLabel from "/layout/Sidenav/styles/sidenav";
+
+import routes from "../../routes";
+
 function Sidenav({ color, brand, brandName, routes, ...rest }) {
+  const [{ accessToken, encryptedAccessToken }] = useCookies();
+
   const [openCollapse, setOpenCollapse] = useState(false);
   const [openNestedCollapse, setOpenNestedCollapse] = useState(false);
   const [controller, dispatch] = useMaterialUIController();
-  const { miniSidenav, transparentSidenav, whiteSidenav, coloredSidenav, darkMode } = controller;
+  const {
+    miniSidenav,
+    transparentSidenav,
+    whiteSidenav,
+    coloredSidenav,
+    darkMode,
+  } = controller;
   const { pathname } = useRouter();
   const collapseName = pathname.split("/").slice(1)[0];
   const items = pathname.split("/").slice(1);
@@ -85,15 +70,15 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
       setMiniSidenav(dispatch, window.innerWidth < 1200);
       setTransparentSidenav(
         dispatch,
-        window.innerWidth < 1200 ? false : transparentSidenav,
+        window.innerWidth < 1200 ? false : transparentSidenav
       );
       setWhiteSidenav(
         dispatch,
-        window.innerWidth < 1200 ? false : whiteSidenav,
+        window.innerWidth < 1200 ? false : whiteSidenav
       );
       setSelectedColorSidenav(
         dispatch,
-        window.innerWidth < 1200 ? false : coloredSidenav,
+        window.innerWidth < 1200 ? false : coloredSidenav
       );
     }
 
@@ -128,17 +113,20 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
             <SidenavItem name={name} active={route === pathname} nested />
           </a>
         </Link>
-      ),
+      )
     );
 
     return template;
   };
   // Render the all the collpases from the routes.js
-  const renderCollapse = (collapses) =>
-    collapses.map(({ name, collapse, route, href, key }) => {
+  const renderCollapse = (collapses) => {
+    // console.log("————————RENDER COLLAPSE", collapses);
+    // console.log("");
+    return collapses.map(({ name, collapse, route, href, key, onClick }) => {
       let returnValue;
 
       if (collapse) {
+        // console.log("————————————IF COLLAPSE", collapses);
         returnValue = (
           <SidenavItem
             key={key}
@@ -157,38 +145,8 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
           </SidenavItem>
         );
       } else {
-        returnValue = href ? (
-          <MuiLink
-            href={href}
-            key={key}
-            target="_blank"
-            rel="noreferrer"
-            sx={{ textDecoration: "none" }}
-          >
-            <SidenavItem color={color} name={name} active={key === itemName} />
-          </MuiLink>
-        ) : (
-          <Link href={route} key={key} sx={{ textDecoration: "none" }}>
-            <a>
-              <SidenavItem
-                color={color}
-                name={name}
-                active={key === itemName}
-              />
-            </a>
-          </Link>
-        );
-      }
-      return <SidenavList key={key}>{returnValue}</SidenavList>;
-    });
-
-  // Render all the routes from the routes.js (All the visible items on the Sidenav)
-  const renderRoutes = routes.map(
-    ({ type, name, icon, title, collapse, noCollapse, key, href, route }) => {
-      let returnValue;
-
-      if (type === "collapse") {
         if (href) {
+          // console.log("————————————ELSE NONCOLLAPSE HREF", collapses);
           returnValue = (
             <MuiLink
               href={href}
@@ -197,91 +155,202 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
               rel="noreferrer"
               sx={{ textDecoration: "none" }}
             >
-              <SidenavCollapse
+              <SidenavItem
+                color={color}
                 name={name}
-                icon={icon}
-                active={key === collapseName}
-                noCollapse={noCollapse}
+                active={key === itemName}
               />
             </MuiLink>
           );
-        } else if (noCollapse && route) {
+        } else if (
+          onClick ||
+          [name.toLowerCase(), key.toLowerCase()].indexOf("logout") != -1
+        ) {
+          // console.log("————————————ELSE NONCOLLAPSE ONCLICK", collapses);
           returnValue = (
-            <Link href={route} key={key} passHref>
-              <a>
-                <SidenavCollapse
+            <Link href={route} key={key} sx={{ textDecoration: "none" }}>
+              <a
+                onClick={() => {
+                  localStorage.clear();
+                  document.cookie.split(";").forEach((c) => {
+                    document.cookie = c
+                      .replace(/^ +/, "")
+                      .replace(
+                        /=.*/,
+                        "=;expires=" + new Date().toUTCString() + ";path=/"
+                      );
+                  });
+                }}
+              >
+                <SidenavItem
+                  color={color}
                   name={name}
-                  icon={icon}
-                  noCollapse={noCollapse}
-                  active={key === collapseName}
-                >
-                  {collapse ? renderCollapse(collapse) : null}
-                </SidenavCollapse>
+                  active={key === itemName}
+                />
               </a>
             </Link>
           );
         } else {
+          // console.log("————————————ELSE NONCOLLAPSE ELSE", collapses);
           returnValue = (
+            <Link href={route} key={key} sx={{ textDecoration: "none" }}>
+              <a>
+                <SidenavItem
+                  color={color}
+                  name={name}
+                  active={key === itemName}
+                />
+              </a>
+            </Link>
+          );
+        }
+
+        // returnValue = href ? (
+        //   <MuiLink
+        //     href={href}
+        //     key={key}
+        //     target="_blank"
+        //     rel="noreferrer"
+        //     sx={{ textDecoration: "none" }}
+        //   >
+        //     <SidenavItem color={color} name={name} active={key === itemName} />
+        //   </MuiLink>
+        // ) : (
+        //   <Link href={route} key={key} sx={{ textDecoration: "none" }}>
+        //     <a>
+        //       <SidenavItem
+        //         color={color}
+        //         name={name}
+        //         active={key === itemName}
+        //       />
+        //     </a>
+        //   </Link>
+        // );
+      }
+      return <SidenavList key={key}>{returnValue}</SidenavList>;
+    });
+  };
+
+  // Render all the routes from the routes.js (All the visible items on the Sidenav)
+  // const renderRoutes = routes.map(
+  //   ({ type, name, icon, title, collapse, noCollapse, key, href, route, onClick }) => {
+  // console.log("ROUTES", routes);
+  const renderRoutes = routes.map((e) => {
+    const {
+      type,
+      name,
+      icon,
+      title,
+      collapse,
+      noCollapse,
+      key,
+      href,
+      route,
+      onClick,
+    } = e;
+    let returnValue;
+
+    if (type === "collapse") {
+      if (href) {
+        returnValue = (
+          <MuiLink
+            href={href}
+            key={key}
+            target="_blank"
+            rel="noreferrer"
+            sx={{ textDecoration: "none" }}
+          >
             <SidenavCollapse
-              key={key}
               name={name}
               icon={icon}
               active={key === collapseName}
-              open={openCollapse === key}
-              onClick={() =>
-                openCollapse === key
-                  ? setOpenCollapse(false)
-                  : setOpenCollapse(key)
-              }
-            >
-              {collapse ? renderCollapse(collapse) : null}
-            </SidenavCollapse>
-          );
-        }
-      } 
-      else if (type === "title") {
-        if (miniSidenav) {
-          returnValue = false;
-        }
-        else {
-          returnValue = (
-            <MDTypography
-              key={key}
-              color={textColor}
-              display="block"
-              variant="caption"
-              fontWeight="bold"
-              textTransform="uppercase"
-              pl={3}
-              mt={2}
-              mb={1}
-              ml={1}
-            >
-              {title}
-            </MDTypography>
-          );
-        }
-      } else if (type === "divider") {
+              noCollapse={noCollapse}
+            />
+          </MuiLink>
+        );
+      } else if (noCollapse && route) {
         returnValue = (
-          <Divider
+          <Link href={route} key={key} passHref>
+            <a>
+              <SidenavCollapse
+                name={name}
+                icon={icon}
+                noCollapse={noCollapse}
+                active={key === collapseName}
+              >
+                {collapse ? renderCollapse(collapse) : null}
+              </SidenavCollapse>
+            </a>
+          </Link>
+        );
+      } else {
+        // console.log("————E", e);
+        // console.log("————————COLLAPSE", collapse);
+        returnValue = (
+          <SidenavCollapse
             key={key}
-            light={
-              (!darkMode && !whiteSidenav && !transparentSidenav) ||
-              (darkMode && !transparentSidenav && whiteSidenav)
+            name={name}
+            icon={icon}
+            active={key === collapseName}
+            open={openCollapse === key}
+            onClick={() =>
+              openCollapse === key
+                ? setOpenCollapse(false)
+                : setOpenCollapse(key)
             }
-          />
+          >
+            {collapse ? renderCollapse(collapse) : null}
+          </SidenavCollapse>
         );
       }
+    } else if (type === "title") {
+      if (miniSidenav) {
+        returnValue = false;
+      } else {
+        returnValue = (
+          <MDTypography
+            key={key}
+            color={textColor}
+            display="block"
+            variant="caption"
+            fontWeight="bold"
+            textTransform="uppercase"
+            pl={3}
+            mt={2}
+            mb={1}
+            ml={1}
+          >
+            {title}
+          </MDTypography>
+        );
+      }
+    } else if (type === "divider") {
+      returnValue = (
+        <Divider
+          key={key}
+          light={
+            (!darkMode && !whiteSidenav && !transparentSidenav) ||
+            (darkMode && !transparentSidenav && whiteSidenav)
+          }
+        />
+      );
+    }
 
-      return returnValue;
-    },
-  );
+    return returnValue;
+  });
+  // console.log("RENDER ROUTES", renderRoutes);
 
   return (
     <SidenavRoot
       {...rest}
       variant="permanent"
-      ownerState={{ transparentSidenav, whiteSidenav, coloredSidenav, miniSidenav, darkMode }}
+      ownerState={{
+        transparentSidenav,
+        whiteSidenav,
+        coloredSidenav,
+        miniSidenav,
+        darkMode,
+      }}
     >
       <MDBox pt={3} pb={1} px={4} textAlign="center">
         <MDBox
@@ -305,7 +374,7 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
                   component="img"
                   src={brand.src}
                   alt={brandName}
-                  width={miniSidenav ? "1.75rem":"5rem"}
+                  width={miniSidenav ? "1.75rem" : "5rem"}
                 />
               ) : (
                 brand

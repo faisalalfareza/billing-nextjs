@@ -64,13 +64,11 @@ function Breadcrumbs({ icon, title, route, light }) {
                 opacity={light ? 0.8 : 0.5}
                 sx={{ lineHeight: 0 }}
               >
-                {
-                  (el.nameOnHeader != undefined)
-                    ? el.nameOnHeader 
-                    : (el.name != undefined)
-                      ? el.name
-                      : el
-                }
+                {el.nameOnHeader != undefined
+                  ? el.nameOnHeader
+                  : el.name != undefined
+                  ? el.name
+                  : el}
               </MDTypography>
             </a>
           </Link>
@@ -101,6 +99,7 @@ function Breadcrumbs({ icon, title, route, light }) {
 // Setting default values for the props of Breadcrumbs
 Breadcrumbs.defaultProps = {
   light: false,
+  title: "",
 };
 
 // Typechecking props for the Breadcrumbs

@@ -45,6 +45,7 @@ import {
 // NextJS Material Dashboard 2 PRO examples
 import Sidenav from "/layout/Sidenav";
 import Configurator from "/layout/Configurator";
+import appInfo from "/appinfo.json";
 
 // Images
 import favicon from "../assets/images/favicon.ico";
@@ -151,7 +152,7 @@ function Main({ Component, pageProps }) {
             <Sidenav
               color={sidenavColor}
               brand={brandIcon}
-              brandName="BILLING SYSTEM"
+              brandName={appInfo.appName}
               routes={routes.main}
               onMouseEnter={handleOnMouseEnter}
               onMouseLeave={handleOnMouseLeave}
@@ -172,7 +173,7 @@ function Main({ Component, pageProps }) {
           <Sidenav
             color={sidenavColor}
             brand={brandIcon}
-            brandName="BILLING SYSTEM"
+            brandName={appInfo.appName}
             routes={routes.main}
             onMouseEnter={handleOnMouseEnter}
             onMouseLeave={handleOnMouseLeave}
@@ -205,7 +206,7 @@ function MyApp({
               />
               <meta name="description" content="Description" />
               <meta name="keywords" content="Keywords" />
-              <title>Billing System</title>
+              <title>{appInfo.appName}</title>
 
               <link rel="manifest" href="/manifest.json" />
               <link
