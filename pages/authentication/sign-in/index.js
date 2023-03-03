@@ -320,7 +320,7 @@ function SignIn(props) {
                 </MDButton>
               </MDBox>
               <MDBox mt={3} textAlign="center" lineHeight="1">
-                <MDTypography variant="button" color="text" lineHeight="1">
+                {/* <MDTypography variant="button" color="text" lineHeight="1">
                   <Link href="/authentication/reset-password">
                     <a>
                       <MDTypography
@@ -333,7 +333,7 @@ function SignIn(props) {
                       </MDTypography>
                     </a>
                   </Link>
-                </MDTypography>
+                </MDTypography> */}
               </MDBox>
             </MDBox>
           );
