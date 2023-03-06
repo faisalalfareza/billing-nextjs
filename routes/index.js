@@ -197,7 +197,7 @@ const main = [
         name: "Billing Payment",
         nameOnHeader: "Billing Payment",
         key: "billing-payment",
-        route: "/app/nsfp/generate",
+        route: "/cashier/billing-payment",
         permission: "Pages.Tenants.GenerateNoSeriFP.Create",
       },
       {
