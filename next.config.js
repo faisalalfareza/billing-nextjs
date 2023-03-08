@@ -39,4 +39,5 @@ module.exports = withTM({
         ? "http://18.140.60.145:1010" // development api 'http://18.141.209.135:1010/api'
         : "http://18.140.60.145:1010", // production api 'http://localhost:3000'
   },
+  pageExtensions: ["js", "jsx", "ts", "tsx", "md", "mdx"],
 });

@@ -19,14 +19,19 @@ import DataTable from "/layout/Tables/DataTable";
 import Icon from "@mui/material/Icon";
 import MDBadgeDot from "/components/MDBadgeDot";
 import Swal from "sweetalert2";
+import * as dayjs from "dayjs";
+import { FormGroup, FormControlLabel, Checkbox } from "@mui/material";
+import DataTableTotal from "../../../layout/Tables/DataTableTotal";
 
 export default function BillingPayment(props) {
   const { dataSite } = props;
-  const [listCustomer, stListCustomer] = useState([]);
+  const [listBilling, stListBilling] = useState([]);
   const [site, setSite] = useState(null);
   const [openModal, setOpenModal] = useState(false);
-  const [modalParams, setModalParams] = useState(undefined);
+  const [params, setParams] = useState(undefined);
   const [filterText, setFilterText] = useState("");
+  const [selectedPSCode, setSelectedPSCode] = useState(undefined);
+  const [detail, setDetail] = useState(undefined);
 
   useEffect(() => {
     let currentSite = JSON.parse(localStorage.getItem("site"));
@@ -47,22 +52,224 @@ export default function BillingPayment(props) {
 
   //dari sini
   const [isLoading, setLoading] = useState(false);
+  const schemeModels = {
+    formId: "payment-detail-form",
+    formField: {
+      paymentMethod: {
+        name: "paymentMethod",
+        label: "Payment Method",
+        placeholder: "Choose Payment Method",
+        type: "text",
+        isRequired: true,
+        errorMsg: "Payment Method is required.",
+        defaultValue: "",
+      },
+      amountPayment: {
+        name: "amountPayment",
+        label: "Amount Payment",
+        placeholder: "Type Amount Payment",
+        type: "number",
+        isRequired: true,
+        errorMsg: "Amount Payment is required.",
+        maxLength: 50,
+        invalidMaxLengthMsg:
+          "Amount Payment exceeds the maximum limit of 50 characters.",
+        defaultValue: "",
+      },
+      transactionDate: {
+        name: "transactionDate",
+        label: "Transaction Date",
+        placeholder: "Choose Date",
+        type: "date",
+        isRequired: true,
+        errorMsg: "Transaction Date is required.",
+        defaultValue: "",
+      },
+      bank: {
+        name: "bank",
+        label: "Bank",
+        placeholder: "Choose Bank",
+        type: "text",
+        isRequired: true,
+        errorMsg: "Bank is required.",
+        defaultValue: "",
+      },
+      remarks: {
+        name: "remarks",
+        label: "Remarks",
+        placeholder: "Type the remarks",
+        type: "text",
+        isRequired: true,
+        errorMsg: "Remarks is required.",
+        defaultValue: "",
+      },
+    },
+  };
+  let {
+    paymentMethod,
+    amountPayment,
+    transactionDate,
+    bank,
+    remarks,
+    statusActive,
+  } = schemeModels.formField;
+  let schemeValidations = Yup.object().shape({
+    [paymentMethod.name]: paymentMethod.isRequired
+      ? Yup.string().required(paymentMethod.errorMsg)
+      : Yup.string().notRequired(),
+    [amountPayment.name]: amountPayment.isRequired
+      ? Yup.string()
+          .required(amountPayment.errorMsg)
+          .max(amountPayment.maxLength, amountPayment.invalidMaxLengthMsg)
+      : Yup.string().notRequired(),
+    [transactionDate.name]: transactionDate.isRequired
+      ? Yup.date().required(transactionDate.errorMsg)
+      : Yup.date().notRequired(),
+    [bank.name]: bank.isRequired
+      ? Yup.string().required(bank.errorMsg)
+      : Yup.string().notRequired(),
+    [remarks.name]: remarks.isRequired
+      ? Yup.string().required(remarks.errorMsg)
+      : Yup.string().notRequired(),
+  });
 
-  const handleCheck = (val) => {};
+  var customParseFormat = require("dayjs/plugin/customParseFormat");
+  dayjs.extend(customParseFormat);
 
-  const setSiteList = () => {
+  const initialValues = {
+    [paymentMethod.name]: params ? params.paymentMethod : null,
+    [amountPayment.name]: params ? params.amountPayment : null,
+    [transactionDate.name]: params
+      ? dayjs(params.transactionDate).format("YYYY-MM-DD")
+      : null,
+    [bank.name]: params ? dayjs(params.bank).format("YYYY-MM-DD") : null,
+    [remarks.name]: params ? dayjs(params.remarks).format("YYYY-MM-DD") : null,
+  };
+
+  const [formValues, setformValues] = useState(initialValues);
+
+  const getFormData = (values) => {
+    console.log("getFormData::", values);
+  };
+  console.log("formValues::", formValues);
+
+  const submitForm = async (values, actions) => {
+    createPeriod(values, actions);
+  };
+
+  const checkingSuccessInput = (value, error) => {
+    return value != undefined && value != "" && value.length > 0 && !error;
+  };
+
+  const createPeriod = async (values, actions) => {
+    // setLoadingSubmit(false);
+    // const url = `${publicRuntimeConfig.apiUrl}/api/services/app/MasterBilling/CreateMasterPeriod`;
+    // const urlUpdate = `${publicRuntimeConfig.apiUrl}/api/services/app/MasterBilling/UpdateMasterPeriod`;
+    // const config = {
+    //   headers: {
+    //     Authorization: "Bearer " + accessToken,
+    //     "Content-Type": "application/json",
+    //   },
+    // };
+    // const body = {
+    //   siteId: site.siteId,
+    //   periodMonth: addDate(values.periodName),
+    //   periodYear: addDate(values.periodName),
+    //   periodNumber: values.periodNumber,
+    //   startDate: addDate(values.startDate),
+    //   endDate: addDate(values.endDate),
+    //   closeDate: addDate(values.closeDate),
+    //   isActive: values.statusActive,
+    // };
+    // console.log("CompanyOfficer/CreateOrUpdateCompanyOfficer ", body);
+    // if (!params) {
+    //   axios
+    //     .post(url, body, config)
+    //     .then((res) => {
+    //       if (res.data.success) {
+    //         Swal.fire({
+    //           title: "New Period Added",
+    //           text:
+    //             "Period " +
+    //             values.periodNumber +
+    //             " has been successfully added",
+    //           icon: "success",
+    //           showConfirmButton: true,
+    //           timerProgressBar: true,
+    //           timer: 3000,
+    //         }).then(() => {
+    //           setLoadingSubmit(false);
+    //           actions.resetForm();
+    //           closeModal();
+    //         });
+    //       }
+    //     })
+    //     .catch((error) => {
+    //       setLoadingSubmit(false);
+    //       console.log("error-----", error.response.data.error.message);
+    //       Swal.fire({
+    //         title: "Error",
+    //         icon: "error",
+    //         text: error.response.data.error.message,
+    //       });
+    //     });
+    // } else {
+    //   body.periodId = params.periodId;
+    //   axios
+    //     .put(urlUpdate, body, config)
+    //     .then((res) => {
+    //       if (res.data.success) {
+    //         Swal.fire({
+    //           title: "Period Updated",
+    //           text:
+    //             "Period " +
+    //             values.periodName +
+    //             " in " +
+    //             values.periodNumber +
+    //             " has been successfully updated.",
+    //           icon: "success",
+    //           showConfirmButton: true,
+    //           timerProgressBar: true,
+    //           timer: 3000,
+    //         }).then((result) => {
+    //           setLoadingSubmit(false);
+    //           actions.resetForm();
+    //           closeModal();
+    //         });
+    //       }
+    //     })
+    //     .catch((error) => {
+    //       setLoadingSubmit(false);
+    //       console.log("error-----", error);
+    //       // <Popup icon={error} text={error.message} title="Error"/>
+    //     });
+    // }
+  };
+
+  const handleCheck = (val) => {
+    console.log("val-----check", val);
+    setSelectedPSCode(val.unitDataId);
+    setDetail(val);
+    console.log("data---checked", selectedPSCode);
+  };
+
+  const setBillingList = () => {
     return {
       columns: [
         {
           Header: "Choose",
-          accessor: "actions",
+          accessor: "e",
           Cell: ({ value }) => {
+            console.log("valueme", value);
             return (
               <Radio
-                onChange={handleCheck(value)}
+                onChange={(e) => {
+                  handleCheck(value);
+                }}
                 value={value}
                 name="radio-buttons"
                 inputProps={{ "aria-label": "A" }}
+                checked={value.unitDataId == selectedPSCode}
               />
             );
           },
@@ -76,12 +283,41 @@ export default function BillingPayment(props) {
         { Header: "Unit No", accessor: "unitNo" },
         { Header: "Customer Name", accessor: "customerName" },
       ],
-      rows: listCustomer,
+      rows: listBilling,
+    };
+  };
+
+  const setInvoiceList = () => {
+    return {
+      columns: [
+        // {
+        //   Header: "Choose",
+        //   accessor: "e",
+        //   Cell: ({ value }, index) => {
+        //     return (
+        //       <Radio
+        //         onChange={handleCheck(value)}
+        //         value={value}
+        //         name="radio-buttons"
+        //         key={"radio" + index}
+        //         inputProps={{ "aria-label": "A" }}
+        //       />
+        //     );
+        //   },
+        // },
+        { Header: "Invoice Number", accessor: "no" },
+        { Header: "Invoice Name", accessor: "projectName" },
+        { Header: "Balance", accessor: "clusterName" },
+
+        { Header: "End Balance", accessor: "unitName" },
+        { Header: "Payment Amount", accessor: "unitCode" },
+      ],
+      rows: listBilling,
     };
   };
 
   const openModalAddOrEditOnEdit = (record) => {
-    setModalParams(record);
+    setParams(record);
     setOpenModal(!openModal);
   };
 
@@ -91,7 +327,7 @@ export default function BillingPayment(props) {
   };
 
   const openModalAddOrEditOnAdd = () => {
-    setModalParams(undefined);
+    setParams(undefined);
     setOpenModal(!openModal);
   };
   const handleClose = () => setOpenModal(false);
@@ -125,12 +361,10 @@ export default function BillingPayment(props) {
             unitName: e.unitName,
             unitCode: e.unitCode,
             unitNo: e.unitNo,
-            action: {
-              e,
-            },
+            e,
           });
         });
-        stListCustomer(list);
+        stListBilling(list);
         console.log("list------", list);
       })
       .catch((error) => {
@@ -218,10 +452,10 @@ export default function BillingPayment(props) {
           <MDBox pl={3}>
             <MDTypography variant="h5">Search Result</MDTypography>
           </MDBox>
-          <DataTable table={setSiteList()} canSearch />
+          <DataTable table={setBillingList()} canSearch />
           <MDBox p={3} alignItems="center" textAlign="center">
             <MDButton
-              disabled
+              disabled={selectedPSCode == undefined || selectedPSCode == null}
               variant="gradient"
               color="primary"
               onClick={() => {
@@ -235,7 +469,7 @@ export default function BillingPayment(props) {
         {/* <AddOrEditPeriod
           site={site}
           isOpen={openModal}
-          params={modalParams}
+          params={params}
           onModalChanged={changeModalAddOrEdit}
         /> */}
       </MDBox>
@@ -283,32 +517,269 @@ export default function BillingPayment(props) {
                 <MDBox mb={1} textAlign="center"></MDBox>
               </MDBox>
               <MDBox p={2}>
-                <MDBox>
-                  <MDBox
-                    p={1}
-                    mt={3}
-                    width="100%"
-                    display="flex"
-                    justifyContent="space-between"
-                  >
-                    <Grid container spacing={3}>
-                      <Grid item xs={12}>
-                        <MDTypography variant="h5">
-                          Payment Detail{" "}
-                        </MDTypography>
-                      </Grid>
-
-                      <Grid item xs={6}>
-                        <MDInput variant="standard" label="Cluster" fullWidth />
-                      </Grid>
-                      <Grid item xs={6}></Grid>
-                      <Grid item xs={12}>
-                        <MDButton variant="gradient" color="dark">
-                          save
-                        </MDButton>
-                      </Grid>
+                <MDBox
+                  p={1}
+                  mt={3}
+                  width="100%"
+                  display="flex"
+                  justifyContent="space-between"
+                >
+                  <Grid container spacing={3}>
+                    <Grid item xs={12}>
+                      <MDTypography variant="h5">Payment Detail </MDTypography>
                     </Grid>
-                  </MDBox>
+                    <Grid item xs={12}>
+                      <Formik
+                        initialValues={initialValues}
+                        validationSchema={schemeValidations}
+                        onSubmit={submitForm}
+                      >
+                        {({
+                          values,
+                          errors,
+                          touched,
+                          isSubmitting,
+                          setFieldValue,
+                          resetForm,
+                        }) => {
+                          setformValues(values);
+                          getFormData(values);
+
+                          const isValifForm = () => {
+                            // return checkingSuccessInput(companyV, errors.periodNumber) &&
+                            //   checkingSuccessInput(officerNameV, errors.amountPayment) &&
+                            //   checkingSuccessInput(officerTitleV, errors.paymentMethod)
+                            //   ? true
+                            //   : false;
+                          };
+
+                          return (
+                            <Form
+                              id={schemeModels.formId}
+                              autoComplete="off"
+                              fullWidth
+                            >
+                              <MDBox pb={3}>
+                                <Grid container spacing={3}>
+                                  <Grid item xs={6}>
+                                    <FormField
+                                      disabled
+                                      type="text"
+                                      label="Cluster"
+                                      name="cluster"
+                                      // value={detail?.clusterName}
+                                      value="upillll"
+                                      placeholder="Custer"
+                                    />
+                                  </Grid>
+                                  <Grid item xs={6}>
+                                    <FormField
+                                      type={transactionDate.type}
+                                      label={
+                                        transactionDate.label +
+                                        (transactionDate.isRequired
+                                          ? " ⁽*⁾"
+                                          : "")
+                                      }
+                                      name={transactionDate.name}
+                                      value={formValues.transactionDate}
+                                      placeholder={transactionDate.placeholder}
+                                      error={
+                                        errors.transactionDate &&
+                                        touched.transactionDate
+                                      }
+                                      success={checkingSuccessInput(
+                                        formValues.transactionDate,
+                                        errors.transactionDate
+                                      )}
+                                    />
+                                  </Grid>
+                                  <Grid item xs={6}>
+                                    <FormField
+                                      type={paymentMethod.type}
+                                      label={
+                                        paymentMethod.label +
+                                        (paymentMethod.isRequired ? " ⁽*⁾" : "")
+                                      }
+                                      name={paymentMethod.name}
+                                      value={formValues.paymentMethod}
+                                      placeholder={paymentMethod.placeholder}
+                                      error={
+                                        errors.paymentMethod &&
+                                        touched.paymentMethod
+                                      }
+                                      success={checkingSuccessInput(
+                                        formValues.paymentMethod,
+                                        errors.paymentMethod
+                                      )}
+                                    />
+                                  </Grid>
+                                  <Grid item xs={6}>
+                                    <FormField
+                                      type={bank.type}
+                                      label={
+                                        bank.label +
+                                        (bank.isRequired ? " ⁽*⁾" : "")
+                                      }
+                                      name={bank.name}
+                                      value={formValues.bank}
+                                      placeholder={bank.placeholder}
+                                      error={errors.bank && touched.bank}
+                                      success={checkingSuccessInput(
+                                        formValues.bank,
+                                        errors.bank
+                                      )}
+                                    />
+                                  </Grid>
+                                  <Grid item xs={6}>
+                                    <MDInput
+                                      label="Card Number"
+                                      variant="standard"
+                                      fullWidth
+                                    />
+                                  </Grid>
+                                  <Grid item xs={6}>
+                                    <FormField
+                                      type={remarks.type}
+                                      label={
+                                        remarks.label +
+                                        (remarks.isRequired ? " ⁽*⁾" : "")
+                                      }
+                                      name={remarks.name}
+                                      value={formValues.remarks}
+                                      placeholder={remarks.placeholder}
+                                      error={errors.remarks && touched.remarks}
+                                      success={checkingSuccessInput(
+                                        formValues.remarks,
+                                        errors.remarks
+                                      )}
+                                    />
+                                  </Grid>
+                                  <Grid item xs={4}>
+                                    <FormField
+                                      type={amountPayment.type}
+                                      label={
+                                        amountPayment.label +
+                                        (amountPayment.isRequired ? " ⁽*⁾" : "")
+                                      }
+                                      name={amountPayment.name}
+                                      value={formValues.amountPayment}
+                                      placeholder={amountPayment.placeholder}
+                                      error={
+                                        errors.amountPayment &&
+                                        touched.amountPayment
+                                      }
+                                      success={checkingSuccessInput(
+                                        formValues.amountPayment,
+                                        errors.amountPayment
+                                      )}
+                                    />
+                                  </Grid>
+                                  <Grid item xs={4}>
+                                    <MDInput
+                                      variant="outlined"
+                                      label="Charge"
+                                      fullWidth
+                                      disabled
+                                    />
+                                  </Grid>
+                                  <Grid item xs={4}>
+                                    <MDInput
+                                      variant="outlined"
+                                      label="Total"
+                                      fullWidth
+                                      disabled
+                                    />
+                                  </Grid>
+                                  <Grid item xs={12}>
+                                    <MDBox
+                                      color="dark"
+                                      bgColor="white"
+                                      borderRadius="lg"
+                                      shadow="lg"
+                                      opacity={1}
+                                      p={2}
+                                    >
+                                      Allocation
+                                      {/* <DataTable
+                                        table={setInvoiceList()}
+                                        showTotalEntries={false}
+                                        isSorted={false}
+                                      /> */}
+                                      <DataTableTotal
+                                        table={setInvoiceList()}
+                                        showTotalEntries={false}
+                                        isSorted={false}
+                                      />
+                                    </MDBox>
+                                  </Grid>
+                                  {params && (
+                                    <Grid item xs={12} sm={12}>
+                                      <FormGroup>
+                                        <FormControlLabel
+                                          control={
+                                            <Checkbox
+                                              disabled={
+                                                !formValues.statusActive
+                                              }
+                                              name={statusActive.name}
+                                              checked={formValues.statusActive}
+                                              onChange={(e) => {
+                                                console.log(e.target.checked);
+                                                setFieldValue(
+                                                  statusActive.name,
+                                                  e.target.checked != null
+                                                    ? e.target.checked
+                                                    : initialValues[
+                                                        statusActive.name
+                                                      ]
+                                                );
+                                              }}
+                                            />
+                                          }
+                                          label="Active"
+                                        />
+                                      </FormGroup>
+                                    </Grid>
+                                  )}
+                                </Grid>
+                              </MDBox>
+                              <Grid item xs={6}>
+                                <MDInput
+                                  variant="standard"
+                                  label="Cluster"
+                                  fullWidth
+                                />
+                              </Grid>
+                              <Grid item xs={6}></Grid>
+                              <Grid item xs={12}>
+                                <MDBox
+                                  ml={{ xs: 0, sm: 1 }}
+                                  mt={{ xs: 1, sm: 0 }}
+                                >
+                                  <MDButton
+                                    type="submit"
+                                    variant="gradient"
+                                    color="primary"
+                                    sx={{ height: "100%" }}
+                                    disabled={isLoading}
+                                  >
+                                    {isLoading
+                                      ? params == undefined
+                                        ? "Adding Period.."
+                                        : "Updating Period.."
+                                      : params == undefined
+                                      ? "Save"
+                                      : "Update"}
+                                  </MDButton>
+                                </MDBox>
+                              </Grid>
+                            </Form>
+                          );
+                        }}
+                      </Formik>
+                    </Grid>
+                  </Grid>
                 </MDBox>
               </MDBox>
             </Card>
