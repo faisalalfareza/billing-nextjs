@@ -22,6 +22,7 @@ import Autocomplete from "@mui/material/Autocomplete";
 import { useMaterialUIController } from "/context";
 import getConfig from "next/config";
 const { publicRuntimeConfig } = getConfig();
+import { useCookies } from "react-cookie";
 import * as React from "react";
 import Backdrop from "@mui/material/Backdrop";
 import Box from "@mui/material/Box";
@@ -47,11 +48,13 @@ export default function WaterReading(props) {
   const [openEdit, setOpenEdit] = useState(false);
   const [dataCluster, setDataCluster] = useState([]);
   const [dataProject, setDataProject] = useState([]);
+  const [listRow, setlistRow] = useState([]);
   const [site, setSite] = useState(null);
   const handleOpenUpload = () => setOpenUpload(true);
   const handleOpenEdit = () => setOpenEdit(true);
   const [isLoading, setLoading] = useState(false);
   const [modalParams, setModalParams] = useState(undefined);
+  const [{ accessToken, encryptedAccessToken }] = useCookies();
 
   useEffect(() => {
     let currentSite = JSON.parse(localStorage.getItem("site"));
@@ -247,6 +250,7 @@ export default function WaterReading(props) {
             action: e,
           });
         });
+        setlistRow(list);
         return setTasklist({
           columns: columns,
           rows: list,
@@ -257,9 +261,40 @@ export default function WaterReading(props) {
       });
   };
 
-  if (typeof window !== "undefined") {
-  }
-
+  const handleExport = () => {
+    const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/ExportToExcelWaterReading`;
+    const config = {
+      headers: {
+        Authorization: "Bearer " + accessToken,
+        "Content-Type": "application/json",
+      },
+    };
+    const body = {
+      maxResultCount: 1000,
+      skipCount: 0,
+      siteId: site?.siteId,
+      projectId: formValues.project?.projectId,
+      clusterId: formValues.cluster?.clusterId,
+      search: undefined,
+    };
+    console.log(url, body);
+    axios
+      .post(url, body, config)
+      .then((res) => {
+        console.log("res", res);
+        if (res.data.success) {
+        }
+      })
+      .catch((error) => {
+        console.log("error-------", error);
+        if (error.response)
+          Swal.fire({
+            title: "Error",
+            text: error.response?.data.error.message,
+            icon: "error",
+          });
+      });
+  };
   useEffect(() => {
     const a = localStorage.getItem("site");
     console.log("a=====", a);
@@ -389,7 +424,7 @@ export default function WaterReading(props) {
                               <Grid container spacing={3}>
                                 <Grid item xs={12} sm={6}>
                                   <Autocomplete
-                                    disableCloseOnSelect
+                                    // disableCloseOnSelect
                                     // includeInputInList={true}
                                     options={dataProject}
                                     key={project.name}
@@ -440,7 +475,7 @@ export default function WaterReading(props) {
                                 </Grid>
                                 <Grid item xs={12} sm={6}>
                                   <Autocomplete
-                                    disableCloseOnSelect
+                                    // disableCloseOnSelect
                                     key={cluster.name}
                                     options={dataCluster}
                                     value={values.cluster}
@@ -539,29 +574,35 @@ export default function WaterReading(props) {
               </Grid>
               <Grid item xs={12} md={4} sx={{ textAlign: "right" }}>
                 <Grid container alignItems="right" spacing={0}>
-                  <Grid item xs={12} md={6}>
-                    <MDButton
-                      variant="outlined"
-                      color="primary"
-                      disabled={tasklist.length == 0}
+                  <Grid item xs={12}>
+                    <MDBox
+                      display="flex"
+                      flexDirection={{ xs: "column", sm: "row" }}
+                      justifyContent="flex-end"
                     >
-                      <Icon>add</Icon>&nbsp; Export Excel
-                    </MDButton>
-                  </Grid>
-                  {/*  */}
-                  <Grid item xs={12} md={6}>
-                    <MDButton
-                      variant="gradient"
-                      color="primary"
-                      onClick={handleOpenUpload}
-                    >
-                      <Icon>add</Icon>&nbsp; Add New
-                    </MDButton>
-                    <UploadDataWater
-                      site={site}
-                      isOpen={openUpload}
-                      onModalChanged={changeModalUpload}
-                    />
+                      <MDButton
+                        variant="outlined"
+                        color="primary"
+                        disabled={listRow.length == 0}
+                        onClick={handleExport}
+                      >
+                        <Icon>add</Icon>&nbsp; Export Excel
+                      </MDButton>
+                      <MDBox ml={{ xs: 0, sm: 1 }} mt={{ xs: 1, sm: 0 }}>
+                        <MDButton
+                          variant="gradient"
+                          color="primary"
+                          onClick={handleOpenUpload}
+                        >
+                          <Icon>add</Icon>&nbsp; Add New
+                        </MDButton>
+                        <UploadDataWater
+                          site={site}
+                          isOpen={openUpload}
+                          onModalChanged={changeModalUpload}
+                        />
+                      </MDBox>
+                    </MDBox>
                   </Grid>
                 </Grid>
               </Grid>
