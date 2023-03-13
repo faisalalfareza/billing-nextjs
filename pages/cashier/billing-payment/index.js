@@ -22,16 +22,20 @@ import Swal from "sweetalert2";
 import * as dayjs from "dayjs";
 import { FormGroup, FormControlLabel, Checkbox } from "@mui/material";
 import DataTableTotal from "../../../layout/Tables/DataTableTotal";
+import { formatValue } from "react-currency-input-field";
+import CurrencyInput from "react-currency-input-field";
 
 export default function BillingPayment(props) {
   const { dataSite } = props;
-  const [listBilling, stListBilling] = useState([]);
+  const [listBilling, setListBilling] = useState([]);
+  const [listInvoice, setListInvoice] = useState([]);
   const [site, setSite] = useState(null);
   const [openModal, setOpenModal] = useState(false);
   const [params, setParams] = useState(undefined);
   const [filterText, setFilterText] = useState("");
   const [selectedPSCode, setSelectedPSCode] = useState(undefined);
   const [detail, setDetail] = useState(undefined);
+  const [user, setUser] = useState(undefined);
 
   useEffect(() => {
     let currentSite = JSON.parse(localStorage.getItem("site"));
@@ -44,6 +48,8 @@ export default function BillingPayment(props) {
       });
     } else {
       setSite(currentSite);
+      let currentUser = JSON.parse(localStorage.getItem("informations"));
+      setUser(currentUser);
     }
   }, []);
   useEffect(() => {
@@ -286,33 +292,62 @@ export default function BillingPayment(props) {
       rows: listBilling,
     };
   };
-
+  const curr = (value) => {
+    console.log("duit", value);
+    return formatValue({
+      value: value.toString(),
+      groupSeparator: ".",
+      decimalSeparator: ",",
+      prefix: "Rp ",
+    });
+  };
   const setInvoiceList = () => {
     return {
       columns: [
-        // {
-        //   Header: "Choose",
-        //   accessor: "e",
-        //   Cell: ({ value }, index) => {
-        //     return (
-        //       <Radio
-        //         onChange={handleCheck(value)}
-        //         value={value}
-        //         name="radio-buttons"
-        //         key={"radio" + index}
-        //         inputProps={{ "aria-label": "A" }}
-        //       />
-        //     );
-        //   },
-        // },
-        { Header: "Invoice Number", accessor: "no" },
-        { Header: "Invoice Name", accessor: "projectName" },
-        { Header: "Balance", accessor: "clusterName" },
+        { Header: "Invoice Number", accessor: "invoiceNo" },
+        { Header: "Invoice Name", accessor: "invoiceName" },
+        {
+          Header: "Balance",
+          accessor: "balance",
+          align: "right",
+          Cell: ({ value }) => {
+            return curr(value);
+          },
+        },
 
-        { Header: "End Balance", accessor: "unitName" },
-        { Header: "Payment Amount", accessor: "unitCode" },
+        {
+          Header: "End Balance",
+          accessor: "endBalance",
+          align: "right",
+          Cell: ({ value }) => {
+            return curr(value);
+          },
+        },
+        {
+          Header: "Payment Amount",
+          accessor: "paymentAmount",
+          align: "right",
+          Cell: ({ value }) => {
+            let valString = value.toString();
+            console.log("duitpayAmount----", valString, typeof valString);
+            return (
+              <CurrencyInput
+                customInput={TextField}
+                id="input-example"
+                name="input-name"
+                placeholder="Please enter a number"
+                defaultValue={valString}
+                decimalsLimit={2}
+                prefix="Rp. "
+                groupSeparator="."
+                decimalSeparator=","
+                onValueChange={(value, name) => console.log(value, name)}
+              />
+            );
+          },
+        },
       ],
-      rows: listBilling,
+      rows: listInvoice,
     };
   };
 
@@ -364,11 +399,38 @@ export default function BillingPayment(props) {
             e,
           });
         });
-        stListBilling(list);
+        setListBilling(list);
         console.log("list------", list);
       })
       .catch((error) => {
         // handle error
+      });
+  };
+
+  const getDetail = async (data) => {
+    const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/GetPaymentDetailByPsCode`;
+    axios
+      .get(url, {
+        params: {
+          PsCode: detail.psCode,
+          unitDataId: detail.unitDataId,
+        },
+      })
+      .then((response) => {
+        // handle success
+        console.log("upilllll", response.data);
+        const result = response.data.result.listInvoicePayment;
+        setListInvoice(result);
+        console.log("list-invoice-----", listInvoice);
+      })
+      .catch((error) => {
+        console.log(error);
+        if (error.response)
+          Swal.fire({
+            title: "Error",
+            text: error.response?.data.error.message,
+            icon: "error",
+          });
       });
   };
   //sampai sini
@@ -459,7 +521,7 @@ export default function BillingPayment(props) {
               variant="gradient"
               color="primary"
               onClick={() => {
-                fetchData();
+                getDetail();
               }}
             >
               <Icon>search</Icon>&nbsp; Show This Unit
@@ -484,7 +546,6 @@ export default function BillingPayment(props) {
                 textAlign="center"
                 bgColor="primary"
                 borderRadius="lg"
-                // variant="gradient"
                 shadow="xl"
                 py={2}
               >
@@ -567,8 +628,7 @@ export default function BillingPayment(props) {
                                       type="text"
                                       label="Cluster"
                                       name="cluster"
-                                      // value={detail?.clusterName}
-                                      value="upillll"
+                                      value={detail?.clusterName}
                                       placeholder="Custer"
                                     />
                                   </Grid>
@@ -745,33 +805,82 @@ export default function BillingPayment(props) {
                                 </Grid>
                               </MDBox>
                               <Grid item xs={6}>
-                                <MDInput
-                                  variant="standard"
-                                  label="Cluster"
-                                  fullWidth
-                                />
+                                <FormGroup>
+                                  <FormControlLabel
+                                    control={
+                                      <Checkbox
+                                        // disabled={!formValues.statusActive}
+                                        name="print-or"
+                                        color="primary"
+                                        // checked={formValues.statusActive}
+                                        // onChange={(e) => {
+                                        //   console.log(e.target.checked);
+                                        //   setFieldValue(
+                                        //     statusActive.name,
+                                        //     e.target.checked != null
+                                        //       ? e.target.checked
+                                        //       : initialValues[statusActive.name]
+                                        //   );
+                                        // }}
+                                      />
+                                    }
+                                    label="Print Official Receipt (OR)"
+                                  />
+                                  <FormControlLabel
+                                    control={
+                                      <Checkbox
+                                        // disabled={!formValues.statusActive}
+                                        name="print-or"
+                                        color="primary"
+                                        // checked={formValues.statusActive}
+                                        // onChange={(e) => {
+                                        //   console.log(e.target.checked);
+                                        //   setFieldValue(
+                                        //     statusActive.name,
+                                        //     e.target.checked != null
+                                        //       ? e.target.checked
+                                        //       : initialValues[statusActive.name]
+                                        //   );
+                                        // }}
+                                      />
+                                    }
+                                    label={"Add Signee : " + user?.user.name}
+                                  />
+                                </FormGroup>
                               </Grid>
-                              <Grid item xs={6}></Grid>
-                              <Grid item xs={12}>
+                              <Grid item xs={12} mt={3}>
                                 <MDBox
-                                  ml={{ xs: 0, sm: 1 }}
-                                  mt={{ xs: 1, sm: 0 }}
+                                  display="flex"
+                                  flexDirection={{ xs: "column", sm: "row" }}
+                                  justifyContent="flex-end"
                                 >
                                   <MDButton
-                                    type="submit"
-                                    variant="gradient"
-                                    color="primary"
-                                    sx={{ height: "100%" }}
-                                    disabled={isLoading}
+                                    type="reset"
+                                    variant="outlined"
+                                    color="secondary"
                                   >
-                                    {isLoading
-                                      ? params == undefined
-                                        ? "Adding Period.."
-                                        : "Updating Period.."
-                                      : params == undefined
-                                      ? "Save"
-                                      : "Update"}
+                                    Cancel
                                   </MDButton>
+                                  <MDBox
+                                    ml={{ xs: 0, sm: 1 }}
+                                    mt={{ xs: 1, sm: 0 }}
+                                  >
+                                    <MDButton
+                                      type="submit"
+                                      variant="gradient"
+                                      color="primary"
+                                      sx={{ height: "100%" }}
+                                      disabled={isLoading}
+                                    >
+                                      {isLoading
+                                        ? params == undefined
+                                          ? "Adding Period.."
+                                          : "Updating Period.."
+                                        : params == undefined
+                                        ? "Save"
+                                        : "Update"}
+                                    </MDButton>
+                                  </MDBox>
                                 </MDBox>
                               </Grid>
                             </Form>

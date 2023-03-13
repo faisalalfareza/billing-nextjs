@@ -21,6 +21,7 @@ import IllustrationLayout from "/pagesComponents/authentication/components/Illus
 import FormField from "/pagesComponents/FormField";
 import appInfo from "/appinfo.json";
 
+import { typeNormalization } from "../../../helpers/utils";
 const { publicRuntimeConfig } = getConfig();
 
 function SignIn(props) {
@@ -97,49 +98,48 @@ function SignIn(props) {
     });
   };
 
-  function authenticate(params) {
-    const credential = JSON.stringify({
-      userNameOrEmailAddress: params.userNameOrEmailAddress,
-      password: params.password,
-    });
-    const url = `${publicRuntimeConfig.apiUrl}/api/TokenAuth/Authenticate`;
-    const config = {
-      headers: { "Content-Type": "application/json" },
-      auth: {
-        username: params.userNameOrEmailAddress,
+  async function authenticate(params) {
+    let response = await fetch("/api/authenticatation/authenticate", {
+      method: "POST",
+      body: JSON.stringify({
+        userNameOrEmailAddress: params.userNameOrEmailAddress,
         password: params.password,
-      },
-      xsrfCookieName: "XSRF-TOKEN",
-      xsrfHeaderName: "X-XSRF-TOKEN",
-    };
+      }),
+    });
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
 
-    axios
-      .post(url, credential, config)
-      .then((response) =>
-        processAuthenticateResult(response.data.result, "/dashboards")
-      )
-      .catch((error) => {
-        setLoadingSubmit(false);
+    // console.log("GET AUTHENTICATION RESULT", response);
 
-        if (error.response) {
-          console.error("ERROR RESPONSE [" + url + "]  :=> ", error.response);
-          Swal.fire({
-            icon: "error",
-            title: error.response.data.error.message,
-            text: error.message + ": " + error.response.data.error.details,
-            footer:
-              "<p style='text-align: center;line-height: 1;'> Contact admin for further handling regarding access rights or authority.</p>",
-          });
-        } else if (error.request) {
-          console.error("ERROR REQUEST [" + url + "]  :=> ", error.request);
-          Swal.fire({
-            icon: "error",
-            title: error.message,
-          });
-        } else console.error("ERROR [" + url + "]  :=> ", error.message);
+    if (response.error) {
+      setLoadingSubmit(false);
+      const error = response.error;
+      if (error.response) {
+        console.error("ERROR RESPONSE => ", error.response);
+        Swal.fire({
+          icon: "error",
+          title: error.response.data.error.message,
+          text: error.message + ": " + error.response.data.error.details,
+          footer:
+            "<p style='text-align: center;line-height: 1;'> Contact admin for further handling regarding access rights or authority.</p>",
+        });
+      } else if (error.request) {
+        console.error("ERROR REQUEST => ", error.request);
+        Swal.fire({
+          icon: "error",
+          title: error.message,
+        });
+      } else console.error("ERROR => ", error.message);
 
-        console.error("ERROR CONFIG [" + url + "]  :=> ", error.config);
-      });
+      console.error("ERROR CONFIG => ", error.config);
+    } else {
+      if (response.isCached)
+        processAuthenticateResult(
+          response.result.authenticateResult,
+          "/dashboards"
+        );
+      else processAuthenticateResult(response.result, "/dashboards");
+    }
   }
   function processAuthenticateResult(
     authenticateResult,
@@ -187,53 +187,71 @@ function SignIn(props) {
     getCurrentLoginInformations(accessToken, redirectUrl);
   }
 
-  function getCurrentLoginInformations(accessToken, redirectUrl) {
-    const url = `${publicRuntimeConfig.apiUrl}/api/services/app/Session/GetCurrentLoginInformations`;
-    const config = { headers: { Authorization: "Bearer " + accessToken } };
+  async function getCurrentLoginInformations(accessToken, redirectUrl) {
+    let response = await fetch("/api/authenticatation/informations", {
+      method: "POST",
+      body: JSON.stringify({
+        accessToken: accessToken,
+      }),
+    });
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
 
-    axios
-      .get(url, config)
-      .then((res) => {
-        const informations = res.data.result;
-        const { application, tenant, user } = informations;
-        localStorage.setItem("informations", JSON.stringify(informations));
-        localStorage.setItem("application", JSON.stringify(application));
+    // console.log("GET INFORMATIONS RESULT", response);
 
-        getUserPermissions(accessToken, redirectUrl),
-          getUserProfilePicture(accessToken);
-      })
-      .catch((error) => setLoadingSubmit(false));
+    if (response.error) setLoadingSubmit(false);
+    else {
+      const informations = response.result;
+      const { application, tenant, user } = informations;
+      localStorage.setItem("informations", JSON.stringify(informations));
+      localStorage.setItem("application", JSON.stringify(application));
+
+      getUserPermissions(accessToken, redirectUrl),
+        getUserProfilePicture(accessToken);
+    }
   }
-  function getUserPermissions(accessToken, redirectUrl) {
-    const url = `${publicRuntimeConfig.apiUrl}/AbpUserConfiguration/GetAll`;
-    const config = { headers: { Authorization: "Bearer " + accessToken } };
+  async function getUserPermissions(accessToken, redirectUrl) {
+    let response = await fetch("/api/authenticatation/permissions", {
+      method: "POST",
+      body: JSON.stringify({
+        accessToken: accessToken,
+      }),
+    });
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
 
-    axios
-      .get(url, config)
-      .then((res) => {
-        const { allPermissions, grantedPermissions } = res.data.result.auth;
-        localStorage.setItem("allPermissions", JSON.stringify(allPermissions));
-        localStorage.setItem(
-          "grantedPermissions",
-          JSON.stringify(grantedPermissions)
-        );
+    // console.log("GET PERMISSIONS RESULT", response);
 
-        // Router.replace(redirectUrl, Router.asPath);
-        window.open(redirectUrl, "_self");
-      })
-      .catch((error) => setLoadingSubmit(false));
+    if (response.error) setLoadingSubmit(false);
+    else {
+      const { allPermissions, grantedPermissions } = response.result;
+      localStorage.setItem("allPermissions", JSON.stringify(allPermissions));
+      localStorage.setItem(
+        "grantedPermissions",
+        JSON.stringify(grantedPermissions)
+      );
+
+      // Router.replace(redirectUrl, Router.asPath);
+      window.open(redirectUrl, "_self");
+    }
   }
-  function getUserProfilePicture(accessToken) {
-    const url = `${publicRuntimeConfig.apiUrl}/api/services/app/Profile/GetProfilePicture`;
-    const config = { headers: { Authorization: "Bearer " + accessToken } };
+  async function getUserProfilePicture(accessToken) {
+    let response = await fetch("/api/authenticatation/profiles", {
+      method: "POST",
+      body: JSON.stringify({
+        accessToken: accessToken,
+      }),
+    });
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
 
-    axios
-      .get(url, config)
-      .then((res) => {
-        const { profilePicture } = res.data.result;
-        localStorage.setItem("profilePicture", profilePicture);
-      })
-      .catch((error) => setLoadingSubmit(false));
+    // console.log("GET PROFILES RESULT", response);
+
+    if (response.error) setLoadingSubmit(false);
+    else {
+      const { profilePicture } = response.result;
+      localStorage.setItem("profilePicture", profilePicture);
+    }
   }
 
   return (
