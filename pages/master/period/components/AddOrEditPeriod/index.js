@@ -177,6 +177,7 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
         "Content-Type": "application/json",
       },
     };
+
     const body = {
       siteId: site.siteId,
       periodMonth: addDate(values.periodName),
@@ -314,7 +315,23 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
       });
     const submitForm = async (values, actions) => {
       // await sleep(1000);
-      createPeriod(values, actions);
+      if (dayjs(values.startDate).isAfter(dayjs(values.endDate))) {
+        Swal.fire({
+          icon: "warning",
+          title: "Oh Snap!",
+          text: "End date should be greater than Start date",
+        });
+        document.getElementsByName(endDate.name)[0].focus();
+      } else if (dayjs(values.endDate).isAfter(dayjs(values.closeDate))) {
+        Swal.fire({
+          icon: "warning",
+          title: "Oh Snap!",
+          text: "Close date should be greater than End date",
+        });
+        document.getElementsByName(closeDate.name)[0].focus();
+      } else {
+        createPeriod(values, actions);
+      }
     };
 
     return (
@@ -516,6 +533,7 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
                     <MDButton
                       variant="outlined"
                       color="secondary"
+                      type="reset"
                       onClick={closeModal}
                     >
                       Cancel
