@@ -133,16 +133,23 @@ function SignIn(props) {
 
       console.error("ERROR CONFIG => ", error.config);
     } else {
-      if (response.isCached)
+      if (response.isCached[0])
         processAuthenticateResult(
           response.result.authenticateResult,
+          undefined,
           "/dashboards"
         );
-      else processAuthenticateResult(response.result, "/dashboards");
+      else
+        processAuthenticateResult(
+          response.result,
+          response.isCached[1].fromOwnSetting,
+          "/dashboards"
+        );
     }
   }
   function processAuthenticateResult(
     authenticateResult,
+    reconfiguredExpireInSeconds = undefined,
     redirectUrl = undefined
   ) {
     if (authenticateResult.shouldResetPassword) {
@@ -158,6 +165,8 @@ function SignIn(props) {
         authenticateResult.expireInSeconds,
         null,
         authenticateResult.twoFactorRememberClientToken,
+        authenticateResult.userId,
+        reconfiguredExpireInSeconds,
         redirectUrl
       );
     } else {
@@ -170,6 +179,8 @@ function SignIn(props) {
     expireInSeconds,
     rememberMe,
     twoFactorRememberClientToken,
+    userId,
+    reconfiguredExpireInSeconds,
     redirectUrl
   ) {
     const tokenExpireDate = new Date(
@@ -184,14 +195,29 @@ function SignIn(props) {
       expires: tokenExpireDate,
     });
 
-    getCurrentLoginInformations(accessToken, redirectUrl);
+    getCurrentLoginInformations(
+      {
+        accessToken: accessToken,
+        userId: userId,
+      },
+      reconfiguredExpireInSeconds,
+      redirectUrl
+    );
   }
 
-  async function getCurrentLoginInformations(accessToken, redirectUrl) {
+  async function getCurrentLoginInformations(
+    authenticateResult,
+    reconfiguredExpireInSeconds,
+    redirectUrl
+  ) {
+    const { accessToken, userId } = authenticateResult;
+
     let response = await fetch("/api/authenticatation/informations", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
+        expireInSeconds: reconfiguredExpireInSeconds,
+        userId: userId,
       }),
     });
     if (!response.ok) throw new Error(`Error: ${response.status}`);
@@ -207,7 +233,7 @@ function SignIn(props) {
       localStorage.setItem("application", JSON.stringify(application));
 
       getUserPermissions(accessToken, redirectUrl),
-        getUserProfilePicture(accessToken);
+        getUserProfilePicture(authenticateResult, reconfiguredExpireInSeconds);
     }
   }
   async function getUserPermissions(accessToken, redirectUrl) {
@@ -231,15 +257,25 @@ function SignIn(props) {
         JSON.stringify(grantedPermissions)
       );
 
-      // Router.replace(redirectUrl, Router.asPath);
+      // Router
+      //   .replace(redirectUrl, Router.asPath)
+      //   .then((result) => {
+      //   });
       window.open(redirectUrl, "_self");
     }
   }
-  async function getUserProfilePicture(accessToken) {
+  async function getUserProfilePicture(
+    authenticateResult,
+    reconfiguredExpireInSeconds
+  ) {
+    const { accessToken, userId } = authenticateResult;
+
     let response = await fetch("/api/authenticatation/profiles", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
+        expireInSeconds: reconfiguredExpireInSeconds,
+        userId: userId,
       }),
     });
     if (!response.ok) throw new Error(`Error: ${response.status}`);
@@ -346,6 +382,7 @@ function SignIn(props) {
               </MDBox>
               <MDBox mt={3} textAlign="center" lineHeight="1">
                 {/* <MDTypography variant="button" color="text" lineHeight="1">
+                  Don&apos;t remember your password yet?{" "}
                   <Link href="/authentication/reset-password">
                     <a>
                       <MDTypography
@@ -371,6 +408,7 @@ function SignIn(props) {
 export default SignIn;
 
 export async function getStaticProps() {
+  // await redisIO.flushdb();
   return {
     props: {},
   };
