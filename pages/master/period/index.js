@@ -21,15 +21,22 @@ import AddOrEditPeriod from "./components/AddOrEditPeriod";
 import Icon from "@mui/material/Icon";
 import MDBadgeDot from "/components/MDBadgeDot";
 import Swal from "sweetalert2";
+import { useCookies } from "react-cookie";
+import { typeNormalization } from "/helpers/utils";
+import { async } from "regenerator-runtime";
 
 export default function MasterPeriod(props) {
-  const { dataProject, dataSite } = props;
+  // const { dataSite } = props;
   const [listSite, setListSite] = useState([]);
+  const [dataSite, setDataSite] = useState([]);
   const [site, setSite] = useState(null);
   const [openModal, setOpenModal] = useState(false);
   const [modalParams, setModalParams] = useState(undefined);
+  const [loading, setLoading] = useState(false);
+  const [{ accessToken, encryptedAccessToken }] = useCookies();
 
   useEffect(() => {
+    getSite();
     let currentSite = JSON.parse(localStorage.getItem("site"));
     console.log("currentSite-----------", currentSite);
     if (currentSite == null) {
@@ -47,7 +54,6 @@ export default function MasterPeriod(props) {
   }, [site]);
 
   //dari sini
-  const [isLoading, setLoading] = useState(false);
 
   const setSiteList = () => {
     return {
@@ -113,23 +119,39 @@ export default function MasterPeriod(props) {
   };
 
   const fetchData = async (data) => {
-    const url = `${publicRuntimeConfig.apiUrl}/api/services/app/MasterBilling/GetListMasterPeriod`;
-    axios
-      .get(url, {
+    let response = await fetch("/api/master/period/list", {
+      method: "POST",
+      body: JSON.stringify({
+        accessToken: accessToken,
         params: {
           SiteId: site?.siteId,
-          // SiteName: site?.siteName,
           MaxResultCount: 1000,
           SkipCount: 0,
         },
-      })
-      .then((response) => {
-        // handle success
-        const result = response.data.result.items;
-        const list = [];
-        const row = result.map((e, i) => {
-          list.push({
-            no: i + 1,
+      }),
+    });
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
+
+    // console.log("GET PERMISSIONS RESULT", response);
+
+    console.log("response----", response);
+    if (response.error) setLoading(false);
+    else {
+      const list = [];
+      const row = response.result.map((e, i) => {
+        list.push({
+          no: i + 1,
+          closeDate: e.closeDate,
+          endDate: e.endDate,
+          isActive: e.isActive,
+          periodName: e.periodName,
+          periodNumber: e.periodNumber,
+          siteId: e.siteId,
+          startDate: e.startDate,
+          siteName: e.siteName,
+          periodId: e.periodId,
+          action: {
             closeDate: e.closeDate,
             endDate: e.endDate,
             isActive: e.isActive,
@@ -139,25 +161,26 @@ export default function MasterPeriod(props) {
             startDate: e.startDate,
             siteName: e.siteName,
             periodId: e.periodId,
-            action: {
-              closeDate: e.closeDate,
-              endDate: e.endDate,
-              isActive: e.isActive,
-              periodName: e.periodName,
-              periodNumber: e.periodNumber,
-              siteId: e.siteId,
-              startDate: e.startDate,
-              siteName: e.siteName,
-              periodId: e.periodId,
-            },
-          });
+          },
         });
-        setListSite(list);
-        console.log("list------", list);
-      })
-      .catch((error) => {
-        // handle error
       });
+      setListSite(list);
+      console.log("list------", list);
+    }
+  };
+
+  const getSite = async () => {
+    let response = await fetch("/api/master/period/dropdownsite", {
+      method: "POST",
+      body: JSON.stringify({
+        accessToken: accessToken,
+      }),
+    });
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
+
+    console.log("up---", response.result);
+    setDataSite(response.result);
   };
   //sampai sini
 
@@ -242,21 +265,16 @@ export default function MasterPeriod(props) {
   );
 }
 
-export async function getStaticProps(context) {
-  const urlP = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetDropdownProject`;
-  const resProject = await fetch(urlP);
-  let listProject = await resProject.json();
-  const dataProject = listProject.result;
-  const resSite = await fetch(
-    `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetDropdownSite`
-  );
-  let listSite = await resSite.json();
-  const dataSite = listSite.result;
-  return {
-    props: {
-      dataProject,
-      dataSite,
-    },
-    revalidate: 60,
-  };
-}
+// export async function getStaticProps(context) {
+//   const resSite = await fetch(
+//     `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetDropdownSite`
+//   );
+//   let listSite = await resSite.json();
+//   const dataSite = listSite.result;
+//   return {
+//     props: {
+//       dataSite,
+//     },
+//     revalidate: 60,
+//   };
+// }

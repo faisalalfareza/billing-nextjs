@@ -77,29 +77,9 @@ function PeriodRowActions({ record, openModalonEdit, onDeleted }) {
     });
   };
 
-  const actionsChild = () => {
-    {
-      record.isActive && (
-        <Menu
-          anchorEl={menu}
-          anchorReference={null}
-          anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-          // transformOrigin={{ vertical: "top", horizontal: "left" }}
-          open={Boolean(menu)}
-          onClose={closeMenu}
-          keepMounted
-        >
-          <MenuItem onClick={editSite}>Edit</MenuItem>
-          {/* <Divider sx={{ margin: "0.5rems 0" }} /> */}
-          {/* <MenuItem onClick={confirmDelete}>
-      <MDTypography variant="button" color="error" fontWeight="regular">
-        Delete Period
-      </MDTypography>
-    </MenuItem> */}
-        </Menu>
-      );
-    }
-  };
+  let actionsChild;
+  if (record.isActive)
+    actionsChild = <MenuItem onClick={editSite}>Edit</MenuItem>;
 
   return (
     <MDBox display="flex" alignItems="center">
@@ -113,7 +93,17 @@ function PeriodRowActions({ record, openModalonEdit, onDeleted }) {
         Actions&nbsp;
         <Icon>keyboard_arrow_down</Icon>
       </MDButton>
-      {actionsChild}
+      <Menu
+        anchorEl={menu}
+        anchorReference={null}
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+        // transformOrigin={{ vertical: "top", horizontal: "left" }}
+        open={Boolean(menu)}
+        onClose={closeMenu}
+        keepMounted
+      >
+        {actionsChild}
+      </Menu>
     </MDBox>
   );
 }

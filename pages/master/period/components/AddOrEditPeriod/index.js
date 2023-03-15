@@ -35,9 +35,9 @@ import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
 import Popup from "../../../../../pagesComponents/app/Popup";
+import { typeNormalization } from "/helpers/utils";
 
 function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
-  const [modalOpen, setModalOpen] = useState(true);
   const [{ accessToken, encryptedAccessToken }] = useCookies();
   const [isLoadingSubmit, setLoadingSubmit] = useState(false);
   const [no, setNo] = useState(null);
@@ -93,8 +93,8 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
         errorMsg: "Close Date is required.",
         defaultValue: "",
       },
-      statusActive: {
-        name: "statusActive",
+      isActive: {
+        name: "isActive",
         label: "Status",
         placeholder: "Status",
         type: "text",
@@ -104,14 +104,8 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
       },
     },
   };
-  let {
-    periodNumber,
-    periodName,
-    startDate,
-    endDate,
-    closeDate,
-    statusActive,
-  } = schemeModels.formField;
+  let { periodNumber, periodName, startDate, endDate, closeDate, isActive } =
+    schemeModels.formField;
 
   var customParseFormat = require("dayjs/plugin/customParseFormat");
   dayjs.extend(customParseFormat);
@@ -126,8 +120,9 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
     [closeDate.name]: params
       ? dayjs(params.closeDate).format("YYYY-MM-DD")
       : null,
-    [statusActive.name]: params ? params.isActive : true,
+    [isActive.name]: params ? params.isActive : true,
   };
+  console.log("initval----", initialValues);
 
   const [formValues, setformValues] = useState(initialValues);
 
@@ -136,26 +131,26 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
   };
   console.log("formValues::", formValues);
 
-  const getLastPeriodNo = (val) => {
+  const getLastPeriodNo = async (val) => {
     // setLoading(true);
     console.log("site-----", site);
-    const url = `${publicRuntimeConfig.apiUrl}/api/services/app/MasterBilling/GetLastPeriodNo`;
-    axios
-      .get(url, {
+    let response = await fetch("/api/master/period/no", {
+      method: "POST",
+      body: JSON.stringify({
+        accessToken: accessToken,
         params: {
           SiteId: site?.siteId,
         },
-      })
-      .then((res) => {
-        setNo(res.data.result);
-        setformValues((prevState) => ({
-          ...prevState,
-          periodNumber: res.data.result,
-        }));
-        console.log("res----", formValues, res.data.result);
-        // setLoading(false);
-      })
-      .catch((err) => console.log(err));
+      }),
+    });
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
+    console.log("response----", response);
+    setNo(response.result);
+    setformValues((prevState) => ({
+      ...prevState,
+      periodNumber: response.result,
+    }));
   };
   useEffect(() => {
     if (site) {
@@ -186,78 +181,85 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
       startDate: addDate(values.startDate),
       endDate: addDate(values.endDate),
       closeDate: addDate(values.closeDate),
-      isActive: values.statusActive,
+      isActive: values.isActive,
     };
     console.log("CompanyOfficer/CreateOrUpdateCompanyOfficer ", body);
 
     if (!params) {
-      axios
-        .post(url, body, config)
-        .then((res) => {
-          if (res.data.success) {
-            Swal.fire({
-              title: "New Period Added",
-              text:
-                "Period " +
-                values.periodNumber +
-                " has been successfully added",
-              icon: "success",
-              showConfirmButton: true,
-              timerProgressBar: true,
-              timer: 3000,
-            }).then(() => {
-              setLoadingSubmit(false);
-              actions.resetForm();
-              closeModal();
-            });
-          }
-        })
-        .catch((error) => {
-          setLoadingSubmit(false);
-          console.log("error-----", error.response.data.error.message);
-          Swal.fire({
-            title: "Error",
-            icon: "error",
-            text: error.response.data.error.message,
-          });
+      let response = await fetch("/api/master/period/create", {
+        method: "POST",
+        body: JSON.stringify({
+          accessToken: accessToken,
+          params: body,
+        }),
+      });
+      if (!response.ok) throw new Error(`Error: ${response.status}`);
+      response = typeNormalization(await response.json());
+      console.log("response----", response);
+      if (response.error) {
+        Swal.fire({
+          title: "Error",
+          icon: "error",
+          text: response.error.message,
         });
+      } else {
+        Swal.fire({
+          title: "New Period Added",
+          text:
+            "Period " + values.periodNumber + " has been successfully added",
+          icon: "success",
+          showConfirmButton: true,
+          timerProgressBar: true,
+          timer: 3000,
+        }).then(() => {
+          setLoadingSubmit(false);
+          actions.resetForm();
+          closeModal();
+        });
+      }
     } else {
       body.periodId = params.periodId;
-      axios
-        .put(urlUpdate, body, config)
-        .then((res) => {
-          if (res.data.success) {
-            Swal.fire({
-              title: "Period Updated",
-              text:
-                "Period " +
-                values.periodName +
-                " in " +
-                values.periodNumber +
-                " has been successfully updated.",
-              icon: "success",
-              showConfirmButton: true,
-              timerProgressBar: true,
-              timer: 3000,
-            }).then((result) => {
-              setLoadingSubmit(false);
-              actions.resetForm();
-              closeModal();
-            });
-          }
-        })
-        .catch((error) => {
-          setLoadingSubmit(false);
-          console.log("error-----", error);
-          // <Popup icon={error} text={error.message} title="Error"/>
+
+      let response = await fetch("/api/master/period/update", {
+        method: "POST",
+        body: JSON.stringify({
+          accessToken: accessToken,
+          params: body,
+        }),
+      });
+      if (!response.ok) throw new Error(`Error: ${response.status}`);
+      response = typeNormalization(await response.json());
+      console.log("response----", response);
+      if (response.error) {
+        Swal.fire({
+          title: "Error",
+          icon: "error",
+          text: response.error.message,
         });
+      } else {
+        Swal.fire({
+          title: "Period Updated",
+          text:
+            "Period " +
+            values.periodName +
+            " in " +
+            values.periodNumber +
+            " has been successfully updated.",
+          icon: "success",
+          showConfirmButton: true,
+          timerProgressBar: true,
+          timer: 3000,
+        }).then((result) => {
+          setLoadingSubmit(false);
+          actions.resetForm();
+          closeModal();
+        });
+      }
     }
   };
-
-  const openModal = () => setModalOpen(true);
-  const toggleModal = () => setModalOpen(true);
   const closeModal = () => {
-    setModalOpen(false);
+    setNo(undefined);
+    setformValues({});
     setTimeout(() => onModalChanged(), 0);
   };
 
@@ -270,7 +272,7 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
     //   [startDate.name]: params.startDate,
     //   [endDate.name]: params.endDate,
     //   [closeDate.name]: params.closeDate,
-    //   [statusActive.name]: params.isActive,
+    //   [isActive.name]: params.isActive,
     // }));
   }
 
@@ -291,20 +293,6 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
         ? Yup.date().required(closeDate.errorMsg)
         : Yup.date().notRequired(),
     });
-
-    // let getCompany =
-    //   params != undefined
-    //     ? params.coCode + " - " + params.coName
-    //     : periodNumber.defaultValue;
-    // let getOfficerName =
-    //   params != undefined ? params.periodName : periodName.defaultValue;
-    // let getOfficerTitle =
-    //   params != undefined ? params.title : startDate.defaultValue;
-    // const schemeInitialValues = {
-    //   [periodNumber.name]: getCompany,
-    //   [periodName.name]: getOfficerName,
-    //   [startDate.name]: getOfficerTitle,
-    // };
 
     const checkingSuccessInput = (value, error) => {
       return value != undefined && value != "" && value.length > 0 && !error;
@@ -335,12 +323,7 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
     };
 
     return (
-      <Modal
-        isOpen={isOpen}
-        toggle={toggleModal}
-        onOpened={openModal}
-        onClosed={closeModal}
-      >
+      <Modal isOpen={isOpen}>
         <Formik
           initialValues={initialValues}
           validationSchema={schemeValidations}
@@ -356,6 +339,7 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
           }) => {
             setformValues(values);
             getFormData(values);
+            console.log("values--ooooo--", values);
 
             const isValifForm = () => {
               // return checkingSuccessInput(companyV, errors.periodNumber) &&
@@ -390,7 +374,7 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
                             (periodNumber.isRequired ? " ⁽*⁾" : "")
                           }
                           name={periodNumber.name}
-                          value={formValues.periodNumber}
+                          // value={formValues.periodNumber}
                           placeholder={periodNumber.placeholder}
                           error={errors.periodNumber && touched.periodNumber}
                           success={checkingSuccessInput(
@@ -455,7 +439,7 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
                             (startDate.isRequired ? " ⁽*⁾" : "")
                           }
                           name={startDate.name}
-                          value={formValues.startDate}
+                          // value={formValues.startDate}
                           placeholder={startDate.placeholder}
                           error={errors.startDate && touched.startDate}
                           success={checkingSuccessInput(
@@ -471,7 +455,7 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
                             endDate.label + (endDate.isRequired ? " ⁽*⁾" : "")
                           }
                           name={endDate.name}
-                          value={formValues.endDate}
+                          // value={formValues.endDate}
                           placeholder={endDate.placeholder}
                           error={errors.endDate && touched.endDate}
                           success={checkingSuccessInput(
@@ -488,7 +472,7 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
                             (closeDate.isRequired ? " ⁽*⁾" : "")
                           }
                           name={closeDate.name}
-                          value={formValues.closeDate}
+                          // value={formValues.closeDate}
                           placeholder={closeDate.placeholder}
                           error={errors.closeDate && touched.closeDate}
                           success={checkingSuccessInput(
@@ -503,16 +487,16 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
                             <FormControlLabel
                               control={
                                 <Checkbox
-                                  disabled={!formValues.statusActive}
-                                  name={statusActive.name}
-                                  checked={formValues.statusActive}
+                                  disabled={!formValues.isActive}
+                                  name={isActive.name}
+                                  checked={formValues.isActive}
                                   onChange={(e) => {
                                     console.log(e.target.checked);
                                     setFieldValue(
-                                      statusActive.name,
+                                      isActive.name,
                                       e.target.checked != null
                                         ? e.target.checked
-                                        : initialValues[statusActive.name]
+                                        : initialValues[isActive.name]
                                     );
                                   }}
                                 />
