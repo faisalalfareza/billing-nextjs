@@ -1,4 +1,4 @@
-export function typeNormalization(value) {
+export function typeNormalization(value: any) {
   try {
     return JSON.parse(value);
   } catch (e) {
