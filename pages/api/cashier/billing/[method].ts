@@ -48,7 +48,7 @@ export default async function handler(
 async function getList(res: any, body: any) {
   const { accessToken, params } = body;
 
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/MasterBilling/GetListMasterPeriod`;
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/GetCustomerList`;
   const config = {
     headers: {
       Authorization: "Bearer " + accessToken,
@@ -77,7 +77,7 @@ async function getList(res: any, body: any) {
 async function getDropdownProject(res: any, body: any) {
   const { accessToken, params } = body;
 
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetDropdownProject`;
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/GetDropdownProject`;
   const config = {
     headers: {
       Authorization: "Bearer " + accessToken,
@@ -104,7 +104,7 @@ async function getDropdownProject(res: any, body: any) {
 async function getDropdownSite(res: any, body: any) {
   const { accessToken, params } = body;
 
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetDropdownSite`;
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/GetDropdownSite`;
   const config = {
     headers: {
       Authorization: "Bearer " + accessToken,
@@ -132,7 +132,7 @@ async function getDropdownSite(res: any, body: any) {
 async function getPeriodNo(res: any, body: any) {
   const { accessToken, params } = body;
 
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/MasterBilling/GetLastPeriodNo`;
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/GetLastPeriodNo`;
   const config = {
     headers: {
       Authorization: "Bearer " + accessToken,
@@ -161,7 +161,7 @@ async function getPeriodNo(res: any, body: any) {
 async function create(res: any, body: any) {
   const { accessToken, params } = body;
 
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/MasterBilling/CreateMasterPeriod`;
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/CreateMasterPeriod`;
   const config = {
     headers: {
       Authorization: "Bearer " + accessToken,
@@ -193,7 +193,7 @@ async function create(res: any, body: any) {
 async function update(res: any, body: any) {
   const { accessToken, params } = body;
 
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/MasterBilling/UpdateMasterPeriod`;
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/UpdateMasterPeriod`;
   const config = {
     headers: {
       Authorization: "Bearer " + accessToken,

@@ -23,7 +23,6 @@ import MDBadgeDot from "/components/MDBadgeDot";
 import Swal from "sweetalert2";
 import { useCookies } from "react-cookie";
 import { typeNormalization } from "/helpers/utils";
-import { async } from "regenerator-runtime";
 
 export default function MasterPeriod(props) {
   // const { dataSite } = props;

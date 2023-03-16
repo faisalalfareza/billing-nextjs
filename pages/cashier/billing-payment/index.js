@@ -24,6 +24,8 @@ import { FormGroup, FormControlLabel, Checkbox } from "@mui/material";
 import DataTableTotal from "../../../layout/Tables/DataTableTotal";
 import { formatValue } from "react-currency-input-field";
 import CurrencyInput from "react-currency-input-field";
+import { useCookies } from "react-cookie";
+import { typeNormalization } from "/helpers/utils";
 
 export default function BillingPayment(props) {
   const { dataSite } = props;
@@ -36,6 +38,7 @@ export default function BillingPayment(props) {
   const [selectedPSCode, setSelectedPSCode] = useState(undefined);
   const [detail, setDetail] = useState(undefined);
   const [user, setUser] = useState(undefined);
+  const [{ accessToken, encryptedAccessToken }] = useCookies();
 
   useEffect(() => {
     let currentSite = JSON.parse(localStorage.getItem("site"));
@@ -373,38 +376,72 @@ export default function BillingPayment(props) {
   };
 
   const fetchData = async (data) => {
-    const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/GetCustomerList`;
-    axios
-      .get(url, {
+    let response = await fetch("/api/cashier/billing/list", {
+      method: "POST",
+      body: JSON.stringify({
+        accessToken: accessToken,
         params: {
           SiteId: site?.siteId,
           Search: filterText,
           MaxResultCount: 1000,
           SkipCount: 0,
         },
-      })
-      .then((response) => {
-        // handle success
-        const result = response.data.result.items;
-        const list = [];
-        const row = result.map((e, i) => {
-          list.push({
-            no: i + 1,
-            projectName: e.projectName,
-            clusterName: e.clusterName,
-            customerName: e.customerName,
-            unitName: e.unitName,
-            unitCode: e.unitCode,
-            unitNo: e.unitNo,
-            e,
-          });
+      }),
+    });
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
+
+    console.log("response----", response);
+    if (response.error) setLoading(false);
+    else {
+      const list = [];
+      const row = response.result.map((e, i) => {
+        list.push({
+          no: i + 1,
+          projectName: e.projectName,
+          clusterName: e.clusterName,
+          customerName: e.customerName,
+          unitName: e.unitName,
+          unitCode: e.unitCode,
+          unitNo: e.unitNo,
+          e,
         });
-        setListBilling(list);
-        console.log("list------", list);
-      })
-      .catch((error) => {
-        // handle error
       });
+      setListBilling(list);
+      console.log("list------", list);
+    }
+    // const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/GetCustomerList`;
+    // axios
+    //   .get(url, {
+    //     params: {
+    //       SiteId: site?.siteId,
+    //       Search: filterText,
+    //       MaxResultCount: 1000,
+    //       SkipCount: 0,
+    //     },
+    //   })
+    //   .then((response) => {
+    //     // handle success
+    //     const result = response.data.result.items;
+    //     const list = [];
+    //     const row = result.map((e, i) => {
+    //       list.push({
+    //         no: i + 1,
+    //         projectName: e.projectName,
+    //         clusterName: e.clusterName,
+    //         customerName: e.customerName,
+    //         unitName: e.unitName,
+    //         unitCode: e.unitCode,
+    //         unitNo: e.unitNo,
+    //         e,
+    //       });
+    //     });
+    //     setListBilling(list);
+    //     console.log("list------", list);
+    //   })
+    //   .catch((error) => {
+    //     // handle error
+    //   });
   };
 
   const getDetail = async (data) => {
