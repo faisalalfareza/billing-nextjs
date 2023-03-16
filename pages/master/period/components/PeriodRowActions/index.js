@@ -77,9 +77,9 @@ function PeriodRowActions({ record, openModalonEdit, onDeleted }) {
     });
   };
 
-  let actionsChild;
-  if (record.isActive)
-    actionsChild = <MenuItem onClick={editSite}>Edit</MenuItem>;
+  const actionsChild = () => {
+    if (record.isActive) return <MenuItem onClick={editSite}>Edit</MenuItem>;
+  };
 
   return (
     <MDBox display="flex" alignItems="center">
@@ -102,7 +102,7 @@ function PeriodRowActions({ record, openModalonEdit, onDeleted }) {
         onClose={closeMenu}
         keepMounted
       >
-        {actionsChild}
+        <MenuItem onClick={editSite}>Edit</MenuItem>
       </Menu>
     </MDBox>
   );
