@@ -1,15 +1,12 @@
 import { useState, useEffect } from "react";
 import { useCookies } from "react-cookie";
-import { Formik, Form } from "formik";
+import { Formik } from "formik";
 import Swal from "sweetalert2";
 import * as Yup from "yup";
-import axios from "axios";
 
 import Switch from "@mui/material/Switch";
 
-import Link from "next/link";
 import Router from "next/router";
-import getConfig from "next/config";
 
 import bgImage from "/assets/images/illustrations/bg-1.jpg";
 
@@ -22,7 +19,6 @@ import FormField from "/pagesComponents/FormField";
 import appInfo from "/appinfo.json";
 
 import { typeNormalization } from "../../../helpers/utils";
-const { publicRuntimeConfig } = getConfig();
 
 function SignIn(props) {
   const {} = props;
@@ -99,7 +95,7 @@ function SignIn(props) {
   };
 
   async function authenticate(params) {
-    let response = await fetch("/api/authenticatation/authenticate", {
+    let response = await fetch("/api/authentication/authenticate", {
       method: "POST",
       body: JSON.stringify({
         userNameOrEmailAddress: params.userNameOrEmailAddress,
@@ -212,7 +208,7 @@ function SignIn(props) {
   ) {
     const { accessToken, userId } = authenticateResult;
 
-    let response = await fetch("/api/authenticatation/informations", {
+    let response = await fetch("/api/authentication/informations", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
@@ -228,7 +224,7 @@ function SignIn(props) {
     if (response.error) setLoadingSubmit(false);
     else {
       const informations = response.result;
-      const { application, tenant, user } = informations;
+      const { application } = informations;
       localStorage.setItem("informations", JSON.stringify(informations));
       localStorage.setItem("application", JSON.stringify(application));
 
@@ -237,7 +233,7 @@ function SignIn(props) {
     }
   }
   async function getUserPermissions(accessToken, redirectUrl) {
-    let response = await fetch("/api/authenticatation/permissions", {
+    let response = await fetch("/api/authentication/permissions", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
@@ -257,11 +253,8 @@ function SignIn(props) {
         JSON.stringify(grantedPermissions)
       );
 
-      // Router
-      //   .replace(redirectUrl, Router.asPath)
-      //   .then((result) => {
-      //   });
-      window.open(redirectUrl, "_self");
+      Router.replace(redirectUrl, Router.asPath);
+      // window.open(redirectUrl, "_self");
     }
   }
   async function getUserProfilePicture(
@@ -270,7 +263,7 @@ function SignIn(props) {
   ) {
     const { accessToken, userId } = authenticateResult;
 
-    let response = await fetch("/api/authenticatation/profiles", {
+    let response = await fetch("/api/authentication/profiles", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
@@ -300,7 +293,7 @@ function SignIn(props) {
         initialValues={schemeInitialValues}
         validationSchema={schemeValidations}
       >
-        {({ values, errors, touched, isSubmitting }) => {
+        {({ values, errors, touched }) => {
           let {
             userNameOrEmailAddress: userNameOrEmailAddressV,
             password: passwordV,

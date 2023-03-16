@@ -32,7 +32,7 @@ import themeDarkRTL from "/assets/theme-dark/theme-rtl";
 import rtlPlugin from "stylis-plugin-rtl";
 
 // NextJS Material Dashboard 2 PRO routes
-import routes from "../routes";
+import setRoutes from "../routes";
 
 // NextJS Material Dashboard 2 PRO Context Provider
 import {
@@ -58,7 +58,7 @@ import brandDark from "../assets/images/app-logo-on-light.png";
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createCache({ key: "css", prepend: true });
 
-function Main({ Component, pageProps }) {
+function Main({ Component, pageProps, routes = setRoutes() }) {
   const [controller, dispatch] = useMaterialUIController();
   const {
     miniSidenav,

@@ -55,6 +55,9 @@ import {
   setOpenConfigurator,
 } from "/context";
 
+import setRoutes from "../../../routes/index";
+const routes = setRoutes();
+
 function DashboardNavbar({ absolute, light, isMini }) {
   const [navbarType, setNavbarType] = useState();
   const [controller, dispatch] = useMaterialUIController();
@@ -66,7 +69,23 @@ function DashboardNavbar({ absolute, light, isMini }) {
     darkMode,
   } = controller;
   const [openMenu, setOpenMenu] = useState(false);
-  const route = useRouter().pathname.split("/").slice(1);
+
+  let route = useRouter().pathname.split("/").slice(1);
+  route.forEach((r,i) => {
+    let findRoute = i > 0 
+      ? routes.reformatedMain.find(e => (e.key == r) && (e.childOf == route[i - 1].name))
+      : routes.reformatedMain.find(e => e.key == r);
+    if (findRoute != undefined) {
+      route[i] = {
+        name: r,
+        nameOnHeader: findRoute.nameOnHeader,
+        childOf: findRoute.childOf
+      };
+    } 
+  });
+  let title = route[route.length - 1].nameOnHeader != undefined
+    ? route[route.length - 1].nameOnHeader
+    : route[route.length - 1].name;
 
   useEffect(() => {
     // Setting the navbar type
@@ -160,7 +179,7 @@ function DashboardNavbar({ absolute, light, isMini }) {
         >
           <Breadcrumbs
             icon="home"
-            title={route[route.length - 1]}
+            title={title}
             route={route}
             light={light}
           />
