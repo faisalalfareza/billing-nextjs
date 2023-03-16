@@ -113,7 +113,7 @@ async function authenticate(res: NextApiResponse, body: any) {
   }
 }
 
-async function getCurrentLoginInformations(res: NextApiResponse, body) {
+async function getCurrentLoginInformations(res: NextApiResponse, body: any) {
   const { accessToken, expireInSeconds, userId } = body;
 
   const key = `USERID{${userId}}-informations`;
