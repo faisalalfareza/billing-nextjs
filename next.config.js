@@ -15,9 +15,20 @@ const withTM = require("next-transpile-modules")([
 const runtimeCaching = require("next-pwa/cache");
 
 module.exports = withTM({
-  pwa: {
-    dest: "public",
-    runtimeCaching,
+  // pwa: {
+  //   dest: "public",
+  //   runtimeCaching,
+  // },
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback.dns = false;
+      config.resolve.fallback.net = false;
+      config.resolve.fallback.tls = false;
+      config.resolve.fallback.dgram = false;
+      config.resolve.fallback.fs = false;
+    }
+
+    return config;
   },
   reactStrictMode: false,
   async redirects() {

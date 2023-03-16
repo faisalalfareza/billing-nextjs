@@ -17,24 +17,13 @@
   10. The `title` key is only for the item with the type of `title` and its used for the title text on the Sidenav.
 */
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import Icon from "@mui/material/Icon";
-
 import MDAvatar from "../components/MDAvatar";
-
 import profilePicture from "../assets/images/team-3.jpg";
 
-let permissions = setPermission();
-export function setPermission() {
-  let permissions = getPermission();
-  // console.log("Permissions: ", permissions);
-
-  return permissions;
-}
-
-let main = setMain();
-export function setMain() {
-  let main = [
+function setMain() {
+  return [
     {
       type: "collapse",
       name: "Brooklyn Alice",
@@ -381,36 +370,10 @@ export function setMain() {
           permission: "Pages.Tenants.SSP.ListMonth",
         },
       ],
-    },
-
-    // { type: "divider", key: "divider-3" },
-    // { type: "title", title: "React Components Samples", key: "title-components" },
-    // {
-    //   type: "collapse",
-    //   name: "Components",
-    //   nameOnHeader: "React Components Samples",
-    //   key: "components",
-    //   collapse: [
-    //     {
-    //       name: "Upload Excel",
-    //       key: "comp-upload-excel",
-    //       route: "/app/nsfp/upload-batch",
-    //     },
-    //     {
-    //       name: "Dropdown",
-    //       key: "comp-dropdown",
-    //       route: "/app/nsfp/upload-batch",
-    //     },
-    //   ],
-    // },
+    }
   ];
-  // console.log("Routes (Before): ", main);
-
-  return main;
 }
-
-let filteredMain = setFilteredMain();
-export function setFilteredMain() {
+function setFilteredMain(permissions = getPermission(), main = setMain()) {
   let filteredMain = [];
   permissions &&
     main.forEach((p) => {
@@ -434,11 +397,10 @@ export function setFilteredMain() {
         }
       } else filteredMain.push(p);
     });
+  
   return filteredMain;
 }
-
-let reformatedMain = setReformatedMain();
-export function setReformatedMain() {
+function setReformatedMain(filteredMain = setFilteredMain()) {
   let reformatedMain = [];
   filteredMain.forEach((e) => {
     if (e.noCollapse) {
@@ -467,22 +429,25 @@ export function setReformatedMain() {
       }
     }
   });
+
   return reformatedMain;
 }
 
-let routes = setRoutes();
-export function setRoutes() {
+export default function setRoutes(permissions = getPermission(), main = setMain()) {
+  const filteredMain = setFilteredMain(permissions, main);
+  const reformatedMain = setReformatedMain(filteredMain);
+  
+  // console.log("Permissions: ", permissions);
+  // console.log("Routes (Before): ", main);
   // console.log("Routes (After): ", filteredMain);
   // console.log("Routes (After - Reformated): ", reformatedMain);
-
+  
   return {
     main,
     filteredMain,
     reformatedMain,
   };
 }
-
-export default routes;
 
 export function getPermission() {
   if (typeof window !== "undefined") {
@@ -492,7 +457,7 @@ export function getPermission() {
   return;
 }
 
-export function checkPermission(testPermission, checkingOn = "Routes") {
+export function checkPermission(testPermission, permissions = getPermission()) {
   if (permissions != null || permissions != undefined) {
     let checking =
       permissions[testPermission] &&

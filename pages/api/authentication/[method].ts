@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import getConfig from "next/config";
 import axios from "axios";
 import redisIO from "../../../libraries/redis";
+import { typeNormalization } from "../../../helpers/utils";
 
 const { publicRuntimeConfig } = getConfig();
 const isRedis: boolean = false;
@@ -45,7 +46,7 @@ export default async function handler(
   }
 }
 
-async function authenticate(res: NextApiResponse, body) {
+async function authenticate(res: NextApiResponse, body: any) {
   const { userNameOrEmailAddress, password } = body;
 
   const key = `USER{${userNameOrEmailAddress}}-tokens`;
@@ -56,7 +57,7 @@ async function authenticate(res: NextApiResponse, body) {
     const getLoggedInUser = await redisIO.get(key);
     return res.send({
       isCached: [true, undefined],
-      result: JSON.parse(getLoggedInUser),
+      result: typeNormalization(getLoggedInUser)
     });
   }
   // Using Back-end & Database (Normal Flow)
@@ -123,7 +124,7 @@ async function getCurrentLoginInformations(res: NextApiResponse, body) {
     const getInformations = await redisIO.get(key);
     return res.send({
       isCached: true,
-      result: JSON.parse(getInformations),
+      result: typeNormalization(getInformations),
     });
   }
   // Using Back-end & Database (Normal Flow)
@@ -141,7 +142,7 @@ async function getCurrentLoginInformations(res: NextApiResponse, body) {
       .then((response) => {
         const informationsResult = response.data.result;
 
-        if (isRedis && isRedisForSpecificAPI.authenticate) {
+        if (isRedis && isRedisForSpecificAPI.informations) {
           redisIO.setex(
             key,
             expireInSeconds,
@@ -168,7 +169,7 @@ async function getCurrentLoginInformations(res: NextApiResponse, body) {
       );
   }
 }
-async function getUserPermissions(res: NextApiResponse, body) {
+async function getUserPermissions(res: NextApiResponse, body: any) {
   const { accessToken, expireInSeconds } = body;
 
   const url = `${publicRuntimeConfig.apiUrl}/AbpUserConfiguration/GetAll`;
@@ -194,7 +195,7 @@ async function getUserPermissions(res: NextApiResponse, body) {
       })
     );
 }
-async function getUserProfilePicture(res: NextApiResponse, body) {
+async function getUserProfilePicture(res: NextApiResponse, body: any) {
   const { accessToken, expireInSeconds, userId } = body;
 
   const key = `USERID{${userId}}-profiles`;
@@ -205,7 +206,7 @@ async function getUserProfilePicture(res: NextApiResponse, body) {
     const getProfiles = await redisIO.get(key);
     return res.send({
       isCached: true,
-      result: JSON.parse(getProfiles),
+      result: typeNormalization(getProfiles),
     });
   }
   // Using Back-end & Database (Normal Flow)

@@ -28,8 +28,6 @@ import SidenavItem from "/layout/Sidenav/SidenavItem";
 import SidenavRoot from "/layout/Sidenav/SidenavRoot";
 import sidenavLogoLabel from "/layout/Sidenav/styles/sidenav";
 
-import routes from "../../routes";
-
 function Sidenav({ color, brand, brandName, routes, ...rest }) {
   const [{ accessToken, encryptedAccessToken }] = useCookies();
 
