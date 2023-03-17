@@ -273,7 +273,7 @@ function setMain() {
         },
       ],
     },
-    { type: "divider", key: "divider-1" },
+    // { type: "divider", key: "divider-1" },
 
     // { type: "divider", key: "divider-1" },
     { type: "title", title: "Faktur Pajak (FP)", key: "title-fp" },
