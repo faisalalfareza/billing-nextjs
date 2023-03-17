@@ -45,9 +45,9 @@ const pageRoutes = [
       {
         name: "company officer",
         icon: <Icon>person_add</Icon>,
-        route: "/app/company-officer",
+        route: "/company-officer",
       },
-    ]
+    ],
   },
   {
     name: "authenticaton",
@@ -56,19 +56,19 @@ const pageRoutes = [
         name: "sign in",
         dropdown: true,
         icon: <Icon>login</Icon>,
-        route: "/authentication/sign-in"
+        route: "/authentication/sign-in",
       },
       {
         name: "sign up",
         dropdown: true,
         icon: <Icon>assignment</Icon>,
-        route: "/authentication/sign-up"
+        route: "/authentication/sign-up",
       },
       {
         name: "reset password",
         dropdown: true,
         icon: <Icon>restart_alt</Icon>,
-        route: "/authentication/reset-password"
+        route: "/authentication/reset-password",
       },
     ],
   },

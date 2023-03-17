@@ -57,7 +57,7 @@ async function authenticate(res: NextApiResponse, body: any) {
     const getLoggedInUser = await redisIO.get(key);
     return res.send({
       isCached: [true, undefined],
-      result: typeNormalization(getLoggedInUser)
+      result: typeNormalization(getLoggedInUser),
     });
   }
   // Using Back-end & Database (Normal Flow)

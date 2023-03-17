@@ -35,8 +35,6 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
-import Popup from "../../../../../pagesComponents/app/Popup";
-
 function UploadDataWater({ isOpen, onModalChanged, site }) {
   const [modalOpen, setModalOpen] = useState(true);
   const [{ accessToken, encryptedAccessToken }] = useCookies();

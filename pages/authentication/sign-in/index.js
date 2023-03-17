@@ -6,6 +6,7 @@ import * as Yup from "yup";
 
 import Switch from "@mui/material/Switch";
 
+import Link from "next/link";
 import Router from "next/router";
 
 import bgImage from "/assets/images/illustrations/bg-1.jpg";
@@ -104,8 +105,6 @@ function SignIn(props) {
     });
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-
-    // console.log("GET AUTHENTICATION RESULT", response);
 
     if (response.error) {
       setLoadingSubmit(false);
@@ -219,12 +218,11 @@ function SignIn(props) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    // console.log("GET INFORMATIONS RESULT", response);
-
     if (response.error) setLoadingSubmit(false);
     else {
       const informations = response.result;
       const { application } = informations;
+
       localStorage.setItem("informations", JSON.stringify(informations));
       localStorage.setItem("application", JSON.stringify(application));
 
@@ -242,11 +240,10 @@ function SignIn(props) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    // console.log("GET PERMISSIONS RESULT", response);
-
     if (response.error) setLoadingSubmit(false);
     else {
       const { allPermissions, grantedPermissions } = response.result;
+
       localStorage.setItem("allPermissions", JSON.stringify(allPermissions));
       localStorage.setItem(
         "grantedPermissions",
@@ -274,11 +271,10 @@ function SignIn(props) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    // console.log("GET PROFILES RESULT", response);
-
     if (response.error) setLoadingSubmit(false);
     else {
       const { profilePicture } = response.result;
+
       localStorage.setItem("profilePicture", profilePicture);
     }
   }
@@ -402,6 +398,7 @@ export default SignIn;
 
 export async function getStaticProps() {
   // await redisIO.flushdb();
+
   return {
     props: {},
   };

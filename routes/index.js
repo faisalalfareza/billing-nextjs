@@ -59,7 +59,7 @@ function setMain() {
       name: "Company Officer",
       nameOnHeader: "Company Officer",
       key: "company-officer",
-      route: "/app/company-officer",
+      route: "/company-officer",
       permission: "Pages.Tenants.CompanyOfficer",
       icon: <Icon fontSize="medium">person_add</Icon>,
       noCollapse: true,
@@ -289,21 +289,21 @@ function setMain() {
           name: "Generate",
           nameOnHeader: "Generate Faktur Pajak",
           key: "generate",
-          route: "/app/nsfp/generate",
+          route: "/nsfp/generate",
           permission: "Pages.Tenants.GenerateNoSeriFP.Create",
         },
         {
           name: "Upload Batch",
           nameOnHeader: "Upload Batch Faktur Pajak",
           key: "upload-batch",
-          route: "/app/nsfp/upload-batch",
+          route: "/nsfp/upload-batch",
           permission: "Pages.Tenants.GenerateNoSeriFP.Create",
         },
         {
           name: "List",
           nameOnHeader: "List Faktur Pajak",
           key: "list",
-          route: "/app/nsfp/list",
+          route: "/nsfp/list",
           permission: "Pages.Tenants.GenerateNoSeriFP.List",
         },
       ],
@@ -370,7 +370,7 @@ function setMain() {
           permission: "Pages.Tenants.SSP.ListMonth",
         },
       ],
-    }
+    },
   ];
 }
 function setFilteredMain(permissions = getPermission(), main = setMain()) {
@@ -397,7 +397,7 @@ function setFilteredMain(permissions = getPermission(), main = setMain()) {
         }
       } else filteredMain.push(p);
     });
-  
+
   return filteredMain;
 }
 function setReformatedMain(filteredMain = setFilteredMain()) {
@@ -433,15 +433,18 @@ function setReformatedMain(filteredMain = setFilteredMain()) {
   return reformatedMain;
 }
 
-export default function setRoutes(permissions = getPermission(), main = setMain()) {
+export default function setRoutes(
+  permissions = getPermission(),
+  main = setMain()
+) {
   const filteredMain = setFilteredMain(permissions, main);
   const reformatedMain = setReformatedMain(filteredMain);
-  
+
   // console.log("Permissions: ", permissions);
   // console.log("Routes (Before): ", main);
   // console.log("Routes (After): ", filteredMain);
   // console.log("Routes (After - Reformated): ", reformatedMain);
-  
+
   return {
     main,
     filteredMain,

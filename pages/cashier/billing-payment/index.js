@@ -26,13 +26,14 @@ import { formatValue } from "react-currency-input-field";
 import CurrencyInput from "react-currency-input-field";
 import { useCookies } from "react-cookie";
 import { typeNormalization } from "/helpers/utils";
+import SiteDropdown from "../../../pagesComponents/dropdown/Site";
 
 export default function BillingPayment(props) {
-  const { dataSite } = props;
   const [listBilling, setListBilling] = useState([]);
   const [listInvoice, setListInvoice] = useState([]);
   const [site, setSite] = useState(null);
   const [openModal, setOpenModal] = useState(false);
+  const [isDetail, setIsDetail] = useState(false);
   const [params, setParams] = useState(undefined);
   const [filterText, setFilterText] = useState("");
   const [selectedPSCode, setSelectedPSCode] = useState(undefined);
@@ -124,21 +125,26 @@ export default function BillingPayment(props) {
   } = schemeModels.formField;
   let schemeValidations = Yup.object().shape({
     [paymentMethod.name]: paymentMethod.isRequired
-      ? Yup.string().required(paymentMethod.errorMsg)
+      ? Yup.string()
+          .required(paymentMethod.errorMsg)
+          .typeError(paymentMethod.errorMsg)
       : Yup.string().notRequired(),
     [amountPayment.name]: amountPayment.isRequired
       ? Yup.string()
           .required(amountPayment.errorMsg)
+          .typeError(amountPayment.errorMsg)
           .max(amountPayment.maxLength, amountPayment.invalidMaxLengthMsg)
       : Yup.string().notRequired(),
     [transactionDate.name]: transactionDate.isRequired
-      ? Yup.date().required(transactionDate.errorMsg)
+      ? Yup.date()
+          .required(transactionDate.errorMsg)
+          .typeError(transactionDate.errorMsg)
       : Yup.date().notRequired(),
     [bank.name]: bank.isRequired
-      ? Yup.string().required(bank.errorMsg)
+      ? Yup.string().required(bank.errorMsg).typeError(bank.errorMsg)
       : Yup.string().notRequired(),
     [remarks.name]: remarks.isRequired
-      ? Yup.string().required(remarks.errorMsg)
+      ? Yup.string().required(remarks.errorMsg).typeError(remarks.errorMsg)
       : Yup.string().notRequired(),
   });
 
@@ -445,30 +451,38 @@ export default function BillingPayment(props) {
   };
 
   const getDetail = async (data) => {
-    const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/GetPaymentDetailByPsCode`;
-    axios
-      .get(url, {
+    let response = await fetch("/api/cashier/billing/detail", {
+      method: "POST",
+      body: JSON.stringify({
+        accessToken: accessToken,
         params: {
           PsCode: detail.psCode,
           unitDataId: detail.unitDataId,
         },
-      })
-      .then((response) => {
-        // handle success
-        console.log("upilllll", response.data);
-        const result = response.data.result.listInvoicePayment;
-        setListInvoice(result);
-        console.log("list-invoice-----", listInvoice);
-      })
-      .catch((error) => {
-        console.log(error);
-        if (error.response)
-          Swal.fire({
-            title: "Error",
-            text: error.response?.data.error.message,
-            icon: "error",
-          });
+      }),
+    });
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
+
+    console.log("response----", response);
+    if (response.error) {
+      setLoading(false);
+      Swal.fire({
+        title: "Error",
+        text: response.error.message,
+        icon: "error",
       });
+    } else {
+      const result = response.result.listInvoicePayment;
+      setListInvoice(result);
+      setIsDetail(true);
+      console.log("list-invoice-----", listInvoice);
+    }
+  };
+
+  const handleSite = (siteVal) => {
+    setSite(siteVal);
+    localStorage.setItem("site", JSON.stringify(siteVal));
   };
   //sampai sini
 
@@ -487,26 +501,7 @@ export default function BillingPayment(props) {
       >
         <Grid container spacing={3}>
           <Grid item xs={12} sm={12}>
-            <Autocomplete
-              options={dataSite}
-              key="site-dropdown"
-              value={site}
-              getOptionLabel={(option) =>
-                option.siteName ? option.siteId + " - " + option.siteName : ""
-              }
-              onChange={(e, value) => {
-                chooseSite(value);
-              }}
-              noOptionsText="No results"
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="Site Name"
-                  variant="standard"
-                  color="dark"
-                />
-              )}
-            />
+            <SiteDropdown onSelectSite={handleSite} site={site} />
           </Grid>
         </Grid>
       </MDBox>
@@ -572,380 +567,380 @@ export default function BillingPayment(props) {
           onModalChanged={changeModalAddOrEdit}
         /> */}
       </MDBox>
-      <MDBox mt={5} mb={9}>
-        <Grid container justifyContent="center">
-          <Grid item xs={12} lg={12}>
-            <Card>
-              <MDBox
-                mt={-3}
-                mb={-1}
-                mx={4}
-                textAlign="center"
-                bgColor="primary"
-                borderRadius="lg"
-                shadow="xl"
-                py={2}
-              >
-                <Grid container spacing={3}>
-                  <Grid item xs={4}>
-                    <MDTypography variant="h6" color="light">
-                      CUSTOMER NAME
-                    </MDTypography>
-                    <MDTypography variant="body2" color="light">
-                      Unit
-                    </MDTypography>
-                  </Grid>
-                  <Grid item xs={4}>
-                    <MDTypography variant="h6" color="light">
-                      UNIT CODE
-                    </MDTypography>
-                    <MDTypography variant="body2" color="light">
-                      Unit
-                    </MDTypography>
-                  </Grid>
-                  <Grid item xs={4}>
-                    <MDTypography variant="h6" color="light">
-                      UNIT NO
-                    </MDTypography>
-                    <MDTypography variant="body2" color="light">
-                      Unit
-                    </MDTypography>
-                  </Grid>
-                </Grid>
-                <MDBox mb={1} textAlign="center"></MDBox>
-              </MDBox>
-              <MDBox p={2}>
+      {isDetail && (
+        <MDBox mt={5} mb={9}>
+          <Grid container justifyContent="center">
+            <Grid item xs={12} lg={12}>
+              <Card>
                 <MDBox
-                  p={1}
-                  mt={3}
-                  width="100%"
-                  display="flex"
-                  justifyContent="space-between"
+                  mt={-3}
+                  mb={-1}
+                  mx={4}
+                  textAlign="center"
+                  bgColor="primary"
+                  borderRadius="lg"
+                  shadow="xl"
+                  py={2}
                 >
                   <Grid container spacing={3}>
-                    <Grid item xs={12}>
-                      <MDTypography variant="h5">Payment Detail </MDTypography>
+                    <Grid item xs={4}>
+                      <MDTypography variant="h6" color="light">
+                        CUSTOMER NAME
+                      </MDTypography>
+                      <MDTypography variant="body2" color="light">
+                        {detail.customerName}
+                      </MDTypography>
                     </Grid>
-                    <Grid item xs={12}>
-                      <Formik
-                        initialValues={initialValues}
-                        validationSchema={schemeValidations}
-                        onSubmit={submitForm}
-                      >
-                        {({
-                          values,
-                          errors,
-                          touched,
-                          isSubmitting,
-                          setFieldValue,
-                          resetForm,
-                        }) => {
-                          setformValues(values);
-                          getFormData(values);
+                    <Grid item xs={4}>
+                      <MDTypography variant="h6" color="light">
+                        UNIT CODE
+                      </MDTypography>
+                      <MDTypography variant="body2" color="light">
+                        {detail.unitCode}
+                      </MDTypography>
+                    </Grid>
+                    <Grid item xs={4}>
+                      <MDTypography variant="h6" color="light">
+                        UNIT NO
+                      </MDTypography>
+                      <MDTypography variant="body2" color="light">
+                        {detail.unitNo}
+                      </MDTypography>
+                    </Grid>
+                  </Grid>
+                  <MDBox mb={1} textAlign="center"></MDBox>
+                </MDBox>
+                <MDBox p={2}>
+                  <MDBox
+                    p={1}
+                    mt={3}
+                    width="100%"
+                    display="flex"
+                    justifyContent="space-between"
+                  >
+                    <Grid container spacing={3}>
+                      <Grid item xs={12}>
+                        <MDTypography variant="h5">
+                          Payment Detail{" "}
+                        </MDTypography>
+                      </Grid>
+                      <Grid item xs={12}>
+                        <Formik
+                          initialValues={initialValues}
+                          validationSchema={schemeValidations}
+                          onSubmit={submitForm}
+                        >
+                          {({
+                            values,
+                            errors,
+                            touched,
+                            isSubmitting,
+                            setFieldValue,
+                            resetForm,
+                          }) => {
+                            setformValues(values);
+                            getFormData(values);
 
-                          const isValifForm = () => {
-                            // return checkingSuccessInput(companyV, errors.periodNumber) &&
-                            //   checkingSuccessInput(officerNameV, errors.amountPayment) &&
-                            //   checkingSuccessInput(officerTitleV, errors.paymentMethod)
-                            //   ? true
-                            //   : false;
-                          };
+                            const isValifForm = () => {
+                              // return checkingSuccessInput(companyV, errors.periodNumber) &&
+                              //   checkingSuccessInput(officerNameV, errors.amountPayment) &&
+                              //   checkingSuccessInput(officerTitleV, errors.paymentMethod)
+                              //   ? true
+                              //   : false;
+                            };
 
-                          return (
-                            <Form
-                              id={schemeModels.formId}
-                              autoComplete="off"
-                              fullWidth
-                            >
-                              <MDBox pb={3}>
-                                <Grid container spacing={3}>
-                                  <Grid item xs={6}>
-                                    <FormField
-                                      disabled
-                                      type="text"
-                                      label="Cluster"
-                                      name="cluster"
-                                      value={detail?.clusterName}
-                                      placeholder="Custer"
-                                    />
-                                  </Grid>
-                                  <Grid item xs={6}>
-                                    <FormField
-                                      type={transactionDate.type}
-                                      label={
-                                        transactionDate.label +
-                                        (transactionDate.isRequired
-                                          ? " ⁽*⁾"
-                                          : "")
-                                      }
-                                      name={transactionDate.name}
-                                      value={formValues.transactionDate}
-                                      placeholder={transactionDate.placeholder}
-                                      error={
-                                        errors.transactionDate &&
-                                        touched.transactionDate
-                                      }
-                                      success={checkingSuccessInput(
-                                        formValues.transactionDate,
-                                        errors.transactionDate
-                                      )}
-                                    />
-                                  </Grid>
-                                  <Grid item xs={6}>
-                                    <FormField
-                                      type={paymentMethod.type}
-                                      label={
-                                        paymentMethod.label +
-                                        (paymentMethod.isRequired ? " ⁽*⁾" : "")
-                                      }
-                                      name={paymentMethod.name}
-                                      value={formValues.paymentMethod}
-                                      placeholder={paymentMethod.placeholder}
-                                      error={
-                                        errors.paymentMethod &&
-                                        touched.paymentMethod
-                                      }
-                                      success={checkingSuccessInput(
-                                        formValues.paymentMethod,
-                                        errors.paymentMethod
-                                      )}
-                                    />
-                                  </Grid>
-                                  <Grid item xs={6}>
-                                    <FormField
-                                      type={bank.type}
-                                      label={
-                                        bank.label +
-                                        (bank.isRequired ? " ⁽*⁾" : "")
-                                      }
-                                      name={bank.name}
-                                      value={formValues.bank}
-                                      placeholder={bank.placeholder}
-                                      error={errors.bank && touched.bank}
-                                      success={checkingSuccessInput(
-                                        formValues.bank,
-                                        errors.bank
-                                      )}
-                                    />
-                                  </Grid>
-                                  <Grid item xs={6}>
-                                    <MDInput
-                                      label="Card Number"
-                                      variant="standard"
-                                      fullWidth
-                                    />
-                                  </Grid>
-                                  <Grid item xs={6}>
-                                    <FormField
-                                      type={remarks.type}
-                                      label={
-                                        remarks.label +
-                                        (remarks.isRequired ? " ⁽*⁾" : "")
-                                      }
-                                      name={remarks.name}
-                                      value={formValues.remarks}
-                                      placeholder={remarks.placeholder}
-                                      error={errors.remarks && touched.remarks}
-                                      success={checkingSuccessInput(
-                                        formValues.remarks,
-                                        errors.remarks
-                                      )}
-                                    />
-                                  </Grid>
-                                  <Grid item xs={4}>
-                                    <FormField
-                                      type={amountPayment.type}
-                                      label={
-                                        amountPayment.label +
-                                        (amountPayment.isRequired ? " ⁽*⁾" : "")
-                                      }
-                                      name={amountPayment.name}
-                                      value={formValues.amountPayment}
-                                      placeholder={amountPayment.placeholder}
-                                      error={
-                                        errors.amountPayment &&
-                                        touched.amountPayment
-                                      }
-                                      success={checkingSuccessInput(
-                                        formValues.amountPayment,
-                                        errors.amountPayment
-                                      )}
-                                    />
-                                  </Grid>
-                                  <Grid item xs={4}>
-                                    <MDInput
-                                      variant="outlined"
-                                      label="Charge"
-                                      fullWidth
-                                      disabled
-                                    />
-                                  </Grid>
-                                  <Grid item xs={4}>
-                                    <MDInput
-                                      variant="outlined"
-                                      label="Total"
-                                      fullWidth
-                                      disabled
-                                    />
-                                  </Grid>
-                                  <Grid item xs={12}>
-                                    <MDBox
-                                      color="dark"
-                                      bgColor="white"
-                                      borderRadius="lg"
-                                      shadow="lg"
-                                      opacity={1}
-                                      p={2}
-                                    >
-                                      Allocation
-                                      {/* <DataTable
+                            return (
+                              <Form
+                                id={schemeModels.formId}
+                                autoComplete="off"
+                                fullWidth
+                              >
+                                <MDBox pb={3}>
+                                  <Grid container spacing={3}>
+                                    <Grid item xs={6}>
+                                      <FormField
+                                        disabled
+                                        type="text"
+                                        label="Cluster"
+                                        name="cluster"
+                                        // value={detail?.clusterName}
+                                        placeholder="Custer"
+                                      />
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                      <FormField
+                                        type={transactionDate.type}
+                                        label={
+                                          transactionDate.label +
+                                          (transactionDate.isRequired
+                                            ? " ⁽*⁾"
+                                            : "")
+                                        }
+                                        name={transactionDate.name}
+                                        value={formValues.transactionDate}
+                                        placeholder={
+                                          transactionDate.placeholder
+                                        }
+                                        error={
+                                          errors.transactionDate &&
+                                          touched.transactionDate
+                                        }
+                                        success={checkingSuccessInput(
+                                          formValues.transactionDate,
+                                          errors.transactionDate
+                                        )}
+                                      />
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                      <FormField
+                                        type={paymentMethod.type}
+                                        label={
+                                          paymentMethod.label +
+                                          (paymentMethod.isRequired
+                                            ? " ⁽*⁾"
+                                            : "")
+                                        }
+                                        name={paymentMethod.name}
+                                        value={formValues.paymentMethod}
+                                        placeholder={paymentMethod.placeholder}
+                                        error={
+                                          errors.paymentMethod &&
+                                          touched.paymentMethod
+                                        }
+                                        success={checkingSuccessInput(
+                                          formValues.paymentMethod,
+                                          errors.paymentMethod
+                                        )}
+                                      />
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                      <FormField
+                                        type={bank.type}
+                                        label={
+                                          bank.label +
+                                          (bank.isRequired ? " ⁽*⁾" : "")
+                                        }
+                                        name={bank.name}
+                                        value={formValues.bank}
+                                        placeholder={bank.placeholder}
+                                        error={errors.bank && touched.bank}
+                                        success={checkingSuccessInput(
+                                          formValues.bank,
+                                          errors.bank
+                                        )}
+                                      />
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                      <MDInput
+                                        label="Card Number"
+                                        variant="standard"
+                                        fullWidth
+                                      />
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                      <FormField
+                                        type={remarks.type}
+                                        label={
+                                          remarks.label +
+                                          (remarks.isRequired ? " ⁽*⁾" : "")
+                                        }
+                                        name={remarks.name}
+                                        value={formValues.remarks}
+                                        placeholder={remarks.placeholder}
+                                        error={
+                                          errors.remarks && touched.remarks
+                                        }
+                                        success={checkingSuccessInput(
+                                          formValues.remarks,
+                                          errors.remarks
+                                        )}
+                                      />
+                                    </Grid>
+                                    <Grid item xs={4}>
+                                      <FormField
+                                        type={amountPayment.type}
+                                        label={
+                                          amountPayment.label +
+                                          (amountPayment.isRequired
+                                            ? " ⁽*⁾"
+                                            : "")
+                                        }
+                                        name={amountPayment.name}
+                                        value={formValues.amountPayment}
+                                        placeholder={amountPayment.placeholder}
+                                        error={
+                                          errors.amountPayment &&
+                                          touched.amountPayment
+                                        }
+                                        success={checkingSuccessInput(
+                                          formValues.amountPayment,
+                                          errors.amountPayment
+                                        )}
+                                      />
+                                    </Grid>
+                                    <Grid item xs={4}>
+                                      <MDInput
+                                        variant="outlined"
+                                        label="Charge"
+                                        fullWidth
+                                        disabled
+                                      />
+                                    </Grid>
+                                    <Grid item xs={4}>
+                                      <MDInput
+                                        variant="outlined"
+                                        label="Total"
+                                        fullWidth
+                                        disabled
+                                      />
+                                    </Grid>
+                                    <Grid item xs={12}>
+                                      <MDBox
+                                        color="dark"
+                                        bgColor="white"
+                                        borderRadius="lg"
+                                        shadow="lg"
+                                        opacity={1}
+                                        p={2}
+                                      >
+                                        Allocation
+                                        {/* <DataTable
                                         table={setInvoiceList()}
                                         showTotalEntries={false}
                                         isSorted={false}
                                       /> */}
-                                      <DataTableTotal
-                                        table={setInvoiceList()}
-                                        showTotalEntries={false}
-                                        isSorted={false}
-                                      />
-                                    </MDBox>
-                                  </Grid>
-                                  {params && (
-                                    <Grid item xs={12} sm={12}>
-                                      <FormGroup>
-                                        <FormControlLabel
-                                          control={
-                                            <Checkbox
-                                              disabled={
-                                                !formValues.statusActive
-                                              }
-                                              name={statusActive.name}
-                                              checked={formValues.statusActive}
-                                              onChange={(e) => {
-                                                console.log(e.target.checked);
-                                                setFieldValue(
-                                                  statusActive.name,
-                                                  e.target.checked != null
-                                                    ? e.target.checked
-                                                    : initialValues[
-                                                        statusActive.name
-                                                      ]
-                                                );
-                                              }}
-                                            />
-                                          }
-                                          label="Active"
+                                        <DataTableTotal
+                                          table={setInvoiceList()}
+                                          showTotalEntries={false}
+                                          isSorted={false}
                                         />
-                                      </FormGroup>
+                                      </MDBox>
                                     </Grid>
-                                  )}
+                                    {params && (
+                                      <Grid item xs={12} sm={12}>
+                                        <FormGroup>
+                                          <FormControlLabel
+                                            control={
+                                              <Checkbox
+                                                disabled={
+                                                  !formValues.statusActive
+                                                }
+                                                name={statusActive.name}
+                                                checked={
+                                                  formValues.statusActive
+                                                }
+                                                onChange={(e) => {
+                                                  console.log(e.target.checked);
+                                                  setFieldValue(
+                                                    statusActive.name,
+                                                    e.target.checked != null
+                                                      ? e.target.checked
+                                                      : initialValues[
+                                                          statusActive.name
+                                                        ]
+                                                  );
+                                                }}
+                                              />
+                                            }
+                                            label="Active"
+                                          />
+                                        </FormGroup>
+                                      </Grid>
+                                    )}
+                                  </Grid>
+                                </MDBox>
+                                <Grid item xs={6}>
+                                  <FormGroup>
+                                    <FormControlLabel
+                                      control={
+                                        <Checkbox
+                                          // disabled={!formValues.statusActive}
+                                          name="print-or"
+                                          color="primary"
+                                          // checked={formValues.statusActive}
+                                          // onChange={(e) => {
+                                          //   console.log(e.target.checked);
+                                          //   setFieldValue(
+                                          //     statusActive.name,
+                                          //     e.target.checked != null
+                                          //       ? e.target.checked
+                                          //       : initialValues[statusActive.name]
+                                          //   );
+                                          // }}
+                                        />
+                                      }
+                                      label="Print Official Receipt (OR)"
+                                    />
+                                    <FormControlLabel
+                                      control={
+                                        <Checkbox
+                                          // disabled={!formValues.statusActive}
+                                          name="print-or"
+                                          color="primary"
+                                          // checked={formValues.statusActive}
+                                          // onChange={(e) => {
+                                          //   console.log(e.target.checked);
+                                          //   setFieldValue(
+                                          //     statusActive.name,
+                                          //     e.target.checked != null
+                                          //       ? e.target.checked
+                                          //       : initialValues[statusActive.name]
+                                          //   );
+                                          // }}
+                                        />
+                                      }
+                                      label={"Add Signee : " + user?.user.name}
+                                    />
+                                  </FormGroup>
                                 </Grid>
-                              </MDBox>
-                              <Grid item xs={6}>
-                                <FormGroup>
-                                  <FormControlLabel
-                                    control={
-                                      <Checkbox
-                                        // disabled={!formValues.statusActive}
-                                        name="print-or"
-                                        color="primary"
-                                        // checked={formValues.statusActive}
-                                        // onChange={(e) => {
-                                        //   console.log(e.target.checked);
-                                        //   setFieldValue(
-                                        //     statusActive.name,
-                                        //     e.target.checked != null
-                                        //       ? e.target.checked
-                                        //       : initialValues[statusActive.name]
-                                        //   );
-                                        // }}
-                                      />
-                                    }
-                                    label="Print Official Receipt (OR)"
-                                  />
-                                  <FormControlLabel
-                                    control={
-                                      <Checkbox
-                                        // disabled={!formValues.statusActive}
-                                        name="print-or"
-                                        color="primary"
-                                        // checked={formValues.statusActive}
-                                        // onChange={(e) => {
-                                        //   console.log(e.target.checked);
-                                        //   setFieldValue(
-                                        //     statusActive.name,
-                                        //     e.target.checked != null
-                                        //       ? e.target.checked
-                                        //       : initialValues[statusActive.name]
-                                        //   );
-                                        // }}
-                                      />
-                                    }
-                                    label={"Add Signee : " + user?.user.name}
-                                  />
-                                </FormGroup>
-                              </Grid>
-                              <Grid item xs={12} mt={3}>
-                                <MDBox
-                                  display="flex"
-                                  flexDirection={{ xs: "column", sm: "row" }}
-                                  justifyContent="flex-end"
-                                >
-                                  <MDButton
-                                    type="reset"
-                                    variant="outlined"
-                                    color="secondary"
-                                  >
-                                    Cancel
-                                  </MDButton>
+                                <Grid item xs={12} mt={3}>
                                   <MDBox
-                                    ml={{ xs: 0, sm: 1 }}
-                                    mt={{ xs: 1, sm: 0 }}
+                                    display="flex"
+                                    flexDirection={{ xs: "column", sm: "row" }}
+                                    justifyContent="flex-end"
                                   >
                                     <MDButton
-                                      type="submit"
-                                      variant="gradient"
-                                      color="primary"
-                                      sx={{ height: "100%" }}
-                                      disabled={isLoading}
+                                      type="reset"
+                                      variant="outlined"
+                                      color="secondary"
                                     >
-                                      {isLoading
-                                        ? params == undefined
-                                          ? "Adding Period.."
-                                          : "Updating Period.."
-                                        : params == undefined
-                                        ? "Save"
-                                        : "Update"}
+                                      Cancel
                                     </MDButton>
+                                    <MDBox
+                                      ml={{ xs: 0, sm: 1 }}
+                                      mt={{ xs: 1, sm: 0 }}
+                                    >
+                                      <MDButton
+                                        type="submit"
+                                        variant="gradient"
+                                        color="primary"
+                                        sx={{ height: "100%" }}
+                                        disabled={isLoading}
+                                      >
+                                        {isLoading
+                                          ? params == undefined
+                                            ? "Adding Period.."
+                                            : "Updating Period.."
+                                          : params == undefined
+                                          ? "Save"
+                                          : "Update"}
+                                      </MDButton>
+                                    </MDBox>
                                   </MDBox>
-                                </MDBox>
-                              </Grid>
-                            </Form>
-                          );
-                        }}
-                      </Formik>
+                                </Grid>
+                              </Form>
+                            );
+                          }}
+                        </Formik>
+                      </Grid>
                     </Grid>
-                  </Grid>
+                  </MDBox>
                 </MDBox>
-              </MDBox>
-            </Card>
+              </Card>
+            </Grid>
           </Grid>
-        </Grid>
-      </MDBox>
+        </MDBox>
+      )}
     </DashboardLayout>
   );
-}
-
-export async function getStaticProps(context) {
-  const resSite = await fetch(
-    `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetDropdownSite`
-  );
-  let listSite = await resSite.json();
-  const dataSite = listSite.result;
-  return {
-    props: {
-      dataSite,
-    },
-    revalidate: 60,
-  };
 }

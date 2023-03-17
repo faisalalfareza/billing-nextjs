@@ -30,7 +30,6 @@ import Modal from "@mui/material/Modal";
 import Fade from "@mui/material/Fade";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
-import ModalWaterReading from "/pagesComponents/app/water-reading/ModalWaterReading";
 
 // Data
 import dataTableData from "/pagesComponents/applications/data-tables/data/dataTableData";
@@ -38,12 +37,12 @@ import { useEffect, useState } from "react";
 import UploadDataWater from "./components/UploadDataWater";
 import WaterRowActions from "./components/WaterRowActions";
 import EditDataWater from "./components/EditDataWater";
+import SiteDropdown from "../../../pagesComponents/dropdown/Site";
 // import templateWaterReading from "../assets/template/template-water-reading.xlsx";
 
 export default function WaterReading(props) {
   const [controller] = useMaterialUIController();
   const { darkMode } = controller;
-  const { dataSite } = props;
   const [openUpload, setOpenUpload] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [dataCluster, setDataCluster] = useState([]);
@@ -339,6 +338,11 @@ export default function WaterReading(props) {
     fetchData();
   };
 
+  const handleSite = (siteVal) => {
+    setSite(siteVal);
+    localStorage.setItem("site", JSON.stringify(siteVal));
+  };
+
   return (
     <DashboardLayout>
       <DashboardNavbar />
@@ -356,26 +360,7 @@ export default function WaterReading(props) {
         </MDTypography> */}
         <Grid container spacing={3}>
           <Grid item xs={12} sm={12}>
-            <Autocomplete
-              options={dataSite}
-              key="site-dropdown"
-              value={site}
-              getOptionLabel={(option) =>
-                option.siteName ? option.siteId + " - " + option.siteName : ""
-              }
-              onChange={(e, value) => {
-                chooseSite(value);
-              }}
-              noOptionsText="No results"
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="Site Name"
-                  variant="standard"
-                  color="dark"
-                />
-              )}
-            />
+            <SiteDropdown onSelectSite={handleSite} site={site} />
           </Grid>
           {/* <Grid item xs={12} sm={3}>
             <MDButton variant="gradient" color="primary">
@@ -619,19 +604,4 @@ export default function WaterReading(props) {
       </MDBox>
     </DashboardLayout>
   );
-}
-
-export async function getStaticProps(context) {
-  const resSite = await fetch(
-    `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetDropdownSite`
-  );
-
-  let listSite = await resSite.json();
-  const dataSite = listSite.result;
-  return {
-    props: {
-      dataSite,
-    },
-    revalidate: 60,
-  };
 }

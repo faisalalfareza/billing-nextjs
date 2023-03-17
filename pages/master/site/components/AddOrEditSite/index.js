@@ -36,7 +36,7 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
 import { typeNormalization } from "/helpers/utils";
 
-function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
+function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
   const [{ accessToken, encryptedAccessToken }] = useCookies();
   const [isLoadingSubmit, setLoadingSubmit] = useState(false);
   const [no, setNo] = useState(null);
@@ -551,17 +551,17 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
   return false;
 }
 
-// Setting default value for the props of AddOrEditPeriod
-AddOrEditPeriod.defaultProps = {
+// Setting default value for the props of AddOrEditSite
+AddOrEditSite.defaultProps = {
   isOpen: false,
   params: undefined,
 };
 
-// Typechecking props for the AddOrEditPeriod
-AddOrEditPeriod.propTypes = {
+// Typechecking props for the AddOrEditSite
+AddOrEditSite.propTypes = {
   isOpen: PropTypes.bool,
   params: PropTypes.object,
   onModalChanged: PropTypes.func,
 };
 
-export default AddOrEditPeriod;
+export default AddOrEditSite;

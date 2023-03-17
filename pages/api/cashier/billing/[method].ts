@@ -17,16 +17,16 @@ export default async function handler(
           getList(res, body);
           break;
 
-        case "dropdownproject":
-          getDropdownProject(res, body);
+        case "detail":
+          getDetail(res, body);
           break;
 
-        case "dropdownsite":
-          getDropdownSite(res, body);
+        case "dropdownpayment":
+          getDropdownPayment(res, body);
           break;
 
-        case "no":
-          getPeriodNo(res, body);
+        case "dropdownbank":
+          getDropdownBank(res, body);
           break;
         case "create":
           create(res, body);
@@ -74,15 +74,16 @@ async function getList(res: any, body: any) {
     );
 }
 
-async function getDropdownProject(res: any, body: any) {
+async function getDetail(res: any, body: any) {
   const { accessToken, params } = body;
 
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/GetDropdownProject`;
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/GetPaymentDetailByPsCode`;
   const config = {
     headers: {
       Authorization: "Bearer " + accessToken,
       "Access-Control-Allow-Origin": "*",
     },
+    params: params,
   };
   console.log("config----", config);
 
@@ -91,7 +92,7 @@ async function getDropdownProject(res: any, body: any) {
     .then((response) =>
       res.send({
         isCached: false,
-        result: response.data.result.items,
+        result: response.data.result,
       })
     )
     .catch((error) =>
@@ -101,10 +102,38 @@ async function getDropdownProject(res: any, body: any) {
       })
     );
 }
-async function getDropdownSite(res: any, body: any) {
+async function getDropdownPayment(res: any, body: any) {
   const { accessToken, params } = body;
 
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/GetDropdownSite`;
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/GetDropdownPaymentMethod`;
+  const config = {
+    headers: {
+      Authorization: "Bearer " + accessToken,
+      "Access-Control-Allow-Origin": "*",
+    },
+  };
+  console.log("upil----", config);
+
+  axios
+    .get(url, config)
+    .then((response) =>
+      res.send({
+        isCached: false,
+        result: response.data.result,
+      })
+    )
+    .catch((error) =>
+      res.send({
+        isCached: false,
+        error: error,
+      })
+    );
+}
+
+async function getDropdownBank(res: any, body: any) {
+  const { accessToken, params } = body;
+
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/GetDropdownBank`;
   const config = {
     headers: {
       Authorization: "Bearer " + accessToken,

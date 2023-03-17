@@ -23,11 +23,10 @@ import MDBadgeDot from "/components/MDBadgeDot";
 import Swal from "sweetalert2";
 import { useCookies } from "react-cookie";
 import { typeNormalization } from "/helpers/utils";
+import SiteDropdown from "../../../pagesComponents/dropdown/Site";
 
 export default function MasterPeriod(props) {
-  // const { dataSite } = props;
   const [listSite, setListSite] = useState([]);
-  const [dataSite, setDataSite] = useState([]);
   const [site, setSite] = useState(null);
   const [openModal, setOpenModal] = useState(false);
   const [modalParams, setModalParams] = useState(undefined);
@@ -35,7 +34,6 @@ export default function MasterPeriod(props) {
   const [{ accessToken, encryptedAccessToken }] = useCookies();
 
   useEffect(() => {
-    getSite();
     let currentSite = JSON.parse(localStorage.getItem("site"));
     console.log("currentSite-----------", currentSite);
     if (currentSite == null) {
@@ -111,11 +109,6 @@ export default function MasterPeriod(props) {
     setOpenModal(!openModal);
   };
   const handleClose = () => setOpenModal(false);
-  const chooseSite = (val) => {
-    setSite(val);
-    localStorage.setItem("site", JSON.stringify(val));
-    // fetchData();
-  };
 
   const fetchData = async (data) => {
     let response = await fetch("/api/master/period/list", {
@@ -168,18 +161,9 @@ export default function MasterPeriod(props) {
     }
   };
 
-  const getSite = async () => {
-    let response = await fetch("/api/master/period/dropdownsite", {
-      method: "POST",
-      body: JSON.stringify({
-        accessToken: accessToken,
-      }),
-    });
-    if (!response.ok) throw new Error(`Error: ${response.status}`);
-    response = typeNormalization(await response.json());
-
-    console.log("up---", response.result);
-    setDataSite(response.result);
+  const handleSite = (siteVal) => {
+    setSite(siteVal);
+    localStorage.setItem("site", JSON.stringify(siteVal));
   };
   //sampai sini
 
@@ -198,26 +182,7 @@ export default function MasterPeriod(props) {
       >
         <Grid container spacing={3}>
           <Grid item xs={12} sm={12}>
-            <Autocomplete
-              options={dataSite}
-              key="site-dropdown"
-              value={site}
-              getOptionLabel={(option) =>
-                option.siteName ? option.siteId + " - " + option.siteName : ""
-              }
-              onChange={(e, value) => {
-                chooseSite(value);
-              }}
-              noOptionsText="No results"
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="Site Name"
-                  variant="standard"
-                  color="dark"
-                />
-              )}
-            />
+            <SiteDropdown onSelectSite={handleSite} site={site} />
           </Grid>
         </Grid>
       </MDBox>
@@ -263,17 +228,3 @@ export default function MasterPeriod(props) {
     </DashboardLayout>
   );
 }
-
-// export async function getStaticProps(context) {
-//   const resSite = await fetch(
-//     `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetDropdownSite`
-//   );
-//   let listSite = await resSite.json();
-//   const dataSite = listSite.result;
-//   return {
-//     props: {
-//       dataSite,
-//     },
-//     revalidate: 60,
-//   };
-// }
