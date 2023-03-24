@@ -11,7 +11,7 @@ import getConfig from "next/config";
 const { publicRuntimeConfig } = getConfig();
 import { useEffect, useState } from "react";
 import Card from "@mui/material/Card";
-import { Formik, Form } from "formik";
+import { Formik, Form, Field } from "formik";
 import FormField from "/pagesComponents/FormField";
 import * as Yup from "yup";
 import axios from "axios";
@@ -22,26 +22,60 @@ import Swal from "sweetalert2";
 import * as dayjs from "dayjs";
 import { FormGroup, FormControlLabel, Checkbox } from "@mui/material";
 import DataTableTotal from "../../../layout/Tables/DataTableTotal";
-import { formatValue } from "react-currency-input-field";
-import CurrencyInput from "react-currency-input-field";
 import { useCookies } from "react-cookie";
 import { typeNormalization } from "/helpers/utils";
 import SiteDropdown from "../../../pagesComponents/dropdown/Site";
+import { NumericFormat } from "react-number-format";
 
 export default function BillingPayment(props) {
+  let dummy = {
+    unitDataId: 1,
+    siteId: 45,
+    projectId: 29,
+    clusterId: 632,
+    projectName: "Tanjung Bunga",
+    clusterName: "Bouvardia",
+    unitName: "Bouvardia Park",
+    unitCode: "BOAV",
+    unitNo: "0001",
+    customerName: "reynard renaldo",
+    psCode: "40217770",
+  };
+  let dummyinvoice = [
+    {
+      invoiceId: 1,
+      invoiceNo: "string",
+      invoiceName: "string",
+      balance: 123456,
+      endBalance: 78910,
+      paymentAmount: 1237878,
+    },
+    {
+      invoiceId: 2,
+      invoiceNo: "string",
+      invoiceName: "string",
+      balance: 767656587,
+      endBalance: 234242,
+      paymentAmount: 45609,
+    },
+  ];
   const [listBilling, setListBilling] = useState([]);
-  const [listInvoice, setListInvoice] = useState([]);
+  const [listInvoice, setListInvoice] = useState(dummyinvoice);
   const [site, setSite] = useState(null);
   const [openModal, setOpenModal] = useState(false);
-  const [isDetail, setIsDetail] = useState(false);
+  const [isDetail, setIsDetail] = useState(true);
   const [params, setParams] = useState(undefined);
   const [filterText, setFilterText] = useState("");
   const [selectedPSCode, setSelectedPSCode] = useState(undefined);
-  const [detail, setDetail] = useState(undefined);
+  const [detail, setDetail] = useState(dummy);
   const [user, setUser] = useState(undefined);
   const [{ accessToken, encryptedAccessToken }] = useCookies();
+  const [dataPaymentMethod, setDataPaymentMethod] = useState([]);
+  const [dataBank, setDataBank] = useState([]);
 
   useEffect(() => {
+    getPaymentMethod();
+    getBank();
     let currentSite = JSON.parse(localStorage.getItem("site"));
     console.log("currentSite-----------", currentSite);
     if (currentSite == null) {
@@ -59,6 +93,17 @@ export default function BillingPayment(props) {
   useEffect(() => {
     // fetchData();
   }, [site]);
+
+  function NumberField({ field }) {
+    return (
+      <NumericFormat
+        {...field}
+        customInput="TextField"
+        decimalScale={0}
+        allowNegative={false}
+      />
+    );
+  }
 
   //dari sini
   const [isLoading, setLoading] = useState(false);
@@ -125,15 +170,14 @@ export default function BillingPayment(props) {
   } = schemeModels.formField;
   let schemeValidations = Yup.object().shape({
     [paymentMethod.name]: paymentMethod.isRequired
-      ? Yup.string()
+      ? Yup.object()
           .required(paymentMethod.errorMsg)
           .typeError(paymentMethod.errorMsg)
-      : Yup.string().notRequired(),
+      : Yup.object().notRequired(),
     [amountPayment.name]: amountPayment.isRequired
       ? Yup.string()
           .required(amountPayment.errorMsg)
           .typeError(amountPayment.errorMsg)
-          .max(amountPayment.maxLength, amountPayment.invalidMaxLengthMsg)
       : Yup.string().notRequired(),
     [transactionDate.name]: transactionDate.isRequired
       ? Yup.date()
@@ -141,8 +185,8 @@ export default function BillingPayment(props) {
           .typeError(transactionDate.errorMsg)
       : Yup.date().notRequired(),
     [bank.name]: bank.isRequired
-      ? Yup.string().required(bank.errorMsg).typeError(bank.errorMsg)
-      : Yup.string().notRequired(),
+      ? Yup.object().required(bank.errorMsg).typeError(bank.errorMsg)
+      : Yup.object().notRequired(),
     [remarks.name]: remarks.isRequired
       ? Yup.string().required(remarks.errorMsg).typeError(remarks.errorMsg)
       : Yup.string().notRequired(),
@@ -320,7 +364,15 @@ export default function BillingPayment(props) {
           accessor: "balance",
           align: "right",
           Cell: ({ value }) => {
-            return curr(value);
+            return (
+              <NumericFormat
+                displayType="text"
+                value={value}
+                decimalSeparator=","
+                prefix="Rp "
+                thousandSeparator="."
+              />
+            );
           },
         },
 
@@ -329,7 +381,15 @@ export default function BillingPayment(props) {
           accessor: "endBalance",
           align: "right",
           Cell: ({ value }) => {
-            return curr(value);
+            return (
+              <NumericFormat
+                displayType="text"
+                value={value}
+                decimalSeparator=","
+                prefix="Rp "
+                thousandSeparator="."
+              />
+            );
           },
         },
         {
@@ -340,17 +400,22 @@ export default function BillingPayment(props) {
             let valString = value.toString();
             console.log("duitpayAmount----", valString, typeof valString);
             return (
-              <CurrencyInput
+              <NumericFormat
                 customInput={TextField}
                 id="input-example"
                 name="input-name"
                 placeholder="Please enter a number"
-                defaultValue={valString}
-                decimalsLimit={2}
                 prefix="Rp. "
-                groupSeparator="."
+                variant="outlined"
+                isNumericString={true}
+                thousandSeparator="."
                 decimalSeparator=","
-                onValueChange={(value, name) => console.log(value, name)}
+                allowNegative={false}
+                value={value}
+                decimalScale={2}
+                onValueChange={(value, name) =>
+                  console.log("upilll", value, name)
+                }
               />
             );
           },
@@ -450,6 +515,50 @@ export default function BillingPayment(props) {
     //   });
   };
 
+  const getPaymentMethod = async () => {
+    let response = await fetch("/api/cashier/billing/dropdownpayment", {
+      method: "POST",
+      body: JSON.stringify({
+        accessToken: accessToken,
+      }),
+    });
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
+    console.log("response----", response);
+    if (response.error) {
+      setLoading(false);
+      Swal.fire({
+        title: "Error",
+        text: response.error.message,
+        icon: "error",
+      });
+    } else {
+      setDataPaymentMethod(response.result);
+    }
+  };
+
+  const getBank = async () => {
+    let response = await fetch("/api/cashier/billing/dropdownbank", {
+      method: "POST",
+      body: JSON.stringify({
+        accessToken: accessToken,
+      }),
+    });
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
+    console.log("response----", response);
+    if (response.error) {
+      setLoading(false);
+      Swal.fire({
+        title: "Error",
+        text: response.error.message,
+        icon: "error",
+      });
+    } else {
+      setDataBank(response.result);
+    }
+  };
+
   const getDetail = async (data) => {
     let response = await fetch("/api/cashier/billing/detail", {
       method: "POST",
@@ -466,10 +575,11 @@ export default function BillingPayment(props) {
 
     console.log("response----", response);
     if (response.error) {
+      const error = response.error;
       setLoading(false);
       Swal.fire({
         title: "Error",
-        text: response.error.message,
+        text: error.error.message,
         icon: "error",
       });
     } else {
@@ -692,41 +802,83 @@ export default function BillingPayment(props) {
                                       />
                                     </Grid>
                                     <Grid item xs={6}>
-                                      <FormField
-                                        type={paymentMethod.type}
-                                        label={
-                                          paymentMethod.label +
-                                          (paymentMethod.isRequired
-                                            ? " ⁽*⁾"
-                                            : "")
-                                        }
+                                      <Field
                                         name={paymentMethod.name}
-                                        value={formValues.paymentMethod}
-                                        placeholder={paymentMethod.placeholder}
-                                        error={
-                                          errors.paymentMethod &&
-                                          touched.paymentMethod
+                                        component={Autocomplete}
+                                        options={dataPaymentMethod}
+                                        getOptionLabel={(option) =>
+                                          option.paymentName
                                         }
-                                        success={checkingSuccessInput(
-                                          formValues.paymentMethod,
-                                          errors.paymentMethod
+                                        onChange={(e, value) => {
+                                          setFieldValue(
+                                            paymentMethod.name,
+                                            value !== null
+                                              ? value
+                                              : initialValues[
+                                                  paymentMethod.name
+                                                ]
+                                          );
+                                        }}
+                                        renderInput={(params) => (
+                                          <FormField
+                                            {...params}
+                                            type={paymentMethod.type}
+                                            label={
+                                              paymentMethod.label +
+                                              (paymentMethod.isRequired
+                                                ? " *"
+                                                : "")
+                                            }
+                                            name={paymentMethod.name}
+                                            placeholder={
+                                              paymentMethod.placeholder
+                                            }
+                                            InputLabelProps={{ shrink: true }}
+                                            error={
+                                              errors.paymentMethod &&
+                                              touched.paymentMethod
+                                            }
+                                            success={checkingSuccessInput(
+                                              paymentMethod,
+                                              errors.paymentMethod
+                                            )}
+                                          />
                                         )}
                                       />
                                     </Grid>
                                     <Grid item xs={6}>
-                                      <FormField
-                                        type={bank.type}
-                                        label={
-                                          bank.label +
-                                          (bank.isRequired ? " ⁽*⁾" : "")
-                                        }
+                                      <Field
                                         name={bank.name}
-                                        value={formValues.bank}
-                                        placeholder={bank.placeholder}
-                                        error={errors.bank && touched.bank}
-                                        success={checkingSuccessInput(
-                                          formValues.bank,
-                                          errors.bank
+                                        component={Autocomplete}
+                                        options={dataBank}
+                                        getOptionLabel={(option) =>
+                                          option.bankName
+                                        }
+                                        onChange={(e, value) => {
+                                          setFieldValue(
+                                            bank.name,
+                                            value !== null
+                                              ? value
+                                              : initialValues[bank.name]
+                                          );
+                                        }}
+                                        renderInput={(params) => (
+                                          <FormField
+                                            {...params}
+                                            type={bank.type}
+                                            label={
+                                              bank.label +
+                                              (bank.isRequired ? " *" : "")
+                                            }
+                                            name={bank.name}
+                                            placeholder={bank.placeholder}
+                                            InputLabelProps={{ shrink: true }}
+                                            error={errors.bank && touched.bank}
+                                            success={checkingSuccessInput(
+                                              bank,
+                                              errors.bank
+                                            )}
+                                          />
                                         )}
                                       />
                                     </Grid>
@@ -758,6 +910,7 @@ export default function BillingPayment(props) {
                                     </Grid>
                                     <Grid item xs={4}>
                                       <FormField
+                                        component={NumericFormat}
                                         type={amountPayment.type}
                                         label={
                                           amountPayment.label +

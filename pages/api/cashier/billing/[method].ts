@@ -62,13 +62,11 @@ async function getList(res: any, body: any) {
     .get(url, config)
     .then((response) =>
       res.send({
-        isCached: false,
         result: response.data.result.items,
       })
     )
     .catch((error) =>
       res.send({
-        isCached: false,
         error: error,
       })
     );
@@ -91,16 +89,16 @@ async function getDetail(res: any, body: any) {
     .get(url, config)
     .then((response) =>
       res.send({
-        isCached: false,
         result: response.data.result,
       })
     )
-    .catch((error) =>
+    .catch((error) => {
+      console.log("er------", error);
+      console.log("er2------", error.response.data.error.message);
       res.send({
-        isCached: false,
-        error: error,
-      })
-    );
+        error: error.response.data,
+      });
+    });
 }
 async function getDropdownPayment(res: any, body: any) {
   const { accessToken, params } = body;
@@ -118,13 +116,11 @@ async function getDropdownPayment(res: any, body: any) {
     .get(url, config)
     .then((response) =>
       res.send({
-        isCached: false,
         result: response.data.result,
       })
     )
     .catch((error) =>
       res.send({
-        isCached: false,
         error: error,
       })
     );
@@ -146,13 +142,11 @@ async function getDropdownBank(res: any, body: any) {
     .get(url, config)
     .then((response) =>
       res.send({
-        isCached: false,
         result: response.data.result,
       })
     )
     .catch((error) =>
       res.send({
-        isCached: false,
         error: error,
       })
     );
@@ -175,13 +169,11 @@ async function getPeriodNo(res: any, body: any) {
     .get(url, config)
     .then((response) =>
       res.send({
-        isCached: false,
         result: response.data.result,
       })
     )
     .catch((error) =>
       res.send({
-        isCached: false,
         error: error,
       })
     );
@@ -206,14 +198,12 @@ async function create(res: any, body: any) {
     .then((response) => {
       console.log("response-----", response);
       res.send({
-        isCached: false,
         result: response.data.result,
       });
     })
     .catch((error) => {
       console.log("err-----", error.response);
       res.send({
-        isCached: false,
         error: error,
       });
     });
@@ -236,13 +226,11 @@ async function update(res: any, body: any) {
     .put(url, params, config)
     .then((response) =>
       res.send({
-        isCached: false,
         result: response.data.result,
       })
     )
     .catch((error) =>
       res.send({
-        isCached: false,
         error: error,
       })
     );
