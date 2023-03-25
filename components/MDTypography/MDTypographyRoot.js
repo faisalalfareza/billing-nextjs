@@ -22,6 +22,7 @@ export default styled(Typography)(({ theme, ownerState }) => {
   const {
     color,
     textTransform,
+    whiteSpace,
     verticalAlign,
     fontWeight,
     opacity,
@@ -73,6 +74,7 @@ export default styled(Typography)(({ theme, ownerState }) => {
   return {
     opacity,
     textTransform,
+    whiteSpace,
     verticalAlign,
     textDecoration: "none",
     color: colorValue,

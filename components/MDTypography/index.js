@@ -30,13 +30,14 @@ const MDTypography = forwardRef(
       color,
       fontWeight,
       textTransform,
+      whiteSpace,
       verticalAlign,
       textGradient,
       opacity,
       children,
       ...rest
     },
-    ref,
+    ref
   ) => {
     const [controller] = useMaterialUIController();
     const { darkMode } = controller;
@@ -48,6 +49,7 @@ const MDTypography = forwardRef(
         ownerState={{
           color,
           textTransform,
+          whiteSpace,
           verticalAlign,
           fontWeight,
           opacity,
@@ -58,7 +60,7 @@ const MDTypography = forwardRef(
         {children}
       </MDTypographyRoot>
     );
-  },
+  }
 );
 
 // Setting default values for the props of MDTypography
@@ -66,6 +68,7 @@ MDTypography.defaultProps = {
   color: "dark",
   fontWeight: false,
   textTransform: "none",
+  whiteSpace: "normal",
   verticalAlign: "unset",
   textGradient: false,
   opacity: 1,
@@ -93,6 +96,7 @@ MDTypography.propTypes = {
     "uppercase",
     "lowercase",
   ]),
+  whiteSpace: PropTypes.oneOf(["normal", "pre-wrap"]),
   verticalAlign: PropTypes.oneOf([
     "unset",
     "baseline",

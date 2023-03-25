@@ -28,6 +28,8 @@ import MDTypography from "/components/MDTypography";
 
 function Breadcrumbs({ icon, title, route, light }) {
   const routes = route.slice(0, -1);
+  // const smallTitle = title.match(/-/g).length > 0 ? title.replace("-", " ") : title;
+  // const focusTitle = itle.match(/-/g).length > 0 ? title.replace("-", " ")+"───" : title;
 
   return (
     <MDBox mr={{ xs: 0, xl: 8 }}>
@@ -53,25 +55,25 @@ function Breadcrumbs({ icon, title, route, light }) {
           </a>
         </Link>
         {routes.map((el, i) => (
-          <Link href={`/${el.name}`} key={i}>
-            <a>
-              <MDTypography
-                component="span"
-                variant="button"
-                fontWeight="regular"
-                textTransform="capitalize"
-                color={light ? "white" : "dark"}
-                opacity={light ? 0.8 : 0.5}
-                sx={{ lineHeight: 0 }}
-              >
-                {el.nameOnHeader != undefined
-                  ? el.nameOnHeader
-                  : el.name != undefined
-                  ? el.name
-                  : el}
-              </MDTypography>
-            </a>
-          </Link>
+          // <Link href={`/${el.name}`} key={i}>
+          //   <a>
+          <MDTypography
+            component="span"
+            variant="button"
+            fontWeight="regular"
+            textTransform="capitalize"
+            color={light ? "white" : "dark"}
+            opacity={light ? 0.8 : 0.5}
+            sx={{ lineHeight: 0 }}
+          >
+            {el.nameOnHeader != undefined
+              ? el.nameOnHeader
+              : el.name != undefined
+              ? el.name
+              : el}
+          </MDTypography>
+          //   </a>
+          // </Link>
         ))}
         <MDTypography
           variant="button"
@@ -80,7 +82,8 @@ function Breadcrumbs({ icon, title, route, light }) {
           color={light ? "white" : "dark"}
           sx={{ lineHeight: 0 }}
         >
-          {title.replace("-", " ")}
+          {/* {smallTitle} */}
+          {title}
         </MDTypography>
       </MuiBreadcrumbs>
       <MDTypography
@@ -90,7 +93,8 @@ function Breadcrumbs({ icon, title, route, light }) {
         color={light ? "white" : "dark"}
         noWrap
       >
-        {title.replace("-", " ")}
+        {/* {focusTitle} */}
+        {title}
       </MDTypography>
     </MDBox>
   );

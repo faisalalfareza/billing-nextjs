@@ -21,15 +21,28 @@ import React from "react";
 import Icon from "@mui/material/Icon";
 import MDAvatar from "../components/MDAvatar";
 import profilePicture from "../assets/images/team-3.jpg";
+import { capitalizeFirstLetter } from "../helpers/utils";
 
-function setMain() {
+function setMain(informations = getInformation(), profiles = getProfile()) {
   return [
     {
       type: "collapse",
-      name: "Brooklyn Alice",
+      name: informations
+        ? capitalizeFirstLetter(informations["user"]["userName"])
+        : null,
       key: "username",
       icon: (
-        <MDAvatar src={profilePicture.src} alt="Brooklyn Alice" size="sm" />
+        <MDAvatar
+          src={
+            profiles ? `data:image/png;base64, ${profiles}` : profilePicture.src
+          }
+          alt={
+            informations
+              ? capitalizeFirstLetter(informations["user"]["name"])
+              : "Brooklyn Alice"
+          }
+          size="sm"
+        />
       ),
       collapse: [
         {
@@ -273,7 +286,6 @@ function setMain() {
         },
       ],
     },
-    // { type: "divider", key: "divider-1" },
 
     // { type: "divider", key: "divider-1" },
     { type: "title", title: "Faktur Pajak (FP)", key: "title-fp" },
@@ -371,6 +383,32 @@ function setMain() {
         },
       ],
     },
+
+    { type: "divider", key: "divider-1" },
+    {
+      type: "title",
+      title: "Components based on case studies",
+      key: "title-comp",
+    },
+    {
+      type: "collapse",
+      name: "Pagination (Client & Server)",
+      nameOnHeader: "Client & Server-side Pagination (Using react-table)",
+      key: "paginations",
+      route: "/others/paginations",
+      permission: "Pages.Tenant.Dashboard",
+      icon: <Icon fontSize="medium">view_in_ar</Icon>,
+      noCollapse: true,
+    },
+    {
+      type: "collapse",
+      name: "Upload Excel",
+      nameOnHeader: "Upload Excel (Using react-excel-renderer)",
+      key: "upload-batch",
+      route: "/nsfp/upload-batch",
+      icon: <Icon fontSize="medium">view_in_ar</Icon>,
+      noCollapse: true,
+    },
   ];
 }
 function setFilteredMain(permissions = getPermission(), main = setMain()) {
@@ -452,6 +490,14 @@ export default function setRoutes(
   };
 }
 
+export function getInformation() {
+  if (typeof window !== "undefined") {
+    return JSON.parse(localStorage.getItem("informations"));
+  }
+
+  return;
+}
+
 export function getPermission() {
   if (typeof window !== "undefined") {
     return JSON.parse(localStorage.getItem("grantedPermissions"));
@@ -459,13 +505,20 @@ export function getPermission() {
 
   return;
 }
-
 export function checkPermission(testPermission, permissions = getPermission()) {
   if (permissions != null || permissions != undefined) {
     let checking =
       permissions[testPermission] &&
       ["true", true].indexOf(permissions[testPermission]) != -1;
     return checking;
+  }
+
+  return;
+}
+
+export function getProfile() {
+  if (typeof window !== "undefined") {
+    return localStorage.getItem("profilePicture");
   }
 
   return;

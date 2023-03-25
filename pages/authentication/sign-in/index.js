@@ -17,7 +17,6 @@ import MDButton from "/components/MDButton";
 
 import IllustrationLayout from "/pagesComponents/authentication/components/IllustrationLayout";
 import FormField from "/pagesComponents/FormField";
-import appInfo from "/appinfo.json";
 
 import { typeNormalization } from "../../../helpers/utils";
 
@@ -39,12 +38,12 @@ function SignIn(props) {
     formField: {
       userNameOrEmailAddress: {
         name: "userNameOrEmailAddress",
-        label: "Username / Email",
-        placeholder: "Type Username / Email",
+        label: "User Name Or Email Address",
+        placeholder: "Type User Name Or Email Address",
         type: "text",
         isRequired: true,
-        errorMsg: "Username / Email is required.",
-        invalidFormatMsg: "Invalid Username / Email format.",
+        errorMsg: "User Name Or Email Address is required.",
+        invalidFormatMsg: "Invalid User Name Or Email Address format.",
         defaultValue: "",
       },
       password: {
@@ -85,8 +84,10 @@ function SignIn(props) {
   };
 
   const handleSetRememberMe = () => setRememberMe(!rememberMe);
+
+  let [loginAttempt, setLoginAttempt] = useState(3);
   const handleSigninSubmit = async (e) => {
-    e.preventDefault();
+    e != undefined && e.preventDefault();
     setLoadingSubmit(true);
 
     authenticate({
@@ -116,7 +117,7 @@ function SignIn(props) {
           title: error.response.data.error.message,
           text: error.message + ": " + error.response.data.error.details,
           footer:
-            "<p style='text-align: center;line-height: 1;'> Contact admin for further handling regarding access rights or authority.</p>",
+            "<p style='text-align: center;line-height: 1;font-size: small;'> Contact admin for further handling regarding access rights or authority.</p>",
         });
       } else if (error.request) {
         console.error("ERROR REQUEST => ", error.request);
@@ -124,9 +125,28 @@ function SignIn(props) {
           icon: "error",
           title: error.message,
         });
-      } else console.error("ERROR => ", error.message);
+      } else {
+        console.error("ERROR => ", error.message);
+        Swal.fire({
+          icon: "error",
+          title: error.message,
+          showConfirmButton: loginAttempt > 0 ? true : false,
+          showCancelButton: true,
+          focusConfirm: true,
+          confirmButtonText: `Try Again (${loginAttempt})`,
+          cancelButtonText: "OK",
+          footer:
+            "<p style='text-align: center;line-height: 1;font-size: small;'>" +
+            "This may be due to an incorrect username/email or password. Please check it again, and also make sure the device is connected to the internet without interruption." +
+            "</p>",
+        }).then(
+          (result) =>
+            result.isConfirmed &&
+            handleSigninSubmit().then(() => (loginAttempt -= 1))
+        );
+      }
 
-      console.error("ERROR CONFIG => ", error.config);
+      // console.error("ERROR CONFIG => ", error.config);
     } else {
       if (response.isCached[0])
         processAuthenticateResult(
@@ -281,8 +301,8 @@ function SignIn(props) {
 
   return (
     <IllustrationLayout
-      formTitle={appInfo.formTitle}
-      formDescription=""
+      formTitle="Sign In"
+      formDescription="Enter your user name or email, and password to sign in."
       illustration={bgImage}
     >
       <Formik
@@ -310,7 +330,6 @@ function SignIn(props) {
               role="form"
               onSubmit={(e) => handleSigninSubmit(e)}
             >
-              <MDTypography variant="h5">Sign In</MDTypography>
               <MDBox mb={2}>
                 <FormField
                   type={userNameOrEmailAddress.type}
@@ -361,7 +380,7 @@ function SignIn(props) {
                 <MDButton
                   type="submit"
                   variant="gradient"
-                  color="primary"
+                  color="dark"
                   size="large"
                   fullWidth
                   disabled={!isValifForm() || isLoadingSubmit}
@@ -370,7 +389,7 @@ function SignIn(props) {
                 </MDButton>
               </MDBox>
               <MDBox mt={3} textAlign="center" lineHeight="1">
-                {/* <MDTypography variant="button" color="text" lineHeight="1">
+                <MDTypography variant="button" color="text" lineHeight="1">
                   Don&apos;t remember your password yet?{" "}
                   <Link href="/authentication/reset-password">
                     <a>
@@ -384,7 +403,7 @@ function SignIn(props) {
                       </MDTypography>
                     </a>
                   </Link>
-                </MDTypography> */}
+                </MDTypography>
               </MDBox>
             </MDBox>
           );

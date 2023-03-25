@@ -169,7 +169,18 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
             <Link href={route} key={key} sx={{ textDecoration: "none" }}>
               <a
                 onClick={() => {
+                  const cached = [
+                    {
+                      key: "application",
+                      value: localStorage.getItem("application"),
+                    },
+                    {
+                      key: "profilePicture",
+                      value: localStorage.getItem("profilePicture"),
+                    },
+                  ];
                   localStorage.clear();
+                  cached.forEach((c) => localStorage.setItem(c.key, c.value));
                   document.cookie.split(";").forEach((c) => {
                     document.cookie = c
                       .replace(/^ +/, "")
@@ -313,6 +324,7 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
             variant="caption"
             fontWeight="bold"
             textTransform="uppercase"
+            whiteSpace="pre-wrap"
             pl={3}
             mt={2}
             mb={1}

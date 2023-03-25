@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
-const withPWA = require("next-pwa");
 
+const withPWA = require("next-pwa");
 const withTM = require("next-transpile-modules")([
   "next-pwa",
   "@fullcalendar/common",
