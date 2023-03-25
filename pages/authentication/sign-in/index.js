@@ -19,6 +19,7 @@ import IllustrationLayout from "/pagesComponents/authentication/components/Illus
 import FormField from "/pagesComponents/FormField";
 
 import { typeNormalization } from "../../../helpers/utils";
+import appInfo from "/appinfo.json";
 
 function SignIn(props) {
   const {} = props;
@@ -38,12 +39,12 @@ function SignIn(props) {
     formField: {
       userNameOrEmailAddress: {
         name: "userNameOrEmailAddress",
-        label: "User Name Or Email Address",
-        placeholder: "Type User Name Or Email Address",
+        label: "Username / Email",
+        placeholder: "Type Username / Email",
         type: "text",
         isRequired: true,
-        errorMsg: "User Name Or Email Address is required.",
-        invalidFormatMsg: "Invalid User Name Or Email Address format.",
+        errorMsg: "Username / Email is required.",
+        invalidFormatMsg: "Invalid Username / Email format.",
         defaultValue: "",
       },
       password: {
@@ -301,8 +302,8 @@ function SignIn(props) {
 
   return (
     <IllustrationLayout
-      formTitle="Sign In"
-      formDescription="Enter your user name or email, and password to sign in."
+      formTitle={appInfo.formTitle}
+      formDescription=""
       illustration={bgImage}
     >
       <Formik
@@ -330,6 +331,7 @@ function SignIn(props) {
               role="form"
               onSubmit={(e) => handleSigninSubmit(e)}
             >
+              <MDTypography variant="h5">Sign In</MDTypography>
               <MDBox mb={2}>
                 <FormField
                   type={userNameOrEmailAddress.type}
@@ -380,7 +382,7 @@ function SignIn(props) {
                 <MDButton
                   type="submit"
                   variant="gradient"
-                  color="dark"
+                  color="primary"
                   size="large"
                   fullWidth
                   disabled={!isValifForm() || isLoadingSubmit}
@@ -389,7 +391,7 @@ function SignIn(props) {
                 </MDButton>
               </MDBox>
               <MDBox mt={3} textAlign="center" lineHeight="1">
-                <MDTypography variant="button" color="text" lineHeight="1">
+                {/* <MDTypography variant="button" color="text" lineHeight="1">
                   Don&apos;t remember your password yet?{" "}
                   <Link href="/authentication/reset-password">
                     <a>
@@ -403,7 +405,7 @@ function SignIn(props) {
                       </MDTypography>
                     </a>
                   </Link>
-                </MDTypography>
+                </MDTypography> */}
               </MDBox>
             </MDBox>
           );
