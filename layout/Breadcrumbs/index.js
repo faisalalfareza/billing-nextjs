@@ -13,6 +13,7 @@ Coded by www.creative-tim.com
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
 
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 
 // prop-types is a library for typechecking of props.
@@ -27,6 +28,14 @@ import MDBox from "/components/MDBox";
 import MDTypography from "/components/MDTypography";
 
 function Breadcrumbs({ icon, title, route, light }) {
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => { setHydrated(true) }, []);
+
+  if (!hydrated) {
+      // Returns null on first render, so the client and server match
+      return null;
+  }
+  
   const routes = route.slice(0, -1);
   // const smallTitle = title.match(/-/g).length > 0 ? title.replace("-", " ") : title;
   // const focusTitle = itle.match(/-/g).length > 0 ? title.replace("-", " ")+"───" : title;
@@ -82,7 +91,6 @@ function Breadcrumbs({ icon, title, route, light }) {
           color={light ? "white" : "dark"}
           sx={{ lineHeight: 0 }}
         >
-          {/* {smallTitle} */}
           {title}
         </MDTypography>
       </MuiBreadcrumbs>
@@ -93,7 +101,6 @@ function Breadcrumbs({ icon, title, route, light }) {
         color={light ? "white" : "dark"}
         noWrap
       >
-        {/* {focusTitle} */}
         {title}
       </MDTypography>
     </MDBox>

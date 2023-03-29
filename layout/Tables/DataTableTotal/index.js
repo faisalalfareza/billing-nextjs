@@ -92,7 +92,7 @@ function DataTableTotal({
   } = tableInstance;
 
   // Set the default value for the entries per page when component mounts
-  useEffect(() => setPageSize(defaultValue || 10), [defaultValue, setPageSize]);
+  useEffect(() => { setPageSize(defaultValue || 10) }, [defaultValue, setPageSize]);
 
   // Set the entries per page value based on the select value
   const setEntriesPerPage = (value) => setPageSize(value);

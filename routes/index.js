@@ -27,23 +27,11 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
   return [
     {
       type: "collapse",
-      name: informations
-        ? capitalizeFirstLetter(informations["user"]["userName"])
-        : null,
+      name: "Brooklyn Alice",
+      // name: informations ? capitalizeFirstLetter(informations['user']['userName']) : "Brooklyn Alice",
       key: "username",
-      icon: (
-        <MDAvatar
-          src={
-            profiles ? `data:image/png;base64, ${profiles}` : profilePicture.src
-          }
-          alt={
-            informations
-              ? capitalizeFirstLetter(informations["user"]["name"])
-              : "Brooklyn Alice"
-          }
-          size="sm"
-        />
-      ),
+      icon: <MDAvatar src={profilePicture.src} alt="Brooklyn Alice" size="sm" />,
+      // icon: <MDAvatar src={profiles ? `data:image/png;base64, ${profiles}` : profilePicture.src} alt={informations ? capitalizeFirstLetter(informations['user']['name']) : "Brooklyn Alice"} size="sm" />,
       collapse: [
         {
           name: "Logout",
@@ -51,7 +39,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           route: "/authentication/sign-in",
           onClick: function () {
             return;
-          },
+          }
         },
       ],
     },
@@ -215,8 +203,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           name: "Reprint OR",
           nameOnHeader: "Reprint OR",
           key: "reprint-or",
-          route: "/app/nsfp/upload-batch",
-          permission: "Pages.Tenants.GenerateNoSeriFP.Create",
+          route: "/cashier/reprint-or",
         },
         {
           name: "Cancel Payment",
@@ -396,19 +383,9 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
       nameOnHeader: "Client & Server-side Pagination (Using react-table)",
       key: "paginations",
       route: "/others/paginations",
-      permission: "Pages.Tenant.Dashboard",
       icon: <Icon fontSize="medium">view_in_ar</Icon>,
       noCollapse: true,
-    },
-    {
-      type: "collapse",
-      name: "Upload Excel",
-      nameOnHeader: "Upload Excel (Using react-excel-renderer)",
-      key: "upload-batch",
-      route: "/nsfp/upload-batch",
-      icon: <Icon fontSize="medium">view_in_ar</Icon>,
-      noCollapse: true,
-    },
+    }
   ];
 }
 function setFilteredMain(permissions = getPermission(), main = setMain()) {
