@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import * as dayjs from "dayjs";
 import * as moment from "moment";
 import Swal from "sweetalert2";
-import { Formik, Form } from "formik";
+import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import { Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
 
@@ -20,277 +20,161 @@ import MDButton from "/components/MDButton";
 import FormField from "/pagesComponents/FormField";
 
 // Data
-import axios from "axios";
 import getConfig from "next/config";
 import { useCookies } from "react-cookie";
-const { publicRuntimeConfig } = getConfig();
-import { MonthPicker } from "@mui/x-date-pickers";
-import { Dayjs } from "dayjs";
-import TextField from "@mui/material/TextField";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-
-import FormGroup from "@mui/material/FormGroup";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox";
 import { typeNormalization } from "/helpers/utils";
 
 function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
   const [{ accessToken, encryptedAccessToken }] = useCookies();
-  const [isLoadingSubmit, setLoadingSubmit] = useState(false);
-  const [no, setNo] = useState(null);
+  const [dataProject, setDataProject] = useState([]);
+  const [dataCluster, setDataCluster] = useState([]);
 
-  const schemeModels = {
-    formId: "period-form",
-    formField: {
-      periodNumber: {
-        name: "periodNumber",
-        label: "Period Number",
-        placeholder: "Auto fullfill",
-        type: "text",
-        isRequired: true,
-        errorMsg: "Period Number is required.",
-        defaultValue: "",
-      },
-      periodName: {
-        name: "periodName",
-        label: "Periode Name",
-        placeholder: "Type Periode Name",
-        type: "text",
-        isRequired: true,
-        errorMsg: "Periode Name is required.",
-        maxLength: 50,
-        invalidMaxLengthMsg:
-          "Periode Name exceeds the maximum limit of 50 characters.",
-        defaultValue: "",
-      },
-      startDate: {
-        name: "startDate",
-        label: "Start Date",
-        placeholder: "Choose Date",
-        type: "date",
-        isRequired: true,
-        errorMsg: "Start Date is required.",
-        defaultValue: "",
-      },
-      endDate: {
-        name: "endDate",
-        label: "End Date",
-        placeholder: "Choose Date",
-        type: "date",
-        isRequired: true,
-        errorMsg: "End Date is required.",
-        defaultValue: "",
-      },
-      closeDate: {
-        name: "closeDate",
-        label: "Close Date",
-        placeholder: "Choose Date",
-        type: "date",
-        isRequired: true,
-        errorMsg: "Close Date is required.",
-        defaultValue: "",
-      },
-      isActive: {
-        name: "isActive",
-        label: "Status",
-        placeholder: "Status",
-        type: "text",
-        isRequired: true,
-        errorMsg: "Status is required.",
-        defaultValue: "",
-      },
-    },
+  useEffect(() => {
+    if (site) {
+      getLastPeriodNo();
+    }
+    getProject();
+  }, [isOpen]);
+
+  const getProject = async () => {
+    let response = await fetch("/api/master/site/dropdownproject", {
+      method: "POST",
+      body: JSON.stringify({
+        accessToken: accessToken,
+      }),
+    });
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
+    console.log("response----", response);
+    if (response.error) {
+      Swal.fire({
+        title: "Error",
+        text: response.error.message,
+        icon: "error",
+      });
+    } else {
+      setDataProject(response.result);
+    }
+    console.log("project------", dataProject);
   };
-  let { periodNumber, periodName, startDate, endDate, closeDate, isActive } =
-    schemeModels.formField;
 
-  var customParseFormat = require("dayjs/plugin/customParseFormat");
-  dayjs.extend(customParseFormat);
-
-  const initialValues = {
-    [periodNumber.name]: params ? params.periodNumber : no,
-    [periodName.name]: params ? params.periodName : null,
-    [startDate.name]: params
-      ? dayjs(params.startDate).format("YYYY-MM-DD")
-      : null,
-    [endDate.name]: params ? dayjs(params.endDate).format("YYYY-MM-DD") : null,
-    [closeDate.name]: params
-      ? dayjs(params.closeDate).format("YYYY-MM-DD")
-      : null,
-    [isActive.name]: params ? params.isActive : true,
-  };
-  console.log("initval----", initialValues);
-
-  const [formValues, setformValues] = useState(initialValues);
-
-  const getFormData = (values) => {
-    console.log("getFormData::", values);
-  };
-  console.log("formValues::", formValues);
-
-  const getLastPeriodNo = async (val) => {
-    // setLoading(true);
-    console.log("site-----", site);
-    let response = await fetch("/api/master/period/no", {
+  const onProjectChange = async (val) => {
+    console.log("valpro", val);
+    let response = await fetch("/api/master/site/dropdowncluster", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
         params: {
-          SiteId: site?.siteId,
+          ProjectId: val[0]?.projectId,
         },
       }),
     });
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
     console.log("response----", response);
-    setNo(response.result);
-    setformValues((prevState) => ({
-      ...prevState,
-      periodNumber: response.result,
-    }));
-  };
-  useEffect(() => {
-    if (site) {
-      getLastPeriodNo();
+    if (response.error) {
+      Swal.fire({
+        title: "Error",
+        text: response.error.message,
+        icon: "error",
+      });
+    } else {
+      setDataCluster(response.result);
     }
-  }, [isOpen]);
-
-  const addDate = (val) => {
-    return dayjs(val).add(1, "day");
+    console.log("cluster------", dataCluster);
   };
-  const createPeriod = async (values, actions) => {
-    setLoadingSubmit(false);
 
-    const url = `${publicRuntimeConfig.apiUrl}/api/services/app/MasterBilling/CreateMasterPeriod`;
-    const urlUpdate = `${publicRuntimeConfig.apiUrl}/api/services/app/MasterBilling/UpdateMasterPeriod`;
-    const config = {
-      headers: {
-        Authorization: "Bearer " + accessToken,
-        "Content-Type": "application/json",
-      },
-    };
+  const createSite = async (fields, actions) => {
+    console.log("valprop", fields);
 
+    let listCluster = [];
+    fields.cluster.map((e) => {
+      listCluster.push({ clusterId: e.clusterId });
+    });
+    let listProject = [];
+    fields.project.map((e) => {
+      listProject.push({
+        projectId: e.projectId,
+        projectName: e.projectName,
+        projectCode: e.projectCode,
+      });
+    });
     const body = {
-      siteId: site.siteId,
-      periodMonth: addDate(values.periodName),
-      periodYear: addDate(values.periodName),
-      periodNumber: values.periodNumber,
-      startDate: addDate(values.startDate),
-      endDate: addDate(values.endDate),
-      closeDate: addDate(values.closeDate),
-      isActive: values.isActive,
+      siteId: fields.id,
+      siteName: fields.name,
+      siteAddress: fields.address,
+      siteCode: fields.code,
+      email: fields.email,
+      officePhone: fields.phone,
+      handPhone: fields.handphone,
+      isActive: true,
+      clusterDataList: listCluster,
+      projectDataList: listProject,
     };
     console.log("CompanyOfficer/CreateOrUpdateCompanyOfficer ", body);
 
-    if (!params) {
-      let response = await fetch("/api/master/period/create", {
-        method: "POST",
-        body: JSON.stringify({
-          accessToken: accessToken,
-          params: body,
-        }),
+    let response = await fetch("/api/master/site/create", {
+      method: "POST",
+      body: JSON.stringify({
+        accessToken: accessToken,
+        params: body,
+      }),
+    });
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
+    console.log("response----", response);
+    if (response.error) {
+      Swal.fire({
+        title: "Error",
+        icon: "error",
+        text: response.error.message,
       });
-      if (!response.ok) throw new Error(`Error: ${response.status}`);
-      response = typeNormalization(await response.json());
-      console.log("response----", response);
-      if (response.error) {
-        Swal.fire({
-          title: "Error",
-          icon: "error",
-          text: response.error.message,
-        });
-      } else {
-        Swal.fire({
-          title: "New Period Added",
-          text:
-            "Period " + values.periodNumber + " has been successfully added",
-          icon: "success",
-          showConfirmButton: true,
-          timerProgressBar: true,
-          timer: 3000,
-        }).then(() => {
-          setLoadingSubmit(false);
-          actions.resetForm();
-          closeModal();
-        });
-      }
     } else {
-      body.periodId = params.periodId;
-
-      let response = await fetch("/api/master/period/update", {
-        method: "POST",
-        body: JSON.stringify({
-          accessToken: accessToken,
-          params: body,
-        }),
+      Swal.fire({
+        title: "New Site Added",
+        text: "Site " + fields.name + " has been successfully added",
+        icon: "success",
+        showConfirmButton: true,
+        timerProgressBar: true,
+        timer: 3000,
+      }).then(() => {
+        actions.resetForm();
+        closeModal();
       });
-      if (!response.ok) throw new Error(`Error: ${response.status}`);
-      response = typeNormalization(await response.json());
-      console.log("response----", response);
-      if (response.error) {
-        Swal.fire({
-          title: "Error",
-          icon: "error",
-          text: response.error.message,
-        });
-      } else {
-        Swal.fire({
-          title: "Period Updated",
-          text:
-            "Period " +
-            values.periodName +
-            " in " +
-            values.periodNumber +
-            " has been successfully updated.",
-          icon: "success",
-          showConfirmButton: true,
-          timerProgressBar: true,
-          timer: 3000,
-        }).then((result) => {
-          setLoadingSubmit(false);
-          actions.resetForm();
-          closeModal();
-        });
-      }
     }
+    actions.setSubmitting(false);
   };
   const closeModal = () => {
-    setNo(undefined);
-    setformValues({});
     setTimeout(() => onModalChanged(), 0);
   };
 
   console.log("params--------", params);
-  if (params) {
-    // setformValues((prevState) => ({
-    //   ...prevState,
-    //   [periodNumber.name]: params.periodNumber,
-    //   [periodName.name]: params.periodName,
-    //   [startDate.name]: params.startDate,
-    //   [endDate.name]: params.endDate,
-    //   [closeDate.name]: params.closeDate,
-    //   [isActive.name]: params.isActive,
-    // }));
-  }
 
   if (isOpen) {
+    const initialValues = {
+      id: "",
+      name: "",
+      code: "",
+      address: "",
+      email: "",
+      phone: "",
+      handphone: "",
+      project: "",
+      cluster: "",
+      status: "",
+    };
     let schemeValidations = Yup.object().shape({
-      [startDate.name]: startDate.isRequired
-        ? Yup.date().required(startDate.errorMsg)
-        : Yup.date().notRequired(),
-      [periodName.name]: periodName.isRequired
-        ? Yup.string()
-            .required(periodName.errorMsg)
-            .max(periodName.maxLength, periodName.invalidMaxLengthMsg)
-        : Yup.string().notRequired(),
-      [endDate.name]: endDate.isRequired
-        ? Yup.date().required(endDate.errorMsg)
-        : Yup.date().notRequired(),
-      [closeDate.name]: closeDate.isRequired
-        ? Yup.date().required(closeDate.errorMsg)
-        : Yup.date().notRequired(),
+      id: Yup.string().required("Site ID is required"),
+      name: Yup.string().required("Site Name is required"),
+      code: Yup.string().required("Site Code is required"),
+      address: Yup.string().required("Address is required"),
+      email: Yup.string()
+        .email("Email is invalid")
+        .required("Email is required"),
+      phone: Yup.string().required("Office Phone is required"),
+      handphone: Yup.string().required("Handphone is required"),
+      project: Yup.array().required("Project is required"),
+      cluster: Yup.array().required("Cluster is required"),
     });
 
     const checkingSuccessInput = (value, error) => {
@@ -300,25 +184,10 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
       new Promise((resolve) => {
         setTimeout(resolve, ms);
       });
-    const submitForm = async (values, actions) => {
-      // await sleep(1000);
-      if (dayjs(values.startDate).isAfter(dayjs(values.endDate))) {
-        Swal.fire({
-          icon: "warning",
-          title: "Oh Snap!",
-          text: "End date should be greater than Start date",
-        });
-        document.getElementsByName(endDate.name)[0].focus();
-      } else if (dayjs(values.endDate).isAfter(dayjs(values.closeDate))) {
-        Swal.fire({
-          icon: "warning",
-          title: "Oh Snap!",
-          text: "Close date should be greater than End date",
-        });
-        document.getElementsByName(closeDate.name)[0].focus();
-      } else {
-        createPeriod(values, actions);
-      }
+    const submitForm = (fields, actions) => {
+      console.log("submit-meeeee");
+      console.log("valprop", fields);
+      createSite(fields, actions);
     };
 
     return (
@@ -328,34 +197,37 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
           validationSchema={schemeValidations}
           onSubmit={submitForm}
         >
-          {({
-            values,
-            errors,
-            touched,
-            isSubmitting,
-            setFieldValue,
-            resetForm,
-          }) => {
-            setformValues(values);
-            getFormData(values);
-            console.log("values--ooooo--", values);
+          {({ errors, touched, isSubmitting, setFieldValue, resetForm }) => {
+            const [user, setUser] = useState({});
+            if (params) {
+              // get user and set form fields
 
-            const isValifForm = () => {
-              // return checkingSuccessInput(companyV, errors.periodNumber) &&
-              //   checkingSuccessInput(officerNameV, errors.periodName) &&
-              //   checkingSuccessInput(officerTitleV, errors.startDate)
-              //   ? true
-              //   : false;
-            };
+              const fields = [
+                "id",
+                "name",
+                "code",
+                "address",
+                "email",
+                "phone",
+                "handphone",
+                "project",
+                "cluster",
+                "status",
+              ];
+              fields.forEach((field) =>
+                setFieldValue(field, params[field], false)
+              );
+              setUser(user);
+            }
 
             return (
-              <Form id={schemeModels.formId} autoComplete="off">
+              <Form id="master-site-form" autoComplete="off">
                 <ModalHeader>
                   <Grid container spacing={3}>
                     <Grid item xs={12} md={12}>
                       <MDBox mb={1}>
                         <MDTypography variant="h5">
-                          {params == undefined ? "Add New" : "Edit"} Period
+                          {params == undefined ? "Add New" : "Edit"} Site
                         </MDTypography>
                       </MDBox>
                     </Grid>
@@ -366,121 +238,154 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
                     <Grid container spacing={3}>
                       <Grid item xs={12} sm={12}>
                         <FormField
-                          disabled
-                          type={periodNumber.type}
-                          label={
-                            periodNumber.label +
-                            (periodNumber.isRequired ? " ⁽*⁾" : "")
-                          }
-                          name={periodNumber.name}
-                          // value={formValues.periodNumber}
-                          placeholder={periodNumber.placeholder}
-                          error={errors.periodNumber && touched.periodNumber}
-                          success={checkingSuccessInput(
-                            formValues.periodNumber,
-                            errors.periodNumber
-                          )}
+                          type="text"
+                          label="Site ID ⁽*⁾"
+                          name="id"
+                          placeholder="Type Site ID"
+                          error={errors.id && touched.id}
+                          success={checkingSuccessInput(user.id, errors.id)}
                         />
                       </Grid>
                       <Grid item xs={12} sm={12}>
-                        <LocalizationProvider dateAdapter={AdapterDayjs}>
-                          <DatePicker
-                            label={periodName.label}
-                            value={formValues.periodName}
-                            // variant="inline"
-                            inputFormat="MMMM YYYY"
-                            views={["year", "month"]}
-                            onChange={(newValue) => {
-                              setFieldValue(
-                                periodName.name,
-                                newValue != null
-                                  ? newValue
-                                  : initialValues[periodName.name]
-                              );
-                            }}
-                            renderInput={(params) => (
-                              <TextField
-                                {...params}
-                                variant="standard"
-                                fullWidth
-                                error={errors.periodName && touched.periodName}
-                                helperText={
-                                  errors.periodName && touched.periodName
-                                    ? periodName.errorMsg
-                                    : ""
-                                }
-                              />
-                            )}
-                          />
-                        </LocalizationProvider>
-
-                        {/* <FormField
-                          type={periodName.type}
-                          label={
-                            periodName.label +
-                            (periodName.isRequired ? " ⁽*⁾" : "")
-                          }
-                          name={periodName.name}
-                          value={formValues.periodName}
-                          placeholder={periodName.placeholder}
-                          error={errors.periodName && touched.periodName}
-                          success={checkingSuccessInput(
-                            formValues.periodName,
-                            errors.periodName
-                          )}
-                        /> */}
+                        <FormField
+                          type="text"
+                          label="Site Name ⁽*⁾"
+                          name="name"
+                          placeholder="Type Site Name"
+                          error={errors.name && touched.name}
+                          success={checkingSuccessInput(user.name, errors.name)}
+                        />
                       </Grid>
                       <Grid item xs={12} sm={12}>
                         <FormField
-                          type={startDate.type}
-                          label={
-                            startDate.label +
-                            (startDate.isRequired ? " ⁽*⁾" : "")
-                          }
-                          name={startDate.name}
-                          // value={formValues.startDate}
-                          placeholder={startDate.placeholder}
-                          error={errors.startDate && touched.startDate}
+                          type="text"
+                          label="Site Code ⁽*⁾"
+                          name="code"
+                          placeholder="Type Site Code"
+                          error={errors.code && touched.code}
+                          success={checkingSuccessInput(user.code, errors.code)}
+                        />
+                      </Grid>
+                      <Grid item xs={12} sm={12}>
+                        <FormField
+                          type="text"
+                          label="Address ⁽*⁾"
+                          name="address"
+                          placeholder="Type Address"
+                          error={errors.address && touched.address}
                           success={checkingSuccessInput(
-                            formValues.startDate,
-                            errors.startDate
+                            user.address,
+                            errors.address
                           )}
                         />
                       </Grid>
                       <Grid item xs={12} sm={12}>
                         <FormField
-                          type={endDate.type}
-                          label={
-                            endDate.label + (endDate.isRequired ? " ⁽*⁾" : "")
-                          }
-                          name={endDate.name}
-                          // value={formValues.endDate}
-                          placeholder={endDate.placeholder}
-                          error={errors.endDate && touched.endDate}
+                          type="text"
+                          label="Email ⁽*⁾"
+                          name="email"
+                          placeholder="Type Email"
+                          error={errors.email && touched.email}
                           success={checkingSuccessInput(
-                            formValues.endDate,
-                            errors.endDate
+                            user.email,
+                            errors.email
                           )}
                         />
                       </Grid>
                       <Grid item xs={12} sm={12}>
                         <FormField
-                          type={closeDate.type}
-                          label={
-                            closeDate.label +
-                            (closeDate.isRequired ? " ⁽*⁾" : "")
-                          }
-                          name={closeDate.name}
-                          // value={formValues.closeDate}
-                          placeholder={closeDate.placeholder}
-                          error={errors.closeDate && touched.closeDate}
+                          type="text"
+                          label="Office Phone ⁽*⁾"
+                          name="phone"
+                          placeholder="Type Office Phone"
+                          error={errors.phone && touched.phone}
                           success={checkingSuccessInput(
-                            formValues.closeDate,
-                            errors.closeDate
+                            user.phone,
+                            errors.phone
                           )}
                         />
                       </Grid>
-                      {params && (
+                      <Grid item xs={12} sm={12}>
+                        <FormField
+                          type="text"
+                          label="Handphone ⁽*⁾"
+                          name="handphone"
+                          placeholder="Type Handphone"
+                          error={errors.handphone && touched.handphone}
+                          success={checkingSuccessInput(
+                            user.handphone,
+                            errors.handphone
+                          )}
+                        />
+                      </Grid>
+                      <Grid item xs={12} sm={12}>
+                        <Field
+                          name="project"
+                          multiple
+                          disableCloseOnSelect
+                          key="project-ddr"
+                          component={Autocomplete}
+                          options={dataProject}
+                          getOptionLabel={(option) => option.projectName}
+                          onChange={(e, value) => {
+                            setFieldValue(
+                              "project",
+                              value !== null ? value : initialValues["project"]
+                            );
+                            onProjectChange(value);
+                          }}
+                          renderInput={(params) => (
+                            <FormField
+                              {...params}
+                              type="text"
+                              label="Project ⁽*⁾"
+                              name="project"
+                              placeholder="Type Project"
+                              error={errors.project && touched.project}
+                              success={checkingSuccessInput(
+                                user.project,
+                                errors.project
+                              )}
+                              InputLabelProps={{ shrink: true }}
+                            />
+                          )}
+                        />
+                      </Grid>
+                      <Grid item xs={12} sm={12}>
+                        <Field
+                          name="cluster"
+                          multiple
+                          disableCloseOnSelect
+                          component={Autocomplete}
+                          options={dataCluster}
+                          getOptionLabel={(option) =>
+                            option.clusterCode + " - " + option.clusterName
+                          }
+                          key="cluster-ddr"
+                          onChange={(e, value) => {
+                            setFieldValue(
+                              "cluster",
+                              value !== null ? value : initialValues["cluster"]
+                            );
+                          }}
+                          renderInput={(params) => (
+                            <FormField
+                              {...params}
+                              type="text"
+                              label="Cluster ⁽*⁾"
+                              name="cluster"
+                              placeholder="Type Cluster"
+                              error={errors.cluster && touched.cluster}
+                              success={checkingSuccessInput(
+                                user.cluster,
+                                errors.cluster
+                              )}
+                              InputLabelProps={{ shrink: true }}
+                            />
+                          )}
+                        />
+                      </Grid>
+                      {/* {params && (
                         <Grid item xs={12} sm={12}>
                           <FormGroup>
                             <FormControlLabel
@@ -504,7 +409,7 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
                             />
                           </FormGroup>
                         </Grid>
-                      )}
+                      )} */}
                     </Grid>
                   </MDBox>
                 </ModalBody>
@@ -527,12 +432,12 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
                         variant="gradient"
                         color="primary"
                         sx={{ height: "100%" }}
-                        disabled={isLoadingSubmit}
+                        disabled={isSubmitting}
                       >
-                        {isLoadingSubmit
+                        {isSubmitting
                           ? params == undefined
-                            ? "Adding Period.."
-                            : "Updating Period.."
+                            ? "Adding Site.."
+                            : "Updating Site.."
                           : params == undefined
                           ? "Save"
                           : "Update"}

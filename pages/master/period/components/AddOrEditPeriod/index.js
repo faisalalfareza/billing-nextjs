@@ -163,15 +163,6 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
   const createPeriod = async (values, actions) => {
     setLoadingSubmit(false);
 
-    const url = `${publicRuntimeConfig.apiUrl}/api/services/app/MasterBilling/CreateMasterPeriod`;
-    const urlUpdate = `${publicRuntimeConfig.apiUrl}/api/services/app/MasterBilling/UpdateMasterPeriod`;
-    const config = {
-      headers: {
-        Authorization: "Bearer " + accessToken,
-        "Content-Type": "application/json",
-      },
-    };
-
     const body = {
       siteId: site.siteId,
       periodMonth: addDate(values.periodName),

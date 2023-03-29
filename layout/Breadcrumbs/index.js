@@ -58,6 +58,7 @@ function Breadcrumbs({ icon, title, route, light }) {
           // <Link href={`/${el.name}`} key={i}>
           //   <a>
           <MDTypography
+            key={"bread" + i}
             component="span"
             variant="button"
             fontWeight="regular"
