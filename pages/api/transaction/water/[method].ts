@@ -20,19 +20,11 @@ export default async function handler(
         case "dropdownproject":
           getDropdownProject(res, body);
           break;
-
-        case "dropdownsite":
-          getDropdownSite(res, body);
-          break;
-
-        case "no":
-          getPeriodNo(res, body);
-          break;
         case "create":
           create(res, body);
           break;
-        case "update":
-          update(res, body);
+        case "export":
+          exportExcel(res, body);
           break;
       }
       break;
@@ -48,7 +40,7 @@ export default async function handler(
 async function getList(res: any, body: any) {
   const { accessToken, params } = body;
 
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/MasterBilling/GetListMasterPeriod`;
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetWaterReadingList`;
   const config = {
     headers: {
       Authorization: "Bearer " + accessToken,
@@ -62,13 +54,11 @@ async function getList(res: any, body: any) {
     .get(url, config)
     .then((response) =>
       res.send({
-        isCached: false,
         result: response.data.result.items,
       })
     )
     .catch((error) =>
       res.send({
-        isCached: false,
         error: error,
       })
     );
@@ -77,62 +67,7 @@ async function getList(res: any, body: any) {
 async function getDropdownProject(res: any, body: any) {
   const { accessToken, params } = body;
 
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetDropdownProject`;
-  const config = {
-    headers: {
-      Authorization: "Bearer " + accessToken,
-      "Access-Control-Allow-Origin": "*",
-    },
-  };
-  console.log("config----", config);
-
-  axios
-    .get(url, config)
-    .then((response) =>
-      res.send({
-        isCached: false,
-        result: response.data.result.items,
-      })
-    )
-    .catch((error) =>
-      res.send({
-        isCached: false,
-        error: error,
-      })
-    );
-}
-async function getDropdownSite(res: any, body: any) {
-  const { accessToken, params } = body;
-
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetDropdownSite`;
-  const config = {
-    headers: {
-      Authorization: "Bearer " + accessToken,
-      "Access-Control-Allow-Origin": "*",
-    },
-  };
-  console.log("upil----", config);
-
-  axios
-    .get(url, config)
-    .then((response) =>
-      res.send({
-        isCached: false,
-        result: response.data.result,
-      })
-    )
-    .catch((error) =>
-      res.send({
-        isCached: false,
-        error: error,
-      })
-    );
-}
-
-async function getPeriodNo(res: any, body: any) {
-  const { accessToken, params } = body;
-
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/MasterBilling/GetLastPeriodNo`;
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetDropdownProjectBySiteId`;
   const config = {
     headers: {
       Authorization: "Bearer " + accessToken,
@@ -146,13 +81,11 @@ async function getPeriodNo(res: any, body: any) {
     .get(url, config)
     .then((response) =>
       res.send({
-        isCached: false,
         result: response.data.result,
       })
     )
     .catch((error) =>
       res.send({
-        isCached: false,
         error: error,
       })
     );
@@ -177,23 +110,21 @@ async function create(res: any, body: any) {
     .then((response) => {
       console.log("response-----", response);
       res.send({
-        isCached: false,
         result: response.data.result,
       });
     })
     .catch((error) => {
       console.log("err-----", error.response);
       res.send({
-        isCached: false,
         error: error,
       });
     });
 }
 
-async function update(res: any, body: any) {
+async function exportExcel(res: any, body: any) {
   const { accessToken, params } = body;
 
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/MasterBilling/UpdateMasterPeriod`;
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/ExportToExcelWaterReading`;
   const config = {
     headers: {
       Authorization: "Bearer " + accessToken,
@@ -204,16 +135,15 @@ async function update(res: any, body: any) {
   console.log("config----", config);
 
   axios
-    .put(url, params, config)
-    .then((response) =>
+    .post(url, params, config)
+    .then((response) => {
+      console.log("response----", response);
       res.send({
-        isCached: false,
         result: response.data.result,
-      })
-    )
+      });
+    })
     .catch((error) =>
       res.send({
-        isCached: false,
         error: error,
       })
     );

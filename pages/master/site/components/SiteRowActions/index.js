@@ -102,7 +102,7 @@ function SiteRowActions({ record, openModalonEdit, onDeleted }) {
         onClose={closeMenu}
         keepMounted
       >
-        <MenuItem onClick={editSite}>Edit</MenuItem>
+        {/* <MenuItem onClick={editSite}>Edit</MenuItem> */}
       </Menu>
     </MDBox>
   );

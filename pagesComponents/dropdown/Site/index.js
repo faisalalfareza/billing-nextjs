@@ -43,6 +43,7 @@ export default function SiteDropdown(props) {
         handleSiteChange(value);
       }}
       noOptionsText="No results"
+      setCustomKey={(option) => option.siteId}
       renderInput={(params) => (
         <TextField
           {...params}

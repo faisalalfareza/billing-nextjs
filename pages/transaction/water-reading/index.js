@@ -1,8 +1,6 @@
 import Card from "@mui/material/Card";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
-import Swal from "sweetalert2";
-import axios from "axios";
 // @mui material components
 import { Grid, TextField } from "@mui/material";
 // NextJS Material Dashboard 2 PRO components
@@ -20,16 +18,10 @@ import MDInput from "/components/MDInput";
 import FormField from "/pagesComponents/FormField";
 import Autocomplete from "@mui/material/Autocomplete";
 import { useMaterialUIController } from "/context";
-import getConfig from "next/config";
-const { publicRuntimeConfig } = getConfig();
 import { useCookies } from "react-cookie";
 import * as React from "react";
-import Backdrop from "@mui/material/Backdrop";
-import Box from "@mui/material/Box";
-import Modal from "@mui/material/Modal";
-import Fade from "@mui/material/Fade";
-import Button from "@mui/material/Button";
-import Typography from "@mui/material/Typography";
+import { typeNormalization, downloadTempFile } from "/helpers/utils";
+import { alertService } from "/helpers";
 
 // Data
 import dataTableData from "/pagesComponents/applications/data-tables/data/dataTableData";
@@ -59,40 +51,38 @@ export default function WaterReading(props) {
     let currentSite = JSON.parse(localStorage.getItem("site"));
     console.log("currentSite-----------", currentSite);
     if (currentSite == null) {
-      Swal.fire({
+      alertService.info({
         title: "Info!",
         text: "Please choose Site first",
-        icon: "info",
       });
     } else {
       setSite(currentSite);
     }
   }, []);
 
-  const getProject = (val) => {
-    // setLoading(true);
-    console.log("site-----", site);
-    const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetDropdownProjectBySiteId`;
-    axios
-      .get(url, {
+  const getProject = async (val) => {
+    let response = await fetch("/api/transaction/water/dropdownproject", {
+      method: "POST",
+      body: JSON.stringify({
+        accessToken: accessToken,
         params: {
           SiteId: site?.siteId,
         },
-      })
-      .then((res) => {
-        setDataProject(res.data.result);
-        console.log("res----", formValues, res.data.result);
-        // setLoading(false);
-      })
-      .catch((err) => console.log(err));
+      }),
+    });
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
+    console.log("response----", response);
+    if (response.error) {
+      alertService.error({ title: "Error", text: response.error.message });
+    } else {
+      setDataProject(response.result);
+    }
+    console.log("project------", dataProject);
   };
   useEffect(() => {
     getProject();
   }, [site]);
-
-  const chooseSite = (val) => {
-    setSite(val);
-  };
 
   console.log("site------", site);
 
@@ -147,52 +137,6 @@ export default function WaterReading(props) {
     return value != undefined && value != "" && value.length > 0 && !error;
   };
 
-  const generateNewFaktur = () => {
-    Swal.fire({
-      title: "Generate New Faktur Pajak",
-      text: "Are you sure to generate new Faktur Pajak? this will remove it from filters & tasklist.",
-      icon: "question",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, new faktur!",
-      reverseButtons: true,
-    }).then((result) => {
-      if (result.isConfirmed) {
-      }
-    });
-  };
-  const cancel = () => {
-    Swal.fire({
-      title: "Cancel Faktur Pajak",
-      text: "Are you sure to cancel the current Faktur Pajak? this will remove it from tasklist & your data will be lost.",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, cancel faktur!",
-      reverseButtons: true,
-    }).then((result) => {
-      if (result.isConfirmed) {
-      }
-    });
-  };
-  const save = () => {
-    Swal.fire({
-      title: "Are you sure to \nSave Faktur Pajak?",
-      text: "Confirmation for saving Faktur Pajak.",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, save",
-      reverseButtons: true,
-    }).then((result) => {
-      if (result.isConfirmed) {
-      }
-    });
-  };
-
   const columns = [
     { Header: "no", accessor: "no", width: "5%" },
     { Header: "project", accessor: "project", width: "25%" },
@@ -220,9 +164,10 @@ export default function WaterReading(props) {
   const [tasklist, setTasklist] = useState({ columns: columns, rows: [] });
 
   const fetchData = async (data) => {
-    const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetWaterReadingList`;
-    axios
-      .get(url, {
+    let response = await fetch("/api/transaction/water/list", {
+      method: "POST",
+      body: JSON.stringify({
+        accessToken: accessToken,
         params: {
           SiteId: site?.siteId,
           ProjectId: formValues.project?.projectId,
@@ -230,97 +175,88 @@ export default function WaterReading(props) {
           MaxResultCount: 1000,
           SkipCount: 0,
         },
-      })
-      .then((response) => {
-        // handle success
-        console.log("suksesssss");
-        console.log(response.data.result);
-        const result = response.data.result.items;
-        const list = [];
-        const row = result.map((e, i) => {
-          list.push({
-            no: i + 1,
-            project: e.projectName,
-            cluster: e.clusterName,
-            unitcode: e.unitCode,
-            unitno: e.unitNo,
-            prev: e.prevRead,
-            curr: e.currentRead,
-            action: e,
-          });
-        });
-        setlistRow(list);
-        return setTasklist({
-          columns: columns,
-          rows: list,
-        });
-      })
-      .catch((error) => {
-        // handle error
-      });
-  };
+      }),
+    });
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
 
-  const handleExport = () => {
-    const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/ExportToExcelWaterReading`;
-    const config = {
-      headers: {
-        Authorization: "Bearer " + accessToken,
-        "Content-Type": "application/json",
-      },
-    };
-    const body = {
-      maxResultCount: 1000,
-      skipCount: 0,
-      siteId: site?.siteId,
-      projectId: formValues.project?.projectId,
-      clusterId: formValues.cluster?.clusterId,
-      search: undefined,
-    };
-    console.log(url, body);
-    axios
-      .post(url, body, config)
-      .then((res) => {
-        console.log("res", res);
-        if (res.data.success) {
-        }
-      })
-      .catch((error) => {
-        console.log("error-------", error);
-        if (error.response)
-          Swal.fire({
-            title: "Error",
-            text: error.response?.data.error.message,
-            icon: "error",
-          });
+    // console.log("GET PERMISSIONS RESULT", response);
+
+    console.log("response----", response);
+    if (response.error)
+      alertService.error({ title: "Error", text: response.error.message });
+    else {
+      const list = [];
+      const row = response.result.map((e, i) => {
+        list.push({
+          no: i + 1,
+          project: e.projectName,
+          cluster: e.clusterName,
+          unitcode: e.unitCode,
+          unitno: e.unitNo,
+          prev: e.prevRead,
+          curr: e.currentRead,
+          action: e,
+        });
       });
-  };
-  useEffect(() => {
-    const a = localStorage.getItem("site");
-    console.log("a=====", a);
-    if (a == null || a == undefined) {
+      setlistRow(list);
+      return setTasklist({
+        columns: columns,
+        rows: list,
+      });
+      console.log("list------", list);
     }
-  });
-
-  const onProjectChange = (val) => {
-    setLoading(true);
-    const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetDropdownClusterByProject?ProjectId=${val.projectId}`;
-    axios
-      .get(url)
-      .then((res) => {
-        setDataCluster(res.data.result);
-        setLoading(false);
-      })
-      .catch((err) => console.log(err));
   };
 
-  const propsSite = {
-    name: "site",
-    label: "Site Name",
-    placeholder: "Type Site",
-    type: "text",
-    isRequired: false,
-    errorMsg: "Site is required.",
-    defaultValue: "",
+  const handleExport = async () => {
+    let response = await fetch("/api/transaction/water/export", {
+      method: "POST",
+      body: JSON.stringify({
+        accessToken: accessToken,
+        params: {
+          maxResultCount: 1000,
+          skipCount: 0,
+          siteId: site?.siteId,
+          projectId: formValues.project?.projectId,
+          clusterId: formValues.cluster?.clusterId,
+          search: undefined,
+        },
+      }),
+    });
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
+
+    console.log("GET PERMISSIONS RESULT", response);
+
+    console.log("response----", response);
+    if (response.error)
+      alertService.error({ text: response.error.message, title: "Error" });
+    else {
+      downloadTempFile(response.result.uri);
+    }
+  };
+
+  const onProjectChange = async (val) => {
+    setLoading(true);
+    let response = await fetch("/api/master/site/dropdowncluster", {
+      method: "POST",
+      body: JSON.stringify({
+        accessToken: accessToken,
+        params: {
+          ProjectId: val.projectId,
+        },
+      }),
+    });
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
+    console.log("response----", response);
+    if (response.error) {
+      alertService.error({ title: "Error", text: response.error.message });
+    } else {
+      setDataCluster(response.result);
+    }
+    console.log("cluster------", dataCluster);
+    setLoading(false);
   };
 
   const openModalEdit = (record) => {
@@ -355,18 +291,10 @@ export default function WaterReading(props) {
         shadow="lg"
         opacity={1}
       >
-        {/* <MDTypography fontWeight="light" variant="h6" color="light">
-          Site Name
-        </MDTypography> */}
         <Grid container spacing={3}>
           <Grid item xs={12} sm={12}>
             <SiteDropdown onSelectSite={handleSite} site={site} />
           </Grid>
-          {/* <Grid item xs={12} sm={3}>
-            <MDButton variant="gradient" color="primary">
-              Set Site
-            </MDButton>
-          </Grid> */}
         </Grid>
       </MDBox>
       <MDBox py={3}>

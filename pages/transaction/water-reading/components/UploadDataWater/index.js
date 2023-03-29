@@ -35,6 +35,7 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
+import { async } from "regenerator-runtime";
 function UploadDataWater({ isOpen, onModalChanged, site }) {
   const [modalOpen, setModalOpen] = useState(true);
   const [{ accessToken, encryptedAccessToken }] = useCookies();
@@ -187,20 +188,31 @@ function UploadDataWater({ isOpen, onModalChanged, site }) {
     }
   });
 
-  const onProjectChange = (val) => {
+  const onProjectChange = async (val) => {
     setLoading(true);
-    const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetDropdownClusterByProject`;
-    axios
-      .get(url, {
+    let response = await fetch("/api/master/site/dropdowncluster", {
+      method: "POST",
+      body: JSON.stringify({
+        accessToken: accessToken,
         params: {
-          ProjectId: val?.projectId,
+          ProjectId: val.projectId,
         },
-      })
-      .then((res) => {
-        setDataCluster(res.data.result);
-        setLoading(false);
-      })
-      .catch((err) => console.log(err));
+      }),
+    });
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
+    console.log("response----", response);
+    if (response.error) {
+      Swal.fire({
+        title: "Error",
+        text: response.error.message,
+        icon: "error",
+      });
+    } else {
+      setDataCluster(response.result);
+    }
+    console.log("cluster------", dataCluster);
+    setLoading(false);
   };
   const uploadExcel = async (values, actions) => {
     setLoadingSubmit(false);
