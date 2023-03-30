@@ -42,12 +42,14 @@ function Paginations() {
       })
       .catch(() => setLoadingRefresh(false));
   };
-  useEffect(() => { getCustomerListClientSide() }, []);
+  useEffect(() => {
+    getCustomerListClientSide();
+  }, []);
 
   const [pageData, setPageData] = useState({
     rowData: [],
     totalRows: undefined,
-    totalPages: undefined
+    totalPages: undefined,
   });
   const [skipCount, setSkipCount] = useState(0);
   const [recordsPerPage, setRecordsPerPage] = useState(5); // Default to 10
@@ -71,7 +73,7 @@ function Paginations() {
         SiteId: 45,
         MaxResultCount: recordsPerPage, // Rows Per Page (Fixed). Start From 1
         SkipCount: skipCount, // Increments Based On Page (Flexible). Start From 0
-        Search: keywords
+        Search: keywords,
       },
     };
 
@@ -89,7 +91,9 @@ function Paginations() {
       })
       .catch(() => setLoadingRefresh(false));
   };
-  useEffect(() => { getCustomerListServerSide() }, [skipCount, recordsPerPage, keywords]);
+  useEffect(() => {
+    getCustomerListServerSide();
+  }, [skipCount, recordsPerPage, keywords]);
 
   const setCustomerTaskList = (rows) => {
     return {
@@ -121,7 +125,12 @@ function Paginations() {
             </MDBox>
             <MDBox mb={2}>
               <MDTypography variant="text" color="text">
-                Pertama, Anda perlu memahami perbedaan mendasar antara paginasi sisi klien dan paginasi sisi server. Di halaman sisi klien, kami sudah memiliki semua data untuk semua halaman yang perlu kami tampilkan di tabel yang berarti kami juga mengetahui jumlah totalnya (totalcount=pagesize*number of pages). Sekarang bandingkan ini dengan paginasi sisi server.
+                Pertama, Anda perlu memahami perbedaan mendasar antara paginasi
+                sisi klien dan paginasi sisi server. Di halaman sisi klien, kami
+                sudah memiliki semua data untuk semua halaman yang perlu kami
+                tampilkan di tabel yang berarti kami juga mengetahui jumlah
+                totalnya (totalcount=pagesize*number of pages). Sekarang
+                bandingkan ini dengan paginasi sisi server.
               </MDTypography>
             </MDBox>
           </Grid>
@@ -136,15 +145,19 @@ function Paginations() {
                   <MDTypography variant="h5">
                     List of Customer &nbsp;
                     <MDBadge
-                      variant="gradient" color="info"
+                      variant="gradient"
+                      color="info"
                       badgeContent="Client-side Pagination"
-                      size="lg" container
+                      size="lg"
+                      container
                     />
                   </MDTypography>
                 </MDBox>
                 <MDBox mb={2}>
                   <MDTypography variant="body2" color="text">
-                  Used to display a list with a relatively small amount of data, so that the mechanism will get the data as a whole immediately at the start of loading.
+                    Used to display a list with a relatively small amount of
+                    data, so that the mechanism will get the data as a whole
+                    immediately at the start of loading.
                   </MDTypography>
                 </MDBox>
               </Grid>
@@ -154,14 +167,16 @@ function Paginations() {
                   color="secondary"
                   onClick={(e) => getCustomerListClientSide(e)}
                 >
-                  <Icon>refresh</Icon>&nbsp; {isLoadingRefresh ? "Refreshing.." : "Refresh"}
+                  <Icon>refresh</Icon>&nbsp;{" "}
+                  {isLoadingRefresh ? "Refreshing.." : "Refresh"}
                 </MDButton>
               </Grid>
             </Grid>
           </MDBox>
           <DataTable
             table={setCustomerTaskList(customerList)}
-            canEntriesPerPage entriesPerPage={{ defaultValue: 5 }} 
+            canEntriesPerPage
+            entriesPerPage={{ defaultValue: 5 }}
           />
         </Card>
       </MDBox>
@@ -176,7 +191,17 @@ function Paginations() {
             </MDBox>
             <MDBox mb={2}>
               <MDTypography variant="text" color="text">
-                Kami akan mendapatkan potongan data yang kami minta artinya jika kami mempertahankan ukuran halaman sebagai 10 dan kami memiliki 100 data di server kami, tetapi karena kami meminta 10 jadi kami hanya akan mendapatkan 10 item. Lalu bagaimana komponen pagination mengetahui berapa jumlah total halaman yang perlu ditampilkan? Itu sebabnya kami membutuhkan jumlah total dari server juga saat kami mengambil data. Tapi tunggu, apakah kita membutuhkannya setiap saat? Yah, itu tergantung pada kasus penggunaan Anda. Secara umum, kami membutuhkan jumlah total baik untuk pertama kali atau jika kami melakukan pencarian atau filter.
+                Kami akan mendapatkan potongan data yang kami minta artinya jika
+                kami mempertahankan ukuran halaman sebagai 10 dan kami memiliki
+                100 data di server kami, tetapi karena kami meminta 10 jadi kami
+                hanya akan mendapatkan 10 item. Lalu bagaimana komponen
+                pagination mengetahui berapa jumlah total halaman yang perlu
+                ditampilkan? Itu sebabnya kami membutuhkan jumlah total dari
+                server juga saat kami mengambil data. Tapi tunggu, apakah kita
+                membutuhkannya setiap saat? Yah, itu tergantung pada kasus
+                penggunaan Anda. Secara umum, kami membutuhkan jumlah total baik
+                untuk pertama kali atau jika kami melakukan pencarian atau
+                filter.
               </MDTypography>
             </MDBox>
           </Grid>
@@ -191,15 +216,20 @@ function Paginations() {
                   <MDTypography variant="h5">
                     List of Customer &nbsp;
                     <MDBadge
-                      variant="gradient" color="info"
+                      variant="gradient"
+                      color="info"
                       badgeContent="Server-side Pagination"
-                      size="lg" container
+                      size="lg"
+                      container
                     />
                   </MDTypography>
                 </MDBox>
                 <MDBox mb={2}>
                   <MDTypography variant="body2" color="text">
-                    Used to display a list with a relatively large amount of data, so that the mechanism will get the data divided. This division is based on the parameters "Max Result Count" and "Skip Count".
+                    Used to display a list with a relatively large amount of
+                    data, so that the mechanism will get the data divided. This
+                    division is based on the parameters *Max Result Count* and
+                    *Skip Count*.
                   </MDTypography>
                 </MDBox>
               </Grid>
@@ -209,19 +239,23 @@ function Paginations() {
                   color="secondary"
                   onClick={(e) => getCustomerListServerSide(e)}
                 >
-                  <Icon>refresh</Icon>&nbsp; {isLoadingRefresh ? "Refreshing.." : "Refresh"}
+                  <Icon>refresh</Icon>&nbsp;{" "}
+                  {isLoadingRefresh ? "Refreshing.." : "Refresh"}
                 </MDButton>
               </Grid>
             </Grid>
           </MDBox>
           <DataTable
             table={setCustomerTaskList(pageData.rowData)}
-            canEntriesPerPage entriesPerPage={{ defaultValue: recordsPerPage }} 
-            canSearch serverSideSearch={["PS Code", "Customer Name"]}
-
+            canEntriesPerPage
+            entriesPerPage={{ defaultValue: recordsPerPage }}
+            canSearch
+            serverSideSearch={["PS Code", "Customer Name"]}
             manualPagination={true}
-            totalRows={pageData.totalRows} totalPages={pageData.totalPages}
-            recordsPerPage={recordsPerPage} skipCount={skipCount}
+            totalRows={pageData.totalRows}
+            totalPages={pageData.totalPages}
+            recordsPerPage={recordsPerPage}
+            skipCount={skipCount}
             pageChangeHandler={setSkipCount}
             recordsPerPageChangeHandler={recordsPerPageChangeHandler}
             keywordsChangeHandler={keywordsChangeHandler}
@@ -240,10 +274,9 @@ function Paginations() {
           </Grid>
           <Grid item xs={12} md={4} sx={{ textAlign: "right" }}>
             <Link href={"/other-pages/reprint-or"}>
-              <MDButton
-                variant="gradient" color="dark"
-              >
-                Billing App &nbsp; ꬹ &nbsp; Reprint Official Receipt<Icon>arrow_right</Icon>
+              <MDButton variant="gradient" color="dark">
+                Billing App &nbsp; ꬹ &nbsp; Reprint Official Receipt
+                <Icon>arrow_right</Icon>
               </MDButton>
             </Link>
           </Grid>

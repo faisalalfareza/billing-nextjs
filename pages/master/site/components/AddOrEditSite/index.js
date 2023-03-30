@@ -28,6 +28,7 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
   const [{ accessToken, encryptedAccessToken }] = useCookies();
   const [dataProject, setDataProject] = useState([]);
   const [dataCluster, setDataCluster] = useState([]);
+  const [user, setUser] = useState({});
 
   useEffect(() => {
     if (site) {
@@ -198,7 +199,6 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
           onSubmit={submitForm}
         >
           {({ errors, touched, isSubmitting, setFieldValue, resetForm }) => {
-            const [user, setUser] = useState({});
             if (params) {
               // get user and set form fields
 
