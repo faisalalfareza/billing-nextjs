@@ -16,23 +16,22 @@ export default async function handler(
         case "list":
           getList(res, body);
           break;
-
         case "dropdownproject":
           getDropdownProject(res, body);
           break;
-        case "create":
-          create(res, body);
+        case "update":
+          update(res, body);
           break;
         case "export":
           exportExcel(res, body);
           break;
+        case "activePeriod":
+          getActivePeriod(res, body);
+          break;
+        case "upload":
+          uploadExcel(res, body);
+          break;
       }
-      break;
-
-    case "GET":
-      switch (query.method) {
-      }
-      break;
       break;
   }
 }
@@ -91,10 +90,10 @@ async function getDropdownProject(res: any, body: any) {
     );
 }
 
-async function create(res: any, body: any) {
+async function update(res: any, body: any) {
   const { accessToken, params } = body;
 
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/MasterBilling/CreateMasterPeriod`;
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/UpdateDetailWaterReading`;
   const config = {
     headers: {
       Authorization: "Bearer " + accessToken,
@@ -106,7 +105,7 @@ async function create(res: any, body: any) {
   console.log("body---", params);
 
   axios
-    .post(url, params, config)
+    .put(url, params, config)
     .then((response) => {
       console.log("response-----", response);
       res.send({
@@ -147,4 +146,61 @@ async function exportExcel(res: any, body: any) {
         error: error,
       })
     );
+}
+
+async function getActivePeriod(res: any, body: any) {
+  const { accessToken, params } = body;
+
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetActivePeriod`;
+  const config = {
+    headers: {
+      Authorization: "Bearer " + accessToken,
+      "Access-Control-Allow-Origin": "*",
+    },
+    params: params,
+  };
+  console.log("config----", config);
+
+  axios
+    .get(url, config)
+    .then((response) =>
+      res.send({
+        result: response.data.result,
+      })
+    )
+    .catch((error) =>
+      res.send({
+        error: error,
+      })
+    );
+}
+
+async function uploadExcel(res: any, body: any) {
+  const { accessToken, params } = body;
+
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/UploadExcelWaterReading`;
+  const config = {
+    headers: {
+      Authorization: "Bearer " + accessToken,
+      "Access-Control-Allow-Origin": "*",
+    },
+  };
+  console.log("config----", config);
+
+  console.log("body---", params);
+
+  axios
+    .post(url, params, config)
+    .then((response) => {
+      console.log("response-----", response);
+      res.send({
+        result: response.data.result,
+      });
+    })
+    .catch((error) => {
+      console.log("err-----", error.response);
+      res.send({
+        error: error,
+      });
+    });
 }

@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from "react";
-import * as dayjs from "dayjs";
-import * as moment from "moment";
 import Swal from "sweetalert2";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
@@ -20,20 +18,9 @@ import MDButton from "/components/MDButton";
 import FormField from "/pagesComponents/FormField";
 
 // Data
-import axios from "axios";
-import getConfig from "next/config";
 import { useCookies } from "react-cookie";
-const { publicRuntimeConfig } = getConfig();
-import { MonthPicker } from "@mui/x-date-pickers";
-import { Dayjs } from "dayjs";
-import TextField from "@mui/material/TextField";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-
-import FormGroup from "@mui/material/FormGroup";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox";
+import { typeNormalization } from "/helpers/utils";
+import { alertService } from "/helpers";
 function EditDataWater({ isOpen, params, onModalChanged, site }) {
   const [modalOpen, setModalOpen] = useState(true);
   const [{ accessToken, encryptedAccessToken }] = useCookies();
@@ -77,50 +64,49 @@ function EditDataWater({ isOpen, params, onModalChanged, site }) {
   console.log("formValues::", formValues);
 
   const updateWater = async (values, actions) => {
-    setLoadingSubmit(false);
-
-    const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/UpdateDetailWaterReading`;
-    const config = {
-      headers: {
-        Authorization: "Bearer " + accessToken,
-        "Content-Type": "application/json",
-      },
-    };
     const body = {
       waterReadingId: params.waterReadingId,
       currentRead: values.current,
       prevRead: values.prev,
     };
-    console.log(url, body);
+    console.log(body);
 
     body.periodId = params.periodId;
-    axios
-      .put(url, body, config)
-      .then((res) => {
-        if (res.data.success) {
-          Swal.fire({
-            title: "Water Reading Updated",
-            text:
-              "Water Reading " +
-              params.period +
-              " in " +
-              params.unitCode +
-              " - " +
-              params.unitNo +
-              " has been successfully updated.",
-            icon: "success",
-          }).then((result) => {
-            setLoadingSubmit(false);
-            actions.resetForm();
-            closeModal();
-          });
-        }
-      })
-      .catch((error) => {
+
+    let response = await fetch("/api/transaction/water/update", {
+      method: "POST",
+      body: JSON.stringify({
+        accessToken: accessToken,
+        params: body,
+      }),
+    });
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
+
+    console.log("response----", response);
+    if (response.error) {
+      alertService.error({ text: response.error.message, title: "Error" });
+      setLoadingSubmit(false);
+      actions.resetForm();
+      closeModal();
+    } else {
+      Swal.fire({
+        title: "Water Reading Updated",
+        text:
+          "Water Reading " +
+          params.period +
+          " in " +
+          params.unitCode +
+          " - " +
+          params.unitNo +
+          " has been successfully updated.",
+        icon: "success",
+      }).then((result) => {
         setLoadingSubmit(false);
-        console.log("error-----", error);
-        // <Popup icon={error} text={error.message} title="Error"/>
+        actions.resetForm();
+        closeModal();
       });
+    }
   };
 
   const openModal = () => setModalOpen(true);

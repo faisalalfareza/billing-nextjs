@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import * as dayjs from "dayjs";
-import * as moment from "moment";
 import Swal from "sweetalert2";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
@@ -21,21 +20,9 @@ import MDButton from "/components/MDButton";
 import FormField from "/pagesComponents/FormField";
 
 // Data
-import axios from "axios";
-import getConfig from "next/config";
+import { typeNormalization } from "/helpers/utils";
+import { alertService } from "/helpers";
 import { useCookies } from "react-cookie";
-const { publicRuntimeConfig } = getConfig();
-import { MonthPicker } from "@mui/x-date-pickers";
-import { Dayjs } from "dayjs";
-import TextField from "@mui/material/TextField";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-
-import FormGroup from "@mui/material/FormGroup";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox";
-import { async } from "regenerator-runtime";
 function UploadDataWater({ isOpen, onModalChanged, site }) {
   const [modalOpen, setModalOpen] = useState(true);
   const [{ accessToken, encryptedAccessToken }] = useCookies();
@@ -127,7 +114,7 @@ function UploadDataWater({ isOpen, onModalChanged, site }) {
 
   const initialValues = {
     [project.name]: null,
-    [cluster.name]: null,
+    [cluster.name]: [],
     [fileUpload.name]: null,
   };
 
@@ -139,40 +126,46 @@ function UploadDataWater({ isOpen, onModalChanged, site }) {
   console.log("formValues::", formValues);
   console.log("dataCluster----", dataCluster);
 
-  const getProject = (val) => {
-    // setLoading(true);
-    console.log("site-----", site);
-    const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetDropdownProjectBySiteId`;
-    axios
-      .get(url, {
+  const getProject = async (val) => {
+    let response = await fetch("/api/transaction/water/dropdownproject", {
+      method: "POST",
+      body: JSON.stringify({
+        accessToken: accessToken,
         params: {
           SiteId: site?.siteId,
         },
-      })
-      .then((res) => {
-        setDataProject(res.data.result);
-        console.log("res----", formValues, res.data.result);
-        // setLoading(false);
-      })
-      .catch((err) => console.log(err));
+      }),
+    });
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
+    console.log("response----", response);
+    if (response.error) {
+      alertService.error({ title: "Error", text: response.error.message });
+    } else {
+      setDataProject(response.result);
+    }
+    console.log("project------", dataProject);
   };
 
-  const getPeriod = (val) => {
-    // setLoading(true);
-    console.log("site-----", site);
-    const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetActivePeriod`;
-    axios
-      .get(url, {
+  const getPeriod = async (val) => {
+    let response = await fetch("/api/transaction/water/activePeriod", {
+      method: "POST",
+      body: JSON.stringify({
+        accessToken: accessToken,
         params: {
           SiteId: site?.siteId,
         },
-      })
-      .then((res) => {
-        setPeriod(res.data.result);
-        console.log("res----", formValues, res.data.result);
-        // setLoading(false);
-      })
-      .catch((err) => console.log(err));
+      }),
+    });
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
+    console.log("response----", response);
+    if (response.error) {
+      alertService.error({ title: "Error", text: response.error.message });
+    } else {
+      setPeriod(response.result);
+    }
+    console.log("period------", period);
   };
   useEffect(() => {
     if (site) {
@@ -195,7 +188,7 @@ function UploadDataWater({ isOpen, onModalChanged, site }) {
       body: JSON.stringify({
         accessToken: accessToken,
         params: {
-          ProjectId: val.projectId,
+          ProjectId: val?.projectId,
         },
       }),
     });
@@ -215,50 +208,53 @@ function UploadDataWater({ isOpen, onModalChanged, site }) {
     setLoading(false);
   };
   const uploadExcel = async (values, actions) => {
-    setLoadingSubmit(false);
-
-    const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/UploadExcelWaterReading`;
-    const config = {
-      headers: {
-        Authorization: "Bearer " + accessToken,
-        "Content-Type": "application/json",
-      },
-    };
+    let listCluster = [];
+    formValues.cluster.map((e) => {
+      listCluster.push(e.clusterId);
+    });
     const list = [];
     dataWater.map((e) => {
       list.push({
-        siteId: site.siteId,
-        projectId: formValues.project.projectId,
-        clusterId: formValues.cluster.clusterId,
         unitNo: e.UnitNo,
         unitCode: e.UnitCode,
         prevRead: +e.PrevRead,
         currentRead: e.CurrRead,
-        periodId: period.periodId,
       });
     });
-    const body = list;
+    const body = {
+      siteId: site.siteId,
+      projectId: formValues.project.projectId,
+      periodId: period.periodId,
+      clusterId: listCluster,
+      waterReadingUploadDetailList: list,
+    };
     console.log("CompanyOfficer/CreateOrUpdateCompanyOfficer ", body);
-    axios
-      .post(url, body, config)
-      .then((res) => {
-        if (res.data.success) {
-          Swal.fire({
-            title: "Uploading success",
-            text:
-              dataWater.length + " rows data has been successfully uploaded",
-            icon: "success",
-          }).then(() => {
-            setLoadingSubmit(false);
-            actions.resetForm();
-            closeModal();
-          });
-        }
-      })
-      .catch((error) => {
+
+    let response = await fetch("/api/transaction/water/upload", {
+      method: "POST",
+      body: JSON.stringify({
+        accessToken: accessToken,
+        params: body,
+      }),
+    });
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
+
+    console.log("response----", response);
+    if (response.error) {
+      alertService.error({ text: response.error.message, title: "Error" });
+      setLoadingSubmit(false);
+    } else {
+      Swal.fire({
+        title: "Uploading success",
+        text: dataWater.length + " rows data has been successfully uploaded",
+        icon: "success",
+      }).then(() => {
         setLoadingSubmit(false);
-        console.log("error-------", error);
+        actions.resetForm();
+        closeModal();
       });
+    }
   };
 
   const openModal = () => setModalOpen(true);
@@ -275,8 +271,8 @@ function UploadDataWater({ isOpen, onModalChanged, site }) {
         ? Yup.object().required(project.errorMsg).typeError(project.errorMsg)
         : Yup.object().notRequired(),
       [cluster.name]: cluster.isRequired
-        ? Yup.object().required(cluster.errorMsg).typeError(cluster.errorMsg)
-        : Yup.object().notRequired(),
+        ? Yup.array().min(1).required(cluster.errorMsg)
+        : Yup.array().notRequired(),
       [fileUpload.name]: fileUpload.isRequired
         ? Yup.mixed().required(fileUpload.errorMsg)
         : Yup.mixed().notRequired(),
@@ -383,99 +379,77 @@ function UploadDataWater({ isOpen, onModalChanged, site }) {
                         </MDTypography>
                       </Grid>
                       <Grid item xs={12} sm={6}>
-                        {dataProject && (
-                          <Autocomplete
-                            disableCloseOnSelect
-                            // includeInputInList={true}
-                            options={dataProject}
-                            key={project.name}
-                            value={values.project}
-                            // getOptionSelected={(option, value) => {
-                            //   return (
-                            //     option.projectName === value.projectName
-                            //   );
-                            // }}
-                            getOptionLabel={(option) =>
-                              values.project != {}
-                                ? option.projectCode +
-                                  " - " +
-                                  option.projectName
-                                : "Nothing selected"
-                            }
-                            onChange={(e, value) => {
-                              setFieldValue(
-                                project.name,
-                                value !== null
-                                  ? value
-                                  : initialValues[project.name]
-                              );
-                              onProjectChange(value);
-                            }}
-                            noOptionsText="No results"
-                            renderInput={(params) => (
-                              <FormField
-                                {...params}
-                                type={project.type}
-                                label={
-                                  project.label +
-                                  (project.isRequired ? " *" : "")
-                                }
-                                name={project.name}
-                                placeholder={project.placeholder}
-                                InputLabelProps={{ shrink: true }}
-                                error={errors.project && touched.project}
-                                success={checkingSuccessInput(
-                                  project,
-                                  errors.project
-                                )}
-                              />
-                            )}
-                          />
-                        )}
+                        <Field
+                          name={project.name}
+                          key={project.name}
+                          component={Autocomplete}
+                          options={dataProject}
+                          getOptionLabel={(option) => option.projectName}
+                          onChange={(e, value) => {
+                            setFieldValue(
+                              project.name,
+                              value !== null
+                                ? value
+                                : initialValues[project.name]
+                            );
+                            onProjectChange(value);
+                          }}
+                          renderInput={(params) => (
+                            <FormField
+                              {...params}
+                              type={project.type}
+                              label={
+                                project.label + (project.isRequired ? " *" : "")
+                              }
+                              name={project.name}
+                              placeholder={project.placeholder}
+                              InputLabelProps={{ shrink: true }}
+                              error={errors.project && touched.project}
+                              success={checkingSuccessInput(
+                                project,
+                                errors.project
+                              )}
+                            />
+                          )}
+                        />
                       </Grid>
                       <Grid item xs={12} sm={6}>
-                        {dataCluster && (
-                          <Autocomplete
-                            disableCloseOnSelect
-                            clearOnBlur={false}
-                            key={cluster.name}
-                            options={dataCluster}
-                            value={values.cluster}
-                            getOptionLabel={(option) =>
-                              values.cluster != {}
-                                ? option.clusterCode +
-                                  " - " +
-                                  option.clusterName
-                                : "Nothing selected"
-                            }
-                            onChange={(e, value) =>
-                              setFieldValue(
-                                cluster.name,
-                                value !== null
-                                  ? value
-                                  : initialValues[cluster.name]
-                              )
-                            }
-                            renderInput={(params) => (
-                              <FormField
-                                {...params}
-                                type={cluster.type}
-                                label={
-                                  cluster.label +
-                                  (cluster.isRequired ? " *" : "")
-                                }
-                                name={cluster.name}
-                                placeholder={cluster.placeholder}
-                                InputLabelProps={{ shrink: true }}
-                                error={errors.cluster && touched.cluster}
-                                success={checkingSuccessInput(
-                                  cluster,
-                                  errors.cluster
-                                )}
-                              />
-                            )}
-                          />
-                        )}
+                        <Field
+                          name={cluster.name}
+                          multiple
+                          disableCloseOnSelect
+                          component={Autocomplete}
+                          options={dataCluster}
+                          getOptionLabel={(option) =>
+                            option.clusterCode + " - " + option.clusterName
+                          }
+                          key={cluster.name}
+                          onChange={(e, value) => {
+                            setFieldValue(
+                              cluster.name,
+                              value !== null
+                                ? value
+                                : initialValues[cluster.name]
+                            );
+                          }}
+                          renderInput={(params) => (
+                            <FormField
+                              {...params}
+                              type={cluster.type}
+                              label={
+                                cluster.label + (cluster.isRequired ? " *" : "")
+                              }
+                              name={cluster.name}
+                              placeholder={cluster.placeholder}
+                              InputLabelProps={{ shrink: true }}
+                              error={errors.cluster && touched.cluster}
+                              success={checkingSuccessInput(
+                                cluster,
+                                errors.cluster
+                              )}
+                            />
+                          )}
+                        />
                       </Grid>
 
                       <Grid item xs={6}>
