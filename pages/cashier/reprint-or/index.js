@@ -82,10 +82,10 @@ function RePrintOR() {
 
   const skipCountChangeHandler = (e) => {
     customerRequest.skipCount = e;
-    setCustomerRequest({
+    setCustomerRequest((prevState) => ({
       ...prevState,
       skipCount: e,
-    });
+    }));
   };
   const recordsPerPageChangeHandler = (e) => {
     customerRequest.recordsPerPage = e;
@@ -112,7 +112,7 @@ function RePrintOR() {
         accessToken: accessToken,
         params: {
           SiteId: site?.siteId,
-          Search: keywords,
+          // Search: keywords,
           MaxResultCount: recordsPerPage, // Rows Per Page (Fixed). Start From 1
           SkipCount: skipCount, // Increments Based On Page (Flexible). Start From 0
         },
@@ -444,6 +444,9 @@ function RePrintOR() {
                           recordsPerPageChangeHandler
                         }
                         keywordsChangeHandler={keywordsChangeHandler}
+                        entriesPerPage={{
+                          defaultValue: customerRequest.recordsPerPage,
+                        }}
                       />
                       <MDBox pt={1} pb={1} px={3}>
                         <Grid item xs={12}>

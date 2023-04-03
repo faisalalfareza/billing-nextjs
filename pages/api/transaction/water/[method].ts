@@ -53,7 +53,7 @@ async function getList(res: any, body: any) {
     .get(url, config)
     .then((response) =>
       res.send({
-        result: response.data.result.items,
+        result: response.data.result,
       })
     )
     .catch((error) =>
