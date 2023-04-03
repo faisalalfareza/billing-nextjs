@@ -53,17 +53,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
       icon: <Icon fontSize="medium">dashboard</Icon>,
       noCollapse: true,
     },
-    {
-      type: "collapse",
-      name: "Company Officer",
-      nameOnHeader: "Company Officer",
-      key: "company-officer",
-      route: "/company-officer",
-      permission: "Pages.Tenants.CompanyOfficer",
-      icon: <Icon fontSize="medium">person_add</Icon>,
-      noCollapse: true,
-    },
-    { type: "title", title: "Master", key: "title-master" },
+
     {
       type: "collapse",
       name: "Master",
@@ -270,119 +260,6 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           permission: "Pages.Tenants.GenerateNoSeriFP.List",
         },
       ],
-    },
-
-    // { type: "divider", key: "divider-1" },
-    { type: "title", title: "Faktur Pajak (FP)", key: "title-fp" },
-    {
-      type: "collapse",
-      name: "Nomor Seri FP",
-      nameOnHeader: "Nomor Seri Faktur Pajak (NSFP)",
-      key: "nsfp",
-      permission: "Pages.Tenants.GenerateNoSeriFP",
-      icon: <Icon fontSize="medium">apps</Icon>,
-      collapse: [
-        {
-          name: "Generate",
-          nameOnHeader: "Generate Faktur Pajak",
-          key: "generate",
-          route: "/nsfp/generate",
-          permission: "Pages.Tenants.GenerateNoSeriFP.Create",
-        },
-        {
-          name: "Upload Batch",
-          nameOnHeader: "Upload Batch Faktur Pajak",
-          key: "upload-batch",
-          route: "/nsfp/upload-batch",
-          permission: "Pages.Tenants.GenerateNoSeriFP.Create",
-        },
-        {
-          name: "List",
-          nameOnHeader: "List Faktur Pajak",
-          key: "list",
-          route: "/nsfp/list",
-          permission: "Pages.Tenants.GenerateNoSeriFP.List",
-        },
-      ],
-    },
-    {
-      type: "collapse",
-      name: "Faktur Pajak",
-      nameOnHeader: "Faktur Pajak (FP)",
-      key: "fp",
-      permission: "Pages.Tenants.FakturPajak",
-      icon: <Icon fontSize="medium">content_paste</Icon>,
-      collapse: [
-        {
-          name: "Input",
-          nameOnHeader: "Input Faktur Pajak",
-          key: "input",
-          route: "",
-          permission: "Pages.Tenants.FakturPajak.Input",
-        },
-        {
-          name: "Upload",
-          nameOnHeader: "Upload Faktur Pajak",
-          key: "upload",
-          route: "",
-          permission: "Pages.Tenants.FakturPajak.CreateUpload",
-        },
-        {
-          name: "List",
-          key: "list",
-          nameOnHeader: "List Faktur Pajak",
-          route: "",
-          permission: "Pages.Tenants.FakturPajak.List",
-        },
-        {
-          name: "Export to CSV",
-          nameOnHeader: "Export Faktur Pajak to CSV",
-          key: "export",
-          route: "",
-          permission: "",
-        },
-      ],
-    },
-
-    // { type: "divider", key: "divider-2" },
-    { type: "title", title: "Surat Setoran Pajak (SSP)", key: "title-ssp" },
-    {
-      type: "collapse",
-      name: "Surat Setoran Pajak",
-      nameOnHeader: "Surat Setoran Pajak (SSP)",
-      key: "ssp",
-      permission: "Pages.Tenants.SSP",
-      icon: <Icon fontSize="medium">receipt_long</Icon>,
-      collapse: [
-        {
-          name: "SSP by Booking Code",
-          key: "ssp-by-bookcode",
-          route: "",
-          permission: "Pages.Tenants.SSP.ListBookCode",
-        },
-        {
-          name: "SSP by Month",
-          key: "ssp-by-month",
-          route: "",
-          permission: "Pages.Tenants.SSP.ListMonth",
-        },
-      ],
-    },
-
-    { type: "divider", key: "divider-1" },
-    {
-      type: "title",
-      title: "Components based on case studies",
-      key: "title-comp",
-    },
-    {
-      type: "collapse",
-      name: "Pagination (Client & Server)",
-      nameOnHeader: "Client & Server-side Pagination (Using react-table)",
-      key: "paginations",
-      route: "/others/paginations",
-      icon: <Icon fontSize="medium">view_in_ar</Icon>,
-      noCollapse: true,
     },
   ];
 }
