@@ -167,7 +167,7 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
       siteId: site.siteId,
       periodMonth: addDate(values.periodName),
       periodYear: addDate(values.periodName),
-      periodNumber: values.periodNumber,
+      periodNumber: no,
       startDate: addDate(values.startDate),
       endDate: addDate(values.endDate),
       closeDate: addDate(values.closeDate),
@@ -364,7 +364,7 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
                             (periodNumber.isRequired ? " ⁽*⁾" : "")
                           }
                           name={periodNumber.name}
-                          // value={formValues.periodNumber}
+                          value={no}
                           placeholder={periodNumber.placeholder}
                           error={errors.periodNumber && touched.periodNumber}
                           success={checkingSuccessInput(
@@ -436,6 +436,7 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
                             formValues.startDate,
                             errors.startDate
                           )}
+                          InputLabelProps={{ shrink: true }}
                         />
                       </Grid>
                       <Grid item xs={12} sm={12}>
@@ -452,6 +453,7 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
                             formValues.endDate,
                             errors.endDate
                           )}
+                          InputLabelProps={{ shrink: true }}
                         />
                       </Grid>
                       <Grid item xs={12} sm={12}>
@@ -469,6 +471,7 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
                             formValues.closeDate,
                             errors.closeDate
                           )}
+                          InputLabelProps={{ shrink: true }}
                         />
                       </Grid>
                       {params && (
