@@ -198,8 +198,8 @@ function RePrintOR() {
         accessToken: accessToken,
         params: {
           UnitDataId: unitDataID,
-          MaxResultCount: recordsPerPage, // Rows Per Page (Fixed). Start From 1
-          SkipCount: skipCount, // Increments Based On Page (Flexible). Start From 0
+          MaxResultCount: 1000, // Rows Per Page (Fixed). Start From 1
+          SkipCount: 0, // Increments Based On Page (Flexible). Start From 0
         },
       }),
     });
