@@ -182,7 +182,7 @@ async function getPeriodNo(res: any, body: any) {
 async function create(res: any, body: any) {
   const { accessToken, params } = body;
 
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/CreateMasterPeriod`;
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/PaymentProses`;
   const config = {
     headers: {
       Authorization: "Bearer " + accessToken,

@@ -4,74 +4,42 @@ import MDBox from "/components/MDBox";
 import MDTypography from "/components/MDTypography";
 import Grid from "@mui/material/Grid";
 import { Autocomplete, TextField, Radio } from "@mui/material";
-import { Link } from "@mui/material";
 import MDButton from "/components/MDButton";
 import MDInput from "/components/MDInput";
-import getConfig from "next/config";
-const { publicRuntimeConfig } = getConfig();
 import { useEffect, useState } from "react";
 import Card from "@mui/material/Card";
-import { Formik, Form, Field } from "formik";
+import { Formik, Form, Field, ErrorMessage } from "formik";
 import FormField from "/pagesComponents/FormField";
 import * as Yup from "yup";
-import axios from "axios";
+import { typeNormalization } from "/helpers/utils";
+import { alertService } from "/helpers";
 import DataTable from "/layout/Tables/DataTable";
 import Icon from "@mui/material/Icon";
-import MDBadgeDot from "/components/MDBadgeDot";
 import Swal from "sweetalert2";
 import * as dayjs from "dayjs";
 import { FormGroup, FormControlLabel, Checkbox } from "@mui/material";
 import DataTableTotal from "../../../layout/Tables/DataTableTotal";
 import { useCookies } from "react-cookie";
-import { typeNormalization } from "/helpers/utils";
 import SiteDropdown from "../../../pagesComponents/dropdown/Site";
+import NumberInput from "/pagesComponents/dropdown/NumberInput";
+import TotalDisable from "/pagesComponents/dropdown/TotalDisable";
 import { NumericFormat } from "react-number-format";
 
 export default function BillingPayment(props) {
-  let dummy = {
-    unitDataId: 1,
-    siteId: 45,
-    projectId: 29,
-    clusterId: 632,
-    projectName: "Tanjung Bunga",
-    clusterName: "Bouvardia",
-    unitName: "Bouvardia Park",
-    unitCode: "BOAV",
-    unitNo: "0001",
-    customerName: "reynard renaldo",
-    psCode: "40217770",
-  };
-  let dummyinvoice = [
-    {
-      invoiceId: 1,
-      invoiceNo: "string",
-      invoiceName: "string",
-      balance: 123456,
-      endBalance: 78910,
-      paymentAmount: 1237878,
-    },
-    {
-      invoiceId: 2,
-      invoiceNo: "string",
-      invoiceName: "string",
-      balance: 767656587,
-      endBalance: 234242,
-      paymentAmount: 45609,
-    },
-  ];
   const [listBilling, setListBilling] = useState([]);
-  const [listInvoice, setListInvoice] = useState(dummyinvoice);
+  const [listInvoice, setListInvoice] = useState([]);
   const [site, setSite] = useState(null);
   const [openModal, setOpenModal] = useState(false);
-  const [isDetail, setIsDetail] = useState(true);
+  const [isDetail, setIsDetail] = useState(false);
   const [params, setParams] = useState(undefined);
   const [filterText, setFilterText] = useState("");
   const [selectedPSCode, setSelectedPSCode] = useState(undefined);
-  const [detail, setDetail] = useState(dummy);
+  const [detail, setDetail] = useState({});
   const [user, setUser] = useState(undefined);
   const [{ accessToken, encryptedAccessToken }] = useCookies();
   const [dataPaymentMethod, setDataPaymentMethod] = useState([]);
   const [dataBank, setDataBank] = useState([]);
+  const [totalFooter, setTotalFooter] = useState({});
 
   useEffect(() => {
     getPaymentMethod();
@@ -107,102 +75,37 @@ export default function BillingPayment(props) {
 
   //dari sini
   const [isLoading, setLoading] = useState(false);
-  const schemeModels = {
-    formId: "payment-detail-form",
-    formField: {
-      paymentMethod: {
-        name: "paymentMethod",
-        label: "Payment Method",
-        placeholder: "Choose Payment Method",
-        type: "text",
-        isRequired: true,
-        errorMsg: "Payment Method is required.",
-        defaultValue: "",
-      },
-      amountPayment: {
-        name: "amountPayment",
-        label: "Amount Payment",
-        placeholder: "Type Amount Payment",
-        type: "number",
-        isRequired: true,
-        errorMsg: "Amount Payment is required.",
-        maxLength: 50,
-        invalidMaxLengthMsg:
-          "Amount Payment exceeds the maximum limit of 50 characters.",
-        defaultValue: "",
-      },
-      transactionDate: {
-        name: "transactionDate",
-        label: "Transaction Date",
-        placeholder: "Choose Date",
-        type: "date",
-        isRequired: true,
-        errorMsg: "Transaction Date is required.",
-        defaultValue: "",
-      },
-      bank: {
-        name: "bank",
-        label: "Bank",
-        placeholder: "Choose Bank",
-        type: "text",
-        isRequired: true,
-        errorMsg: "Bank is required.",
-        defaultValue: "",
-      },
-      remarks: {
-        name: "remarks",
-        label: "Remarks",
-        placeholder: "Type the remarks",
-        type: "text",
-        isRequired: true,
-        errorMsg: "Remarks is required.",
-        defaultValue: "",
-      },
-    },
-  };
-  let {
-    paymentMethod,
-    amountPayment,
-    transactionDate,
-    bank,
-    remarks,
-    statusActive,
-  } = schemeModels.formField;
   let schemeValidations = Yup.object().shape({
-    [paymentMethod.name]: paymentMethod.isRequired
-      ? Yup.object()
-          .required(paymentMethod.errorMsg)
-          .typeError(paymentMethod.errorMsg)
-      : Yup.object().notRequired(),
-    [amountPayment.name]: amountPayment.isRequired
-      ? Yup.string()
-          .required(amountPayment.errorMsg)
-          .typeError(amountPayment.errorMsg)
-      : Yup.string().notRequired(),
-    [transactionDate.name]: transactionDate.isRequired
-      ? Yup.date()
-          .required(transactionDate.errorMsg)
-          .typeError(transactionDate.errorMsg)
-      : Yup.date().notRequired(),
-    [bank.name]: bank.isRequired
-      ? Yup.object().required(bank.errorMsg).typeError(bank.errorMsg)
-      : Yup.object().notRequired(),
-    [remarks.name]: remarks.isRequired
-      ? Yup.string().required(remarks.errorMsg).typeError(remarks.errorMsg)
-      : Yup.string().notRequired(),
+    cluster: Yup.string(),
+    paymentMethod: Yup.object().required("Payment Method is required."),
+    cardNumber: Yup.string(),
+    amountPayment: Yup.string()
+      .required("Amount Payment is required.")
+      .typeError("Amount Payment is required."),
+    transactionDate: Yup.date()
+      .required("Transaction Date is required.")
+      .typeError("Transaction Date is required."),
+    bank: Yup.object()
+      .required("Bank is required.")
+      .typeError("Bank is required."),
+    remarks: Yup.string().required("Remarks is required."),
+    charge: Yup.string(),
   });
 
   var customParseFormat = require("dayjs/plugin/customParseFormat");
   dayjs.extend(customParseFormat);
 
   const initialValues = {
-    [paymentMethod.name]: params ? params.paymentMethod : null,
-    [amountPayment.name]: params ? params.amountPayment : null,
-    [transactionDate.name]: params
-      ? dayjs(params.transactionDate).format("YYYY-MM-DD")
-      : null,
-    [bank.name]: params ? dayjs(params.bank).format("YYYY-MM-DD") : null,
-    [remarks.name]: params ? dayjs(params.remarks).format("YYYY-MM-DD") : null,
+    cluster: detail?.clusterName,
+    paymentMethod: "",
+    cardNumber: "",
+    amountPayment: null,
+    transactionDate: null,
+    bank: null,
+    remarks: "",
+    charge: "",
+    isPrintOR: true,
+    isAddSignee: true,
   };
 
   const [formValues, setformValues] = useState(initialValues);
@@ -213,96 +116,52 @@ export default function BillingPayment(props) {
   console.log("formValues::", formValues);
 
   const submitForm = async (values, actions) => {
-    createPeriod(values, actions);
+    console.log("formval", values);
+    paymentProcess(values, actions);
   };
 
   const checkingSuccessInput = (value, error) => {
     return value != undefined && value != "" && value.length > 0 && !error;
   };
 
-  const createPeriod = async (values, actions) => {
-    // setLoadingSubmit(false);
-    // const url = `${publicRuntimeConfig.apiUrl}/api/services/app/MasterBilling/CreateMasterPeriod`;
-    // const urlUpdate = `${publicRuntimeConfig.apiUrl}/api/services/app/MasterBilling/UpdateMasterPeriod`;
-    // const config = {
-    //   headers: {
-    //     Authorization: "Bearer " + accessToken,
-    //     "Content-Type": "application/json",
-    //   },
-    // };
-    // const body = {
-    //   siteId: site.siteId,
-    //   periodMonth: addDate(values.periodName),
-    //   periodYear: addDate(values.periodName),
-    //   periodNumber: values.periodNumber,
-    //   startDate: addDate(values.startDate),
-    //   endDate: addDate(values.endDate),
-    //   closeDate: addDate(values.closeDate),
-    //   isActive: values.statusActive,
-    // };
-    // console.log("CompanyOfficer/CreateOrUpdateCompanyOfficer ", body);
-    // if (!params) {
-    //   axios
-    //     .post(url, body, config)
-    //     .then((res) => {
-    //       if (res.data.success) {
-    //         Swal.fire({
-    //           title: "New Period Added",
-    //           text:
-    //             "Period " +
-    //             values.periodNumber +
-    //             " has been successfully added",
-    //           icon: "success",
-    //           showConfirmButton: true,
-    //           timerProgressBar: true,
-    //           timer: 3000,
-    //         }).then(() => {
-    //           setLoadingSubmit(false);
-    //           actions.resetForm();
-    //           closeModal();
-    //         });
-    //       }
-    //     })
-    //     .catch((error) => {
-    //       setLoadingSubmit(false);
-    //       console.log("error-----", error.response.data.error.message);
-    //       Swal.fire({
-    //         title: "Error",
-    //         icon: "error",
-    //         text: error.response.data.error.message,
-    //       });
-    //     });
-    // } else {
-    //   body.periodId = params.periodId;
-    //   axios
-    //     .put(urlUpdate, body, config)
-    //     .then((res) => {
-    //       if (res.data.success) {
-    //         Swal.fire({
-    //           title: "Period Updated",
-    //           text:
-    //             "Period " +
-    //             values.periodName +
-    //             " in " +
-    //             values.periodNumber +
-    //             " has been successfully updated.",
-    //           icon: "success",
-    //           showConfirmButton: true,
-    //           timerProgressBar: true,
-    //           timer: 3000,
-    //         }).then((result) => {
-    //           setLoadingSubmit(false);
-    //           actions.resetForm();
-    //           closeModal();
-    //         });
-    //       }
-    //     })
-    //     .catch((error) => {
-    //       setLoadingSubmit(false);
-    //       console.log("error-----", error);
-    //       // <Popup icon={error} text={error.message} title="Error"/>
-    //     });
-    // }
+  const paymentProcess = async (fields, actions) => {
+    console.log("valprop", fields);
+    console.log("listinvoice", listInvoice);
+    const body = {
+      paymentType: fields.paymentMethod.paymentType,
+      cardNumber: fields.cardNumber,
+      totalPayment: fields.amountPayment,
+      total: 0,
+      charge: fields.charge,
+      unitDataId: detail.unitDataId,
+      unitCode: detail.unitCode,
+      unitNo: detail.unitNo,
+      psCode: detail.psCode,
+      bankId: fields.bank.bankID,
+      remarks: fields.remarks,
+      listInvoicePayment: listInvoice,
+    };
+    console.log("CompanyOfficer/CreateOrUpdateCompanyOfficer ", body);
+
+    let response = await fetch("/api/cashier/billing/create", {
+      method: "POST",
+      body: JSON.stringify({
+        accessToken: accessToken,
+        params: body,
+      }),
+    });
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
+    console.log("response----", response);
+    if (response.error) {
+      alertService.error({ title: "Error", text: response.error.message });
+    } else {
+      alertService.success({
+        title: "Input Payment Successfull",
+        text: "Official receipt document will be displayed and will be sent to the customer via email",
+      });
+    }
+    actions.setSubmitting(false);
   };
 
   const handleCheck = (val) => {
@@ -345,15 +204,30 @@ export default function BillingPayment(props) {
       rows: listBilling,
     };
   };
-  const curr = (value) => {
-    console.log("duit", value);
-    return formatValue({
-      value: value.toString(),
-      groupSeparator: ".",
-      decimalSeparator: ",",
-      prefix: "Rp ",
+  const paymentAmountChange = (value, index) => {
+    console.log("upilll", value);
+    const newData = listInvoice.map((item, i) => {
+      if (i === index) {
+        return {
+          ...item,
+          paymentAmount: value,
+        };
+      } else {
+        return item;
+      }
     });
+
+    setListInvoice(newData);
+
+    console.log("listinvo", listInvoice);
   };
+
+  useEffect(() => {
+    let tp = listInvoice.reduce((acc, o) => acc + parseInt(o.paymentAmount), 0);
+    let n = Object.assign({}, totalFooter);
+    n.payment = tp;
+    setTotalFooter(n);
+  }, [listInvoice]);
   const setInvoiceList = () => {
     return {
       columns: [
@@ -396,25 +270,23 @@ export default function BillingPayment(props) {
           Header: "Payment Amount",
           accessor: "paymentAmount",
           align: "right",
-          Cell: ({ value }) => {
-            let valString = value.toString();
-            console.log("duitpayAmount----", valString, typeof valString);
+          Cell: ({ value, row }) => {
+            console.log("valuepay----", value);
             return (
-              <NumericFormat
-                customInput={TextField}
-                id="input-example"
-                name="input-name"
-                placeholder="Please enter a number"
-                prefix="Rp. "
-                variant="outlined"
-                isNumericString={true}
-                thousandSeparator="."
-                decimalSeparator=","
-                allowNegative={false}
+              // <NumberInput
+              //   inputProps={{ style: { textAlign: "right" } }}
+              //   placeholder="Type Amount Payment"
+              //   value={value}
+              //   onValueChange={(val) =>
+              //     paymentAmountChange(val.value, row.index)
+              //   }
+              // />
+              <TextField
+                inputProps={{ style: { textAlign: "right" } }}
+                placeholder="Type Amount Payment"
                 value={value}
-                decimalScale={2}
-                onValueChange={(value, name) =>
-                  console.log("upilll", value, name)
+                onChange={(val) =>
+                  paymentAmountChange(val.target.value, row.index)
                 }
               />
             );
@@ -481,38 +353,6 @@ export default function BillingPayment(props) {
       setListBilling(list);
       console.log("list------", list);
     }
-    // const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/GetCustomerList`;
-    // axios
-    //   .get(url, {
-    //     params: {
-    //       SiteId: site?.siteId,
-    //       Search: filterText,
-    //       MaxResultCount: 1000,
-    //       SkipCount: 0,
-    //     },
-    //   })
-    //   .then((response) => {
-    //     // handle success
-    //     const result = response.data.result.items;
-    //     const list = [];
-    //     const row = result.map((e, i) => {
-    //       list.push({
-    //         no: i + 1,
-    //         projectName: e.projectName,
-    //         clusterName: e.clusterName,
-    //         customerName: e.customerName,
-    //         unitName: e.unitName,
-    //         unitCode: e.unitCode,
-    //         unitNo: e.unitNo,
-    //         e,
-    //       });
-    //     });
-    //     setListBilling(list);
-    //     console.log("list------", list);
-    //   })
-    //   .catch((error) => {
-    //     // handle error
-    //   });
   };
 
   const getPaymentMethod = async () => {
@@ -586,6 +426,20 @@ export default function BillingPayment(props) {
       const result = response.result.listInvoicePayment;
       setListInvoice(result);
       setIsDetail(true);
+      let newState = { ...formValues };
+      newState.cluster = detail.clusterName;
+      setformValues(newState);
+      let tb = result.reduce((acc, o) => acc + parseInt(o.balance), 0);
+      let te = result.reduce((acc, o) => acc + parseInt(o.endBalance), 0);
+      let tp = result.reduce((acc, o) => acc + parseInt(o.paymentAmount), 0);
+      setTotalFooter((prevState) => {
+        return {
+          ...prevState,
+          balance: tb,
+          endBalance: te,
+          payment: tp,
+        };
+      });
       console.log("list-invoice-----", listInvoice);
     }
   };
@@ -741,27 +595,28 @@ export default function BillingPayment(props) {
                           onSubmit={submitForm}
                         >
                           {({
-                            values,
                             errors,
                             touched,
                             isSubmitting,
                             setFieldValue,
                             resetForm,
                           }) => {
-                            setformValues(values);
-                            getFormData(values);
-
-                            const isValifForm = () => {
-                              // return checkingSuccessInput(companyV, errors.periodNumber) &&
-                              //   checkingSuccessInput(officerNameV, errors.amountPayment) &&
-                              //   checkingSuccessInput(officerTitleV, errors.paymentMethod)
-                              //   ? true
-                              //   : false;
-                            };
-
+                            const fields = [
+                              "cluster",
+                              "paymentMethod",
+                              "cardNumber",
+                              "amountPayment",
+                              "transactionDate",
+                              "bank",
+                              "remarks",
+                              "charge",
+                            ];
+                            // fields.forEach((field) =>
+                            //   setFieldValue(field, initialValues[field], false)
+                            // );
                             return (
                               <Form
-                                id={schemeModels.formId}
+                                id="payment-detail"
                                 autoComplete="off"
                                 fullWidth
                               >
@@ -769,28 +624,27 @@ export default function BillingPayment(props) {
                                   <Grid container spacing={3}>
                                     <Grid item xs={6}>
                                       <FormField
-                                        disabled
                                         type="text"
-                                        label="Cluster"
+                                        label="Cluster ⁽*⁾"
                                         name="cluster"
-                                        // value={detail?.clusterName}
-                                        placeholder="Custer"
+                                        disabled
+                                        placeholder="Type Cluster"
+                                        error={
+                                          errors.cluster && touched.cluster
+                                        }
+                                        success={checkingSuccessInput(
+                                          formValues.cluster,
+                                          errors.cluster
+                                        )}
                                       />
                                     </Grid>
                                     <Grid item xs={6}>
                                       <FormField
-                                        type={transactionDate.type}
-                                        label={
-                                          transactionDate.label +
-                                          (transactionDate.isRequired
-                                            ? " ⁽*⁾"
-                                            : "")
-                                        }
-                                        name={transactionDate.name}
-                                        value={formValues.transactionDate}
-                                        placeholder={
-                                          transactionDate.placeholder
-                                        }
+                                        InputLabelProps={{ shrink: true }}
+                                        type="date"
+                                        label="Transaction Date ⁽*⁾"
+                                        name="transactionDate"
+                                        placeholder="Type Transaction Date"
                                         error={
                                           errors.transactionDate &&
                                           touched.transactionDate
@@ -803,7 +657,7 @@ export default function BillingPayment(props) {
                                     </Grid>
                                     <Grid item xs={6}>
                                       <Field
-                                        name={paymentMethod.name}
+                                        name="paymentMethod"
                                         component={Autocomplete}
                                         options={dataPaymentMethod}
                                         getOptionLabel={(option) =>
@@ -811,35 +665,26 @@ export default function BillingPayment(props) {
                                         }
                                         onChange={(e, value) => {
                                           setFieldValue(
-                                            paymentMethod.name,
+                                            "paymentMethod",
                                             value !== null
                                               ? value
-                                              : initialValues[
-                                                  paymentMethod.name
-                                                ]
+                                              : initialValues["paymentMethod"]
                                           );
                                         }}
                                         renderInput={(params) => (
                                           <FormField
                                             {...params}
-                                            type={paymentMethod.type}
-                                            label={
-                                              paymentMethod.label +
-                                              (paymentMethod.isRequired
-                                                ? " *"
-                                                : "")
-                                            }
-                                            name={paymentMethod.name}
-                                            placeholder={
-                                              paymentMethod.placeholder
-                                            }
+                                            type="text"
+                                            label="Payment Method *"
+                                            name="paymentMethod"
+                                            placeholder="Choose Payment Method"
                                             InputLabelProps={{ shrink: true }}
                                             error={
                                               errors.paymentMethod &&
                                               touched.paymentMethod
                                             }
                                             success={checkingSuccessInput(
-                                              paymentMethod,
+                                              formValues.paymentMethod,
                                               errors.paymentMethod
                                             )}
                                           />
@@ -848,7 +693,7 @@ export default function BillingPayment(props) {
                                     </Grid>
                                     <Grid item xs={6}>
                                       <Field
-                                        name={bank.name}
+                                        name="bank"
                                         component={Autocomplete}
                                         options={dataBank}
                                         getOptionLabel={(option) =>
@@ -856,26 +701,23 @@ export default function BillingPayment(props) {
                                         }
                                         onChange={(e, value) => {
                                           setFieldValue(
-                                            bank.name,
+                                            "bank",
                                             value !== null
                                               ? value
-                                              : initialValues[bank.name]
+                                              : initialValues["bank"]
                                           );
                                         }}
                                         renderInput={(params) => (
                                           <FormField
                                             {...params}
-                                            type={bank.type}
-                                            label={
-                                              bank.label +
-                                              (bank.isRequired ? " *" : "")
-                                            }
-                                            name={bank.name}
-                                            placeholder={bank.placeholder}
+                                            type="text"
+                                            label="Bank"
+                                            name="bank"
+                                            placeholder="Choose Bank"
                                             InputLabelProps={{ shrink: true }}
                                             error={errors.bank && touched.bank}
                                             success={checkingSuccessInput(
-                                              bank,
+                                              formValues.bank,
                                               errors.bank
                                             )}
                                           />
@@ -883,22 +725,27 @@ export default function BillingPayment(props) {
                                       />
                                     </Grid>
                                     <Grid item xs={6}>
-                                      <MDInput
-                                        label="Card Number"
-                                        variant="standard"
-                                        fullWidth
+                                      <FormField
+                                        type="text"
+                                        label="Card number"
+                                        name="cardNumber"
+                                        placeholder="Type Card Number"
+                                        error={
+                                          errors.cardNumber &&
+                                          touched.cardNumber
+                                        }
+                                        success={checkingSuccessInput(
+                                          formValues.cardNumber,
+                                          errors.cardNumber
+                                        )}
                                       />
                                     </Grid>
                                     <Grid item xs={6}>
                                       <FormField
-                                        type={remarks.type}
-                                        label={
-                                          remarks.label +
-                                          (remarks.isRequired ? " ⁽*⁾" : "")
-                                        }
-                                        name={remarks.name}
-                                        value={formValues.remarks}
-                                        placeholder={remarks.placeholder}
+                                        type="text"
+                                        label="Remarks ⁽*⁾"
+                                        name="remarks"
+                                        placeholder="Type Remarks"
                                         error={
                                           errors.remarks && touched.remarks
                                         }
@@ -909,18 +756,16 @@ export default function BillingPayment(props) {
                                       />
                                     </Grid>
                                     <Grid item xs={4}>
-                                      <FormField
-                                        component={NumericFormat}
-                                        type={amountPayment.type}
-                                        label={
-                                          amountPayment.label +
-                                          (amountPayment.isRequired
-                                            ? " ⁽*⁾"
-                                            : "")
-                                        }
-                                        name={amountPayment.name}
+                                      <NumberInput
+                                        label="Amount Payment ⁽*⁾"
+                                        placeholder="Type Amount Payment"
                                         value={formValues.amountPayment}
-                                        placeholder={amountPayment.placeholder}
+                                        onValueChange={(val) =>
+                                          setFieldValue(
+                                            "amountPayment",
+                                            val.floatValue
+                                          )
+                                        }
                                         error={
                                           errors.amountPayment &&
                                           touched.amountPayment
@@ -930,21 +775,50 @@ export default function BillingPayment(props) {
                                           errors.amountPayment
                                         )}
                                       />
+
+                                      <MDBox mt={0.75}>
+                                        <MDTypography
+                                          component="div"
+                                          variant="caption"
+                                          color="error"
+                                          fontWeight="regular"
+                                        >
+                                          <ErrorMessage name="amountPayment" />
+                                        </MDTypography>
+                                      </MDBox>
                                     </Grid>
                                     <Grid item xs={4}>
-                                      <MDInput
-                                        variant="outlined"
+                                      <NumberInput
                                         label="Charge"
-                                        fullWidth
-                                        disabled
+                                        placeholder="Type Charge"
+                                        value={formValues.charge}
+                                        onValueChange={(val) =>
+                                          setFieldValue(
+                                            "charge",
+                                            val.floatValue
+                                          )
+                                        }
+                                        error={errors.charge && touched.charge}
+                                        success={checkingSuccessInput(
+                                          formValues.charge,
+                                          errors.charge
+                                        )}
                                       />
+                                      <MDBox mt={0.75}>
+                                        <MDTypography
+                                          component="div"
+                                          variant="caption"
+                                          color="error"
+                                          fontWeight="regular"
+                                        >
+                                          <ErrorMessage name="charge" />
+                                        </MDTypography>
+                                      </MDBox>
                                     </Grid>
                                     <Grid item xs={4}>
-                                      <MDInput
-                                        variant="outlined"
-                                        label="Total"
-                                        fullWidth
-                                        disabled
+                                      <TotalDisable
+                                        title="Total"
+                                        value={123456}
                                       />
                                     </Grid>
                                     <Grid item xs={12}>
@@ -966,40 +840,10 @@ export default function BillingPayment(props) {
                                           table={setInvoiceList()}
                                           showTotalEntries={false}
                                           isSorted={false}
+                                          totalFooter={totalFooter}
                                         />
                                       </MDBox>
                                     </Grid>
-                                    {params && (
-                                      <Grid item xs={12} sm={12}>
-                                        <FormGroup>
-                                          <FormControlLabel
-                                            control={
-                                              <Checkbox
-                                                disabled={
-                                                  !formValues.statusActive
-                                                }
-                                                name={statusActive.name}
-                                                checked={
-                                                  formValues.statusActive
-                                                }
-                                                onChange={(e) => {
-                                                  console.log(e.target.checked);
-                                                  setFieldValue(
-                                                    statusActive.name,
-                                                    e.target.checked != null
-                                                      ? e.target.checked
-                                                      : initialValues[
-                                                          statusActive.name
-                                                        ]
-                                                  );
-                                                }}
-                                              />
-                                            }
-                                            label="Active"
-                                          />
-                                        </FormGroup>
-                                      </Grid>
-                                    )}
                                   </Grid>
                                 </MDBox>
                                 <Grid item xs={6}>
@@ -1007,19 +851,19 @@ export default function BillingPayment(props) {
                                     <FormControlLabel
                                       control={
                                         <Checkbox
-                                          // disabled={!formValues.statusActive}
+                                          disabled={!formValues.isPrintOR}
                                           name="print-or"
                                           color="primary"
-                                          // checked={formValues.statusActive}
-                                          // onChange={(e) => {
-                                          //   console.log(e.target.checked);
-                                          //   setFieldValue(
-                                          //     statusActive.name,
-                                          //     e.target.checked != null
-                                          //       ? e.target.checked
-                                          //       : initialValues[statusActive.name]
-                                          //   );
-                                          // }}
+                                          checked={formValues.isPrintOR}
+                                          onChange={(e) => {
+                                            console.log(e.target.checked);
+                                            setFieldValue(
+                                              "isPrintOR",
+                                              e.target.checked != null
+                                                ? e.target.checked
+                                                : initialValues["isPrintOR"]
+                                            );
+                                          }}
                                         />
                                       }
                                       label="Print Official Receipt (OR)"
@@ -1027,19 +871,19 @@ export default function BillingPayment(props) {
                                     <FormControlLabel
                                       control={
                                         <Checkbox
-                                          // disabled={!formValues.statusActive}
-                                          name="print-or"
+                                          disabled={!formValues.isAddSignee}
+                                          name="add-signee"
                                           color="primary"
-                                          // checked={formValues.statusActive}
-                                          // onChange={(e) => {
-                                          //   console.log(e.target.checked);
-                                          //   setFieldValue(
-                                          //     statusActive.name,
-                                          //     e.target.checked != null
-                                          //       ? e.target.checked
-                                          //       : initialValues[statusActive.name]
-                                          //   );
-                                          // }}
+                                          checked={formValues.isAddSignee}
+                                          onChange={(e) => {
+                                            console.log(e.target.checked);
+                                            setFieldValue(
+                                              "isAddSignee",
+                                              e.target.checked != null
+                                                ? e.target.checked
+                                                : initialValues["isAddSignee"]
+                                            );
+                                          }}
                                         />
                                       }
                                       label={"Add Signee : " + user?.user.name}

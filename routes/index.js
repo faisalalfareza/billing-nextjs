@@ -27,18 +27,9 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
   return [
     {
       type: "collapse",
-      name: informations
-        ? capitalizeFirstLetter(informations["user"]["userName"])
-        : "",
+      name: "Brooklyn Alice",
       key: "username",
-      icon: (
-        <MDAvatar
-          src={
-            profiles ? `data:image/png;base64, ${profiles}` : profilePicture.src
-          }
-          size="sm"
-        />
-      ),
+      icon: <MDAvatar src={profilePicture.src} size="sm" />,
       collapse: [
         {
           name: "Logout",

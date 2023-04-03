@@ -47,6 +47,8 @@ import MDPagination from "/components/MDPagination";
 // NextJS Material Dashboard 2 PRO examples
 import DataTableHeadCell from "/layout/Tables/DataTable/DataTableHeadCell";
 import DataTableBodyCell from "/layout/Tables/DataTable/DataTableBodyCell";
+import { TableFooter, TableCell } from "@mui/material";
+import TotalDisable from "/pagesComponents/dropdown/TotalDisable";
 
 function DataTableTotal({
   entriesPerPage,
@@ -56,6 +58,7 @@ function DataTableTotal({
   pagination,
   isSorted,
   noEndBorder,
+  totalFooter,
 }) {
   const defaultValue = entriesPerPage.defaultValue
     ? entriesPerPage.defaultValue
@@ -90,9 +93,12 @@ function DataTableTotal({
     setGlobalFilter,
     state: { pageIndex, pageSize, globalFilter },
   } = tableInstance;
+  console.log("props", tableInstance);
 
   // Set the default value for the entries per page when component mounts
-  useEffect(() => { setPageSize(defaultValue || 10) }, [defaultValue, setPageSize]);
+  useEffect(() => {
+    setPageSize(defaultValue || 10);
+  }, [defaultValue, setPageSize]);
 
   // Set the entries per page value based on the select value
   const setEntriesPerPage = (value) => setPageSize(value);
@@ -242,6 +248,24 @@ function DataTableTotal({
             );
           })}
         </TableBody>
+        <TableFooter {...getTableBodyProps()}>
+          <TableRow key="total-footer">
+            <TableCell></TableCell>
+            <TableCell></TableCell>
+            <TableCell>
+              <TotalDisable title="Total Balance" value={totalFooter.balance} />{" "}
+            </TableCell>
+            <TableCell>
+              <TotalDisable
+                title="Total End Balance"
+                value={totalFooter.endBalance}
+              />
+            </TableCell>
+            <TableCell>
+              <TotalDisable title="Total Payment" value={totalFooter.payment} />{" "}
+            </TableCell>
+          </TableRow>
+        </TableFooter>
       </Table>
 
       <MDBox

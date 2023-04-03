@@ -24,6 +24,7 @@ import Footer from "/layout/Footer";
 import DataTable from "/layout/Tables/DataTable";
 
 import FormField from "/pagesComponents/FormField";
+import SiteDropdown from "../../../pagesComponents/dropdown/Site";
 
 function RePrintOR() {
   const [{ accessToken, encryptedAccessToken }] = useCookies();
@@ -266,9 +267,30 @@ function RePrintOR() {
       .catch(() => setLoadingOfficialReceipt(false));
   };
 
+  const handleSite = (siteVal) => {
+    setSite(siteVal);
+    localStorage.setItem("site", JSON.stringify(siteVal));
+  };
+
   return (
     <DashboardLayout>
       <DashboardNavbar />
+      <MDBox
+        p={3}
+        color="light"
+        bgColor="info"
+        variant="gradient"
+        borderRadius="lg"
+        shadow="lg"
+        opacity={1}
+        mb={2}
+      >
+        <Grid container spacing={3}>
+          <Grid item xs={12} sm={12}>
+            <SiteDropdown onSelectSite={handleSite} site={site} />
+          </Grid>
+        </Grid>
+      </MDBox>
       <MDBox py={3}>
         <Grid container spacing={3}>
           {/* Customer List */}
