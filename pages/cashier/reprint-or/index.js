@@ -2,8 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useCookies } from "react-cookie";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
-import axios from "axios";
-
 // @mui material components
 import Card from "@mui/material/Card";
 import Grid from "@mui/material/Grid";
@@ -15,19 +13,20 @@ import Radio from "@mui/material/Radio";
 import MDBox from "/components/MDBox";
 import MDTypography from "/components/MDTypography";
 import MDButton from "/components/MDButton";
-import MDBadge from "/components/MDBadge";
 
 // NextJS Material Dashboard 2 PRO examples
 import DashboardLayout from "/layout/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "/layout/Navbars/DashboardNavbar";
-import Footer from "/layout/Footer";
 import DataTable from "/layout/Tables/DataTable";
 
 import FormField from "/pagesComponents/FormField";
 import SiteDropdown from "../../../pagesComponents/dropdown/Site";
+import { typeNormalization } from "/helpers/utils";
+import { alertService } from "/helpers";
 
 function RePrintOR() {
   const [{ accessToken, encryptedAccessToken }] = useCookies();
+  const [site, setSite] = useState(null);
 
   const schemeModels = {
     formId: "reprint-or-form",
@@ -54,11 +53,22 @@ function RePrintOR() {
   };
   useEffect(() => {
     document.getElementsByName(customerName.name)[0].focus();
+    let currentSite = JSON.parse(localStorage.getItem("site"));
+    console.log("currentSite-----------", currentSite);
+    if (currentSite == null) {
+      Swal.fire({
+        title: "Info!",
+        text: "Please choose Site first",
+        icon: "info",
+      });
+    } else {
+      setSite(currentSite);
+    }
   }, []);
 
   const [isLoadingCustomer, setLoadingCustomer] = useState(false);
   const [customerRequest, setCustomerRequest] = useState({
-    scheme: 45,
+    scheme: site?.siteId,
     keywords: "",
     recordsPerPage: 5,
     skipCount: 0,
@@ -92,37 +102,41 @@ function RePrintOR() {
     }));
   };
 
-  const getCustomerList = async () => {
+  const getCustomerList = async (data) => {
     setLoadingCustomer(true);
 
     const { scheme, keywords, recordsPerPage, skipCount } = customerRequest;
+    let response = await fetch("/api/cashier/reprintor/listCustomer", {
+      method: "POST",
+      body: JSON.stringify({
+        accessToken: accessToken,
+        params: {
+          SiteId: site?.siteId,
+          Search: keywords,
+          MaxResultCount: recordsPerPage, // Rows Per Page (Fixed). Start From 1
+          SkipCount: skipCount, // Increments Based On Page (Flexible). Start From 0
+        },
+      }),
+    });
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
 
-    const url = `http://18.140.60.145:1010/api/services/app/CashierSystem/GetCustomerList`;
-    const config = {
-      params: {
-        SiteId: scheme,
-        Search: keywords,
-        MaxResultCount: recordsPerPage, // Rows Per Page (Fixed). Start From 1
-        SkipCount: skipCount, // Increments Based On Page (Flexible). Start From 0
-      },
-    };
-
-    axios
-      .get(url, config)
-      .finally(() => setLoadingCustomer(false))
-      .then((res) => {
-        let data = res.data.result;
-        setCustomerResponse((prevState) => ({
-          ...prevState,
-          rowData: data.items,
-          totalRows: data.totalCount,
-          totalPages: Math.ceil(
-            data.totalCount / customerRequest.recordsPerPage
-          ),
-        }));
-      })
-      .catch(() => setLoadingCustomer(false));
+    console.log("response----", response);
+    if (response.error)
+      alertService.error({ title: "Error", text: response.error.message });
+    else {
+      let data = response.result;
+      setCustomerResponse((prevState) => ({
+        ...prevState,
+        rowData: data.items,
+        totalRows: data.totalCount,
+        totalPages: Math.ceil(data.totalCount / customerRequest.recordsPerPage),
+      }));
+      console.log("list------", data);
+      setLoadingCustomer(false);
+    }
   };
+
   const setCustomerTaskList = (rows) => {
     return {
       columns: [
@@ -177,31 +191,37 @@ function RePrintOR() {
   const getOfficialReceiptList = async (unitDataID) => {
     setLoadingOfficialReceipt(true);
 
-    const url = `http://18.140.60.145:1010/api/services/app/CashierSystem/GetListOfficialReceipt`;
-    const config = {
-      params: {
-        UnitDataId: unitDataID,
-        MaxResultCount: 1000, // Rows Per Page (Fixed). Start From 1
-        SkipCount: 0, // Increments Based On Page (Flexible). Start From 0
-      },
-    };
+    const { scheme, keywords, recordsPerPage, skipCount } = customerRequest;
+    let response = await fetch("/api/cashier/reprintor/listOr", {
+      method: "POST",
+      body: JSON.stringify({
+        accessToken: accessToken,
+        params: {
+          UnitDataId: unitDataID,
+          MaxResultCount: recordsPerPage, // Rows Per Page (Fixed). Start From 1
+          SkipCount: skipCount, // Increments Based On Page (Flexible). Start From 0
+        },
+      }),
+    });
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
 
-    axios
-      .get(url, config)
-      .finally(() => setLoadingOfficialReceipt(false))
-      .then((res) => {
-        let data = res.data.result;
-        setOfficialReceiptData((prevState) => ({
-          ...prevState,
-          rowData: data.items,
-          totalRows: data.totalCount,
-          totalPages: Math.ceil(
-            data.totalCount / customerRequest.recordsPerPage
-          ),
-        }));
-      })
-      .catch(() => setLoadingOfficialReceipt(false));
+    console.log("response----", response);
+    if (response.error)
+      alertService.error({ title: "Error", text: response.error.message });
+    else {
+      let data = response.result;
+      setOfficialReceiptData((prevState) => ({
+        ...prevState,
+        rowData: data.items,
+        totalRows: data.totalCount,
+        totalPages: Math.ceil(data.totalCount / customerRequest.recordsPerPage),
+      }));
+      console.log("list------", data);
+      setLoadingOfficialReceipt(false);
+    }
   };
+
   const setOfficialReceiptTaskList = (rows) => {
     return {
       columns: [
@@ -244,27 +264,29 @@ function RePrintOR() {
 
   const reprintOfficialReceipt = async (billingHeaderId) => {
     setLoadingOfficialReceipt(true);
-
-    const { scheme } = customerRequest;
-
-    const url = `http://18.140.60.145:1010/api/services/app/CashierSystem/ReprintOfficialReceipt`;
     const body = {
-      SiteId: scheme,
+      SiteId: site?.siteId,
       BillingHeaderId: billingHeaderId,
     };
-    const config = {
-      headers: {
-        Authorization: "Bearer " + accessToken,
-        "Content-Type": "application/json",
-      },
-      params: body,
-    };
+    let response = await fetch("/api/cashier/reprintor/reprintOr", {
+      method: "POST",
+      body: JSON.stringify({
+        accessToken: accessToken,
+        params: body,
+      }),
+    });
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
 
-    axios
-      .post(url, body, config)
-      .finally(() => setLoadingOfficialReceipt(false))
-      .then((res) => window.open(res.data.result))
-      .catch(() => setLoadingOfficialReceipt(false));
+    console.log("response----", response);
+    if (response.error)
+      alertService.error({ title: "Error", text: response.error.message });
+    else {
+      let data = response.result;
+      window.open(data);
+      console.log("list------", data);
+      setLoadingOfficialReceipt(false);
+    }
   };
 
   const handleSite = (siteVal) => {
@@ -375,7 +397,7 @@ function RePrintOR() {
                                     <MDButton
                                       type="submit"
                                       variant="gradient"
-                                      color="info"
+                                      color="primary"
                                       sx={{ height: "100%" }}
                                       disabled={
                                         !isValifForm() || isLoadingCustomer
@@ -434,7 +456,7 @@ function RePrintOR() {
                               <MDButton
                                 type="button"
                                 variant="gradient"
-                                color="info"
+                                color="primary"
                                 sx={{ height: "100%" }}
                                 onClick={() =>
                                   getOfficialReceiptList(
@@ -443,13 +465,7 @@ function RePrintOR() {
                                 }
                                 disabled={!selectedUnit}
                               >
-                                Show this Unit{" "}
-                                {selectedUnit && (
-                                  <sup>
-                                    &nbsp;({selectedUnit.unitCode}-
-                                    {selectedUnit.unitNo})
-                                  </sup>
-                                )}
+                                Show this Unit
                               </MDButton>
                             </MDBox>
                           </MDBox>
