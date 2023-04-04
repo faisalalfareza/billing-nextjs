@@ -503,12 +503,12 @@ function CancelPayment() {
               { modalOpen.isOpen && <DetailCancelPayment
                   isOpen={modalOpen.isOpen}
                   params={modalOpen.params}
-                  onModalChanged={() => {
+                  onModalChanged={(isChanged) => {
                     setModalOpen((prevState) => ({
                       ...prevState,
                       isOpen: !modalOpen.isOpen
                     }));
-                    getCancelPaymentList(selectedUnit.unitDataId);
+                    isChanged && getCancelPaymentList(selectedUnit.unitDataId);
                   }}
                 />
               }

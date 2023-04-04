@@ -84,48 +84,60 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
     return (!isRequired && true) || (isRequired && value != undefined && value != "" && value.length > 0 && !error);
   };
   const submitForm = async (values, actions) => cancelPayment(values, actions);
-
-  const [remarksCancel, setRemarksCancel] = useState();;
   const cancelPayment = async (values, actions) => {
-    setLoadingSubmit(true);
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You will cancel the payment on this receipt number.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, cancel it!",
+      reverseButtons: true,
+      focusConfirm: false
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setLoadingSubmit(true);
 
-    const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/CancelPayment`;
-    const body = {
-      BillingHeaderId: detailCancelPayment.billingHeaderId,
-      Remarks: values.remarks
-    };
-    const config = {
-      headers: {
-        Authorization: "Bearer " + accessToken,
-        'Content-Type': 'application/json'
-      },
-      params: body
-    };
-
-    axios
-      .post(url, body, config)
-      .finally(() => setLoadingSubmit(false))
-      .then(res => {
-        res.data.success && Swal.fire({
-          title: 'Payment Cancelled',
-          text: "Payment with "+detailCancelPayment.receiptNumber+" has been successfully canceled.",
-          icon: 'success',
-          showConfirmButton: true,
-          timerProgressBar: true,
-          timer: 3000,
-        }).then(() => {
-          setLoadingSubmit(false);
-          actions.resetForm();
-          closeModal();
-        });
-      }).catch((error) => setLoadingSubmit(false));
+        const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/CancelPayment`;
+        const body = {
+          BillingHeaderId: detailCancelPayment.billingHeaderId,
+          Remarks: values.remarks
+        };
+        const config = {
+          headers: {
+            Authorization: "Bearer " + accessToken,
+            'Content-Type': 'application/json'
+          },
+          params: body
+        };
+    
+        axios
+          .post(url, body, config)
+          .finally(() => setLoadingSubmit(false))
+          .then(res => {
+            res.data.success && Swal.fire({
+              title: 'Payment Cancelled',
+              text: "Payment with "+detailCancelPayment.receiptNumber+" has been successfully canceled.",
+              icon: 'success',
+              showConfirmButton: true,
+              timerProgressBar: true,
+              timer: 3000,
+            }).then(() => {
+              setLoadingSubmit(false);
+              actions.resetForm();
+              closeModal(true);
+            });
+          }).catch((error) => setLoadingSubmit(false));
+      }
+    });
   };
 
   const openModal = () => setModalOpen(true);
   const toggleModal = () => setModalOpen(true);
-  const closeModal = () => {
+  const closeModal = (isChanged) => {
     setModalOpen(false); setDetailCancelPayment({});
-    setTimeout(() => onModalChanged(), 0);
+    setTimeout(() => onModalChanged(isChanged), 0);
   };
 
   if (isOpen) {
