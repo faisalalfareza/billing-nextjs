@@ -10,17 +10,17 @@ export default async function handler(
 ) {
   let { method, query, body } = req;
   body = JSON.parse(body);
+
   switch (method) {
     case "POST":
       switch (query.method) {
         case "listCustomer":
-          getList(res, body);
+          getCustomerList(res, body);
           break;
 
-        case "listOr":
-          getListOR(res, body);
+        case "listCancelPayment":
+          getListCancelPayment(res, body);
           break;
-
         case "reprintOr":
           reprintOR(res, body);
           break;
@@ -28,19 +28,19 @@ export default async function handler(
       break;
 
     case "GET":
-      switch (query.method) {
-      }
+      // switch (query.method) {
+      // }
       break;
   }
 }
 
-async function getList(res: any, body: any) {
+async function getCustomerList(res: any, body: any) {
   const { accessToken, params } = body;
 
   const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/GetCustomerList`;
   const config = {
     headers: {
-      Authorization: "Bearer " + accessToken,
+      // Authorization: "Bearer " + accessToken,
       "Access-Control-Allow-Origin": "*",
     },
     params: params,
@@ -60,13 +60,13 @@ async function getList(res: any, body: any) {
     );
 }
 
-async function getListOR(res: any, body: any) {
+async function getListCancelPayment(res: any, body: any) {
   const { accessToken, params } = body;
 
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/GetListOfficialReceipt`;
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/GetListCancelPayment`;
   const config = {
     headers: {
-      Authorization: "Bearer " + accessToken,
+      // Authorization: "Bearer " + accessToken,
       "Access-Control-Allow-Origin": "*",
     },
     params: params,
@@ -85,6 +85,7 @@ async function getListOR(res: any, body: any) {
       });
     });
 }
+
 async function reprintOR(res: any, body: any) {
   const { accessToken, params } = body;
 

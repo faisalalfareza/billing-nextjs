@@ -197,8 +197,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           name: "Cancel Payment",
           nameOnHeader: "Cancel Payment",
           key: "cancel-payment",
-          route: "/app/nsfp/list",
-          permission: "Pages.Tenants.GenerateNoSeriFP.List",
+          route: "/cashier/cancel-payment"
         },
         {
           name: "Upload Bulk Payment",
