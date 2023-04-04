@@ -280,7 +280,7 @@ function CancelPayment() {
   const openModal = (record = undefined) => {
     setModalOpen({
       isOpen: !modalOpen.isOpen,
-      params: record.billingHeaderId
+      params: record
     });
   };
 

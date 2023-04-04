@@ -32,6 +32,7 @@ import TableRow from '@mui/material/TableRow';
 const { publicRuntimeConfig } = getConfig();
 
 function DetailCancelPayment({ isOpen, params, onModalChanged }) {
+  const isCanceled = (params.canceled == "Yes");
   const [modalOpen, setModalOpen] = useState(true);
   const [{ accessToken, encryptedAccessToken }] = useCookies();
   const [isLoadingSubmit, setLoadingSubmit] = useState(false);
@@ -68,7 +69,7 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
     const config = {
       headers: { Authorization: "Bearer " + accessToken },
       params: {
-        BillingHeaderId: params
+        BillingHeaderId: params.billingHeaderId
       }
     };
     axios
@@ -176,7 +177,7 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
                     <Grid item xs={12} md={12}>
                       <MDBox>
                         <MDTypography variant="h5">
-                          Detail Payment
+                          { !isCanceled ? "Detail Payment" : "Detail Canceled Payment" }
                         </MDTypography>
                       </MDBox>
                     </Grid>
@@ -355,7 +356,7 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
                           </MDBox>
                         </MDBox>
                       </Grid>   
-                      <Grid item xs={12} sm={12}>
+                      { !isCanceled && <Grid item xs={12} sm={12}>
                         <FormField
                           type={remarks.type}
                           label={remarks.label + (remarks.isRequired ? " ⁽*⁾" : "")}
@@ -366,7 +367,7 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
                           error={errors.remarks && touched.remarks}
                           success={remarks.isRequired && checkingSuccessInput(remarks.isRequired, remarksV, errors.remarks)}
                         />
-                      </Grid>
+                      </Grid>}
                     </Grid>
                   </MDBox>
                 </ModalBody>
@@ -380,9 +381,9 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
                       color="secondary"
                       onClick={closeModal}
                     >
-                      Cancel
+                      { !isCanceled ? "Cancel" : "Close" }
                     </MDButton>
-                    <MDBox ml={{ xs: 0, sm: 1 }} mt={{ xs: 1, sm: 0 }}>
+                    { !isCanceled && <MDBox ml={{ xs: 0, sm: 1 }} mt={{ xs: 1, sm: 0 }}>
                       <MDButton
                         type="submit"
                         variant="gradient"
@@ -392,7 +393,7 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
                       >
                         {isLoadingSubmit ? "Canceling Payment.." : "Cancel Payment"}
                       </MDButton>
-                    </MDBox>
+                    </MDBox> }
                   </MDBox>
                 </ModalFooter>
               </Form>
