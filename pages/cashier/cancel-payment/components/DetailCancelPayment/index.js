@@ -128,8 +128,8 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
         if (response.error) alertService.error({ title: "Error", text: response.error.message });
         else {
           response && Swal.fire({
-            title: 'Payment Cancelled',
-            text: receiptNumber ? ("Payment with receipt number "+receiptNumber+" has been successfully canceled.") : ("Payment has been successfully canceled."),
+            title: 'Payment Canceled',
+            text: `Payment of this receipt number${receiptNumber ? ` ${receiptNumber}` : ` `}has been canceled.`,
             icon: 'success',
             showConfirmButton: true,
             timerProgressBar: true,

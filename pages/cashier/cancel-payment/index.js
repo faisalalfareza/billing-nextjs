@@ -29,6 +29,7 @@ import SiteDropdown from "../../../pagesComponents/dropdown/Site";
 import { typeNormalization } from "/helpers/utils";
 import { alertService } from "/helpers";
 
+
 function CancelPayment() {
   const [{ accessToken, encryptedAccessToken }] = useCookies();
   const [site, setSite] = useState(null);
@@ -172,8 +173,8 @@ function CancelPayment() {
     customerRequest.keywords != "" && getCustomerList();
   }, [customerRequest.skipCount, customerRequest.recordsPerPage]);
 
-  const checkingSuccessInput = (value, error) => {
-    return value != undefined && value != "" && value.length > 0 && !error;
+  const checkingSuccessInput = (isRequired, value, error) => {
+    return (!isRequired && true) || (isRequired && value != undefined && value != "" && value.length > 0 && !error);
   };
   const handleCustomerSubmit = async (e) => {
     e != undefined && e.preventDefault();
@@ -310,14 +311,9 @@ function CancelPayment() {
             <Card>
               <MDBox p={3} lineHeight={1}>
                 <Grid container alignItems="center">
-                  <Grid item xs={12}>
-                    <MDBox mb={1}>
+                  <Grid item xs={12} mb={2}>
+                    <MDBox>
                       <MDTypography variant="h5">Filter</MDTypography>
-                    </MDBox>
-                    <MDBox mb={2}>
-                      <MDTypography variant="body2" color="text">
-                        Used to view tax invoices based on available filters.
-                      </MDTypography>
                     </MDBox>
                   </Grid>
                   <Grid item xs={12}>
@@ -325,17 +321,18 @@ function CancelPayment() {
                       initialValues={schemeInitialValues}
                       validationSchema={schemeValidations}
                     >
-                      {({ values, errors, touched }) => {
-                        let { customerName: customerNameV } = values;
+                      {({
+                        values,
+                        errors,
+                        touched
+                      }) => {
+                        let {
+                          customerName: customerNameV
+                        } = values;
 
-                        const isValifForm = () => {
-                          return checkingSuccessInput(
-                            customerNameV,
-                            errors.customerName
-                          )
-                            ? true
-                            : false;
-                        };
+                        const isValifForm = () => (
+                          checkingSuccessInput(customerName.isRequired, customerNameV, errors.customerName)
+                        );
 
                         return (
                           <MDBox
@@ -343,8 +340,6 @@ function CancelPayment() {
                             role="form"
                             onSubmit={(e) => handleCustomerSubmit(e)}
                           >
-                            {" "}
-                            {/* pb={3} px={3} */}
                             <Grid container spacing={3}>
                               <Grid item xs={12} sm={9}>
                                 <FormField
@@ -359,10 +354,7 @@ function CancelPayment() {
                                   error={
                                     errors.customerName && touched.customerName
                                   }
-                                  success={checkingSuccessInput(
-                                    customerNameV,
-                                    errors.customerName
-                                  )}
+                                  success={checkingSuccessInput(customerName.isRequired, customerNameV, errors.customerName)}
                                   onKeyUp={(e) =>
                                     setCustomerRequest((prevState) => ({
                                       ...prevState,
@@ -410,15 +402,9 @@ function CancelPayment() {
                 </Grid>
                 {customerResponse.rowData.length > 0 && (
                   <Grid container alignItems="center" pt={3}>
-                    <Grid item xs={12}>
-                      <MDBox mb={1}>
+                    <Grid item xs={12} mb={2}>
+                      <MDBox>
                         <MDTypography variant="h5">Search Result</MDTypography>
-                      </MDBox>
-                      <MDBox mb={2}>
-                        <MDTypography variant="body2" color="text">
-                          Customers related to search `
-                          {customerRequest.keywords}`.
-                        </MDTypography>
                       </MDBox>
                     </Grid>
                     <Grid item xs={12}>
@@ -433,7 +419,7 @@ function CancelPayment() {
                         recordsPerPageChangeHandler={recordsPerPageChangeHandler}
                         keywordsChangeHandler={keywordsChangeHandler}
                       />
-                      <MDBox pt={1} pb={1} px={3}>
+                      <MDBox pt={3} pb={1} px={3}>
                         <Grid item xs={12}>
                           <MDBox
                             display="flex"
@@ -468,27 +454,18 @@ function CancelPayment() {
               <Card>
                 <MDBox p={3} lineHeight={1}>
                   <Grid container alignItems="center">
-                    <Grid item xs={12}>
-                      <MDBox mb={1}>
+                    <Grid item xs={12} mb={2}>
+                      <MDBox>
                         <MDTypography variant="h5">
                           Cancel Payment List
-                        </MDTypography>
-                      </MDBox>
-                      <MDBox mb={2}>
-                        <MDTypography variant="body2" color="text">
-                          Cancel payments of {selectedUnit.projectName}{" "}
-                          {selectedUnit.unitName} {selectedUnit.unitCode}{" "}
-                          {selectedUnit.unitNo} on behalf of{" "}
-                          {selectedUnit.customerName}.
                         </MDTypography>
                       </MDBox>
                     </Grid>
                     <Grid item xs={12}>
                       <DataTable
                         table={setCancelPaymentTaskList(cancelPaymentData.rowData)}
-                        canEntriesPerPage
-                        entriesPerPage={{ defaultValue: customerRequest.recordsPerPage }}
-                        canSearch
+                        // canEntriesPerPage entriesPerPage={{ defaultValue: customerRequest.recordsPerPage }}
+                        // canSearch
                       />
                     </Grid>
                   </Grid>
