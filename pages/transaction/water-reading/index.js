@@ -34,12 +34,15 @@ import SiteDropdown from "../../../pagesComponents/dropdown/Site";
 
 export default function WaterReading(props) {
   const [controller] = useMaterialUIController();
-  const { darkMode } = controller;
+  const [customerResponse, setCustomerResponse] = useState({
+    rowData: [],
+    totalRows: undefined,
+    totalPages: undefined,
+  });
   const [openUpload, setOpenUpload] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [dataCluster, setDataCluster] = useState([]);
   const [dataProject, setDataProject] = useState([]);
-  const [listRow, setlistRow] = useState([]);
   const [site, setSite] = useState(null);
   const handleOpenUpload = () => setOpenUpload(true);
   const handleOpenEdit = () => setOpenEdit(true);
@@ -58,7 +61,37 @@ export default function WaterReading(props) {
     } else {
       setSite(currentSite);
     }
+    getProject();
   }, []);
+
+  const [customerRequest, setCustomerRequest] = useState({
+    scheme: site?.siteId,
+    keywords: "",
+    recordsPerPage: 10,
+    skipCount: 0,
+  });
+
+  const skipCountChangeHandler = (e) => {
+    customerRequest.skipCount = e;
+    setCustomerRequest((prevState) => ({
+      ...prevState,
+      skipCount: e,
+    }));
+  };
+  const recordsPerPageChangeHandler = (e) => {
+    customerRequest.recordsPerPage = e;
+    setCustomerRequest({
+      ...prevState,
+      recordsPerPage: e,
+    });
+  };
+  const keywordsChangeHandler = (e) => {
+    customerRequest.keywords = e;
+    setCustomerRequest((prevState) => ({
+      ...prevState,
+      keywords: e,
+    }));
+  };
 
   const getProject = async (val) => {
     let response = await fetch("/api/transaction/water/dropdownproject", {
@@ -83,6 +116,9 @@ export default function WaterReading(props) {
   useEffect(() => {
     getProject();
   }, [site]);
+  useEffect(() => {
+    fetchData();
+  }, [customerRequest.skipCount, customerRequest.recordsPerPage]);
 
   console.log("site------", site);
 
@@ -119,10 +155,7 @@ export default function WaterReading(props) {
 
   const [formValues, setformValues] = useState(initialValues);
 
-  const getFormData = (values) => {
-    console.log("getFormData::", values);
-  };
-  console.log("formValues::", formValues);
+  const getFormData = (values) => {};
 
   const validations = Yup.object().shape({
     [project.name]: Yup.object()
@@ -164,6 +197,8 @@ export default function WaterReading(props) {
   const [tasklist, setTasklist] = useState({ columns: columns, rows: [] });
 
   const fetchData = async (data) => {
+    console.log("record--", recordsPerPage);
+    const { scheme, keywords, recordsPerPage, skipCount } = customerRequest;
     let response = await fetch("/api/transaction/water/list", {
       method: "POST",
       body: JSON.stringify({
@@ -172,8 +207,8 @@ export default function WaterReading(props) {
           SiteId: site?.siteId,
           ProjectId: formValues.project?.projectId,
           ClusterId: formValues.cluster?.clusterId,
-          MaxResultCount: 1000,
-          SkipCount: 0,
+          MaxResultCount: recordsPerPage,
+          SkipCount: skipCount,
         },
       }),
     });
@@ -186,10 +221,11 @@ export default function WaterReading(props) {
     if (response.error)
       alertService.error({ title: "Error", text: response.error.message });
     else {
+      let data = response.result;
       const list = [];
-      const row = response.result.map((e, i) => {
+      data.items.map((e, i) => {
         list.push({
-          no: i + 1,
+          no: skipCount + 1,
           project: e.projectName,
           cluster: e.clusterName,
           unitcode: e.unitCode,
@@ -199,13 +235,27 @@ export default function WaterReading(props) {
           action: e,
         });
       });
-      setlistRow(list);
-      return setTasklist({
-        columns: columns,
-        rows: list,
-      });
-      console.log("list------", list);
+      setCustomerResponse((prevState) => ({
+        ...prevState,
+        rowData: list,
+        totalRows: data.totalCount,
+        totalPages: Math.ceil(data.totalCount / customerRequest.recordsPerPage),
+      }));
+
+      // setlistRow(list);
+      // return setTasklist({
+      //   columns: columns,
+      //   rows: list,
+      // });
+      console.log("list------", customerResponse);
     }
+  };
+
+  const setCustomerTaskList = (list) => {
+    return {
+      columns: columns,
+      rows: list,
+    };
   };
 
   const handleExport = async () => {
@@ -496,7 +546,7 @@ export default function WaterReading(props) {
                       <MDButton
                         variant="outlined"
                         color="primary"
-                        disabled={listRow.length == 0}
+                        disabled={customerResponse.rowData.length == 0}
                         onClick={handleExport}
                       >
                         <Icon>add</Icon>&nbsp; Export Excel
@@ -521,7 +571,18 @@ export default function WaterReading(props) {
               </Grid>
             </Grid>
           </MDBox>
-          <DataTable table={tasklist} canSearch />
+          <DataTable
+            table={setCustomerTaskList(customerResponse.rowData)}
+            manualPagination={true}
+            totalRows={customerResponse.totalRows}
+            totalPages={customerResponse.totalPages}
+            recordsPerPage={customerRequest.recordsPerPage}
+            skipCount={customerRequest.skipCount}
+            pageChangeHandler={skipCountChangeHandler}
+            recordsPerPageChangeHandler={recordsPerPageChangeHandler}
+            keywordsChangeHandler={keywordsChangeHandler}
+            entriesPerPage={{ defaultValue: customerRequest.recordsPerPage }}
+          />
         </Card>
         <EditDataWater
           site={site}
