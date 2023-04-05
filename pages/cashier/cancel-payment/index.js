@@ -115,7 +115,6 @@ function CancelPayment() {
     let response = await fetch("/api/cashier/cancel-payment/listCustomer", {
       method: "POST",
       body: JSON.stringify({
-        accessToken: accessToken,
         params: {
           SiteId: site?.siteId,
           Search: keywords,
@@ -129,15 +128,13 @@ function CancelPayment() {
 
     if (response.error) alertService.error({ title: "Error", text: response.error.message });
     else {
-      let data = response.result;
       setCustomerResponse((prevState) => ({
         ...prevState,
-        rowData: data.items,
-        totalRows: data.totalCount,
-        totalPages: Math.ceil(data.totalCount / customerRequest.recordsPerPage),
+        rowData: response.items,
+        totalRows: response.totalCount,
+        totalPages: Math.ceil(response.totalCount / customerRequest.recordsPerPage),
       }));
-      setLoadingCustomer(false);
-    }
+    } setLoadingCustomer(false);
   };
   const setCustomerTaskList = (rows) => {
     return {
@@ -197,7 +194,6 @@ function CancelPayment() {
     let response = await fetch("/api/cashier/cancel-payment/listCancelPayment", {
       method: "POST",
       body: JSON.stringify({
-        accessToken: accessToken,
         params: {
           UnitDataId: unitDataID,
           MaxResultCount: 1000, // Rows Per Page (Fixed). Start From 1
@@ -210,15 +206,13 @@ function CancelPayment() {
 
     if (response.error) alertService.error({ title: "Error", text: response.error.message });
     else {
-      let data = response.result;
       setCancelPaymentData((prevState) => ({
         ...prevState,
-        rowData: data.items,
-        totalRows: data.totalCount,
-        totalPages: Math.ceil(data.totalCount / customerRequest.recordsPerPage),
+        rowData: response.items,
+        totalRows: response.totalCount,
+        totalPages: Math.ceil(response.totalCount / customerRequest.recordsPerPage),
       }));
-      setLoadingCancelPayment(false);
-    }
+    } setLoadingCancelPayment(false);
   };
   const setCancelPaymentTaskList = (rows) => {
     return {
@@ -288,6 +282,7 @@ function CancelPayment() {
     setSite(siteVal);
     localStorage.setItem("site", JSON.stringify(siteVal));
   };
+
 
   return (
     <DashboardLayout>
@@ -454,7 +449,7 @@ function CancelPayment() {
                                 onClick={() => getCancelPaymentList(selectedUnit.unitDataId)}
                                 disabled={!selectedUnit}
                               >
-                                Show this Unit
+                                { isLoadingCancelPayment ? "Showing this Unit.." : "Show this Unit" }
                               </MDButton>
                             </MDBox>
                           </MDBox>

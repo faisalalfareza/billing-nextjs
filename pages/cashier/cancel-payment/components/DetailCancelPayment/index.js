@@ -23,6 +23,8 @@ import FormField from "/pagesComponents/FormField";
 
 // Data
 import { useCookies } from "react-cookie";
+import { typeNormalization } from "/helpers/utils";
+import { alertService } from "/helpers";
 
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -35,7 +37,6 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
   const isCanceled = (params.canceled == "Yes");
   const [modalOpen, setModalOpen] = useState(true);
   const [{ accessToken, encryptedAccessToken }] = useCookies();
-  const [isLoadingSubmit, setLoadingSubmit] = useState(false);
 
   const schemeModels = {
     formId: "cancel-payment-form",
@@ -61,20 +62,27 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
     [remarks.name]: remarks.defaultValue,
   };
 
-  const [detailCancelPayment, setDetailCancelPayment] = useState({});
-  const getDetailCancelPayment = (e) => {
-    if (e) e.preventDefault();
+  const [isLoadingDetailCancelPayment, setLoadingDetailCancelPayment] = useState(false);
+  const [detailCancelPayment, setDetailCancelPayment] = useState();
+  const getDetailCancelPayment = async () => {
+    setLoadingDetailCancelPayment(true);
 
-    const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/GetDetailCancelPayment`;
-    const config = {
-      headers: { Authorization: "Bearer " + accessToken },
-      params: {
-        BillingHeaderId: params.billingHeaderId
-      }
-    };
-    axios
-      .get(url, config)
-      .then(res => setDetailCancelPayment(res.data.result));
+    const { billingHeaderId } = params;
+    let response = await fetch("/api/cashier/cancel-payment/detailCancelPayment", {
+      method: "POST",
+      body: JSON.stringify({
+        params: {
+          BillingHeaderId: billingHeaderId
+        },
+      }),
+    });
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
+
+    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+    else setDetailCancelPayment(response);
+
+    setLoadingDetailCancelPayment(false);
   };
   useEffect(() => {
     getDetailCancelPayment();
@@ -85,7 +93,11 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
     return (!isRequired && true) || (isRequired && value != undefined && value != "" && value.length > 0 && !error);
   };
   const submitForm = async (values, actions) => cancelPayment(values, actions);
+
+  const [isLoadingCancelPayment, setLoadingCancelPayment] = useState(false);
   const cancelPayment = async (values, actions) => {
+    const { billingHeaderId, receiptNumber } = detailCancelPayment;
+
     Swal.fire({
       title: "Are you sure?",
       text: "You will cancel the payment on this receipt number.",
@@ -96,40 +108,39 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
       confirmButtonText: "Yes, cancel it!",
       reverseButtons: true,
       focusConfirm: false
-    }).then((result) => {
+    }).then(async (result) => {
       if (result.isConfirmed) {
-        setLoadingSubmit(true);
+        setLoadingCancelPayment(true);
 
-        const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/CancelPayment`;
-        const body = {
-          BillingHeaderId: detailCancelPayment.billingHeaderId,
-          Remarks: values.remarks
-        };
-        const config = {
-          headers: {
-            Authorization: "Bearer " + accessToken,
-            'Content-Type': 'application/json'
-          },
-          params: body
+        let response = await fetch("/api/cashier/cancel-payment/cancelPayment", {
+          method: "POST",
+          body: JSON.stringify({
+            accessToken: accessToken,
+            params: {
+              BillingHeaderId: billingHeaderId,
+              Remarks: values.remarks
+            }
+          }),
+        });
+        if (!response.ok) throw new Error(`Error: ${response.status}`);
+        response = typeNormalization(await response.json());
+    
+        if (response.error) alertService.error({ title: "Error", text: response.error.message });
+        else {
+          response && Swal.fire({
+            title: 'Payment Cancelled',
+            text: receiptNumber ? ("Payment with receipt number "+receiptNumber+" has been successfully canceled.") : ("Payment has been successfully canceled."),
+            icon: 'success',
+            showConfirmButton: true,
+            timerProgressBar: true,
+            timer: 3000,
+          }).then(() => {
+            actions.resetForm();
+            closeModal(true);
+          });
         };
     
-        axios
-          .post(url, body, config)
-          .finally(() => setLoadingSubmit(false))
-          .then(res => {
-            res.data.success && Swal.fire({
-              title: 'Payment Cancelled',
-              text: "Payment with "+detailCancelPayment.receiptNumber+" has been successfully canceled.",
-              icon: 'success',
-              showConfirmButton: true,
-              timerProgressBar: true,
-              timer: 3000,
-            }).then(() => {
-              setLoadingSubmit(false);
-              actions.resetForm();
-              closeModal(true);
-            });
-          }).catch((error) => setLoadingSubmit(false));
+        setLoadingCancelPayment(false);
       }
     });
   };
@@ -389,9 +400,9 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
                         variant="gradient"
                         color="primary"
                         sx={{ height: "100%" }}
-                        disabled={!isValifForm() || isLoadingSubmit}
+                        disabled={!isValifForm() || isLoadingCancelPayment}
                       >
-                        {isLoadingSubmit ? "Canceling Payment.." : "Cancel Payment"}
+                        {isLoadingCancelPayment ? "Canceling Payment.." : "Cancel Payment"}
                       </MDButton>
                     </MDBox> }
                   </MDBox>
