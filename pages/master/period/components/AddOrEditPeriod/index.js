@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import * as dayjs from "dayjs";
-import * as moment from "moment";
 import Swal from "sweetalert2";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
@@ -11,7 +10,6 @@ import PropTypes from "prop-types";
 
 // @mui material components
 import Grid from "@mui/material/Grid";
-import Autocomplete from "@mui/material/Autocomplete";
 
 // NextJS Material Dashboard 2 PRO components
 import MDBox from "/components/MDBox";
@@ -20,12 +18,9 @@ import MDButton from "/components/MDButton";
 import FormField from "/pagesComponents/FormField";
 
 // Data
-import axios from "axios";
 import getConfig from "next/config";
 import { useCookies } from "react-cookie";
 const { publicRuntimeConfig } = getConfig();
-import { MonthPicker } from "@mui/x-date-pickers";
-import { Dayjs } from "dayjs";
 import TextField from "@mui/material/TextField";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
