@@ -20,10 +20,10 @@ import PeriodRowActions from "./components/PeriodRowActions";
 import AddOrEditPeriod from "./components/AddOrEditPeriod";
 import Icon from "@mui/material/Icon";
 import MDBadgeDot from "/components/MDBadgeDot";
-import Swal from "sweetalert2";
 import { useCookies } from "react-cookie";
 import { typeNormalization } from "/helpers/utils";
 import SiteDropdown from "../../../pagesComponents/dropdown/Site";
+import { alertService } from "/helpers";
 
 export default function MasterPeriod(props) {
   const [listSite, setListSite] = useState([]);
@@ -37,11 +37,7 @@ export default function MasterPeriod(props) {
     let currentSite = JSON.parse(localStorage.getItem("site"));
     console.log("currentSite-----------", currentSite);
     if (currentSite == null) {
-      Swal.fire({
-        title: "Info!",
-        text: "Please choose Site first",
-        icon: "info",
-      });
+      alertService.info({ title: "Info", text: "Please choose Site first" });
     } else {
       setSite(currentSite);
     }

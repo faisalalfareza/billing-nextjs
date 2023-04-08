@@ -54,10 +54,7 @@ export default function WaterReading(props) {
     let currentSite = JSON.parse(localStorage.getItem("site"));
     console.log("currentSite-----------", currentSite);
     if (currentSite == null) {
-      alertService.info({
-        title: "Info!",
-        text: "Please choose Site first",
-      });
+      alertService.info({ title: "Info", text: "Please choose Site first" });
     } else {
       setSite(currentSite);
     }
@@ -225,7 +222,7 @@ export default function WaterReading(props) {
       const list = [];
       data.items.map((e, i) => {
         list.push({
-          no: skipCount + 1,
+          no: skipCount + i + 1,
           project: e.projectName,
           cluster: e.clusterName,
           unitcode: e.unitCode,
@@ -582,6 +579,7 @@ export default function WaterReading(props) {
             recordsPerPageChangeHandler={recordsPerPageChangeHandler}
             keywordsChangeHandler={keywordsChangeHandler}
             entriesPerPage={{ defaultValue: customerRequest.recordsPerPage }}
+            pagination={{ variant: "gradient", color: "primary" }}
           />
         </Card>
         <EditDataWater

@@ -31,8 +31,8 @@ export default async function handler(
         case "create":
           create(res, body);
           break;
-        case "update":
-          update(res, body);
+        case "balance":
+          getBalance(res, body);
           break;
       }
       break;
@@ -62,7 +62,7 @@ async function getList(res: any, body: any) {
     .get(url, config)
     .then((response) =>
       res.send({
-        result: response.data.result.items,
+        result: response.data.result,
       })
     )
     .catch((error) =>
@@ -209,10 +209,10 @@ async function create(res: any, body: any) {
     });
 }
 
-async function update(res: any, body: any) {
+async function getBalance(res: any, body: any) {
   const { accessToken, params } = body;
 
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/UpdateMasterPeriod`;
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/ViewDetailBalance`;
   const config = {
     headers: {
       Authorization: "Bearer " + accessToken,
@@ -223,7 +223,7 @@ async function update(res: any, body: any) {
   console.log("config----", config);
 
   axios
-    .put(url, params, config)
+    .post(url, params, config)
     .then((response) =>
       res.send({
         result: response.data.result,

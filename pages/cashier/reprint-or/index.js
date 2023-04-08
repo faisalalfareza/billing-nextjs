@@ -56,11 +56,7 @@ function RePrintOR() {
     let currentSite = JSON.parse(localStorage.getItem("site"));
     console.log("currentSite-----------", currentSite);
     if (currentSite == null) {
-      Swal.fire({
-        title: "Info!",
-        text: "Please choose Site first",
-        icon: "info",
-      });
+      alertService.info({ title: "Info", text: "Please choose Site first" });
     } else {
       setSite(currentSite);
     }
@@ -447,6 +443,7 @@ function RePrintOR() {
                         entriesPerPage={{
                           defaultValue: customerRequest.recordsPerPage,
                         }}
+                        pagination={{ variant: "gradient", color: "primary" }}
                       />
                       <MDBox pt={1} pb={1} px={3}>
                         <Grid item xs={12}>
