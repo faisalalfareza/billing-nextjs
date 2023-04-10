@@ -26,15 +26,15 @@ import { useCookies } from "react-cookie";
 import { typeNormalization } from "/helpers/utils";
 import { alertService } from "/helpers";
 
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableRow from '@mui/material/TableRow';
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableRow from "@mui/material/TableRow";
 
 const { publicRuntimeConfig } = getConfig();
 
 function DetailCancelPayment({ isOpen, params, onModalChanged }) {
-  const isCanceled = (params.canceled == "Yes");
+  const isCanceled = params?.canceled == "Yes";
   const [modalOpen, setModalOpen] = useState(true);
   const [{ accessToken, encryptedAccessToken }] = useCookies();
 
@@ -49,38 +49,42 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
         isRequired: false,
         errorMsg: "Cancel Payment is required.",
         defaultValue: "",
-      }
+      },
     },
   };
   let { remarks } = schemeModels.formField;
   const schemeValidations = Yup.object().shape({
     [remarks.name]: remarks.isRequired
       ? Yup.string().required(remarks.errorMsg)
-      : Yup.string().notRequired().nullable()
+      : Yup.string().notRequired().nullable(),
   });
   const schemeInitialValues = {
     [remarks.name]: remarks.defaultValue,
   };
 
-
-  const [isLoadingDetailCancelPayment, setLoadingDetailCancelPayment] = useState(false);
+  const [isLoadingDetailCancelPayment, setLoadingDetailCancelPayment] =
+    useState(false);
   const [detailCancelPayment, setDetailCancelPayment] = useState();
   const getDetailCancelPayment = async () => {
     setLoadingDetailCancelPayment(true);
 
     const { billingHeaderId } = params;
-    let response = await fetch("/api/cashier/cancel-payment/detailCancelPayment", {
-      method: "POST",
-      body: JSON.stringify({
-        params: {
-          BillingHeaderId: billingHeaderId
-        },
-      }),
-    });
+    let response = await fetch(
+      "/api/cashier/cancel-payment/detailCancelPayment",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          params: {
+            BillingHeaderId: billingHeaderId,
+          },
+        }),
+      }
+    );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+    if (response.error)
+      alertService.error({ title: "Error", text: response.error.message });
     else setDetailCancelPayment(response);
 
     setLoadingDetailCancelPayment(false);
@@ -90,9 +94,15 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
-
   const checkingSuccessInput = (isRequired, value, error) => {
-    return (!isRequired && true) || (isRequired && value != undefined && value != "" && value.length > 0 && !error);
+    return (
+      (!isRequired && true) ||
+      (isRequired &&
+        value != undefined &&
+        value != "" &&
+        value.length > 0 &&
+        !error)
+    );
   };
   const submitForm = (values, actions) => cancelPayment(values, actions);
 
@@ -109,39 +119,46 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
       cancelButtonColor: "#d33",
       confirmButtonText: "Yes, cancel it!",
       reverseButtons: true,
-      focusConfirm: false
+      focusConfirm: false,
     }).then(async (result) => {
       if (result.isConfirmed) {
         setLoadingCancelPayment(true);
 
-        let response = await fetch("/api/cashier/cancel-payment/cancelPayment", {
-          method: "POST",
-          body: JSON.stringify({
-            accessToken: accessToken,
-            params: {
-              BillingHeaderId: billingHeaderId,
-              Remarks: values.remarks
-            }
-          }),
-        });
+        let response = await fetch(
+          "/api/cashier/cancel-payment/cancelPayment",
+          {
+            method: "POST",
+            body: JSON.stringify({
+              accessToken: accessToken,
+              params: {
+                BillingHeaderId: billingHeaderId,
+                Remarks: values.remarks,
+              },
+            }),
+          }
+        );
         if (!response.ok) throw new Error(`Error: ${response.status}`);
         response = typeNormalization(await response.json());
-    
-        if (response.error) alertService.error({ title: "Error", text: response.error.message });
+
+        if (response.error)
+          alertService.error({ title: "Error", text: response.error.message });
         else {
-          response && Swal.fire({
-            title: 'Payment Canceled',
-            text: `Payment of this receipt number${receiptNumber ? ` ${receiptNumber}` : ` `}has been canceled.`,
-            icon: 'success',
-            showConfirmButton: true,
-            timerProgressBar: true,
-            timer: 3000,
-          }).then(() => {
-            actions.resetForm();
-            closeModal(true);
-          });
-        };
-    
+          response &&
+            Swal.fire({
+              title: "Payment Canceled",
+              text: `Payment of this receipt number${
+                receiptNumber ? ` ${receiptNumber}` : ` `
+              }has been canceled.`,
+              icon: "success",
+              showConfirmButton: true,
+              timerProgressBar: true,
+              timer: 3000,
+            }).then(() => {
+              actions.resetForm();
+              closeModal(true);
+            });
+        }
+
         setLoadingCancelPayment(false);
       }
     });
@@ -150,268 +167,383 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
   const openModal = () => setModalOpen(true);
   const toggleModal = () => setModalOpen(true);
   const closeModal = (isChanged) => {
-    setModalOpen(false); setDetailCancelPayment({});
+    setModalOpen(false);
+    setDetailCancelPayment({});
     setTimeout(() => onModalChanged(isChanged), 0);
   };
 
   if (isOpen) {
     return (
-      detailCancelPayment && <Modal
-        size="lg"
-        isOpen={isOpen}
-        toggle={toggleModal}
-        onOpened={openModal}
-        onClosed={closeModal}
-      >
-        <Formik
-          initialValues={schemeInitialValues}
-          validationSchema={schemeValidations}
-          onSubmit={submitForm}
+      detailCancelPayment && (
+        <Modal
+          size="lg"
+          isOpen={isOpen}
+          toggle={toggleModal}
+          onOpened={openModal}
+          onClosed={closeModal}
         >
-          {({
-            values,
-            errors,
-            touched
-          }) => {
-            let { 
-              remarks: remarksV
-            } = values;
-            const isValifForm = () => (
-              checkingSuccessInput(remarks.isRequired, remarksV, errors.remarks)
-            );
+          <Formik
+            initialValues={schemeInitialValues}
+            validationSchema={schemeValidations}
+            onSubmit={submitForm}
+          >
+            {({ values, errors, touched }) => {
+              let { remarks: remarksV } = values;
+              const isValifForm = () =>
+                checkingSuccessInput(
+                  remarks.isRequired,
+                  remarksV,
+                  errors.remarks
+                );
 
-            return (
-              <Form id={schemeModels.formId} autoComplete="off">
-                <ModalHeader>
-                  <Grid container spacing={3}>
-                    <Grid item xs={12} md={12}>
-                      <MDBox>
-                        <MDTypography variant="h5">
-                          { !isCanceled ? "Detail Payment" : "Detail Canceled Payment" }
-                        </MDTypography>
-                      </MDBox>
-                    </Grid>
-                  </Grid>
-                </ModalHeader>
-                <ModalBody>
-                  <MDBox>
+              return (
+                <Form id={schemeModels.formId} autoComplete="off">
+                  <ModalHeader>
                     <Grid container spacing={3}>
-                      <Grid item xs={12} sm={12}>
-                        <MDBox
-                          component="li"
-                          display="flex"
-                          justifyContent="space-between"
-                          alignItems="flex-start"
-                          bgColor="grey-100"
-                          borderRadius="lg"
-                          p={3}
-                        >
-                          <MDBox
-                            width="100%"
-                            display="flex"
-                            flexDirection="column"
-                            lineHeight={1}
-                          >
-                            <MDBox mb={2}>
-                              <MDTypography
-                                variant="button"
-                                fontWeight="medium"
-                                textTransform="capitalize"
-                              >
-                                Main Information
-                              </MDTypography>
-                            </MDBox>
-                            <Table sx={{ minWidth: 650 }} size="small">
-                              <TableBody>
-                                <TableRow>
-                                  <TableCell sx={{ paddingTop: 0, paddingBottom: 0.2, border: 0 }}>
-                                    <MDTypography
-                                      variant="caption"
-                                      textTransform="capitalize"
-                                    >
-                                      Receipt Number
-                                    </MDTypography>
-                                  </TableCell>
-                                  <TableCell sx={{ paddingTop: 0, paddingBottom: 0.2, border: 0 }}>
-                                    <MDTypography
-                                      variant="caption"
-                                      fontWeight="medium"
-                                      textTransform="uppercase"
-                                    >
-                                      {detailCancelPayment.receiptNumber}
-                                    </MDTypography>
-                                  </TableCell>
-
-                                  <TableCell sx={{ paddingTop: 0, paddingBottom: 0.2, border: 0 }}>
-                                    <MDTypography
-                                      variant="caption"
-                                      textTransform="capitalize"
-                                    >
-                                      Payment Method
-                                    </MDTypography>
-                                  </TableCell>
-                                  <TableCell sx={{ paddingTop: 0, paddingBottom: 0.2, border: 0 }}>
-                                    <MDTypography
-                                      variant="caption"
-                                      fontWeight="medium"
-                                      textTransform="capitalize"
-                                    >
-                                      {detailCancelPayment.method}
-                                    </MDTypography>
-                                  </TableCell>
-                                </TableRow>
-
-                                <TableRow>
-                                  <TableCell sx={{ paddingTop: 0, paddingBottom: 0.2, border: 0 }}>
-                                    <MDTypography
-                                      variant="caption"
-                                      textTransform="capitalize"
-                                    >
-                                      Unit Code
-                                    </MDTypography>
-                                  </TableCell>
-                                  <TableCell sx={{ paddingTop: 0, paddingBottom: 0.2, border: 0 }}>
-                                    <MDTypography
-                                      variant="caption"
-                                      fontWeight="medium"
-                                      textTransform="uppercase"
-                                    >
-                                      {detailCancelPayment.unitCode}
-                                    </MDTypography>
-                                  </TableCell>
-
-                                  <TableCell sx={{ paddingTop: 0, paddingBottom: 0.2, border: 0 }}>
-                                    <MDTypography
-                                      variant="caption"
-                                      textTransform="capitalize"
-                                    >
-                                      Remarks
-                                    </MDTypography>
-                                  </TableCell>
-                                  <TableCell sx={{ paddingTop: 0, paddingBottom: 0.2, border: 0 }}>
-                                    <MDTypography
-                                      variant="caption"
-                                      fontWeight="medium"
-                                      textTransform="capitalize"
-                                    >
-                                      {detailCancelPayment.remarks}
-                                    </MDTypography>
-                                  </TableCell>
-                                </TableRow>
-
-                                <TableRow>
-                                  <TableCell sx={{ paddingTop: 0, paddingBottom: 0.2, border: 0 }}>
-                                    <MDTypography
-                                      variant="caption"
-                                      textTransform="capitalize"
-                                    >
-                                      Unit No
-                                    </MDTypography>
-                                  </TableCell>
-                                  <TableCell sx={{ paddingTop: 0, paddingBottom: 0.2, border: 0 }}>
-                                    <MDTypography
-                                      variant="caption"
-                                      fontWeight="medium"
-                                      textTransform="uppercase"
-                                    >
-                                      {detailCancelPayment.unitNo}
-                                    </MDTypography>
-                                  </TableCell>
-
-                                  <TableCell rowSpan={2} sx={{ paddingTop: 0, paddingBottom: 0.2, border: 0 }}>
-                                    <MDTypography
-                                      variant="caption"
-                                      textTransform="capitalize"
-                                    >
-                                      Total Amount
-                                    </MDTypography>
-                                  </TableCell>
-                                  <TableCell rowSpan={2} sx={{ paddingTop: 0, paddingBottom: 0.2, border: 0 }}>
-                                    <MDBadge
-                                      variant="contained"
-                                      color="info"
-                                      badgeContent={<NumericFormat
-                                        displayType="text"
-                                        value={detailCancelPayment.totalAmount}
-                                        decimalSeparator=","
-                                        prefix="Rp. "
-                                        thousandSeparator="."
-                                      />}
-                                      size="lg"
-                                      container
-                                    />
-                                  </TableCell>
-                                </TableRow>
-                                
-                                <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                                  <TableCell sx={{ paddingTop: 0, paddingBottom: 0.2, border: 0 }}>
-                                    <MDTypography
-                                      variant="caption"
-                                      textTransform="capitalize"
-                                    >
-                                      Transaction Date
-                                    </MDTypography>
-                                  </TableCell>
-                                  <TableCell sx={{ paddingTop: 0, paddingBottom: 0.2, border: 0 }}>
-                                    <MDTypography
-                                      variant="caption"
-                                      fontWeight="medium"
-                                    >
-                                      {detailCancelPayment.transactionDate}
-                                    </MDTypography>
-                                  </TableCell>
-                                </TableRow>
-                              </TableBody>
-                            </Table>
-                          </MDBox>
+                      <Grid item xs={12} md={12}>
+                        <MDBox>
+                          <MDTypography variant="h5">
+                            {!isCanceled
+                              ? "Detail Payment"
+                              : "Detail Canceled Payment"}
+                          </MDTypography>
                         </MDBox>
-                      </Grid>   
-                      { !isCanceled && <Grid item xs={12} sm={12}>
-                        <FormField
-                          type={remarks.type}
-                          label={remarks.label + (remarks.isRequired ? " ⁽*⁾" : "")}
-                          name={remarks.name}
-                          value={remarksV}
-                          placeholder={remarks.placeholder}
-                          InputLabelProps={{ shrink: true }}
-                          error={errors.remarks && touched.remarks}
-                          success={remarks.isRequired && checkingSuccessInput(remarks.isRequired, remarksV, errors.remarks)}
-                          multiline rows={5}
-                        />
-                      </Grid> }
+                      </Grid>
                     </Grid>
-                  </MDBox>
-                </ModalBody>
-                <ModalFooter>
-                  <MDBox
-                    display="flex"
-                    flexDirection={{ xs: "column", sm: "row" }}
-                  >
-                    <MDButton
-                      variant="outlined"
-                      color="secondary"
-                      onClick={closeModal}
+                  </ModalHeader>
+                  <ModalBody>
+                    <MDBox>
+                      <Grid container spacing={3}>
+                        <Grid item xs={12} sm={12}>
+                          <MDBox
+                            component="li"
+                            display="flex"
+                            justifyContent="space-between"
+                            alignItems="flex-start"
+                            bgColor="grey-100"
+                            borderRadius="lg"
+                            p={3}
+                          >
+                            <MDBox
+                              width="100%"
+                              display="flex"
+                              flexDirection="column"
+                              lineHeight={1}
+                            >
+                              <MDBox mb={2}>
+                                <MDTypography
+                                  variant="button"
+                                  fontWeight="medium"
+                                  textTransform="capitalize"
+                                >
+                                  Main Information
+                                </MDTypography>
+                              </MDBox>
+                              <Table sx={{ minWidth: 650 }} size="small">
+                                <TableBody>
+                                  <TableRow>
+                                    <TableCell
+                                      sx={{
+                                        paddingTop: 0,
+                                        paddingBottom: 0.2,
+                                        border: 0,
+                                      }}
+                                    >
+                                      <MDTypography
+                                        variant="caption"
+                                        textTransform="capitalize"
+                                      >
+                                        Receipt Number
+                                      </MDTypography>
+                                    </TableCell>
+                                    <TableCell
+                                      sx={{
+                                        paddingTop: 0,
+                                        paddingBottom: 0.2,
+                                        border: 0,
+                                      }}
+                                    >
+                                      <MDTypography
+                                        variant="caption"
+                                        fontWeight="medium"
+                                        textTransform="uppercase"
+                                      >
+                                        {detailCancelPayment.receiptNumber}
+                                      </MDTypography>
+                                    </TableCell>
+
+                                    <TableCell
+                                      sx={{
+                                        paddingTop: 0,
+                                        paddingBottom: 0.2,
+                                        border: 0,
+                                      }}
+                                    >
+                                      <MDTypography
+                                        variant="caption"
+                                        textTransform="capitalize"
+                                      >
+                                        Payment Method
+                                      </MDTypography>
+                                    </TableCell>
+                                    <TableCell
+                                      sx={{
+                                        paddingTop: 0,
+                                        paddingBottom: 0.2,
+                                        border: 0,
+                                      }}
+                                    >
+                                      <MDTypography
+                                        variant="caption"
+                                        fontWeight="medium"
+                                        textTransform="capitalize"
+                                      >
+                                        {detailCancelPayment.method}
+                                      </MDTypography>
+                                    </TableCell>
+                                  </TableRow>
+
+                                  <TableRow>
+                                    <TableCell
+                                      sx={{
+                                        paddingTop: 0,
+                                        paddingBottom: 0.2,
+                                        border: 0,
+                                      }}
+                                    >
+                                      <MDTypography
+                                        variant="caption"
+                                        textTransform="capitalize"
+                                      >
+                                        Unit Code
+                                      </MDTypography>
+                                    </TableCell>
+                                    <TableCell
+                                      sx={{
+                                        paddingTop: 0,
+                                        paddingBottom: 0.2,
+                                        border: 0,
+                                      }}
+                                    >
+                                      <MDTypography
+                                        variant="caption"
+                                        fontWeight="medium"
+                                        textTransform="uppercase"
+                                      >
+                                        {detailCancelPayment.unitCode}
+                                      </MDTypography>
+                                    </TableCell>
+
+                                    <TableCell
+                                      sx={{
+                                        paddingTop: 0,
+                                        paddingBottom: 0.2,
+                                        border: 0,
+                                      }}
+                                    >
+                                      <MDTypography
+                                        variant="caption"
+                                        textTransform="capitalize"
+                                      >
+                                        Remarks
+                                      </MDTypography>
+                                    </TableCell>
+                                    <TableCell
+                                      sx={{
+                                        paddingTop: 0,
+                                        paddingBottom: 0.2,
+                                        border: 0,
+                                      }}
+                                    >
+                                      <MDTypography
+                                        variant="caption"
+                                        fontWeight="medium"
+                                        textTransform="capitalize"
+                                      >
+                                        {detailCancelPayment.remarks}
+                                      </MDTypography>
+                                    </TableCell>
+                                  </TableRow>
+
+                                  <TableRow>
+                                    <TableCell
+                                      sx={{
+                                        paddingTop: 0,
+                                        paddingBottom: 0.2,
+                                        border: 0,
+                                      }}
+                                    >
+                                      <MDTypography
+                                        variant="caption"
+                                        textTransform="capitalize"
+                                      >
+                                        Unit No
+                                      </MDTypography>
+                                    </TableCell>
+                                    <TableCell
+                                      sx={{
+                                        paddingTop: 0,
+                                        paddingBottom: 0.2,
+                                        border: 0,
+                                      }}
+                                    >
+                                      <MDTypography
+                                        variant="caption"
+                                        fontWeight="medium"
+                                        textTransform="uppercase"
+                                      >
+                                        {detailCancelPayment.unitNo}
+                                      </MDTypography>
+                                    </TableCell>
+
+                                    <TableCell
+                                      rowSpan={2}
+                                      sx={{
+                                        paddingTop: 0,
+                                        paddingBottom: 0.2,
+                                        border: 0,
+                                      }}
+                                    >
+                                      <MDTypography
+                                        variant="caption"
+                                        textTransform="capitalize"
+                                      >
+                                        Total Amount
+                                      </MDTypography>
+                                    </TableCell>
+                                    <TableCell
+                                      rowSpan={2}
+                                      sx={{
+                                        paddingTop: 0,
+                                        paddingBottom: 0.2,
+                                        border: 0,
+                                      }}
+                                    >
+                                      <MDBadge
+                                        variant="contained"
+                                        color="info"
+                                        badgeContent={
+                                          <NumericFormat
+                                            displayType="text"
+                                            value={
+                                              detailCancelPayment.totalAmount
+                                            }
+                                            decimalSeparator=","
+                                            prefix="Rp. "
+                                            thousandSeparator="."
+                                          />
+                                        }
+                                        size="lg"
+                                        container
+                                      />
+                                    </TableCell>
+                                  </TableRow>
+
+                                  <TableRow
+                                    sx={{
+                                      "&:last-child td, &:last-child th": {
+                                        border: 0,
+                                      },
+                                    }}
+                                  >
+                                    <TableCell
+                                      sx={{
+                                        paddingTop: 0,
+                                        paddingBottom: 0.2,
+                                        border: 0,
+                                      }}
+                                    >
+                                      <MDTypography
+                                        variant="caption"
+                                        textTransform="capitalize"
+                                      >
+                                        Transaction Date
+                                      </MDTypography>
+                                    </TableCell>
+                                    <TableCell
+                                      sx={{
+                                        paddingTop: 0,
+                                        paddingBottom: 0.2,
+                                        border: 0,
+                                      }}
+                                    >
+                                      <MDTypography
+                                        variant="caption"
+                                        fontWeight="medium"
+                                      >
+                                        {detailCancelPayment.transactionDate}
+                                      </MDTypography>
+                                    </TableCell>
+                                  </TableRow>
+                                </TableBody>
+                              </Table>
+                            </MDBox>
+                          </MDBox>
+                        </Grid>
+                        {!isCanceled && (
+                          <Grid item xs={12} sm={12}>
+                            <FormField
+                              type={remarks.type}
+                              label={
+                                remarks.label +
+                                (remarks.isRequired ? " ⁽*⁾" : "")
+                              }
+                              name={remarks.name}
+                              value={remarksV}
+                              placeholder={remarks.placeholder}
+                              InputLabelProps={{ shrink: true }}
+                              error={errors.remarks && touched.remarks}
+                              success={
+                                remarks.isRequired &&
+                                checkingSuccessInput(
+                                  remarks.isRequired,
+                                  remarksV,
+                                  errors.remarks
+                                )
+                              }
+                              multiline
+                              rows={5}
+                            />
+                          </Grid>
+                        )}
+                      </Grid>
+                    </MDBox>
+                  </ModalBody>
+                  <ModalFooter>
+                    <MDBox
+                      display="flex"
+                      flexDirection={{ xs: "column", sm: "row" }}
                     >
-                      { !isCanceled ? "Cancel" : "Close" }
-                    </MDButton>
-                    { !isCanceled && <MDBox ml={{ xs: 0, sm: 1 }} mt={{ xs: 1, sm: 0 }}>
                       <MDButton
-                        type="submit"
-                        variant="gradient"
-                        color="primary"
-                        sx={{ height: "100%" }}
-                        disabled={!isValifForm() || isLoadingCancelPayment}
+                        variant="outlined"
+                        color="secondary"
+                        onClick={closeModal}
                       >
-                        {isLoadingCancelPayment ? "Canceling Payment.." : "Cancel Payment"}
+                        {!isCanceled ? "Cancel" : "Close"}
                       </MDButton>
-                    </MDBox> }
-                  </MDBox>
-                </ModalFooter>
-              </Form>
-            );
-          }}
-        </Formik>
-      </Modal>
+                      {!isCanceled && (
+                        <MDBox ml={{ xs: 0, sm: 1 }} mt={{ xs: 1, sm: 0 }}>
+                          <MDButton
+                            type="submit"
+                            variant="gradient"
+                            color="primary"
+                            sx={{ height: "100%" }}
+                            disabled={!isValifForm() || isLoadingCancelPayment}
+                          >
+                            {isLoadingCancelPayment
+                              ? "Canceling Payment.."
+                              : "Cancel Payment"}
+                          </MDButton>
+                        </MDBox>
+                      )}
+                    </MDBox>
+                  </ModalFooter>
+                </Form>
+              );
+            }}
+          </Formik>
+        </Modal>
+      )
     );
   }
 
