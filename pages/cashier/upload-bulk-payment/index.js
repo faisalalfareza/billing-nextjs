@@ -218,7 +218,6 @@ function UploadBulkPayment() {
                                     // value={values.paymentMethod}
                                     getOptionLabel={(option) => option.paymentName}
                                     onChange={(e, value) => {
-                                      debugger
                                       setFieldValue(
                                         paymentMethod.name,
                                         value !== null
