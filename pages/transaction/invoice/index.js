@@ -33,6 +33,7 @@ import SiteDropdown from "/pagesComponents/dropdown/Site";
 import { NumericFormat } from "react-number-format";
 import Image from "next/image";
 import fileCheck from "/assets/images/file-check.svg";
+import FindName from "./components/FindName";
 
 export default function Invoice(props) {
   const [controller] = useMaterialUIController();
@@ -63,6 +64,7 @@ export default function Invoice(props) {
   });
   const [openUpload, setOpenUpload] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
+  const [openFind, setOpenFind] = useState(false);
   const [dataCluster, setDataCluster] = useState([]);
   const [dataProject, setDataProject] = useState([]);
   const [dataPeriod, setDataPeriod] = useState([]);
@@ -146,7 +148,7 @@ export default function Invoice(props) {
     project: null,
     cluster: null,
     period: null,
-    nameF: null,
+    nameF: "",
     unitCode: null,
     unitNo: null,
   };
@@ -368,6 +370,10 @@ export default function Invoice(props) {
     localStorage.setItem("site", JSON.stringify(siteVal));
   };
 
+  const handleFind = () => {
+    setOpenFind(!openFind);
+  };
+
   return (
     <DashboardLayout>
       <DashboardNavbar />
@@ -461,31 +467,13 @@ export default function Invoice(props) {
                                   />
                                 </Grid>
                                 <Grid item xs={12} sm={6}>
-                                  <Field
-                                    name="nameF"
-                                    component={Autocomplete}
-                                    options={dataProject}
-                                    getOptionLabel={(option) =>
-                                      option.projectName
-                                    }
-                                    onChange={(e, value) => {
-                                      setFieldValue(
-                                        "nameF",
-                                        value !== null
-                                          ? value
-                                          : initialValues["nameF"]
-                                      );
-                                    }}
-                                    isOptionEqualToValue={(option, value) =>
-                                      option.value === value.value
-                                    }
-                                    renderInput={(params) => (
+                                  <Grid container spacing={2}>
+                                    <Grid item xs={10}>
                                       <FormField
-                                        {...params}
                                         type="text"
                                         label="Name"
                                         name="nameF"
-                                        placeholder="Choose Name"
+                                        placeholder="Type Name"
                                         InputLabelProps={{ shrink: true }}
                                         error={errors.nameF && touched.nameF}
                                         success={checkingSuccessInput(
@@ -493,7 +481,20 @@ export default function Invoice(props) {
                                           errors.nameF
                                         )}
                                       />
-                                    )}
+                                    </Grid>
+                                    <Grid item xs={2}>
+                                      <MDButton
+                                        variant="text"
+                                        color="info"
+                                        onClick={handleFind}
+                                      >
+                                        Find
+                                      </MDButton>
+                                    </Grid>
+                                  </Grid>
+                                  <FindName
+                                    isOpen={openFind}
+                                    close={handleFind}
                                   />
                                 </Grid>
                                 <Grid item xs={12} sm={6}>

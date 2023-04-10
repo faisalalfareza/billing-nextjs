@@ -19,8 +19,8 @@ export default async function handler(
         case "dropdownproject":
           getDropdownProject(res, body);
           break;
-        case "update":
-          update(res, body);
+        case "findname":
+          findName(res, body);
           break;
         case "export":
           exportExcel(res, body);
@@ -90,10 +90,10 @@ async function getDropdownProject(res: any, body: any) {
     );
 }
 
-async function update(res: any, body: any) {
+async function findName(res: any, body: any) {
   const { accessToken, params } = body;
 
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/UpdateDetailWaterReading`;
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetSearchPSCode`;
   const config = {
     headers: {
       Authorization: "Bearer " + accessToken,
@@ -105,7 +105,7 @@ async function update(res: any, body: any) {
   console.log("body---", params);
 
   axios
-    .put(url, params, config)
+    .get(url, config)
     .then((response) => {
       console.log("response-----", response);
       res.send({
