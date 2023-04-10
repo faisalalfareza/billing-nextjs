@@ -34,5 +34,5 @@ function info(options: any) {
 }
 
 function warn(options: any) {
-  Swal.fire({ ...options, type: alertType.Warning });
+  Swal.fire({ ...options, icon: alertType.Warning });
 }

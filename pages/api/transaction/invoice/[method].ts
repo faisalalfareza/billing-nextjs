@@ -16,31 +16,22 @@ export default async function handler(
         case "list":
           getList(res, body);
           break;
-
-        case "detail":
-          getDetail(res, body);
+        case "dropdownproject":
+          getDropdownProject(res, body);
           break;
-
-        case "dropdownpayment":
-          getDropdownPayment(res, body);
+        case "update":
+          update(res, body);
           break;
-
-        case "dropdownbank":
-          getDropdownBank(res, body);
+        case "export":
+          exportExcel(res, body);
           break;
-        case "create":
-          create(res, body);
+        case "activePeriod":
+          getActivePeriod(res, body);
           break;
-        case "balance":
-          getBalance(res, body);
+        case "upload":
+          uploadExcel(res, body);
           break;
       }
-      break;
-
-    case "GET":
-      switch (query.method) {
-      }
-      break;
       break;
   }
 }
@@ -48,7 +39,7 @@ export default async function handler(
 async function getList(res: any, body: any) {
   const { accessToken, params } = body;
 
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/GetCustomerList`;
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetInvoiceList`;
   const config = {
     headers: {
       Authorization: "Bearer " + accessToken,
@@ -72,10 +63,10 @@ async function getList(res: any, body: any) {
     );
 }
 
-async function getDetail(res: any, body: any) {
+async function getDropdownProject(res: any, body: any) {
   const { accessToken, params } = body;
 
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/GetPaymentDetailByPsCode`;
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetDropdownProjectBySiteId`;
   const config = {
     headers: {
       Authorization: "Bearer " + accessToken,
@@ -92,33 +83,64 @@ async function getDetail(res: any, body: any) {
         result: response.data.result,
       })
     )
-    .catch((error) => {
-      console.log("er------", error);
-      console.log("er2------", error.response.data.error.message);
+    .catch((error) =>
       res.send({
-        error: error.response.data,
+        error: error,
+      })
+    );
+}
+
+async function update(res: any, body: any) {
+  const { accessToken, params } = body;
+
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/UpdateDetailWaterReading`;
+  const config = {
+    headers: {
+      Authorization: "Bearer " + accessToken,
+      "Access-Control-Allow-Origin": "*",
+    },
+  };
+  console.log("config----", config);
+
+  console.log("body---", params);
+
+  axios
+    .put(url, params, config)
+    .then((response) => {
+      console.log("response-----", response);
+      res.send({
+        result: response.data.result,
+      });
+    })
+    .catch((error) => {
+      console.log("err-----", error.response);
+      res.send({
+        error: error,
       });
     });
 }
-async function getDropdownPayment(res: any, body: any) {
+
+async function exportExcel(res: any, body: any) {
   const { accessToken, params } = body;
 
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/GetDropdownPaymentMethod`;
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/ExportToExcelWaterReading`;
   const config = {
     headers: {
       Authorization: "Bearer " + accessToken,
       "Access-Control-Allow-Origin": "*",
     },
+    params: params,
   };
-  console.log("upil----", config);
+  console.log("config----", config);
 
   axios
-    .get(url, config)
-    .then((response) =>
+    .post(url, params, config)
+    .then((response) => {
+      console.log("response----", response);
       res.send({
         result: response.data.result,
-      })
-    )
+      });
+    })
     .catch((error) =>
       res.send({
         error: error,
@@ -126,36 +148,10 @@ async function getDropdownPayment(res: any, body: any) {
     );
 }
 
-async function getDropdownBank(res: any, body: any) {
+async function getActivePeriod(res: any, body: any) {
   const { accessToken, params } = body;
 
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/GetDropdownBank`;
-  const config = {
-    headers: {
-      Authorization: "Bearer " + accessToken,
-      "Access-Control-Allow-Origin": "*",
-    },
-  };
-  console.log("upil----", config);
-
-  axios
-    .get(url, config)
-    .then((response) =>
-      res.send({
-        result: response.data.result,
-      })
-    )
-    .catch((error) =>
-      res.send({
-        error: error,
-      })
-    );
-}
-
-async function getPeriodNo(res: any, body: any) {
-  const { accessToken, params } = body;
-
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/GetLastPeriodNo`;
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetActivePeriod`;
   const config = {
     headers: {
       Authorization: "Bearer " + accessToken,
@@ -179,10 +175,10 @@ async function getPeriodNo(res: any, body: any) {
     );
 }
 
-async function create(res: any, body: any) {
+async function uploadExcel(res: any, body: any) {
   const { accessToken, params } = body;
 
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/PaymentProses`;
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/UploadExcelWaterReading`;
   const config = {
     headers: {
       Authorization: "Bearer " + accessToken,
@@ -207,31 +203,4 @@ async function create(res: any, body: any) {
         error: error,
       });
     });
-}
-
-async function getBalance(res: any, body: any) {
-  const { accessToken, params } = body;
-
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/ViewDetailBalance`;
-  const config = {
-    headers: {
-      Authorization: "Bearer " + accessToken,
-      "Access-Control-Allow-Origin": "*",
-    },
-    params: params,
-  };
-  console.log("config----", config);
-
-  axios
-    .post(url, params, config)
-    .then((response) =>
-      res.send({
-        result: response.data.result,
-      })
-    )
-    .catch((error) =>
-      res.send({
-        error: error,
-      })
-    );
 }
