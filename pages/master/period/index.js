@@ -43,7 +43,7 @@ export default function MasterPeriod(props) {
     }
   }, []);
   useEffect(() => {
-    fetchData();
+    if (site != undefined) fetchData();
   }, [site]);
 
   //dari sini

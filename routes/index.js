@@ -146,7 +146,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           name: "Invoice",
           nameOnHeader: "Invoice",
           key: "invoice",
-          route: "/app/nsfp/list",
+          route: "/transaction/invoice",
           permission: "Pages.Tenants.GenerateNoSeriFP.List",
         },
         {
