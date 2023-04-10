@@ -120,6 +120,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
         },
       ],
     },
+
     {
       type: "collapse",
       name: "Transaction",
@@ -172,6 +173,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
         },
       ],
     },
+
     {
       type: "collapse",
       name: "Cashier System",
@@ -203,11 +205,12 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           name: "Upload Bulk Payment",
           nameOnHeader: "Upload Bulk Payment",
           key: "upload-bulk-payment",
-          route: "/app/nsfp/list",
+          route: "/cashier/upload-bulk-payment",
           permission: "Pages.Tenants.GenerateNoSeriFP.List",
         },
       ],
     },
+
     {
       type: "collapse",
       name: "Report",

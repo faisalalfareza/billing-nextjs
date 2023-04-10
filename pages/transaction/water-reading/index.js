@@ -312,10 +312,7 @@ export default function WaterReading(props) {
                     <Formik
                       initialValues={initialValues}
                       validationSchema={validations}
-                      onSubmit={(values, { setSubmitting }) => {
-                        fetchData(values);
-                        setSubmitting(false);
-                      }}
+                      onSubmit={fetchData}
                     >
                       {({
                         values,

@@ -62,6 +62,7 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
     [remarks.name]: remarks.defaultValue,
   };
 
+
   const [isLoadingDetailCancelPayment, setLoadingDetailCancelPayment] = useState(false);
   const [detailCancelPayment, setDetailCancelPayment] = useState();
   const getDetailCancelPayment = async () => {
@@ -89,10 +90,11 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
+
   const checkingSuccessInput = (isRequired, value, error) => {
     return (!isRequired && true) || (isRequired && value != undefined && value != "" && value.length > 0 && !error);
   };
-  const submitForm = async (values, actions) => cancelPayment(values, actions);
+  const submitForm = (values, actions) => cancelPayment(values, actions);
 
   const [isLoadingCancelPayment, setLoadingCancelPayment] = useState(false);
   const cancelPayment = async (values, actions) => {
@@ -169,10 +171,7 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
           {({
             values,
             errors,
-            touched,
-            isSubmitting,
-            setFieldValue,
-            resetForm,
+            touched
           }) => {
             let { 
               remarks: remarksV
@@ -377,8 +376,9 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
                           InputLabelProps={{ shrink: true }}
                           error={errors.remarks && touched.remarks}
                           success={remarks.isRequired && checkingSuccessInput(remarks.isRequired, remarksV, errors.remarks)}
+                          multiline rows={5}
                         />
-                      </Grid>}
+                      </Grid> }
                     </Grid>
                   </MDBox>
                 </ModalBody>

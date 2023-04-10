@@ -1,23 +1,21 @@
 import React, { useState, useEffect } from "react";
-import { useCookies } from "react-cookie";
 import { NumericFormat } from "react-number-format";
-import { Formik, Form } from "formik";
+import { Formik } from "formik";
 import * as Yup from "yup";
 import Swal from "sweetalert2";
 
-// @mui material components
 import Card from "@mui/material/Card";
 import Grid from "@mui/material/Grid";
 import Icon from "@mui/material/Icon";
-import Autocomplete from "@mui/material/Autocomplete";
 import Radio from "@mui/material/Radio";
 
-// NextJS Material Dashboard 2 PRO components
 import MDBox from "/components/MDBox";
 import MDTypography from "/components/MDTypography";
 import MDButton from "/components/MDButton";
 
-// NextJS Material Dashboard 2 PRO examples
+import { typeNormalization } from "/helpers/utils";
+import { alertService } from "/helpers/alert.service";
+
 import DashboardLayout from "/layout/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "/layout/Navbars/DashboardNavbar";
 import DataTable from "/layout/Tables/DataTable";
@@ -26,13 +24,14 @@ import DetailCancelPayment from "./components/DetailCancelPayment";
 
 import FormField from "/pagesComponents/FormField";
 import SiteDropdown from "../../../pagesComponents/dropdown/Site";
-import { typeNormalization } from "/helpers/utils";
-import { alertService } from "/helpers";
 
 
 function CancelPayment() {
-  const [{ accessToken, encryptedAccessToken }] = useCookies();
   const [site, setSite] = useState(null);
+  const handleSite = (siteVal) => {
+    setSite(siteVal);
+    localStorage.setItem("site", JSON.stringify(siteVal));
+  };
 
   const schemeModels = {
     formId: "reprint-or-form",
@@ -67,9 +66,7 @@ function CancelPayment() {
         text: "Please choose Site first",
         icon: "info",
       });
-    } else {
-      setSite(currentSite);
-    }
+    } else setSite(currentSite);
   }, []);
 
 
@@ -279,15 +276,11 @@ function CancelPayment() {
     });
   };
 
-  const handleSite = (siteVal) => {
-    setSite(siteVal);
-    localStorage.setItem("site", JSON.stringify(siteVal));
-  };
-
 
   return (
     <DashboardLayout>
       <DashboardNavbar />
+
       <MDBox
         p={3}
         color="light"
@@ -304,16 +297,18 @@ function CancelPayment() {
           </Grid>
         </Grid>
       </MDBox>
+
       <MDBox py={3}>
         <Grid container spacing={3}>
-          {/* Customer List */}
           <Grid item xs={12}>
             <Card>
               <MDBox p={3} lineHeight={1}>
                 <Grid container alignItems="center">
                   <Grid item xs={12} mb={2}>
                     <MDBox>
-                      <MDTypography variant="h5">Filter</MDTypography>
+                      <MDTypography variant="h5">
+                        Filter
+                      </MDTypography>
                     </MDBox>
                   </Grid>
                   <Grid item xs={12}>
@@ -351,9 +346,7 @@ function CancelPayment() {
                                   name={customerName.name}
                                   value={customerNameV}
                                   placeholder={customerName.placeholder}
-                                  error={
-                                    errors.customerName && touched.customerName
-                                  }
+                                  error={errors.customerName && touched.customerName}
                                   success={checkingSuccessInput(customerName.isRequired, customerNameV, errors.customerName)}
                                   onKeyUp={(e) =>
                                     setCustomerRequest((prevState) => ({
@@ -369,9 +362,6 @@ function CancelPayment() {
                                   flexDirection={{ xs: "column", sm: "row" }}
                                   justifyContent="flex-end"
                                 >
-                                  {/* <MDButton variant="outlined" color="secondary">
-                                    Clear Filters
-                                  </MDButton> */}
                                   <MDBox
                                     ml={{ xs: 0, sm: 1 }}
                                     mt={{ xs: 1, sm: 0 }}
@@ -381,14 +371,9 @@ function CancelPayment() {
                                       variant="gradient"
                                       color="primary"
                                       sx={{ height: "100%" }}
-                                      disabled={
-                                        !isValifForm() || isLoadingCustomer
-                                      }
+                                      disabled={!isValifForm() || isLoadingCustomer}
                                     >
-                                      <Icon>search</Icon>&nbsp;{" "}
-                                      {isLoadingCustomer
-                                        ? "Searching.."
-                                        : "Search"}
+                                      <Icon>search</Icon>&nbsp;{" "} { isLoadingCustomer ? "Searching.." : "Search" }
                                     </MDButton>
                                   </MDBox>
                                 </MDBox>
@@ -400,7 +385,7 @@ function CancelPayment() {
                     </Formik>
                   </Grid>
                 </Grid>
-                {customerResponse.rowData.length > 0 && (
+                { customerResponse.rowData.length > 0 && (
                   <Grid container alignItems="center" pt={3}>
                     <Grid item xs={12} mb={2}>
                       <MDBox>
@@ -443,13 +428,12 @@ function CancelPayment() {
                       </MDBox>
                     </Grid>
                   </Grid>
-                )}
+                ) }
               </MDBox>
             </Card>
           </Grid>
 
-          {/* Cancel Payment List */}
-          {cancelPaymentData.rowData.length > 0 && (
+          { cancelPaymentData.rowData.length > 0 && (
             <Grid item xs={12}>
               <Card>
                 <MDBox p={3} lineHeight={1}>
