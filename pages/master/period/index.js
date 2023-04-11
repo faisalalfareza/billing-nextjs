@@ -35,7 +35,6 @@ export default function MasterPeriod(props) {
 
   useEffect(() => {
     let currentSite = JSON.parse(localStorage.getItem("site"));
-    console.log("currentSite-----------", currentSite);
     if (currentSite == null) {
       Swal.fire({
         title: "Info!",
@@ -125,9 +124,6 @@ export default function MasterPeriod(props) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    // console.log("GET PERMISSIONS RESULT", response);
-
-    console.log("response----", response);
     if (response.error) setLoading(false);
     else {
       const list = [];
@@ -157,7 +153,6 @@ export default function MasterPeriod(props) {
         });
       });
       setListSite(list);
-      console.log("list------", list);
     }
   };
 

@@ -46,7 +46,7 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
     });
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    console.log("response----", response);
+
     if (response.error) {
       Swal.fire({
         title: "Error",
@@ -56,11 +56,9 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
     } else {
       setDataProject(response.result);
     }
-    console.log("project------", dataProject);
   };
 
   const onProjectChange = async (val) => {
-    console.log("valpro", val);
     let response = await fetch("/api/master/site/dropdowncluster", {
       method: "POST",
       body: JSON.stringify({
@@ -72,7 +70,7 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
     });
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    console.log("response----", response);
+
     if (response.error) {
       Swal.fire({
         title: "Error",
@@ -82,12 +80,9 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
     } else {
       setDataCluster(response.result);
     }
-    console.log("cluster------", dataCluster);
   };
 
   const createSite = async (fields, actions) => {
-    console.log("valprop", fields);
-
     let listCluster = [];
     fields.cluster.map((e) => {
       listCluster.push({ clusterId: e.clusterId });
@@ -112,7 +107,6 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
       clusterDataList: listCluster,
       projectDataList: listProject,
     };
-    console.log("CompanyOfficer/CreateOrUpdateCompanyOfficer ", body);
 
     let response = await fetch("/api/master/site/create", {
       method: "POST",
@@ -123,7 +117,7 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
     });
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    console.log("response----", response);
+
     if (response.error) {
       Swal.fire({
         title: "Error",
@@ -148,8 +142,6 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
   const closeModal = () => {
     setTimeout(() => onModalChanged(), 0);
   };
-
-  console.log("params--------", params);
 
   if (isOpen) {
     const initialValues = {
@@ -186,8 +178,6 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
         setTimeout(resolve, ms);
       });
     const submitForm = (fields, actions) => {
-      console.log("submit-meeeee");
-      console.log("valprop", fields);
       createSite(fields, actions);
     };
 
@@ -395,7 +385,6 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
                                   name={isActive.name}
                                   checked={formValues.isActive}
                                   onChange={(e) => {
-                                    console.log(e.target.checked);
                                     setFieldValue(
                                       isActive.name,
                                       e.target.checked != null

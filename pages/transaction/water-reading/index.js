@@ -52,7 +52,6 @@ export default function WaterReading(props) {
 
   useEffect(() => {
     let currentSite = JSON.parse(localStorage.getItem("site"));
-    console.log("currentSite-----------", currentSite);
     if (currentSite == null) {
       alertService.info({
         title: "Info!",
@@ -105,13 +104,11 @@ export default function WaterReading(props) {
     });
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    console.log("response----", response);
     if (response.error) {
       alertService.error({ title: "Error", text: response.error.message });
     } else {
       setDataProject(response.result);
     }
-    console.log("project------", dataProject);
   };
   useEffect(() => {
     getProject();
@@ -119,8 +116,6 @@ export default function WaterReading(props) {
   useEffect(() => {
     fetchData();
   }, [customerRequest.skipCount, customerRequest.recordsPerPage]);
-
-  console.log("site------", site);
 
   const form = {
     formId: "water-reading-filter",
@@ -197,7 +192,6 @@ export default function WaterReading(props) {
   const [tasklist, setTasklist] = useState({ columns: columns, rows: [] });
 
   const fetchData = async (data) => {
-    console.log("record--", recordsPerPage);
     const { scheme, keywords, recordsPerPage, skipCount } = customerRequest;
     let response = await fetch("/api/transaction/water/list", {
       method: "POST",
@@ -215,9 +209,6 @@ export default function WaterReading(props) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    // console.log("GET PERMISSIONS RESULT", response);
-
-    console.log("response----", response);
     if (response.error)
       alertService.error({ title: "Error", text: response.error.message });
     else {
@@ -247,7 +238,6 @@ export default function WaterReading(props) {
       //   columns: columns,
       //   rows: list,
       // });
-      console.log("list------", customerResponse);
     }
   };
 
@@ -276,9 +266,6 @@ export default function WaterReading(props) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    console.log("GET PERMISSIONS RESULT", response);
-
-    console.log("response----", response);
     if (response.error)
       alertService.error({ text: response.error.message, title: "Error" });
     else {
@@ -299,13 +286,12 @@ export default function WaterReading(props) {
     });
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    console.log("response----", response);
+
     if (response.error) {
       alertService.error({ title: "Error", text: response.error.message });
     } else {
       setDataCluster(response.result);
     }
-    console.log("cluster------", dataCluster);
     setLoading(false);
   };
 

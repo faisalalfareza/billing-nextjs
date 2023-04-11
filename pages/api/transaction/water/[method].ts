@@ -47,7 +47,6 @@ async function getList(res: any, body: any) {
     },
     params: params,
   };
-  console.log("config----", config);
 
   axios
     .get(url, config)
@@ -74,7 +73,6 @@ async function getDropdownProject(res: any, body: any) {
     },
     params: params,
   };
-  console.log("config----", config);
 
   axios
     .get(url, config)
@@ -100,20 +98,15 @@ async function update(res: any, body: any) {
       "Access-Control-Allow-Origin": "*",
     },
   };
-  console.log("config----", config);
-
-  console.log("body---", params);
 
   axios
     .put(url, params, config)
     .then((response) => {
-      console.log("response-----", response);
       res.send({
         result: response.data.result,
       });
     })
     .catch((error) => {
-      console.log("err-----", error.response);
       res.send({
         error: error,
       });
@@ -131,12 +124,10 @@ async function exportExcel(res: any, body: any) {
     },
     params: params,
   };
-  console.log("config----", config);
 
   axios
     .post(url, params, config)
     .then((response) => {
-      console.log("response----", response);
       res.send({
         result: response.data.result,
       });
@@ -159,7 +150,6 @@ async function getActivePeriod(res: any, body: any) {
     },
     params: params,
   };
-  console.log("config----", config);
 
   axios
     .get(url, config)
@@ -185,20 +175,15 @@ async function uploadExcel(res: any, body: any) {
       "Access-Control-Allow-Origin": "*",
     },
   };
-  console.log("config----", config);
-
-  console.log("body---", params);
 
   axios
     .post(url, params, config)
     .then((response) => {
-      console.log("response-----", response);
       res.send({
         result: response.data.result,
       });
     })
     .catch((error) => {
-      console.log("err-----", error.response);
       res.send({
         error: error,
       });

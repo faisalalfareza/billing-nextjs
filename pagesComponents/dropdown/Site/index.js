@@ -23,7 +23,6 @@ export default function SiteDropdown(props) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    console.log("up---", response.result);
     setDataSite(response.result);
   };
 
