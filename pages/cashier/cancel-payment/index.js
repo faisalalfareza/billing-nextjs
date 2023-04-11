@@ -67,6 +67,7 @@ function CancelPayment() {
         icon: "info",
       });
     } else setSite(currentSite);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
 
@@ -171,7 +172,7 @@ function CancelPayment() {
   }, [customerRequest.skipCount, customerRequest.recordsPerPage]);
 
   const checkingSuccessInput = (isRequired, value, error) => {
-    return (!isRequired && true) || (isRequired && value != undefined && value != "" && value.length > 0 && !error);
+    return (!isRequired && true) || (isRequired && value != undefined && value != "" && !error);
   };
   const handleCustomerSubmit = async (e) => {
     e != undefined && e.preventDefault();

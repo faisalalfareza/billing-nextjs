@@ -117,7 +117,6 @@ export default function BillingPayment(props) {
     getPaymentMethod();
     getBank();
     let currentSite = JSON.parse(localStorage.getItem("site"));
-    console.log("currentSite-----------", currentSite);
     if (currentSite == null) {
       alertService.info({ title: "Info", text: "Please choose Site first" });
     } else {
@@ -188,13 +187,9 @@ export default function BillingPayment(props) {
   const [formValues, setformValues] = useState(initialValues);
 
   const getFormData = (values) => {
-    console.log("getFormData::", values);
   };
-  console.log("formValues::", formValues);
 
   const submitForm = async (values, actions) => {
-    console.log("reneeeee----", totalFooter);
-    console.log("formval------", values);
     if (values.amountPayment != totalFooter.payment) {
       alertService.warn({
         title: "Warning",
@@ -211,8 +206,7 @@ export default function BillingPayment(props) {
 
   const paymentProcess = async (fields, actions) => {
     setLoading(true);
-    console.log("valprop", fields);
-    console.log("listinvoice", listInvoice);
+
     const body = {
       paymentType: fields.paymentMethod.paymentType,
       cardNumber: fields.cardNumber,
@@ -227,7 +221,6 @@ export default function BillingPayment(props) {
       remarks: fields.remarks,
       listInvoicePayment: listInvoice,
     };
-    console.log("CompanyOfficer/CreateOrUpdateCompanyOfficer ", body);
 
     let response = await fetch("/api/cashier/billing/create", {
       method: "POST",
@@ -238,7 +231,6 @@ export default function BillingPayment(props) {
     });
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    console.log("response----", response);
     if (response.error) {
       alertService.error({ title: "Error", text: response.error.message });
     } else {
@@ -258,10 +250,8 @@ export default function BillingPayment(props) {
   };
 
   const handleCheck = (val) => {
-    console.log("val-----check", val);
     setSelectedPSCode(val.unitDataId);
     setDetail(val);
-    console.log("data---checked", selectedPSCode);
   };
 
   const setBillingList = (list) => {
@@ -271,7 +261,6 @@ export default function BillingPayment(props) {
           Header: "Choose",
           accessor: "e",
           Cell: ({ value }) => {
-            console.log("valueme", value);
             return (
               <Radio
                 onChange={(e) => {
@@ -298,7 +287,6 @@ export default function BillingPayment(props) {
     };
   };
   const paymentAmountChange = (value, index) => {
-    console.log("upilll", value);
     const newData = [...listInvoice];
     let a = value.replaceAll("Rp. ", "").replaceAll(".", "").replace(",", ".");
     let valFloat = parseFloat(a);
@@ -306,8 +294,6 @@ export default function BillingPayment(props) {
     newData[index].paymentAmount = valFloat;
 
     setListInvoice(newData);
-
-    console.log("listinvo", listInvoice);
   };
 
   useEffect(() => {
@@ -441,7 +427,6 @@ export default function BillingPayment(props) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    console.log("response----", response);
     if (response.error) setLoading(false);
     else {
       const list = [];
@@ -464,7 +449,6 @@ export default function BillingPayment(props) {
         totalRows: data.totalCount,
         totalPages: Math.ceil(data.totalCount / customerRequest.recordsPerPage),
       }));
-      console.log("list------", list);
     }
   };
 
@@ -477,7 +461,7 @@ export default function BillingPayment(props) {
     });
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    console.log("response----", response);
+
     if (response.error) {
       setLoading(false);
       alertService.error({ title: "Error", text: response.error.message });
@@ -495,7 +479,7 @@ export default function BillingPayment(props) {
     });
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    console.log("response----", response);
+
     if (response.error) {
       setLoading(false);
       alertService.error({ title: "Error", text: response.error.message });
@@ -518,7 +502,6 @@ export default function BillingPayment(props) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    console.log("response----", response);
     if (response.error) {
       const error = response.error;
       setLoading(false);
@@ -544,7 +527,6 @@ export default function BillingPayment(props) {
           payment: tp,
         };
       });
-      console.log("list-invoice-----", listInvoice);
     }
   };
 
@@ -970,7 +952,6 @@ export default function BillingPayment(props) {
                                           color="primary"
                                           checked={formValues.isPrintOR}
                                           onChange={(e) => {
-                                            console.log(e.target.checked);
                                             setFieldValue(
                                               "isPrintOR",
                                               e.target.checked != null
@@ -990,7 +971,6 @@ export default function BillingPayment(props) {
                                           color="primary"
                                           checked={formValues.isAddSignee}
                                           onChange={(e) => {
-                                            console.log(e.target.checked);
                                             setFieldValue(
                                               "isAddSignee",
                                               e.target.checked != null

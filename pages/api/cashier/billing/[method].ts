@@ -56,7 +56,6 @@ async function getList(res: any, body: any) {
     },
     params: params,
   };
-  console.log("config----", config);
 
   axios
     .get(url, config)
@@ -83,7 +82,6 @@ async function getDetail(res: any, body: any) {
     },
     params: params,
   };
-  console.log("config----", config);
 
   axios
     .get(url, config)
@@ -93,8 +91,6 @@ async function getDetail(res: any, body: any) {
       })
     )
     .catch((error) => {
-      console.log("er------", error);
-      console.log("er2------", error.response.data.error.message);
       res.send({
         error: error.response.data,
       });
@@ -110,7 +106,6 @@ async function getDropdownPayment(res: any, body: any) {
       "Access-Control-Allow-Origin": "*",
     },
   };
-  console.log("upil----", config);
 
   axios
     .get(url, config)
@@ -136,7 +131,6 @@ async function getDropdownBank(res: any, body: any) {
       "Access-Control-Allow-Origin": "*",
     },
   };
-  console.log("upil----", config);
 
   axios
     .get(url, config)
@@ -163,7 +157,6 @@ async function getPeriodNo(res: any, body: any) {
     },
     params: params,
   };
-  console.log("config----", config);
 
   axios
     .get(url, config)
@@ -189,20 +182,15 @@ async function create(res: any, body: any) {
       "Access-Control-Allow-Origin": "*",
     },
   };
-  console.log("config----", config);
-
-  console.log("body---", params);
 
   axios
     .post(url, params, config)
     .then((response) => {
-      console.log("response-----", response);
       res.send({
         result: response.data.result,
       });
     })
     .catch((error) => {
-      console.log("err-----", error.response);
       res.send({
         error: error,
       });
@@ -220,7 +208,6 @@ async function getBalance(res: any, body: any) {
     },
     params: params,
   };
-  console.log("config----", config);
 
   axios
     .post(url, params, config)

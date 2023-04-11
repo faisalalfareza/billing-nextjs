@@ -95,14 +95,7 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
   }, [isOpen]);
 
   const checkingSuccessInput = (isRequired, value, error) => {
-    return (
-      (!isRequired && true) ||
-      (isRequired &&
-        value != undefined &&
-        value != "" &&
-        value.length > 0 &&
-        !error)
-    );
+    return (!isRequired && true) || (isRequired && value != undefined && value != "" && !error);
   };
   const submitForm = (values, actions) => cancelPayment(values, actions);
 

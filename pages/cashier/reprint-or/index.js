@@ -54,7 +54,6 @@ function RePrintOR() {
   useEffect(() => {
     document.getElementsByName(customerName.name)[0].focus();
     let currentSite = JSON.parse(localStorage.getItem("site"));
-    console.log("currentSite-----------", currentSite);
     if (currentSite == null) {
       alertService.info({ title: "Info", text: "Please choose Site first" });
     } else {
@@ -117,7 +116,6 @@ function RePrintOR() {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    console.log("response----", response);
     if (response.error)
       alertService.error({ title: "Error", text: response.error.message });
     else {
@@ -128,7 +126,6 @@ function RePrintOR() {
         totalRows: data.totalCount,
         totalPages: Math.ceil(data.totalCount / customerRequest.recordsPerPage),
       }));
-      console.log("list------", data);
       setLoadingCustomer(false);
     }
   };
@@ -202,7 +199,6 @@ function RePrintOR() {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    console.log("response----", response);
     if (response.error)
       alertService.error({ title: "Error", text: response.error.message });
     else {
@@ -213,7 +209,6 @@ function RePrintOR() {
         totalRows: data.totalCount,
         totalPages: Math.ceil(data.totalCount / customerRequest.recordsPerPage),
       }));
-      console.log("list------", data);
       setLoadingOfficialReceipt(false);
     }
   };
@@ -274,13 +269,11 @@ function RePrintOR() {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    console.log("response----", response);
     if (response.error)
       alertService.error({ title: "Error", text: response.error.message });
     else {
       let data = response.result;
       window.open(data);
-      console.log("list------", data);
       setLoadingOfficialReceipt(false);
     }
   };

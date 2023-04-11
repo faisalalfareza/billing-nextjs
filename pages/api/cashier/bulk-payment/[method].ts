@@ -15,17 +15,9 @@ export default async function handler(
     case "listPaymentMethod":
       getDropdownPaymentMethod(res, body);
       break;
-
-    case "listCancelPayment":
-      getListCancelPayment(res, body);
-      break;
-
-    case "detailCancelPayment":
-      getDetailCancelPayment(res, body);
-      break;
     
-    case "cancelPayment":
-      cancelPayment(res, body);
+    case "uploadBulkPayment":
+      uploadBulkPayment(res, body);
       break;
   }
 }
@@ -46,38 +38,11 @@ async function getDropdownPaymentMethod(res: any, body: any) {
     .then((response) => res.send(response.data.result))
     .catch((error) => res.send({ error: error }));
 }
-async function getListCancelPayment(res: any, body: any) {
-  const { params } = body;
 
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/GetListCancelPayment`;
-  const config = {
-    headers: { "Access-Control-Allow-Origin": "*" },
-    params: params,
-  };
-
-  axios
-    .get(url, config)
-    .then((response) => res.send(response.data.result))
-    .catch((error) => res.send({ error: error.response.data }));
-}
-async function getDetailCancelPayment(res: any, body: any) {
-  const { params } = body;
-
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/GetDetailCancelPayment`;
-  const config = {
-    headers: { "Access-Control-Allow-Origin": "*" },
-    params: params
-  };
-  axios
-    .get(url, config)
-    .then((response) => res.send(response.data.result))
-    .catch((error) => res.send({ error: error.response.data }));
-}
-
-async function cancelPayment(res: any, body: any) {
+async function uploadBulkPayment(res: any, body: any) {
   const { accessToken, params } = body;
 
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/CancelPayment`;
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/UploadBulkPayment`;
   const config = {
     headers: {
       "Authorization": "Bearer " + accessToken,

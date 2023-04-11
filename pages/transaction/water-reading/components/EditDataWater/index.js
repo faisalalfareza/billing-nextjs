@@ -59,9 +59,7 @@ function EditDataWater({ isOpen, params, onModalChanged, site }) {
   const [formValues, setformValues] = useState(initialValues);
 
   const getFormData = (values) => {
-    console.log("getFormData::", values);
   };
-  console.log("formValues::", formValues);
 
   const updateWater = async (values, actions) => {
     const body = {
@@ -69,7 +67,6 @@ function EditDataWater({ isOpen, params, onModalChanged, site }) {
       currentRead: values.current,
       prevRead: values.prev,
     };
-    console.log(body);
 
     body.periodId = params.periodId;
 
@@ -83,7 +80,6 @@ function EditDataWater({ isOpen, params, onModalChanged, site }) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    console.log("response----", response);
     if (response.error) {
       alertService.error({ text: response.error.message, title: "Error" });
       setLoadingSubmit(false);
@@ -116,17 +112,13 @@ function EditDataWater({ isOpen, params, onModalChanged, site }) {
     setTimeout(() => onModalChanged(), 0);
   };
 
-  console.log("params--------", params);
   useEffect(() => {
     if (params) {
-      console.log("parms------", params);
       // setformValues((prevState) => ({
       //   ...prevState,
       //   [prev.name]: params?.prevRead,
       //   [current.name]: params?.currentRead,
       // }));
-
-      console.log("formparams------", formValues);
     }
   }, [params]);
 
@@ -174,7 +166,6 @@ function EditDataWater({ isOpen, params, onModalChanged, site }) {
             resetForm,
           }) => {
             setformValues(values);
-            console.log("val-----", values);
             // setformValues((prevState) => ({
             //   ...prevState,
             //   [prev.name]: params?.prevRead,

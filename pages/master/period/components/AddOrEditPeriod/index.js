@@ -121,18 +121,14 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
       : null,
     [isActive.name]: params ? params.isActive : true,
   };
-  console.log("initval----", initialValues);
 
   const [formValues, setformValues] = useState(initialValues);
 
   const getFormData = (values) => {
-    console.log("getFormData::", values);
   };
-  console.log("formValues::", formValues);
 
   const getLastPeriodNo = async (val) => {
     // setLoading(true);
-    console.log("site-----", site);
     let response = await fetch("/api/master/period/no", {
       method: "POST",
       body: JSON.stringify({
@@ -144,7 +140,7 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
     });
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    console.log("response----", response);
+
     setNo(response.result);
     setformValues((prevState) => ({
       ...prevState,
@@ -173,7 +169,6 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
       closeDate: addDate(values.closeDate),
       isActive: values.isActive,
     };
-    console.log("CompanyOfficer/CreateOrUpdateCompanyOfficer ", body);
 
     if (!params) {
       let response = await fetch("/api/master/period/create", {
@@ -185,7 +180,7 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
       });
       if (!response.ok) throw new Error(`Error: ${response.status}`);
       response = typeNormalization(await response.json());
-      console.log("response----", response);
+
       if (response.error) {
         Swal.fire({
           title: "Error",
@@ -219,7 +214,7 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
       });
       if (!response.ok) throw new Error(`Error: ${response.status}`);
       response = typeNormalization(await response.json());
-      console.log("response----", response);
+
       if (response.error) {
         Swal.fire({
           title: "Error",
@@ -253,7 +248,6 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
     setTimeout(() => onModalChanged(), 0);
   };
 
-  console.log("params--------", params);
   if (params) {
     // setformValues((prevState) => ({
     //   ...prevState,
@@ -329,7 +323,6 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
           }) => {
             setformValues(values);
             getFormData(values);
-            console.log("values--ooooo--", values);
 
             const isValifForm = () => {
               // return checkingSuccessInput(companyV, errors.periodNumber) &&
@@ -484,7 +477,6 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
                                   name={isActive.name}
                                   checked={formValues.isActive}
                                   onChange={(e) => {
-                                    console.log(e.target.checked);
                                     setFieldValue(
                                       isActive.name,
                                       e.target.checked != null

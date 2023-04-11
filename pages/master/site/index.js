@@ -141,9 +141,6 @@ export default function MasterSite(props) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    // console.log("GET PERMISSIONS RESULT", response);
-
-    console.log("response----", response);
     if (response.error) setLoading(false);
     else {
       const list = [];
@@ -165,7 +162,6 @@ export default function MasterSite(props) {
         });
       });
       setListSite(list);
-      console.log("list------", list);
     }
 
     // const url = `${publicRuntimeConfig.apiUrl}/api/services/app/MasterBilling/GetListMasterSite`;
@@ -198,7 +194,6 @@ export default function MasterSite(props) {
     //       });
     //     });
     //     setListSite(list);
-    //     console.log("list------", list);
     //   })
     //   .catch((error) => {
     //     // handle error
