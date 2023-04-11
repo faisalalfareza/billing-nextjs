@@ -16,9 +16,9 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import FormField from "/pagesComponents/FormField";
 
 export default function FindName(props) {
-  const { isOpen, params, close } = props;
-  console.log("props-detail----", props);
+  const { isOpen, site, period, close, handlePSCode } = props;
   const [modal, setModal] = useState(isOpen);
+  const [isLoading, setLoading] = useState(false);
   const [listDetail, setListDetail] = useState([]);
   const [{ accessToken, encryptedAccessToken }] = useCookies();
   const [selectedPSCode, setSelectedPSCode] = useState(undefined);
@@ -30,7 +30,6 @@ export default function FindName(props) {
           Header: "Select",
           accessor: "e",
           Cell: ({ value }) => {
-            console.log("valueme", value);
             return (
               <Radio
                 onChange={(e) => {
@@ -39,7 +38,7 @@ export default function FindName(props) {
                 value={value}
                 name="radio-buttons"
                 inputProps={{ "aria-label": "A" }}
-                checked={value.unitDataId == selectedPSCode}
+                checked={value.psCode == selectedPSCode?.psCode}
               />
             );
           },
@@ -52,44 +51,43 @@ export default function FindName(props) {
   };
 
   const handleCheck = (val) => {
-    console.log("val-----check", val);
-    setSelectedPSCode(val.unitDataId);
-    console.log("data---checked", selectedPSCode);
+    setSelectedPSCode(val);
   };
 
   useEffect(() => {
-    if (params != undefined) fetchData();
-  }, [params]);
+    // fetchData();
+  }, []);
 
   const fetchData = async (values, actions) => {
+    setLoading(true);
     let response = await fetch("/api/transaction/invoice/findname", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
         params: {
-          PsCode: params,
-          CustName: undefined,
+          PsCode: values.psCode,
+          CustName: values.name,
+          SiteId: site,
+          PeriodId: period,
         },
       }),
     });
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    console.log("response----", response);
     if (response.error)
       alertService.error({ title: "Error", text: response.error.message });
     else {
       const list = [];
       const row = response.result.map((e, i) => {
         list.push({
-          no: i + 1,
-          deskripsi: e.deskripsi,
-          tanggal: e.tanggal,
-          jumlah: e.jumlah,
+          e,
+          psCode: e.psCode,
+          name: e.name,
         });
       });
       setListDetail(list);
-      console.log("list------", list);
+      setLoading(false);
     }
   };
   const toggle = () => setModal(!modal);
@@ -108,19 +106,24 @@ export default function FindName(props) {
     psCode: Yup.string()
       .required("PSCode is required.")
       .typeError("PSCode is required."),
-    name: Yup.date()
+    name: Yup.string()
       .required("Name is required.")
       .typeError("Name is required."),
   });
 
   const submitForm = async (values, actions) => {
-    console.log("formval------", values);
     fetchData(values, actions);
   };
 
   const [formValues, setformValues] = useState(initialValues);
   const checkingSuccessInput = (value, error) => {
     return value != undefined && value != "" && value.length > 0 && !error;
+  };
+
+  const reset = () => {
+    setListDetail([]);
+    setSelectedPSCode(undefined);
+    close();
   };
 
   return (
@@ -154,6 +157,9 @@ export default function FindName(props) {
                 values,
               }) => {
                 setformValues(values);
+                const isValifForm = () =>
+                  checkingSuccessInput(values.psCode, errors.psCode) &&
+                  checkingSuccessInput(values.name, errors.name);
                 return (
                   <Form id="payment-detail" autoComplete="off" fullWidth>
                     <MDBox pb={3}>
@@ -193,9 +199,10 @@ export default function FindName(props) {
                                 justifyContent="flex-end"
                               >
                                 <MDButton
-                                  type="reset"
+                                  type="button"
                                   variant="outlined"
                                   color="secondary"
+                                  onClick={close}
                                 >
                                   Cancel
                                 </MDButton>
@@ -208,9 +215,9 @@ export default function FindName(props) {
                                     variant="gradient"
                                     color="primary"
                                     sx={{ height: "100%" }}
-                                    disabled={isSubmitting}
+                                    disabled={!isValifForm() || isLoading}
                                   >
-                                    {isSubmitting ? "Searching.." : "Search"}
+                                    {isLoading ? "Searching.." : "Search"}
                                   </MDButton>
                                 </MDBox>
                               </MDBox>
@@ -225,16 +232,31 @@ export default function FindName(props) {
             </Formik>
           </Grid>
         </Grid>
-        <DataTable
-          table={setDetailList()}
-          entriesPerPage={{ defaultValue: listDetail.length }}
-        />
+        {listDetail.length > 0 && (
+          <DataTable
+            table={setDetailList()}
+            entriesPerPage={{ defaultValue: listDetail.length }}
+          />
+        )}
       </ModalBody>
-      <ModalFooter>
-        <MDButton variant="outlined" color="secondary" onClick={close}>
-          Cancel
-        </MDButton>
-      </ModalFooter>
+      {listDetail.length > 0 && (
+        <ModalFooter>
+          <MDButton variant="outlined" color="secondary" onClick={reset}>
+            Cancel
+          </MDButton>
+          <MDButton
+            variant="gradient"
+            color="primary"
+            onClick={() => {
+              handlePSCode(selectedPSCode);
+              reset();
+            }}
+            disabled={selectedPSCode == undefined}
+          >
+            SELECT THIS NAME
+          </MDButton>
+        </ModalFooter>
+      )}
     </Modal>
   );
 }

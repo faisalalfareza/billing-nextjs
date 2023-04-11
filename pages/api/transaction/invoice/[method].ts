@@ -16,8 +16,20 @@ export default async function handler(
         case "list":
           getList(res, body);
           break;
+        case "dropdownperiod":
+          getDropdownPeriod(res, body);
+          break;
         case "dropdownproject":
           getDropdownProject(res, body);
+          break;
+        case "dropdowncluster":
+          getDropdownCluster(res, body);
+          break;
+        case "dropdownunitcode":
+          getDropdownUnitCode(res, body);
+          break;
+        case "dropdownunitno":
+          getDropdownUnitNo(res, body);
           break;
         case "findname":
           findName(res, body);
@@ -63,10 +75,118 @@ async function getList(res: any, body: any) {
     );
 }
 
+async function getDropdownPeriod(res: any, body: any) {
+  const { accessToken, params } = body;
+
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/Report/GetDropdownPeriodBySiteId`;
+  const config = {
+    headers: {
+      Authorization: "Bearer " + accessToken,
+      "Access-Control-Allow-Origin": "*",
+    },
+    params: params,
+  };
+  console.log("config----", config);
+
+  axios
+    .get(url, config)
+    .then((response) =>
+      res.send({
+        result: response.data.result,
+      })
+    )
+    .catch((error) =>
+      res.send({
+        error: error,
+      })
+    );
+}
+
 async function getDropdownProject(res: any, body: any) {
   const { accessToken, params } = body;
 
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetDropdownProjectBySiteId`;
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetDropdownProjectInvoice`;
+  const config = {
+    headers: {
+      Authorization: "Bearer " + accessToken,
+      "Access-Control-Allow-Origin": "*",
+    },
+    params: params,
+  };
+  console.log("config----", config);
+
+  axios
+    .get(url, config)
+    .then((response) =>
+      res.send({
+        result: response.data.result,
+      })
+    )
+    .catch((error) =>
+      res.send({
+        error: error,
+      })
+    );
+}
+
+async function getDropdownCluster(res: any, body: any) {
+  const { accessToken, params } = body;
+
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetDropdownClusterInvoice`;
+  const config = {
+    headers: {
+      Authorization: "Bearer " + accessToken,
+      "Access-Control-Allow-Origin": "*",
+    },
+    params: params,
+  };
+  console.log("config----", config);
+
+  axios
+    .get(url, config)
+    .then((response) =>
+      res.send({
+        result: response.data.result,
+      })
+    )
+    .catch((error) =>
+      res.send({
+        error: error,
+      })
+    );
+}
+
+async function getDropdownUnitCode(res: any, body: any) {
+  const { accessToken, params } = body;
+
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetDropdownUnitCodeByCluster`;
+  const config = {
+    headers: {
+      Authorization: "Bearer " + accessToken,
+      "Access-Control-Allow-Origin": "*",
+    },
+    params: params,
+  };
+  console.log("config----", config);
+
+  axios
+    .get(url, config)
+    .then((response) =>
+      res.send({
+        result: response.data.result,
+      })
+    )
+    .catch((error) =>
+      res.send({
+        error: error,
+      })
+    );
+}
+
+async function getDropdownUnitNo(res: any, body: any) {
+  const { accessToken, params } = body;
+
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetDropdownUnitInvoice`;
   const config = {
     headers: {
       Authorization: "Bearer " + accessToken,
@@ -99,25 +219,22 @@ async function findName(res: any, body: any) {
       Authorization: "Bearer " + accessToken,
       "Access-Control-Allow-Origin": "*",
     },
+    params: params,
   };
   console.log("config----", config);
 
-  console.log("body---", params);
-
   axios
     .get(url, config)
-    .then((response) => {
-      console.log("response-----", response);
+    .then((response) =>
       res.send({
         result: response.data.result,
-      });
-    })
-    .catch((error) => {
-      console.log("err-----", error.response);
+      })
+    )
+    .catch((error) =>
       res.send({
         error: error,
-      });
-    });
+      })
+    );
 }
 
 async function exportExcel(res: any, body: any) {
