@@ -144,6 +144,13 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           permission: "Pages.Tenants.GenerateNoSeriFP.Create",
         },
         {
+          name: "Oracle To Journal",
+          nameOnHeader: "Oracle To Journal",
+          key: "oracle-to-journal",
+          route: "/transaction/oracle-to-journal",
+          permission: "Pages.Tenants.GenerateNoSeriFP.Create",
+        },
+        {
           name: "Invoice",
           nameOnHeader: "Invoice",
           key: "invoice",
@@ -163,14 +170,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           key: "customer-complaint",
           route: "/app/nsfp/list",
           permission: "Pages.Tenants.GenerateNoSeriFP.List",
-        },
-        {
-          name: "Oracle To Journal",
-          nameOnHeader: "Oracle To Journal",
-          key: "oracle-t-journal",
-          route: "/app/nsfp/list",
-          permission: "Pages.Tenants.GenerateNoSeriFP.List",
-        },
+        }
       ],
     },
 

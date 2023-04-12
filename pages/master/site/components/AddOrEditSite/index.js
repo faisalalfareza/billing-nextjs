@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from "react";
-import * as dayjs from "dayjs";
-import * as moment from "moment";
 import Swal from "sweetalert2";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
@@ -20,7 +18,6 @@ import MDButton from "/components/MDButton";
 import FormField from "/pagesComponents/FormField";
 
 // Data
-import getConfig from "next/config";
 import { useCookies } from "react-cookie";
 import { typeNormalization } from "/helpers/utils";
 
