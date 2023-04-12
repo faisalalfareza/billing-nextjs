@@ -53,6 +53,6 @@ async function uploadBulkPayment(res: any, body: any) {
 
   axios
     .post(url, params, config)
-    .then((response) => res.send(response.data.success))
+    .then((response) => res.send(response.data))
     .catch((error) => res.send({ error: error }));
 }

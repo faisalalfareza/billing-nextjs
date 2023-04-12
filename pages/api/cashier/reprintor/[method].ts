@@ -8,33 +8,25 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  let { method, query, body } = req;
+  let { query, body } = req;
   body = JSON.parse(body);
-  switch (method) {
-    case "POST":
-      switch (query.method) {
-        case "listCustomer":
-          getList(res, body);
-          break;
 
-        case "listOr":
-          getListOR(res, body);
-          break;
-
-        case "reprintOr":
-          reprintOR(res, body);
-          break;
-      }
+  switch (query.method) {
+    case "listCustomer":
+      getCustomerList(res, body);
       break;
 
-    case "GET":
-      switch (query.method) {
-      }
+    case "listOR":
+      getListOfficialReceipt(res, body);
+      break;
+
+    case "reprintOR":
+      reprintOfficialReceipt(res, body);
       break;
   }
 }
 
-async function getList(res: any, body: any) {
+async function getCustomerList(res: any, body: any) {
   const { accessToken, params } = body;
 
   const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/GetCustomerList`;
@@ -48,19 +40,11 @@ async function getList(res: any, body: any) {
 
   axios
     .get(url, config)
-    .then((response) =>
-      res.send({
-        result: response.data.result,
-      })
-    )
-    .catch((error) =>
-      res.send({
-        error: error,
-      })
-    );
+    .then((response) => res.send(response.data.result))
+    .catch((error) => res.send({ error: error }));
 }
 
-async function getListOR(res: any, body: any) {
+async function getListOfficialReceipt(res: any, body: any) {
   const { accessToken, params } = body;
 
   const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/GetListOfficialReceipt`;
@@ -74,18 +58,10 @@ async function getListOR(res: any, body: any) {
 
   axios
     .get(url, config)
-    .then((response) =>
-      res.send({
-        result: response.data.result,
-      })
-    )
-    .catch((error) => {
-      res.send({
-        error: error.response.data,
-      });
-    });
+    .then((response) => res.send(response.data.result))
+    .catch((error) => res.send({ error: error.response.data }));
 }
-async function reprintOR(res: any, body: any) {
+async function reprintOfficialReceipt(res: any, body: any) {
   const { accessToken, params } = body;
 
   const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/ReprintOfficialReceipt`;
@@ -99,14 +75,6 @@ async function reprintOR(res: any, body: any) {
 
   axios
     .post(url, params, config)
-    .then((response) => {
-      res.send({
-        result: response.data.result,
-      });
-    })
-    .catch((error) => {
-      res.send({
-        error: error,
-      });
-    });
+    .then((response) => res.send(response.data.result))
+    .catch((error) => res.send({ error: error }));
 }

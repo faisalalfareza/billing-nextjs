@@ -1,32 +1,34 @@
 import React, { useState, useEffect } from "react";
 import { useCookies } from "react-cookie";
-import { Formik, Form } from "formik";
+import { Formik } from "formik";
 import * as Yup from "yup";
-// @mui material components
-import Card from "@mui/material/Card";
-import Grid from "@mui/material/Grid";
-import Icon from "@mui/material/Icon";
-import Autocomplete from "@mui/material/Autocomplete";
-import Radio from "@mui/material/Radio";
 
-// NextJS Material Dashboard 2 PRO components
+import { Card, Grid, Icon, Radio } from "@mui/material";
+
 import MDBox from "/components/MDBox";
 import MDTypography from "/components/MDTypography";
 import MDButton from "/components/MDButton";
 
-// NextJS Material Dashboard 2 PRO examples
+import { typeNormalization } from "/helpers/utils";
+import { alertService } from "/helpers";
+
 import DashboardLayout from "/layout/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "/layout/Navbars/DashboardNavbar";
 import DataTable from "/layout/Tables/DataTable";
 
 import FormField from "/pagesComponents/FormField";
 import SiteDropdown from "../../../pagesComponents/dropdown/Site";
-import { typeNormalization } from "/helpers/utils";
-import { alertService } from "/helpers";
+
 
 function RePrintOR() {
   const [{ accessToken, encryptedAccessToken }] = useCookies();
+  
   const [site, setSite] = useState(null);
+  const handleSite = (siteVal) => {
+    setSite(siteVal);
+    localStorage.setItem("site", JSON.stringify(siteVal));
+  };
+
 
   const schemeModels = {
     formId: "reprint-or-form",
@@ -53,13 +55,18 @@ function RePrintOR() {
   };
   useEffect(() => {
     document.getElementsByName(customerName.name)[0].focus();
-    let currentSite = JSON.parse(localStorage.getItem("site"));
+
+    let currentSite = typeNormalization(localStorage.getItem("site"));
     if (currentSite == null) {
-      alertService.info({ title: "Info", text: "Please choose Site first" });
-    } else {
-      setSite(currentSite);
-    }
+      Swal.fire({
+        title: "Info!",
+        text: "Please choose Site first",
+        icon: "info",
+      });
+    } else setSite(currentSite);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
 
   const [isLoadingCustomer, setLoadingCustomer] = useState(false);
   const [customerRequest, setCustomerRequest] = useState({
@@ -97,17 +104,17 @@ function RePrintOR() {
     }));
   };
 
-  const getCustomerList = async (data) => {
+  const getCustomerList = async () => {
     setLoadingCustomer(true);
 
     const { scheme, keywords, recordsPerPage, skipCount } = customerRequest;
-    let response = await fetch("/api/cashier/reprintor/listCustomer", {
+    let response = await fetch("/api/cashier/reprint-or/listCustomer", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
         params: {
           SiteId: site?.siteId,
-          // Search: keywords,
+          Search: keywords,
           MaxResultCount: recordsPerPage, // Rows Per Page (Fixed). Start From 1
           SkipCount: skipCount, // Increments Based On Page (Flexible). Start From 0
         },
@@ -116,18 +123,15 @@ function RePrintOR() {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error)
-      alertService.error({ title: "Error", text: response.error.message });
+    if (response.error) alertService.error({ title: "Error", text: response.error.message });
     else {
-      let data = response.result;
       setCustomerResponse((prevState) => ({
         ...prevState,
-        rowData: data.items,
-        totalRows: data.totalCount,
-        totalPages: Math.ceil(data.totalCount / customerRequest.recordsPerPage),
+        rowData: response.items,
+        totalRows: response.totalCount,
+        totalPages: Math.ceil(response.totalCount / customerRequest.recordsPerPage),
       }));
-      setLoadingCustomer(false);
-    }
+    } setLoadingCustomer(false);
   };
 
   const setCustomerTaskList = (rows) => {
@@ -166,13 +170,15 @@ function RePrintOR() {
     customerRequest.keywords != "" && getCustomerList();
   }, [customerRequest.skipCount, customerRequest.recordsPerPage]);
 
-  const checkingSuccessInput = (value, error) => {
-    return value != undefined && value != "" && value.length > 0 && !error;
+
+  const checkingSuccessInput = (isRequired, value, error) => {
+    return (!isRequired && true) || (isRequired && value != undefined && value != "" && !error);
   };
   const handleCustomerSubmit = async (e) => {
     e != undefined && e.preventDefault();
     getCustomerList();
   };
+
 
   const [isLoadingOfficialReceipt, setLoadingOfficialReceipt] = useState(false);
   const [officialReceiptData, setOfficialReceiptData] = useState({
@@ -184,8 +190,7 @@ function RePrintOR() {
   const getOfficialReceiptList = async (unitDataID) => {
     setLoadingOfficialReceipt(true);
 
-    const { scheme, keywords, recordsPerPage, skipCount } = customerRequest;
-    let response = await fetch("/api/cashier/reprintor/listOr", {
+    let response = await fetch("/api/cashier/reprint-or/listOR", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
@@ -199,20 +204,16 @@ function RePrintOR() {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error)
-      alertService.error({ title: "Error", text: response.error.message });
+    if (response.error) alertService.error({ title: "Error", text: response.error.message });
     else {
-      let data = response.result;
       setOfficialReceiptData((prevState) => ({
         ...prevState,
-        rowData: data.items,
-        totalRows: data.totalCount,
-        totalPages: Math.ceil(data.totalCount / customerRequest.recordsPerPage),
+        rowData: response.items,
+        totalRows: response.totalCount,
+        totalPages: Math.ceil(response.totalCount / customerRequest.recordsPerPage),
       }));
-      setLoadingOfficialReceipt(false);
-    }
+    } setLoadingOfficialReceipt(false);
   };
-
   const setOfficialReceiptTaskList = (rows) => {
     return {
       columns: [
@@ -255,11 +256,12 @@ function RePrintOR() {
 
   const reprintOfficialReceipt = async (billingHeaderId) => {
     setLoadingOfficialReceipt(true);
+
     const body = {
       SiteId: site?.siteId,
       BillingHeaderId: billingHeaderId,
     };
-    let response = await fetch("/api/cashier/reprintor/reprintOr", {
+    let response = await fetch("/api/cashier/reprint-or/reprintOR", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
@@ -269,19 +271,12 @@ function RePrintOR() {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error)
-      alertService.error({ title: "Error", text: response.error.message });
-    else {
-      let data = response.result;
-      window.open(data);
-      setLoadingOfficialReceipt(false);
-    }
+    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+    else window.open(response);
+      
+    setLoadingOfficialReceipt(false);
   };
 
-  const handleSite = (siteVal) => {
-    setSite(siteVal);
-    localStorage.setItem("site", JSON.stringify(siteVal));
-  };
 
   return (
     <DashboardLayout>
@@ -304,7 +299,6 @@ function RePrintOR() {
       </MDBox>
       <MDBox py={3}>
         <Grid container spacing={3}>
-          {/* Customer List */}
           <Grid item xs={12}>
             <Card>
               <MDBox p={3} lineHeight={1}>
@@ -325,16 +319,12 @@ function RePrintOR() {
                       validationSchema={schemeValidations}
                     >
                       {({ values, errors, touched }) => {
-                        let { customerName: customerNameV } = values;
-
-                        const isValifForm = () => {
-                          return checkingSuccessInput(
-                            customerNameV,
-                            errors.customerName
-                          )
-                            ? true
-                            : false;
-                        };
+                        let {
+                          customerName: customerNameV
+                        } = values;
+                        const isValifForm = () => (
+                          checkingSuccessInput(customerName.isRequired, customerNameV, errors.customerName)
+                        );
 
                         return (
                           <MDBox
@@ -342,8 +332,6 @@ function RePrintOR() {
                             role="form"
                             onSubmit={(e) => handleCustomerSubmit(e)}
                           >
-                            {" "}
-                            {/* pb={3} px={3} */}
                             <Grid container spacing={3}>
                               <Grid item xs={12} sm={9}>
                                 <FormField
@@ -355,13 +343,8 @@ function RePrintOR() {
                                   name={customerName.name}
                                   value={customerNameV}
                                   placeholder={customerName.placeholder}
-                                  error={
-                                    errors.customerName && touched.customerName
-                                  }
-                                  success={checkingSuccessInput(
-                                    customerNameV,
-                                    errors.customerName
-                                  )}
+                                  error={errors.customerName && touched.customerName}
+                                  success={customerName.isRequired && checkingSuccessInput(customerName.isRequired, customerNameV, errors.customerName)}
                                   onKeyUp={(e) =>
                                     setCustomerRequest((prevState) => ({
                                       ...prevState,
@@ -376,9 +359,6 @@ function RePrintOR() {
                                   flexDirection={{ xs: "column", sm: "row" }}
                                   justifyContent="flex-end"
                                 >
-                                  {/* <MDButton variant="outlined" color="secondary">
-                                    Clear Filters
-                                  </MDButton> */}
                                   <MDBox
                                     ml={{ xs: 0, sm: 1 }}
                                     mt={{ xs: 1, sm: 0 }}
@@ -451,14 +431,10 @@ function RePrintOR() {
                                 variant="gradient"
                                 color="primary"
                                 sx={{ height: "100%" }}
-                                onClick={() =>
-                                  getOfficialReceiptList(
-                                    selectedUnit.unitDataId
-                                  )
-                                }
+                                onClick={() => getOfficialReceiptList(selectedUnit.unitDataId)}
                                 disabled={!selectedUnit}
                               >
-                                Show this Unit
+                                { isLoadingOfficialReceipt ? "Showing this Unit.." : "Show this Unit" }
                               </MDButton>
                             </MDBox>
                           </MDBox>
@@ -471,7 +447,6 @@ function RePrintOR() {
             </Card>
           </Grid>
 
-          {/* Reprint Official Receipt List */}
           {officialReceiptData.rowData.length > 0 && (
             <Grid item xs={12}>
               <Card>

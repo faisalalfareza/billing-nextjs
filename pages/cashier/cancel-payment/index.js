@@ -4,10 +4,7 @@ import { Formik } from "formik";
 import * as Yup from "yup";
 import Swal from "sweetalert2";
 
-import Card from "@mui/material/Card";
-import Grid from "@mui/material/Grid";
-import Icon from "@mui/material/Icon";
-import Radio from "@mui/material/Radio";
+import { Card, Grid, Icon, Radio } from "@mui/material";
 
 import MDBox from "/components/MDBox";
 import MDTypography from "/components/MDTypography";
@@ -33,6 +30,7 @@ function CancelPayment() {
     localStorage.setItem("site", JSON.stringify(siteVal));
   };
 
+  
   const schemeModels = {
     formId: "reprint-or-form",
     formField: {
@@ -59,7 +57,7 @@ function CancelPayment() {
   useEffect(() => {
     document.getElementsByName(customerName.name)[0].focus();
 
-    let currentSite = JSON.parse(localStorage.getItem("site"));
+    let currentSite = typeNormalization(localStorage.getItem("site"));
     if (currentSite == null) {
       Swal.fire({
         title: "Info!",
@@ -171,10 +169,11 @@ function CancelPayment() {
     customerRequest.keywords != "" && getCustomerList();
   }, [customerRequest.skipCount, customerRequest.recordsPerPage]);
 
+
   const checkingSuccessInput = (isRequired, value, error) => {
     return (!isRequired && true) || (isRequired && value != undefined && value != "" && !error);
   };
-  const handleCustomerSubmit = async (e) => {
+  const onFormSubmit = async (e) => {
     e != undefined && e.preventDefault();
     getCustomerList();
   };
@@ -266,6 +265,7 @@ function CancelPayment() {
     };
   };
 
+
   const [modalOpen, setModalOpen] = useState({
     isOpen: false,
     params: undefined
@@ -325,7 +325,6 @@ function CancelPayment() {
                         let {
                           customerName: customerNameV
                         } = values;
-
                         const isValifForm = () => (
                           checkingSuccessInput(customerName.isRequired, customerNameV, errors.customerName)
                         );
@@ -334,7 +333,7 @@ function CancelPayment() {
                           <MDBox
                             component="form"
                             role="form"
-                            onSubmit={(e) => handleCustomerSubmit(e)}
+                            onSubmit={(e) => onFormSubmit(e)}
                           >
                             <Grid container spacing={3}>
                               <Grid item xs={12} sm={9}>
@@ -348,7 +347,7 @@ function CancelPayment() {
                                   value={customerNameV}
                                   placeholder={customerName.placeholder}
                                   error={errors.customerName && touched.customerName}
-                                  success={checkingSuccessInput(customerName.isRequired, customerNameV, errors.customerName)}
+                                  success={customerName.isRequired && checkingSuccessInput(customerName.isRequired, customerNameV, errors.customerName)}
                                   onKeyUp={(e) =>
                                     setCustomerRequest((prevState) => ({
                                       ...prevState,

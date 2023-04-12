@@ -5,10 +5,7 @@ import * as Yup from "yup";
 import Swal from "sweetalert2";
 import * as XLSX from "xlsx";
 
-import Card from "@mui/material/Card";
-import Grid from "@mui/material/Grid";
-import Icon from "@mui/material/Icon";
-import Autocomplete from "@mui/material/Autocomplete";
+import { Card, Grid, Icon, Autocomplete } from "@mui/material";
 
 import MDBox from "/components/MDBox";
 import MDTypography from "/components/MDTypography";
@@ -19,7 +16,6 @@ import { alertService } from "/helpers/alert.service";
 
 import DashboardLayout from "/layout/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "/layout/Navbars/DashboardNavbar";
-import DataTable from "/layout/Tables/DataTable";
 
 import FormField from "/pagesComponents/FormField";
 import SiteDropdown from "../../../pagesComponents/dropdown/Site";
@@ -34,6 +30,7 @@ function UploadBulkPayment() {
     localStorage.setItem("site", JSON.stringify(siteVal));
   };
 
+  
   const schemeModels = {
     formId: "upload-bulk-payment-form",
     formField: {
@@ -69,7 +66,7 @@ function UploadBulkPayment() {
   useEffect(() => {
     document.getElementsByName(paymentMethod.name)[0].focus();
 
-    let currentSite = JSON.parse(localStorage.getItem("site"));
+    let currentSite = typeNormalization(localStorage.getItem("site"));
     if (currentSite == null) {
       Swal.fire({
         title: "Info!",
@@ -95,28 +92,27 @@ function UploadBulkPayment() {
     if (response.error) alertService.error({ title: "Error", text: response.error.message });
     else setPaymentMethodList(response);
   };
-  const onPaymentMethodChange = async (selectedPaymentMethod) => { };
   useEffect(() => {
     getDropdownPaymentMethod();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [site]);
 
-  
   const [uploadedList, setUploadedList] = useState([]);
-  const SheetJSFT = [
-    "xlsx",
-    "xlsb",
-    "xlsm",
-    "xls"
-  ].map((x) => ("." + x)).join(",");
+  const uploadaOptions = {
+    fileType: ["xlsx", "xls"],
+    maxFileSize: 1000000 * 2
+  };
+const SheetJSFT = uploadaOptions.fileType.map((x) => ("." + x)).join(",");
   const downloadFile = () => {
     const element = document.createElement("a");
-    element.href = "/template/template-water-reading.xlsx";
-    element.download = "template-water-reading.xlsx";
+    element.href = "/template/template-bulk-payment.xlsx";
+    element.download = "template-bulk-payment.xlsx";
     element.click();
   };
   const onFileChange = (files) => (files && files[0]) && onFileUpload(files[0]);
   const onFileUpload = (file) => {
+    setUploadedList([]);
+
     const reader = new FileReader();
     const rABS = !!reader.readAsBinaryString;
 
@@ -128,16 +124,26 @@ function UploadBulkPayment() {
       const ws = wb.Sheets[wsname];
 
       const data = XLSX.utils.sheet_to_json(ws, { header: 2 });
-      const data_formated = data.map(e => ({
-        "idClient": e["ID Client"],
-        "unitCode": e["Unit Code"],
-        "unitNo": e["Unit No"],
-        "invoiceNumber": e["Invoice Number"],
-        "transactionDate": e["Transaction Date"],
-        "amount": e["Amount"]
-      }))
-      console.log("UPLOADED FILE", data_formated);
-      setUploadedList(data_formated);
+      debugger
+      // const data_formated = data.map(e => {
+      //   const date_splitted = e["Transaction Date"]?.split("/");
+      //   const date_formatted = new Date();
+      //   date_formatted.setUTCDate(date_splitted[0]);
+      //   date_formatted.setUTCMonth(parseInt(date_splitted[1]) - 1);
+      //   date_formatted.setUTCFullYear(date_splitted[2]);
+      //   date_formatted.setUTCHours(0, 0, 0, 0);
+
+      //   return ({
+      //     "idClient": e["ID Client"],
+      //     "unitCode": e["Unit Code"],
+      //     "unitNo": e["Unit No"],
+      //     "invoiceNumber": e["Invoice Number"],
+      //     "transactionDate": date_formatted.toISOString(),
+      //     "amount": e["Amount"]
+      //   })
+      // });
+      // console.log("UPLOADED FILE", data_formated);
+      // setUploadedList(data_formated);
     };
 
     if (rABS) reader.readAsBinaryString(file);
@@ -148,7 +154,7 @@ function UploadBulkPayment() {
   const checkingSuccessInput = (isRequired, value, error) => {
     return (!isRequired && true) || (isRequired && value != undefined && value != "" && !error);
   };
-  const submitForm = (values, actions) => uploadBulkPayment(values, actions);
+  const onFormSubmit = (values, actions) => uploadBulkPayment(values, actions);
 
   const [isLoadingUploadBulkPayment, setLoadingUploadBulkPayment] = useState(false);
   const uploadBulkPayment = async (values, actions) => {
@@ -170,15 +176,29 @@ function UploadBulkPayment() {
 
     if (response.error) alertService.error({ title: "Error", text: response.error.message });
     else {
-      response && Swal.fire({
-        title: 'Upload Bulk Payment Successfull',
-        text: `312 records has been successfully uploaded.`,
-        icon: 'success',
-        timerProgressBar: true,
-        timer: 3000,
-      }).then(() => {
-        actions.resetForm();
-      });
+      if (response.success) {
+        const isFailed = (response.result.totalGagal > 0);
+
+        Swal.fire({
+          title: 'Upload Bulk Payment Successfull',
+          html:
+            `${response.result.totalSukses} data has been successfully uploaded.` +
+            (isFailed ? `<br><strong>${response.result.totalGagal} data failed to upload</strong>, <a href="${response.result.urlDataGagal}" download="template-bulk-payment.xlsx"><u>download here to see.</u></a>` : ``),
+          icon: 'success',
+          timerProgressBar: true,
+          timer: !isFailed && 3000,
+        }).then(() => setTimeout(() => {
+          if (isFailed) {
+            actions.setFieldValue(fileUpload.name, null);
+            document.getElementsByName(fileUpload.name)[0].value = null;
+          } else {
+            actions.resetForm();
+            document.getElementsByName(paymentMethod.name)[0].value = null;
+            document.getElementsByName(fileUpload.name)[0].value = null;
+          }
+          setUploadedList([]);
+        }, 0));
+      }
     } setLoadingUploadBulkPayment(false);
   };
 
@@ -226,7 +246,7 @@ function UploadBulkPayment() {
                     <Formik
                       initialValues={schemeInitialValues}
                       validationSchema={schemeValidations}
-                      onSubmit={submitForm}
+                      onSubmit={onFormSubmit}
                     >
                       {({
                         values,
@@ -255,7 +275,6 @@ function UploadBulkPayment() {
                                     getOptionLabel={(option) => option.paymentName}
                                     onChange={(e, value) => {
                                       setFieldValue(paymentMethod.name, value);
-                                      onPaymentMethodChange(value);
                                     }}
                                     noOptionsText="No results"
                                     renderInput={(params) => (
@@ -271,13 +290,13 @@ function UploadBulkPayment() {
                                         InputLabelProps={{ shrink: true }}
                                         error={errors.paymentMethod && touched.paymentMethod}
                                         success={paymentMethod.isRequired && checkingSuccessInput(paymentMethod.isRequired, values.paymentMethod, errors.paymentMethod)}
-                                        setFieldValue={setFieldValue}
-                                      />
+                                      /> 
                                     )}
                                   />
                                 </Grid>
                                 <Grid item xs={12} sm={6}>    
                                   <FormField
+                                  
                                     type={fileUpload.type}
                                     label={
                                       fileUpload.label +
@@ -288,14 +307,13 @@ function UploadBulkPayment() {
                                     InputLabelProps={{ shrink: true }}
                                     error={errors.fileUpload && touched.fileUpload}
                                     success={fileUpload.isRequired && checkingSuccessInput(fileUpload.isRequired, values.fileUpload, errors.fileUpload)}
-                                    setFieldValue={setFieldValue}
-                                    accept={SheetJSFT}
+                                    accept={SheetJSFT} 
                                     onChange={(e, value) => {
                                       setFieldValue(fileUpload.name, e.target.value);
                                       onFileChange(e.target.files);        
                                     }}
                                   />  
-                                  <MDTypography variant="caption" color="error" fontWeight="regular">*Only file .xls/.xlsx and maximum file size 2mb</MDTypography>
+                                  {/* <MDTypography variant="caption" color="error" fontWeight="regular">*Only file .xls/.xlsx and maximum file size 2mb</MDTypography> */}
                                 </Grid>
                                 <Grid item xs={12}>
                                   <MDBox
@@ -308,9 +326,9 @@ function UploadBulkPayment() {
                                       variant="gradient"
                                       color="primary"
                                       sx={{ height: "100%" }}
-                                      // disabled={isSubmitting}
+                                      disabled={isLoadingUploadBulkPayment || !isValifForm()}
                                     >
-                                      <Icon>upload</Icon>&nbsp; { isLoadingUploadBulkPayment ? "Uploading Bulk Payment.." : "Upload Bulk Payment" } {isValifForm().toString()}
+                                      <Icon>upload</Icon>&nbsp; { isLoadingUploadBulkPayment ? "Uploading Bulk Payment.." : "Upload Bulk Payment" }
                                     </MDButton>
                                   </MDBox>
                                 </Grid>

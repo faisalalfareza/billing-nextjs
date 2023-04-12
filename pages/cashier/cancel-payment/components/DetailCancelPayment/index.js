@@ -1,43 +1,32 @@
 import React, { useState, useEffect } from "react";
+import { useCookies } from "react-cookie";
 import Swal from "sweetalert2";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import { Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
 import { NumericFormat } from "react-number-format";
-import getConfig from "next/config";
-import axios from "axios";
-
-// prop-types is a library for typechecking of props
 import PropTypes from "prop-types";
 
-// @mui material components
-import { Grid } from "@mui/material";
+import { Grid, Table, TableBody, TableCell, TableRow } from "@mui/material";
 
-// NextJS Material Dashboard 2 PRO components
 import MDBox from "/components/MDBox";
 import MDTypography from "/components/MDTypography";
 import MDButton from "/components/MDButton";
 import MDBadge from "/components/MDBadge";
 
+import { typeNormalization } from "/helpers/utils";
+import { alertService } from "/helpers/alert.service";
+
 import FormField from "/pagesComponents/FormField";
 
-// Data
-import { useCookies } from "react-cookie";
-import { typeNormalization } from "/helpers/utils";
-import { alertService } from "/helpers";
-
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableRow from "@mui/material/TableRow";
-
-const { publicRuntimeConfig } = getConfig();
 
 function DetailCancelPayment({ isOpen, params, onModalChanged }) {
-  const isCanceled = params?.canceled == "Yes";
   const [modalOpen, setModalOpen] = useState(true);
-  const [{ accessToken, encryptedAccessToken }] = useCookies();
+  const [{ accessToken }] = useCookies();
 
+  const isCanceled = params?.canceled == "Yes";
+
+  
   const schemeModels = {
     formId: "cancel-payment-form",
     formField: {
@@ -83,8 +72,7 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error)
-      alertService.error({ title: "Error", text: response.error.message });
+    if (response.error) alertService.error({ title: "Error", text: response.error.message });
     else setDetailCancelPayment(response);
 
     setLoadingDetailCancelPayment(false);
@@ -94,10 +82,11 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
+
   const checkingSuccessInput = (isRequired, value, error) => {
     return (!isRequired && true) || (isRequired && value != undefined && value != "" && !error);
   };
-  const submitForm = (values, actions) => cancelPayment(values, actions);
+  const onFormSubmit = (values, actions) => cancelPayment(values, actions);
 
   const [isLoadingCancelPayment, setLoadingCancelPayment] = useState(false);
   const cancelPayment = async (values, actions) => {
@@ -133,8 +122,7 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
         if (!response.ok) throw new Error(`Error: ${response.status}`);
         response = typeNormalization(await response.json());
 
-        if (response.error)
-          alertService.error({ title: "Error", text: response.error.message });
+        if (response.error) alertService.error({ title: "Error", text: response.error.message });
         else {
           response &&
             Swal.fire({
@@ -150,12 +138,11 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
               actions.resetForm();
               closeModal(true);
             });
-        }
-
-        setLoadingCancelPayment(false);
+        } setLoadingCancelPayment(false);
       }
     });
   };
+
 
   const openModal = () => setModalOpen(true);
   const toggleModal = () => setModalOpen(true);
@@ -165,6 +152,7 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
     setTimeout(() => onModalChanged(isChanged), 0);
   };
 
+  
   if (isOpen) {
     return (
       detailCancelPayment && (
@@ -178,16 +166,19 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
           <Formik
             initialValues={schemeInitialValues}
             validationSchema={schemeValidations}
-            onSubmit={submitForm}
+            onSubmit={onFormSubmit}
           >
-            {({ values, errors, touched }) => {
-              let { remarks: remarksV } = values;
-              const isValifForm = () =>
-                checkingSuccessInput(
-                  remarks.isRequired,
-                  remarksV,
-                  errors.remarks
-                );
+            {({
+              values,
+              errors,
+              touched
+            }) => {
+              let {
+                remarks: remarksV
+              } = values;
+              const isValifForm = () => (
+                checkingSuccessInput(remarks.isRequired, remarksV, errors.remarks)
+              );
 
               return (
                 <Form id={schemeModels.formId} autoComplete="off">
