@@ -1,31 +1,18 @@
 import Card from "@mui/material/Card";
-import { Formik, Form } from "formik";
-import * as Yup from "yup";
 // @mui material components
-import { Grid, TextField } from "@mui/material";
+import { Grid } from "@mui/material";
 // NextJS Material Dashboard 2 PRO components
 import MDBox from "/components/MDBox";
 import MDTypography from "/components/MDTypography";
-import Icon from "@mui/material/Icon";
 
 // NextJS Material Dashboard 2 PRO layout
 import DashboardLayout from "/layout/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "/layout/Navbars/DashboardNavbar";
-import Footer from "/layout/Footer";
-import DataTable from "/layout/Tables/DataTable";
-import MDButton from "/components/MDButton";
-import MDInput from "/components/MDInput";
-import FormField from "/pagesComponents/FormField";
-import Autocomplete from "@mui/material/Autocomplete";
 import { useMaterialUIController } from "/context";
-import { useCookies } from "react-cookie";
 import * as React from "react";
-import { typeNormalization, downloadTempFile } from "/helpers/utils";
-import { alertService } from "/helpers";
 
 // Data
-import dataTableData from "/pagesComponents/applications/data-tables/data/dataTableData";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import SiteDropdown from "../../../pagesComponents/dropdown/Site";
 // import templateWaterReading from "../assets/template/template-water-reading.xlsx";
 
@@ -36,108 +23,30 @@ export default function OracleToJournal(props){
       totalRows: undefined,
       totalPages: undefined,
     });
-    const [openUpload, setOpenUpload] = useState(false);
-    const [openEdit, setOpenEdit] = useState(false);
-    const [dataPeriod, setDataPeriod] = useState([]);
-    const [site, setSite] = useState(null);
-    const handleOpenUpload = () => setOpenUpload(true);
-    const handleOpenEdit = () => setOpenEdit(true);
-    const [isLoading, setLoading] = useState(false);
-    const [modalParams, setModalParams] = useState(undefined);
-    const [{ accessToken, encryptedAccessToken }] = useCookies();
 
-    const schemeModels = {
-        formId: "period-data-form",
-        formField: {           
-            jenisData: {
-                name: "periodData",
-                label: "Period",
-                placeholder: "Select Active Period",
+    const form = {
+        formId: "oracle-to-journal",
+        formField: {
+            period: {
+                name: "period",
+                label: "period",
+                placeholder: "Type Period",
                 type: "text",
                 isRequired: true,
-                errorMsg: "Period is required.",
+                errorMsg: "Period is required",
                 defaultValue: ""
-            },
-        },
-    };
-    let { periodData } =
-        schemeModels.formField;
-
-
-    useEffect(() => {
-        let currentSite = JSON.parse(localStorage.getItem("site"));
-        console.log("currentSite-----------", currentSite);
-        if (currentSite == null) {
-          alertService.info({
-            title: "Info!",
-            text: "Please choose Site first",
-          });
-        } else {
-          setSite(currentSite);
+            }
         }
-        getActivePeriod();
-    }, []);
+    };
 
-    const [customerRequest, setCustomerRequest] = useState({
-        scheme: site?.siteId,
-        keywords: "",
-        recordsPerPage: 10,
-        skipCount: 0,
-    });
+    const { period } = form.formField;
 
-    const skipCountChangeHandler = (e) => {
-        customerRequest.skipCount = e;
-        setCustomerRequest((prevState) => ({
-          ...prevState,
-          skipCount: e,
-        }));
-      };
-      const recordsPerPageChangeHandler = (e) => {
-        customerRequest.recordsPerPage = e;
-        setCustomerRequest({
-          ...prevState,
-          recordsPerPage: e,
-        });
-      };
-      const keywordsChangeHandler = (e) => {
-        customerRequest.keywords = e;
-        setCustomerRequest((prevState) => ({
-          ...prevState,
-          keywords: e,
-        }));
-      };
-    
-      const [periodList, setPeriodList] = useState([]);
-      const getPeriodList = async (e) => {
-        if (e) e.preventDefault();
+    const [site, setSite] = useState(null);
 
-        const url = `${publicRuntimeConfig.apiUrl}/api/services/app/JenisData/getListData?schema=${site}`;
-        //const config = { headers: { Authorization: "Bearer " + accessToken } };
-        axios
-            //.get(url, config)
-            .get(url)
-            .then(res => {
-                let periodList = res.data.result;
-                setjenisData(periodList);
-          });
-      };
-
-      useEffect(() => {
-        getActivePeriod();
-        getPeriodList();
-      }, [site]);
-
-      useEffect(() => {
-        
-      }, [customerRequest.skipCount, customerRequest.recordsPerPage]);
-    
-      console.log("site------", site);
-    
-      
-      const handleSite = (siteVal) => {
+    const handleSite = (siteVal) => {
         setSite(siteVal);
         localStorage.setItem("site", JSON.stringify(siteVal));
-      };
+    };
 
     return (
         <DashboardLayout>
@@ -178,27 +87,44 @@ export default function OracleToJournal(props){
                                     <Grid item xs={12}>
                                         <Grid item xs={12} md={6}>
                                             <Autocomplete
-                                                    defaultValue={periodData}
-                                                    //defaultValue={{ id: 1, jenisData: "DATA CONNEXINDO NOV 2021" }}
-                                                    options={periodList}
-                                                    getOptionLabel={(option) => option.periodname}
-                                                    onChange={(e, value) => {
-                                                        setFieldValue(periodList.periodname, value.periodid);
-                                                    }}
-                                                    renderInput={(params) => (
-                                                        <FormField
-                                                            {...params}
-                                                            type={periodData.type}
-                                                            label={periodData.label + (periodData.isRequired ? ' ⁽*⁾' : '')}
-                                                            name={periodData.name}
-                                                            placeholder={periodData.placeholder}
-                                                            InputLabelProps={{ shrink: true }}
-                                                            error={errors.periodData && touched.periodData}
-                                                            success={periodData.isRequired && checkingSuccessInput(periodData.isRequired, periodDataV, errors.periodData)}
-                                                        />
+                                                // disableCloseOnSelect
+                                                key={cluster.name}
+                                                options={dataCluster}
+                                                value={values.cluster}
+                                                getOptionLabel={(option) =>
+                                                option.clusterCode +
+                                                " - " +
+                                                option.clusterName
+                                                }
+                                                onChange={(e, value) =>
+                                                setFieldValue(
+                                                    cluster.name,
+                                                    value !== null
+                                                    ? value
+                                                    : initialValues[cluster.name]
+                                                )
+                                                }
+                                                renderInput={(params) => (
+                                                <FormField
+                                                    {...params}
+                                                    type={cluster.type}
+                                                    label={
+                                                    cluster.label +
+                                                    (cluster.isRequired ? " *" : "")
+                                                    }
+                                                    name={cluster.name}
+                                                    placeholder={cluster.placeholder}
+                                                    InputLabelProps={{ shrink: true }}
+                                                    error={
+                                                    errors.cluster && touched.cluster
+                                                    }
+                                                    success={checkingSuccessInput(
+                                                    cluster,
+                                                    errors.cluster
                                                     )}
-                                              />
-                                   
+                                                />
+                                                )}
+                                            />
                                         </Grid>
                                     </Grid>
                                 </Grid>
