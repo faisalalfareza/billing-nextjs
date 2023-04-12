@@ -124,26 +124,25 @@ const SheetJSFT = uploadaOptions.fileType.map((x) => ("." + x)).join(",");
       const ws = wb.Sheets[wsname];
 
       const data = XLSX.utils.sheet_to_json(ws, { header: 2 });
-      debugger
-      // const data_formated = data.map(e => {
-      //   const date_splitted = e["Transaction Date"]?.split("/");
-      //   const date_formatted = new Date();
-      //   date_formatted.setUTCDate(date_splitted[0]);
-      //   date_formatted.setUTCMonth(parseInt(date_splitted[1]) - 1);
-      //   date_formatted.setUTCFullYear(date_splitted[2]);
-      //   date_formatted.setUTCHours(0, 0, 0, 0);
+      const data_formated = data.map(e => {
+        const date_splitted = e["Transaction Date"]?.split("/");
+        const date_formatted = new Date();
+        date_formatted.setUTCDate(date_splitted[0]);
+        date_formatted.setUTCMonth(parseInt(date_splitted[1]) - 1);
+        date_formatted.setUTCFullYear(date_splitted[2]);
+        date_formatted.setUTCHours(0, 0, 0, 0);
 
-      //   return ({
-      //     "idClient": e["ID Client"],
-      //     "unitCode": e["Unit Code"],
-      //     "unitNo": e["Unit No"],
-      //     "invoiceNumber": e["Invoice Number"],
-      //     "transactionDate": date_formatted.toISOString(),
-      //     "amount": e["Amount"]
-      //   })
-      // });
-      // console.log("UPLOADED FILE", data_formated);
-      // setUploadedList(data_formated);
+        return ({
+          "idClient": e["ID Client"],
+          "unitCode": e["Unit Code"],
+          "unitNo": e["Unit No"],
+          "invoiceNumber": e["Invoice Number"],
+          "transactionDate": date_formatted.toISOString(),
+          "amount": e["Amount"]
+        })
+      });
+      console.log("UPLOADED FILE", data_formated);
+      setUploadedList(data_formated);
     };
 
     if (rABS) reader.readAsBinaryString(file);
