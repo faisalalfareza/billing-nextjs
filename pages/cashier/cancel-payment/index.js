@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { useCookies } from "react-cookie";
+import { NumericFormat } from "react-number-format";
 import { Formik } from "formik";
 import * as Yup from "yup";
+import Swal from "sweetalert2";
 
 import { Card, Grid, Icon, Radio } from "@mui/material";
 
@@ -10,26 +11,26 @@ import MDTypography from "/components/MDTypography";
 import MDButton from "/components/MDButton";
 
 import { typeNormalization } from "/helpers/utils";
-import { alertService } from "/helpers";
+import { alertService } from "/helpers/alert.service";
 
 import DashboardLayout from "/layout/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "/layout/Navbars/DashboardNavbar";
 import DataTable from "/layout/Tables/DataTable";
 
+import DetailCancelPayment from "./components/DetailCancelPayment";
+
 import FormField from "/pagesComponents/FormField";
 import SiteDropdown from "../../../pagesComponents/dropdown/Site";
 
 
-function RePrintOR() {
-  const [{ accessToken, encryptedAccessToken }] = useCookies();
-  
+function CancelPayment() {
   const [site, setSite] = useState(null);
   const handleSite = (siteVal) => {
     setSite(siteVal);
     localStorage.setItem("site", JSON.stringify(siteVal));
   };
 
-
+  
   const schemeModels = {
     formId: "reprint-or-form",
     formField: {
@@ -84,10 +85,10 @@ function RePrintOR() {
 
   const skipCountChangeHandler = (e) => {
     customerRequest.skipCount = e;
-    setCustomerRequest((prevState) => ({
+    setCustomerRequest({
       ...prevState,
       skipCount: e,
-    }));
+    });
   };
   const recordsPerPageChangeHandler = (e) => {
     customerRequest.recordsPerPage = e;
@@ -104,14 +105,13 @@ function RePrintOR() {
     }));
   };
 
-  const getCustomerList = async () => {
+  const getCustomerList = async (data) => {
     setLoadingCustomer(true);
 
     const { scheme, keywords, recordsPerPage, skipCount } = customerRequest;
-    let response = await fetch("/api/cashier/reprint-or/listCustomer", {
+    let response = await fetch("/api/cashier/cancel-payment/listCustomer", {
       method: "POST",
       body: JSON.stringify({
-        accessToken: accessToken,
         params: {
           SiteId: site?.siteId,
           Search: keywords,
@@ -133,7 +133,6 @@ function RePrintOR() {
       }));
     } setLoadingCustomer(false);
   };
-
   const setCustomerTaskList = (rows) => {
     return {
       columns: [
@@ -180,20 +179,19 @@ function RePrintOR() {
   };
 
 
-  const [isLoadingOfficialReceipt, setLoadingOfficialReceipt] = useState(false);
-  const [officialReceiptData, setOfficialReceiptData] = useState({
+  const [isLoadingCancelPayment, setLoadingCancelPayment] = useState(false);
+  const [cancelPaymentData, setCancelPaymentData] = useState({
     rowData: [],
     totalRows: undefined,
     totalPages: undefined,
   });
 
-  const getOfficialReceiptList = async (unitDataID) => {
-    setLoadingOfficialReceipt(true);
+  const getCancelPaymentList = async (unitDataID) => {
+    setLoadingCancelPayment(true);
 
-    let response = await fetch("/api/cashier/reprint-or/listOR", {
+    let response = await fetch("/api/cashier/cancel-payment/listCancelPayment", {
       method: "POST",
       body: JSON.stringify({
-        accessToken: accessToken,
         params: {
           UnitDataId: unitDataID,
           MaxResultCount: 1000, // Rows Per Page (Fixed). Start From 1
@@ -206,15 +204,15 @@ function RePrintOR() {
 
     if (response.error) alertService.error({ title: "Error", text: response.error.message });
     else {
-      setOfficialReceiptData((prevState) => ({
+      setCancelPaymentData((prevState) => ({
         ...prevState,
         rowData: response.items,
         totalRows: response.totalCount,
         totalPages: Math.ceil(response.totalCount / customerRequest.recordsPerPage),
       }));
-    } setLoadingOfficialReceipt(false);
+    } setLoadingCancelPayment(false);
   };
-  const setOfficialReceiptTaskList = (rows) => {
+  const setCancelPaymentTaskList = (rows) => {
     return {
       columns: [
         {
@@ -224,12 +222,26 @@ function RePrintOR() {
           align: "center",
         },
         { Header: "Receipt Number", accessor: "receiptNumber" },
-        { Header: "Invoice Number", accessor: "invoiceNumber" },
-        { Header: "Invoice Name", accessor: "invoiceName" },
         { Header: "Transaction Date", accessor: "transactionDate" },
-        { Header: "Method", accessor: "method" },
-        { Header: "Total Amount", accessor: "totalAmount", align: "right" },
+        { Header: "Payment Method", accessor: "method" },
+        {
+          Header: "Total Amount",
+          accessor: "totalAmount",
+          align: "right",
+          Cell: ({ value }) => {
+            return (
+              <NumericFormat
+                displayType="text"
+                value={value}
+                decimalSeparator=","
+                prefix="Rp. "
+                thousandSeparator="."
+              />
+            );
+          },
+        },
         { Header: "Remarks", accessor: "remarks" },
+        { Header: "Canceled", accessor: "canceled" },
         {
           Header: "Actions",
           accessor: "action",
@@ -239,11 +251,10 @@ function RePrintOR() {
                 variant="outlined"
                 color="info"
                 size="small"
-                onClick={(e) =>
-                  reprintOfficialReceipt(row.original.billingHeaderId)
-                }
+                disabled={!row.original.billingHeaderId}
+                onClick={(e) => openModal(row.original)}
               >
-                <Icon>print</Icon>&nbsp; Re-Print
+                <Icon>payment</Icon>&nbsp; Detail
               </MDButton>
             );
           },
@@ -254,33 +265,23 @@ function RePrintOR() {
     };
   };
 
-  const reprintOfficialReceipt = async (billingHeaderId) => {
-    setLoadingOfficialReceipt(true);
 
-    const body = {
-      SiteId: site?.siteId,
-      BillingHeaderId: billingHeaderId,
-    };
-    let response = await fetch("/api/cashier/reprint-or/reprintOR", {
-      method: "POST",
-      body: JSON.stringify({
-        accessToken: accessToken,
-        params: body,
-      }),
+  const [modalOpen, setModalOpen] = useState({
+    isOpen: false,
+    params: undefined
+  });
+  const openModal = (record = undefined) => {
+    setModalOpen({
+      isOpen: !modalOpen.isOpen,
+      params: record
     });
-    if (!response.ok) throw new Error(`Error: ${response.status}`);
-    response = typeNormalization(await response.json());
-
-    if (response.error) alertService.error({ title: "Error", text: response.error.message });
-    else window.open(response);
-      
-    setLoadingOfficialReceipt(false);
   };
 
 
   return (
     <DashboardLayout>
       <DashboardNavbar />
+
       <MDBox
         p={3}
         color="light"
@@ -297,19 +298,17 @@ function RePrintOR() {
           </Grid>
         </Grid>
       </MDBox>
+
       <MDBox py={3}>
         <Grid container spacing={3}>
           <Grid item xs={12}>
             <Card>
               <MDBox p={3} lineHeight={1}>
                 <Grid container alignItems="center">
-                  <Grid item xs={12}>
-                    <MDBox mb={1}>
-                      <MDTypography variant="h5">Filter</MDTypography>
-                    </MDBox>
-                    <MDBox mb={2}>
-                      <MDTypography variant="body2" color="text">
-                        Used to view tax invoices based on available filters.
+                  <Grid item xs={12} mb={2}>
+                    <MDBox>
+                      <MDTypography variant="h5">
+                        Filter
                       </MDTypography>
                     </MDBox>
                   </Grid>
@@ -318,7 +317,11 @@ function RePrintOR() {
                       initialValues={schemeInitialValues}
                       validationSchema={schemeValidations}
                     >
-                      {({ values, errors, touched }) => {
+                      {({
+                        values,
+                        errors,
+                        touched
+                      }) => {
                         let {
                           customerName: customerNameV
                         } = values;
@@ -368,14 +371,9 @@ function RePrintOR() {
                                       variant="gradient"
                                       color="primary"
                                       sx={{ height: "100%" }}
-                                      disabled={
-                                        !isValifForm() || isLoadingCustomer
-                                      }
+                                      disabled={!isValifForm() || isLoadingCustomer}
                                     >
-                                      <Icon>search</Icon>&nbsp;{" "}
-                                      {isLoadingCustomer
-                                        ? "Searching.."
-                                        : "Search"}
+                                      <Icon>search</Icon>&nbsp;{" "} { isLoadingCustomer ? "Searching.." : "Search" }
                                     </MDButton>
                                   </MDBox>
                                 </MDBox>
@@ -387,17 +385,11 @@ function RePrintOR() {
                     </Formik>
                   </Grid>
                 </Grid>
-                {customerResponse.rowData.length > 0 && (
+                { customerResponse.rowData.length > 0 && (
                   <Grid container alignItems="center" pt={3}>
-                    <Grid item xs={12}>
-                      <MDBox mb={1}>
+                    <Grid item xs={12} mb={2}>
+                      <MDBox>
                         <MDTypography variant="h5">Search Result</MDTypography>
-                      </MDBox>
-                      <MDBox mb={2}>
-                        <MDTypography variant="body2" color="text">
-                          Customers related to search `
-                          {customerRequest.keywords}`.
-                        </MDTypography>
                       </MDBox>
                     </Grid>
                     <Grid item xs={12}>
@@ -409,16 +401,10 @@ function RePrintOR() {
                         recordsPerPage={customerRequest.recordsPerPage}
                         skipCount={customerRequest.skipCount}
                         pageChangeHandler={skipCountChangeHandler}
-                        recordsPerPageChangeHandler={
-                          recordsPerPageChangeHandler
-                        }
+                        recordsPerPageChangeHandler={recordsPerPageChangeHandler}
                         keywordsChangeHandler={keywordsChangeHandler}
-                        entriesPerPage={{
-                          defaultValue: customerRequest.recordsPerPage,
-                        }}
-                        pagination={{ variant: "gradient", color: "primary" }}
                       />
-                      <MDBox pt={1} pb={1} px={3}>
+                      <MDBox pt={3} pb={1} px={3}>
                         <Grid item xs={12}>
                           <MDBox
                             display="flex"
@@ -431,10 +417,10 @@ function RePrintOR() {
                                 variant="gradient"
                                 color="primary"
                                 sx={{ height: "100%" }}
-                                onClick={() => getOfficialReceiptList(selectedUnit.unitDataId)}
+                                onClick={() => getCancelPaymentList(selectedUnit.unitDataId)}
                                 disabled={!selectedUnit}
                               >
-                                { isLoadingOfficialReceipt ? "Showing this Unit.." : "Show this Unit" }
+                                { isLoadingCancelPayment ? "Showing this Unit.." : "Show this Unit" }
                               </MDButton>
                             </MDBox>
                           </MDBox>
@@ -442,46 +428,46 @@ function RePrintOR() {
                       </MDBox>
                     </Grid>
                   </Grid>
-                )}
+                ) }
               </MDBox>
             </Card>
           </Grid>
 
-          {officialReceiptData.rowData.length > 0 && (
+          { cancelPaymentData.rowData.length > 0 && (
             <Grid item xs={12}>
               <Card>
                 <MDBox p={3} lineHeight={1}>
                   <Grid container alignItems="center">
-                    <Grid item xs={12}>
-                      <MDBox mb={1}>
+                    <Grid item xs={12} mb={2}>
+                      <MDBox>
                         <MDTypography variant="h5">
-                          Re-Print Official Receipt List
-                        </MDTypography>
-                      </MDBox>
-                      <MDBox mb={2}>
-                        <MDTypography variant="body2" color="text">
-                          Official receipts of {selectedUnit.projectName}{" "}
-                          {selectedUnit.unitName} {selectedUnit.unitCode}{" "}
-                          {selectedUnit.unitNo} on behalf of{" "}
-                          {selectedUnit.customerName}.
+                          Cancel Payment List
                         </MDTypography>
                       </MDBox>
                     </Grid>
                     <Grid item xs={12}>
                       <DataTable
-                        table={setOfficialReceiptTaskList(
-                          officialReceiptData.rowData
-                        )}
-                        canEntriesPerPage
-                        entriesPerPage={{
-                          defaultValue: customerRequest.recordsPerPage,
-                        }}
-                        canSearch
+                        table={setCancelPaymentTaskList(cancelPaymentData.rowData)}
+                        // canEntriesPerPage entriesPerPage={{ defaultValue: customerRequest.recordsPerPage }}
+                        // canSearch
                       />
                     </Grid>
                   </Grid>
                 </MDBox>
               </Card>
+
+              { modalOpen.isOpen && <DetailCancelPayment
+                  isOpen={modalOpen.isOpen}
+                  params={modalOpen.params}
+                  onModalChanged={(isChanged) => {
+                    setModalOpen((prevState) => ({
+                      ...prevState,
+                      isOpen: !modalOpen.isOpen
+                    }));
+                    isChanged && getCancelPaymentList(selectedUnit.unitDataId);
+                  }}
+                />
+              }
             </Grid>
           )}
         </Grid>
@@ -490,4 +476,4 @@ function RePrintOR() {
   );
 }
 
-export default RePrintOR;
+export default CancelPayment;

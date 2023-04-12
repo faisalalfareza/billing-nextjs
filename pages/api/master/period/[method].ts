@@ -56,7 +56,6 @@ async function getList(res: any, body: any) {
     },
     params: params,
   };
-  console.log("config----", config);
 
   axios
     .get(url, config)
@@ -84,7 +83,6 @@ async function getDropdownProject(res: any, body: any) {
       "Access-Control-Allow-Origin": "*",
     },
   };
-  console.log("config----", config);
 
   axios
     .get(url, config)
@@ -111,7 +109,6 @@ async function getDropdownSite(res: any, body: any) {
       "Access-Control-Allow-Origin": "*",
     },
   };
-  console.log("upil----", config);
 
   axios
     .get(url, config)
@@ -140,7 +137,6 @@ async function getPeriodNo(res: any, body: any) {
     },
     params: params,
   };
-  console.log("config----", config);
 
   axios
     .get(url, config)
@@ -168,21 +164,16 @@ async function create(res: any, body: any) {
       "Access-Control-Allow-Origin": "*",
     },
   };
-  console.log("config----", config);
-
-  console.log("body---", params);
 
   axios
     .post(url, params, config)
     .then((response) => {
-      console.log("response-----", response);
       res.send({
         isCached: false,
         result: response.data.result,
       });
     })
     .catch((error) => {
-      console.log("err-----", error.response);
       res.send({
         isCached: false,
         error: error,
@@ -201,7 +192,6 @@ async function update(res: any, body: any) {
     },
     params: params,
   };
-  console.log("config----", config);
 
   axios
     .put(url, params, config)

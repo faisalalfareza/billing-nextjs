@@ -15,21 +15,21 @@ import { typeNormalization } from "/helpers/utils";
 import { alertService } from "/helpers";
 import DataTable from "/layout/Tables/DataTable";
 import Icon from "@mui/material/Icon";
-import Swal from "sweetalert2";
 import * as dayjs from "dayjs";
 import { FormGroup, FormControlLabel, Checkbox } from "@mui/material";
-import DataTableTotal from "../../../layout/Tables/DataTableTotal";
+import DataTableTotal from "/layout/Tables/DataTableTotal";
 import { useCookies } from "react-cookie";
-import SiteDropdown from "../../../pagesComponents/dropdown/Site";
+import SiteDropdown from "/pagesComponents/dropdown/Site";
 import NumberInput from "/pagesComponents/dropdown/NumberInput";
 import TotalDisable from "/pagesComponents/dropdown/TotalDisable";
 import { NumericFormat } from "react-number-format";
+import DetailBalance from "./detail-balance";
 
 export default function BillingPayment(props) {
   const [listBilling, setListBilling] = useState([]);
   const [listInvoice, setListInvoice] = useState([]);
   const [site, setSite] = useState(null);
-  const [openModal, setOpenModal] = useState(false);
+  const [openDetail, setOpenDetail] = useState(false);
   const [isDetail, setIsDetail] = useState(false);
   const [params, setParams] = useState(undefined);
   const [filterText, setFilterText] = useState("");
@@ -40,18 +40,85 @@ export default function BillingPayment(props) {
   const [dataPaymentMethod, setDataPaymentMethod] = useState([]);
   const [dataBank, setDataBank] = useState([]);
   const [totalFooter, setTotalFooter] = useState({});
+  const [totalAc, setTotalAc] = useState(0);
+  const [charge, setCharge] = useState(0);
+  const [totalPay, setTotalPay] = useState(0);
+  const [isCard, setIsCard] = useState({});
+  const [hasNote, setHasNote] = useState(false);
+  const [invoiceId, setInvoiceId] = useState(undefined);
+  const [customerResponse, setCustomerResponse] = useState({
+    rowData: [],
+    totalRows: undefined,
+    totalPages: undefined,
+  });
+
+  const [customerRequest, setCustomerRequest] = useState({
+    scheme: site?.siteId,
+    keywords: "",
+    recordsPerPage: 2,
+    skipCount: 0,
+  });
+
+  useEffect(() => {
+    fetchData();
+  }, [customerRequest.skipCount, customerRequest.recordsPerPage]);
+
+  const skipCountChangeHandler = (e) => {
+    customerRequest.skipCount = e;
+    setCustomerRequest((prevState) => ({
+      ...prevState,
+      skipCount: e,
+    }));
+  };
+  const recordsPerPageChangeHandler = (e) => {
+    customerRequest.recordsPerPage = e;
+    setCustomerRequest({
+      ...prevState,
+      recordsPerPage: e,
+    });
+  };
+  const keywordsChangeHandler = (e) => {
+    customerRequest.keywords = e;
+    setCustomerRequest((prevState) => ({
+      ...prevState,
+      keywords: e,
+    }));
+  };
+
+  const FormSchema = (hasNote) =>
+    Yup.object().shape({
+      // no more conditional schema, just recreating a schema every time hasNote changes
+      note: hasNote ? Yup.string().required() : Yup.string(),
+      cluster: Yup.string(),
+      paymentMethod: Yup.object().required("Payment Method is required."),
+      cardNumber: hasNote
+        ? Yup.string().required("Card Number is required.")
+        : Yup.string(),
+      amountPayment: Yup.string()
+        .required("Amount Payment is required.")
+        .typeError("Amount Payment is required."),
+      transactionDate: Yup.date()
+        .required("Transaction Date is required.")
+        .typeError("Transaction Date is required."),
+      bank: Yup.object()
+        .required("Bank is required.")
+        .typeError("Bank is required."),
+      remarks: Yup.string().required("Remarks is required."),
+      charge: Yup.string(),
+    });
+  const [schema, setSchema] = useState(() => FormSchema(hasNote));
+
+  useEffect(() => {
+    // every time hasNote changes, recreate the schema and set it in the state
+    setSchema(FormSchema(hasNote));
+  }, [hasNote]);
 
   useEffect(() => {
     getPaymentMethod();
     getBank();
     let currentSite = JSON.parse(localStorage.getItem("site"));
-    console.log("currentSite-----------", currentSite);
     if (currentSite == null) {
-      Swal.fire({
-        title: "Info!",
-        text: "Please choose Site first",
-        icon: "info",
-      });
+      alertService.info({ title: "Info", text: "Please choose Site first" });
     } else {
       setSite(currentSite);
       let currentUser = JSON.parse(localStorage.getItem("informations"));
@@ -59,8 +126,11 @@ export default function BillingPayment(props) {
     }
   }, []);
   useEffect(() => {
-    // fetchData();
-  }, [site]);
+    console.log("iscard---", isCard);
+    if (isCard?.paymentType == 2 || isCard?.paymentType == 3) {
+      setHasNote(true);
+    } else setHasNote(false);
+  }, [isCard]);
 
   function NumberField({ field }) {
     return (
@@ -78,7 +148,13 @@ export default function BillingPayment(props) {
   let schemeValidations = Yup.object().shape({
     cluster: Yup.string(),
     paymentMethod: Yup.object().required("Payment Method is required."),
-    cardNumber: Yup.string(),
+    cardNumber: Yup.string().when(["paymentMethod"], {
+      is: (paymentMethod) =>
+        paymentMethod === { paymentName: "Credit Card", paymentType: 3 } ||
+        paymentMethod === { paymentName: "Debit Card", paymentType: 2 },
+      then: Yup.string().required("Card Number is required."),
+    }),
+    // cardNumber: Yup.string(),
     amountPayment: Yup.string()
       .required("Amount Payment is required.")
       .typeError("Amount Payment is required."),
@@ -111,13 +187,17 @@ export default function BillingPayment(props) {
   const [formValues, setformValues] = useState(initialValues);
 
   const getFormData = (values) => {
-    console.log("getFormData::", values);
   };
-  console.log("formValues::", formValues);
 
   const submitForm = async (values, actions) => {
-    console.log("formval", values);
-    paymentProcess(values, actions);
+    if (values.amountPayment != totalFooter.payment) {
+      alertService.warn({
+        title: "Warning",
+        text: "Amount payment and Total payment should be balanced",
+      });
+    } else {
+      paymentProcess(values, actions);
+    }
   };
 
   const checkingSuccessInput = (value, error) => {
@@ -125,8 +205,8 @@ export default function BillingPayment(props) {
   };
 
   const paymentProcess = async (fields, actions) => {
-    console.log("valprop", fields);
-    console.log("listinvoice", listInvoice);
+    setLoading(true);
+
     const body = {
       paymentType: fields.paymentMethod.paymentType,
       cardNumber: fields.cardNumber,
@@ -141,7 +221,6 @@ export default function BillingPayment(props) {
       remarks: fields.remarks,
       listInvoicePayment: listInvoice,
     };
-    console.log("CompanyOfficer/CreateOrUpdateCompanyOfficer ", body);
 
     let response = await fetch("/api/cashier/billing/create", {
       method: "POST",
@@ -152,7 +231,6 @@ export default function BillingPayment(props) {
     });
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    console.log("response----", response);
     if (response.error) {
       alertService.error({ title: "Error", text: response.error.message });
     } else {
@@ -160,25 +238,29 @@ export default function BillingPayment(props) {
         title: "Input Payment Successfull",
         text: "Official receipt document will be displayed and will be sent to the customer via email",
       });
+
+      setListInvoice([]);
+      setIsDetail(false);
+      setformValues({});
+      setTotalFooter({});
+      setTotalAc(0);
     }
     actions.setSubmitting(false);
+    setLoading(false);
   };
 
   const handleCheck = (val) => {
-    console.log("val-----check", val);
     setSelectedPSCode(val.unitDataId);
     setDetail(val);
-    console.log("data---checked", selectedPSCode);
   };
 
-  const setBillingList = () => {
+  const setBillingList = (list) => {
     return {
       columns: [
         {
           Header: "Choose",
           accessor: "e",
           Cell: ({ value }) => {
-            console.log("valueme", value);
             return (
               <Radio
                 onChange={(e) => {
@@ -201,25 +283,46 @@ export default function BillingPayment(props) {
         { Header: "Unit No", accessor: "unitNo" },
         { Header: "Customer Name", accessor: "customerName" },
       ],
-      rows: listBilling,
+      rows: list,
     };
   };
   const paymentAmountChange = (value, index) => {
-    console.log("upilll", value);
-    const newData = listInvoice.map((item, i) => {
-      if (i === index) {
-        return {
-          ...item,
-          paymentAmount: value,
-        };
-      } else {
-        return item;
-      }
-    });
+    const newData = [...listInvoice];
+    let a = value.replaceAll("Rp. ", "").replaceAll(".", "").replace(",", ".");
+    let valFloat = parseFloat(a);
+    newData[index].paymentAmount = valFloat;
+    newData[index].paymentAmount = valFloat;
 
     setListInvoice(newData);
+  };
 
-    console.log("listinvo", listInvoice);
+  useEffect(() => {
+    totalChange();
+  }, [totalPay, charge]);
+
+  useEffect(() => {
+    let newState = [...listInvoice];
+    let temp = totalPay;
+    newState.map((e, index) => {
+      console.log("temp----", temp);
+      if (index + 1 === newState.length) {
+        e.paymentAmount = temp;
+      } else {
+        if (temp < e.balance) {
+          e.paymentAmount = temp;
+          temp = 0;
+        } else if (temp > e.balance) {
+          e.paymentAmount = e.balance;
+          temp -= e.balance;
+        }
+      }
+    });
+    setListInvoice(newState);
+  }, [totalPay]);
+
+  const totalChange = () => {
+    let t = totalPay - charge;
+    setTotalAc(t);
   };
 
   useEffect(() => {
@@ -228,6 +331,10 @@ export default function BillingPayment(props) {
     n.payment = tp;
     setTotalFooter(n);
   }, [listInvoice]);
+
+  const handleDetail = () => {
+    setOpenDetail(!openDetail);
+  };
   const setInvoiceList = () => {
     return {
       columns: [
@@ -237,7 +344,7 @@ export default function BillingPayment(props) {
           Header: "Balance",
           accessor: "balance",
           align: "right",
-          Cell: ({ value }) => {
+          Cell: ({ value, row }) => {
             return (
               <NumericFormat
                 displayType="text"
@@ -245,6 +352,18 @@ export default function BillingPayment(props) {
                 decimalSeparator=","
                 prefix="Rp "
                 thousandSeparator="."
+                renderText={(value) => (
+                  <u
+                    onClick={() => {
+                      console.log("valueeee", row);
+                      setInvoiceId(row.original.invoiceId);
+                      handleDetail();
+                    }}
+                    style={{ color: "#4593C4", cursor: "pointer" }}
+                  >
+                    {value}
+                  </u>
+                )}
               />
             );
           },
@@ -271,23 +390,17 @@ export default function BillingPayment(props) {
           accessor: "paymentAmount",
           align: "right",
           Cell: ({ value, row }) => {
-            console.log("valuepay----", value);
             return (
-              // <NumberInput
-              //   inputProps={{ style: { textAlign: "right" } }}
-              //   placeholder="Type Amount Payment"
-              //   value={value}
-              //   onValueChange={(val) =>
-              //     paymentAmountChange(val.value, row.index)
-              //   }
-              // />
-              <TextField
-                inputProps={{ style: { textAlign: "right" } }}
+              <NumberInput
+                inputProps={{
+                  style: { textAlign: "right" },
+                  onBlur: (e) => {
+                    console.log("foo bar", e.target.value);
+                    paymentAmountChange(e.target.value, row.index);
+                  },
+                }}
                 placeholder="Type Amount Payment"
                 value={value}
-                onChange={(val) =>
-                  paymentAmountChange(val.target.value, row.index)
-                }
               />
             );
           },
@@ -297,28 +410,8 @@ export default function BillingPayment(props) {
     };
   };
 
-  const openModalAddOrEditOnEdit = (record) => {
-    setParams(record);
-    setOpenModal(!openModal);
-  };
-
-  const changeModalAddOrEdit = () => {
-    setOpenModal(!openModal);
-    fetchData();
-  };
-
-  const openModalAddOrEditOnAdd = () => {
-    setParams(undefined);
-    setOpenModal(!openModal);
-  };
-  const handleClose = () => setOpenModal(false);
-  const chooseSite = (val) => {
-    setSite(val);
-    localStorage.setItem("site", JSON.stringify(val));
-    // fetchData();
-  };
-
   const fetchData = async (data) => {
+    const { scheme, keywords, recordsPerPage, skipCount } = customerRequest;
     let response = await fetch("/api/cashier/billing/list", {
       method: "POST",
       body: JSON.stringify({
@@ -326,21 +419,21 @@ export default function BillingPayment(props) {
         params: {
           SiteId: site?.siteId,
           Search: filterText,
-          MaxResultCount: 1000,
-          SkipCount: 0,
+          MaxResultCount: recordsPerPage,
+          SkipCount: skipCount,
         },
       }),
     });
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    console.log("response----", response);
     if (response.error) setLoading(false);
     else {
       const list = [];
-      const row = response.result.map((e, i) => {
+      let data = response.result;
+      data.items.map((e, i) => {
         list.push({
-          no: i + 1,
+          no: skipCount + i + 1,
           projectName: e.projectName,
           clusterName: e.clusterName,
           customerName: e.customerName,
@@ -350,8 +443,12 @@ export default function BillingPayment(props) {
           e,
         });
       });
-      setListBilling(list);
-      console.log("list------", list);
+      setCustomerResponse((prevState) => ({
+        ...prevState,
+        rowData: list,
+        totalRows: data.totalCount,
+        totalPages: Math.ceil(data.totalCount / customerRequest.recordsPerPage),
+      }));
     }
   };
 
@@ -364,14 +461,10 @@ export default function BillingPayment(props) {
     });
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    console.log("response----", response);
+
     if (response.error) {
       setLoading(false);
-      Swal.fire({
-        title: "Error",
-        text: response.error.message,
-        icon: "error",
-      });
+      alertService.error({ title: "Error", text: response.error.message });
     } else {
       setDataPaymentMethod(response.result);
     }
@@ -386,14 +479,10 @@ export default function BillingPayment(props) {
     });
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    console.log("response----", response);
+
     if (response.error) {
       setLoading(false);
-      Swal.fire({
-        title: "Error",
-        text: response.error.message,
-        icon: "error",
-      });
+      alertService.error({ title: "Error", text: response.error.message });
     } else {
       setDataBank(response.result);
     }
@@ -413,17 +502,15 @@ export default function BillingPayment(props) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    console.log("response----", response);
     if (response.error) {
       const error = response.error;
       setLoading(false);
-      Swal.fire({
-        title: "Error",
-        text: error.error.message,
-        icon: "error",
-      });
+      alertService.error({ title: "Error", text: response.error.message });
     } else {
       const result = response.result.listInvoicePayment;
+      result.map((e) => {
+        e["paymentTemp"] = e.paymentAmount;
+      });
       setListInvoice(result);
       setIsDetail(true);
       let newState = { ...formValues };
@@ -440,7 +527,6 @@ export default function BillingPayment(props) {
           payment: tp,
         };
       });
-      console.log("list-invoice-----", listInvoice);
     }
   };
 
@@ -469,7 +555,6 @@ export default function BillingPayment(props) {
           </Grid>
         </Grid>
       </MDBox>
-      {/* tasklist */}
       <MDBox pb={3}>
         <Card>
           <MDBox p={3} lineHeight={1}>
@@ -510,7 +595,19 @@ export default function BillingPayment(props) {
           <MDBox pl={3}>
             <MDTypography variant="h5">Search Result</MDTypography>
           </MDBox>
-          <DataTable table={setBillingList()} canSearch />
+          <DataTable
+            table={setBillingList(customerResponse.rowData)}
+            manualPagination={true}
+            totalRows={customerResponse.totalRows}
+            totalPages={customerResponse.totalPages}
+            recordsPerPage={customerRequest.recordsPerPage}
+            skipCount={customerRequest.skipCount}
+            pageChangeHandler={skipCountChangeHandler}
+            recordsPerPageChangeHandler={recordsPerPageChangeHandler}
+            keywordsChangeHandler={keywordsChangeHandler}
+            entriesPerPage={{ defaultValue: customerRequest.recordsPerPage }}
+            pagination={{ variant: "gradient", color: "primary" }}
+          />
           <MDBox p={3} alignItems="center" textAlign="center">
             <MDButton
               disabled={selectedPSCode == undefined || selectedPSCode == null}
@@ -524,12 +621,6 @@ export default function BillingPayment(props) {
             </MDButton>
           </MDBox>
         </Card>
-        {/* <AddOrEditPeriod
-          site={site}
-          isOpen={openModal}
-          params={params}
-          onModalChanged={changeModalAddOrEdit}
-        /> */}
       </MDBox>
       {isDetail && (
         <MDBox mt={5} mb={9}>
@@ -600,20 +691,9 @@ export default function BillingPayment(props) {
                             isSubmitting,
                             setFieldValue,
                             resetForm,
+                            values,
                           }) => {
-                            const fields = [
-                              "cluster",
-                              "paymentMethod",
-                              "cardNumber",
-                              "amountPayment",
-                              "transactionDate",
-                              "bank",
-                              "remarks",
-                              "charge",
-                            ];
-                            // fields.forEach((field) =>
-                            //   setFieldValue(field, initialValues[field], false)
-                            // );
+                            setformValues(values);
                             return (
                               <Form
                                 id="payment-detail"
@@ -670,7 +750,11 @@ export default function BillingPayment(props) {
                                               ? value
                                               : initialValues["paymentMethod"]
                                           );
+                                          setIsCard(value);
                                         }}
+                                        isOptionEqualToValue={(option, value) =>
+                                          option.value === value.value
+                                        }
                                         renderInput={(params) => (
                                           <FormField
                                             {...params}
@@ -707,6 +791,9 @@ export default function BillingPayment(props) {
                                               : initialValues["bank"]
                                           );
                                         }}
+                                        isOptionEqualToValue={(option, value) =>
+                                          option.value === value.value
+                                        }
                                         renderInput={(params) => (
                                           <FormField
                                             {...params}
@@ -760,12 +847,16 @@ export default function BillingPayment(props) {
                                         label="Amount Payment ⁽*⁾"
                                         placeholder="Type Amount Payment"
                                         value={formValues.amountPayment}
-                                        onValueChange={(val) =>
+                                        onValueChange={(val) => {
+                                          console.log("val-------", val);
                                           setFieldValue(
                                             "amountPayment",
                                             val.floatValue
-                                          )
-                                        }
+                                          );
+                                          if (val.floatValue != undefined)
+                                            setTotalPay(val.floatValue);
+                                          else setTotalPay(0);
+                                        }}
                                         error={
                                           errors.amountPayment &&
                                           touched.amountPayment
@@ -792,12 +883,16 @@ export default function BillingPayment(props) {
                                         label="Charge"
                                         placeholder="Type Charge"
                                         value={formValues.charge}
-                                        onValueChange={(val) =>
+                                        onValueChange={(val) => {
+                                          console.log("val-------", val);
                                           setFieldValue(
                                             "charge",
                                             val.floatValue
-                                          )
-                                        }
+                                          );
+                                          if (val.floatValue != undefined)
+                                            setCharge(val.floatValue);
+                                          else setCharge(0);
+                                        }}
                                         error={errors.charge && touched.charge}
                                         success={checkingSuccessInput(
                                           formValues.charge,
@@ -818,7 +913,7 @@ export default function BillingPayment(props) {
                                     <Grid item xs={4}>
                                       <TotalDisable
                                         title="Total"
-                                        value={123456}
+                                        value={totalAc}
                                       />
                                     </Grid>
                                     <Grid item xs={12}>
@@ -831,16 +926,17 @@ export default function BillingPayment(props) {
                                         p={2}
                                       >
                                         Allocation
-                                        {/* <DataTable
-                                        table={setInvoiceList()}
-                                        showTotalEntries={false}
-                                        isSorted={false}
-                                      /> */}
+                                        <DetailBalance
+                                          isOpen={openDetail}
+                                          params={invoiceId}
+                                          close={handleDetail}
+                                        />
                                         <DataTableTotal
                                           table={setInvoiceList()}
                                           showTotalEntries={false}
                                           isSorted={false}
                                           totalFooter={totalFooter}
+                                          entriesPerPage={false}
                                         />
                                       </MDBox>
                                     </Grid>
@@ -856,7 +952,6 @@ export default function BillingPayment(props) {
                                           color="primary"
                                           checked={formValues.isPrintOR}
                                           onChange={(e) => {
-                                            console.log(e.target.checked);
                                             setFieldValue(
                                               "isPrintOR",
                                               e.target.checked != null
@@ -876,7 +971,6 @@ export default function BillingPayment(props) {
                                           color="primary"
                                           checked={formValues.isAddSignee}
                                           onChange={(e) => {
-                                            console.log(e.target.checked);
                                             setFieldValue(
                                               "isAddSignee",
                                               e.target.checked != null

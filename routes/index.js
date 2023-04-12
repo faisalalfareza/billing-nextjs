@@ -120,6 +120,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
         },
       ],
     },
+
     {
       type: "collapse",
       name: "Transaction",
@@ -153,7 +154,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           name: "Invoice",
           nameOnHeader: "Invoice",
           key: "invoice",
-          route: "/app/nsfp/list",
+          route: "/transaction/invoice",
           permission: "Pages.Tenants.GenerateNoSeriFP.List",
         },
         {
@@ -172,6 +173,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
         }
       ],
     },
+
     {
       type: "collapse",
       name: "Cashier System",
@@ -197,18 +199,18 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           name: "Cancel Payment",
           nameOnHeader: "Cancel Payment",
           key: "cancel-payment",
-          route: "/app/nsfp/list",
-          permission: "Pages.Tenants.GenerateNoSeriFP.List",
+          route: "/cashier/cancel-payment"
         },
         {
           name: "Upload Bulk Payment",
           nameOnHeader: "Upload Bulk Payment",
           key: "upload-bulk-payment",
-          route: "/app/nsfp/list",
+          route: "/cashier/upload-bulk-payment",
           permission: "Pages.Tenants.GenerateNoSeriFP.List",
         },
       ],
     },
+
     {
       type: "collapse",
       name: "Report",
@@ -331,7 +333,7 @@ export default function setRoutes(
   const reformatedMain = setReformatedMain(filteredMain);
 
   // console.log("Permissions: ", permissions);
-  // console.log("Routes (Before): ", main);
+  // ("Routes (Before): ", main);
   // console.log("Routes (After): ", filteredMain);
   // console.log("Routes (After - Reformated): ", reformatedMain);
 

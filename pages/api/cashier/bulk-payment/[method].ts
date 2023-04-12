@@ -22,30 +22,25 @@ export default async function handler(
   body = JSON.parse(body);
 
   switch (query.method) {
-    case "listCustomer":
-      getCustomerList(res, body);
+    case "listPaymentMethod":
+      getDropdownPaymentMethod(res, body);
       break;
-
-    case "listOR":
-      getListOfficialReceipt(res, body);
-      break;
-
-    case "reprintOR":
-      reprintOfficialReceipt(res, body);
+    
+    case "uploadBulkPayment":
+      uploadBulkPayment(res, body);
       break;
   }
 }
 
-async function getCustomerList(res: any, body: any) {
-  const { accessToken, params } = body;
-
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/GetCustomerList`;
+async function getDropdownPaymentMethod(res: any, body: any) {
+  const { accessToken } = body;
+  
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/GetDropdownPaymentMethod`;
   const config = {
     headers: {
-      Authorization: "Bearer " + accessToken,
+      "Authorization": "Bearer " + accessToken,
       "Access-Control-Allow-Origin": "*",
     },
-    params: params,
   };
 
   axios
@@ -54,30 +49,13 @@ async function getCustomerList(res: any, body: any) {
     .catch((error) => res.send({ error: error }));
 }
 
-async function getListOfficialReceipt(res: any, body: any) {
+async function uploadBulkPayment(res: any, body: any) {
   const { accessToken, params } = body;
 
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/GetListOfficialReceipt`;
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/UploadBulkPayment`;
   const config = {
     headers: {
-      Authorization: "Bearer " + accessToken,
-      "Access-Control-Allow-Origin": "*",
-    },
-    params: params,
-  };
-
-  axios
-    .get(url, config)
-    .then((response) => res.send(response.data.result))
-    .catch((error) => res.send({ error: error.response.data }));
-}
-async function reprintOfficialReceipt(res: any, body: any) {
-  const { accessToken, params } = body;
-
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/ReprintOfficialReceipt`;
-  const config = {
-    headers: {
-      Authorization: "Bearer " + accessToken,
+      "Authorization": "Bearer " + accessToken,
       "Access-Control-Allow-Origin": "*",
     },
     params: params,
@@ -85,6 +63,6 @@ async function reprintOfficialReceipt(res: any, body: any) {
 
   axios
     .post(url, params, config)
-    .then((response) => res.send(response.data.result))
+    .then((response) => res.send(response.data))
     .catch((error) => res.send({ error: error }));
 }

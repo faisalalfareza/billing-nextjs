@@ -17,7 +17,8 @@ import MDButton from "/components/MDButton";
 
 const { publicRuntimeConfig } = getConfig();
 
-function SiteRowActions({ record, openModalonEdit, onDeleted }) {
+function WaterRowActions({ record, openModalonEdit, onDeleted }) {
+  console.log("detail------", record);
   const [{ accessToken, encryptedAccessToken }] = useCookies();
   const [menu, setMenu] = useState(false);
 
@@ -76,10 +77,6 @@ function SiteRowActions({ record, openModalonEdit, onDeleted }) {
     });
   };
 
-  const actionsChild = () => {
-    if (record.isActive) return <MenuItem onClick={editSite}>Edit</MenuItem>;
-  };
-
   return (
     <MDBox display="flex" alignItems="center">
       <MDButton
@@ -101,22 +98,28 @@ function SiteRowActions({ record, openModalonEdit, onDeleted }) {
         onClose={closeMenu}
         keepMounted
       >
-        {/* <MenuItem onClick={editSite}>Edit</MenuItem> */}
+        <MenuItem onClick={editSite}>Edit</MenuItem>
+        {/* <Divider sx={{ margin: "0.5rems 0" }} /> */}
+        {/* <MenuItem onClick={confirmDelete}>
+          <MDTypography variant="button" color="error" fontWeight="regular">
+            Delete Water
+          </MDTypography>
+        </MenuItem> */}
       </Menu>
     </MDBox>
   );
 }
 
-// Setting default value for the props of SiteRowActions
-SiteRowActions.defaultProps = {
+// Setting default value for the props of WaterRowActions
+WaterRowActions.defaultProps = {
   record: undefined,
 };
 
-// Typechecking props for the SiteRowActions
-SiteRowActions.propTypes = {
+// Typechecking props for the WaterRowActions
+WaterRowActions.propTypes = {
   record: PropTypes.any.isRequired,
   openModalonEdit: PropTypes.func,
   onDeleted: PropTypes.func,
 };
 
-export default SiteRowActions;
+export default WaterRowActions;

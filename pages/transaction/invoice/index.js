@@ -1,5 +1,5 @@
 import Card from "@mui/material/Card";
-import { Formik, Form } from "formik";
+import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 // @mui material components
 import { Grid, TextField } from "@mui/material";
@@ -7,6 +7,7 @@ import { Grid, TextField } from "@mui/material";
 import MDBox from "/components/MDBox";
 import MDTypography from "/components/MDTypography";
 import Icon from "@mui/material/Icon";
+import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 
 // NextJS Material Dashboard 2 PRO layout
 import DashboardLayout from "/layout/LayoutContainers/DashboardLayout";
@@ -24,18 +25,39 @@ import { typeNormalization, downloadTempFile } from "/helpers/utils";
 import { alertService } from "/helpers";
 
 // Data
-import dataTableData from "/pagesComponents/applications/data-tables/data/dataTableData";
 import { useEffect, useState } from "react";
 import UploadDataWater from "./components/UploadDataWater";
 import WaterRowActions from "./components/WaterRowActions";
 import EditDataWater from "./components/EditDataWater";
-import SiteDropdown from "../../../pagesComponents/dropdown/Site";
-// import templateWaterReading from "../assets/template/template-water-reading.xlsx";
+import SiteDropdown from "/pagesComponents/dropdown/Site";
+import { NumericFormat } from "react-number-format";
+import Image from "next/image";
+import fileCheck from "/assets/images/file-check.svg";
 
-export default function WaterReading(props) {
+export default function Invoice(props) {
   const [controller] = useMaterialUIController();
   const [customerResponse, setCustomerResponse] = useState({
-    rowData: [],
+    rowData: [
+      {
+        siteId: 0,
+        invoiceId: 0,
+        period: 0,
+        projectId: 0,
+        projectCode: "string",
+        projectName: "string",
+        clusterId: 0,
+        clusterName: "string",
+        unitCodeID: 0,
+        unitId: 0,
+        unitCode: "string",
+        unitNo: "string",
+        psCode: "string",
+        name: "string",
+        invoiceNo: "string",
+        invoiceName: "string",
+        totalTunggakan: 123456,
+      },
+    ],
     totalRows: undefined,
     totalPages: undefined,
   });
@@ -43,6 +65,7 @@ export default function WaterReading(props) {
   const [openEdit, setOpenEdit] = useState(false);
   const [dataCluster, setDataCluster] = useState([]);
   const [dataProject, setDataProject] = useState([]);
+  const [dataPeriod, setDataPeriod] = useState([]);
   const [site, setSite] = useState(null);
   const handleOpenUpload = () => setOpenUpload(true);
   const handleOpenEdit = () => setOpenEdit(true);
@@ -52,6 +75,7 @@ export default function WaterReading(props) {
 
   useEffect(() => {
     let currentSite = JSON.parse(localStorage.getItem("site"));
+    console.log("currentSite-----------", currentSite);
     if (currentSite == null) {
       alertService.info({ title: "Info", text: "Please choose Site first" });
     } else {
@@ -101,11 +125,13 @@ export default function WaterReading(props) {
     });
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
+    console.log("response----", response);
     if (response.error) {
       alertService.error({ title: "Error", text: response.error.message });
     } else {
       setDataProject(response.result);
     }
+    console.log("project------", dataProject);
   };
   useEffect(() => {
     getProject();
@@ -114,35 +140,15 @@ export default function WaterReading(props) {
     fetchData();
   }, [customerRequest.skipCount, customerRequest.recordsPerPage]);
 
-  const form = {
-    formId: "water-reading-filter",
-    formField: {
-      project: {
-        name: "project",
-        label: "Project",
-        placeholder: "Type Project",
-        type: "text",
-        isRequired: true,
-        errorMsg: "Project is required.",
-        defaultValue: "",
-      },
-      cluster: {
-        name: "cluster",
-        label: "Cluster",
-        placeholder: "Type Cluster",
-        type: "text",
-        isRequired: true,
-        errorMsg: "CLuster is required.",
-        defaultValue: "",
-      },
-    },
-  };
-
-  const { project, cluster } = form.formField;
+  console.log("site------", site);
 
   const initialValues = {
-    [project.name]: null,
-    [cluster.name]: null,
+    project: null,
+    cluster: null,
+    period: null,
+    nameF: null,
+    unitCode: null,
+    unitNo: null,
   };
 
   const [formValues, setformValues] = useState(initialValues);
@@ -150,12 +156,14 @@ export default function WaterReading(props) {
   const getFormData = (values) => {};
 
   const validations = Yup.object().shape({
-    [project.name]: Yup.object()
-      .required(project.errorMsg)
-      .typeError(project.errorMsg),
-    [cluster.name]: Yup.object()
-      .required(cluster.errorMsg)
-      .typeError(cluster.errorMsg),
+    period: Yup.object()
+      .required("Period is required.")
+      .typeError("Period is required."),
+    project: Yup.object(),
+    cluster: Yup.object(),
+    nameF: Yup.string(),
+    unitCode: Yup.object(),
+    unitNo: Yup.object(),
   });
 
   const checkingSuccessInput = (value, error) => {
@@ -164,24 +172,59 @@ export default function WaterReading(props) {
 
   const columns = [
     { Header: "no", accessor: "no", width: "5%" },
+    { Header: "period", accessor: "period", width: "25%" },
     { Header: "project", accessor: "project", width: "25%" },
     { Header: "cluster", accessor: "cluster" },
-    { Header: "unitcode", accessor: "unitcode", width: "7%" },
-    { Header: "unitno", accessor: "unitno" },
-    { Header: "prev read", accessor: "prev" },
-    { Header: "current read", accessor: "curr" },
+    { Header: "unitCode", accessor: "unitCode", width: "7%" },
+    { Header: "unitNo", accessor: "unitNo" },
+    { Header: "id client", accessor: "psCode" },
+    { Header: "name", accessor: "name" },
+    { Header: "invoice no", accessor: "invoiceNo" },
+    { Header: "invoice name", accessor: "invoiceName" },
+    {
+      Header: "total tunggakan",
+      accessor: "totalTunggakan",
+      align: "right",
+      Cell: ({ value }) => {
+        return (
+          <NumericFormat
+            displayType="text"
+            value={value}
+            decimalSeparator=","
+            prefix="Rp "
+            thousandSeparator="."
+          />
+        );
+      },
+    },
+    {
+      Header: "preview tunggakan",
+      accessor: "prev",
+      align: "center",
+      Cell: ({ value }) => {
+        return (
+          <Image
+            src={fileCheck.src}
+            alt="Picture of the author"
+            width={25}
+            height={25}
+            style={{ cursor: "pointer" }}
+          />
+        );
+      },
+    },
     {
       Header: "action",
       accessor: "action",
       align: "center",
-      sorted: true,
       Cell: ({ value }) => {
         return (
-          <WaterRowActions
-            record={value}
-            openModalonEdit={openModalEdit}
-            onDeleted={fetchData}
-          />
+          <u style={{ color: "#4593C4", cursor: "pointer" }}>Adjustment</u>
+          // <WaterRowActions
+          //   record={value}
+          //   openModalonEdit={openModalEdit}
+          //   onDeleted={fetchData}
+          // />
         );
       },
     },
@@ -189,15 +232,20 @@ export default function WaterReading(props) {
   const [tasklist, setTasklist] = useState({ columns: columns, rows: [] });
 
   const fetchData = async (data) => {
+    console.log("record--", recordsPerPage);
     const { scheme, keywords, recordsPerPage, skipCount } = customerRequest;
-    let response = await fetch("/api/transaction/water/list", {
+    let response = await fetch("/api/transaction/invoice/list", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
         params: {
           SiteId: site?.siteId,
+          PeriodId: formValues.period?.periodId,
           ProjectId: formValues.project?.projectId,
           ClusterId: formValues.cluster?.clusterId,
+          UnitCode: formValues.unitCode,
+          UnitNo: formValues.unitNo,
+          Name: formValues.nameF,
           MaxResultCount: recordsPerPage,
           SkipCount: skipCount,
         },
@@ -206,6 +254,9 @@ export default function WaterReading(props) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
+    // console.log("GET PERMISSIONS RESULT", response);
+
+    console.log("response----", response);
     if (response.error)
       alertService.error({ title: "Error", text: response.error.message });
     else {
@@ -216,8 +267,8 @@ export default function WaterReading(props) {
           no: skipCount + i + 1,
           project: e.projectName,
           cluster: e.clusterName,
-          unitcode: e.unitCode,
-          unitno: e.unitNo,
+          unitCode: e.unitCode,
+          unitNo: e.unitNo,
           prev: e.prevRead,
           curr: e.currentRead,
           action: e,
@@ -235,6 +286,7 @@ export default function WaterReading(props) {
       //   columns: columns,
       //   rows: list,
       // });
+      console.log("list------", customerResponse);
     }
   };
 
@@ -263,6 +315,9 @@ export default function WaterReading(props) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
+    console.log("GET PERMISSIONS RESULT", response);
+
+    console.log("response----", response);
     if (response.error)
       alertService.error({ text: response.error.message, title: "Error" });
     else {
@@ -283,12 +338,13 @@ export default function WaterReading(props) {
     });
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-
+    console.log("response----", response);
     if (response.error) {
       alertService.error({ title: "Error", text: response.error.message });
     } else {
       setDataCluster(response.result);
     }
+    console.log("cluster------", dataCluster);
     setLoading(false);
   };
 
@@ -345,7 +401,10 @@ export default function WaterReading(props) {
                     <Formik
                       initialValues={initialValues}
                       validationSchema={validations}
-                      onSubmit={fetchData}
+                      onSubmit={(values, { setSubmitting }) => {
+                        fetchData(values);
+                        setSubmitting(false);
+                      }}
                     >
                       {({
                         values,
@@ -362,54 +421,114 @@ export default function WaterReading(props) {
                         setformValues(values);
                         getFormData(values);
                         return (
-                          <Form id={form.formId} autoComplete="off">
+                          <Form id="invoice-filter" autoComplete="off">
                             <MDBox>
                               <Grid container spacing={3}>
                                 <Grid item xs={12} sm={6}>
-                                  <Autocomplete
-                                    // disableCloseOnSelect
-                                    // includeInputInList={true}
-                                    options={dataProject}
-                                    key={project.name}
-                                    value={values.project}
-                                    // getOptionSelected={(option, value) => {
-                                    //   return (
-                                    //     option.projectName === value.projectName
-                                    //   );
-                                    // }}
+                                  <Field
+                                    name="period"
+                                    component={Autocomplete}
+                                    options={dataPeriod}
                                     getOptionLabel={(option) =>
-                                      values.project != {}
-                                        ? option.projectCode +
-                                          " - " +
-                                          option.projectName
-                                        : "Nothing selected"
+                                      option.paymentName
                                     }
                                     onChange={(e, value) => {
                                       setFieldValue(
-                                        project.name,
+                                        "period",
                                         value !== null
                                           ? value
-                                          : initialValues[project.name]
+                                          : initialValues["period"]
                                       );
-                                      onProjectChange(value);
                                     }}
-                                    noOptionsText="No results"
+                                    isOptionEqualToValue={(option, value) =>
+                                      option.value === value.value
+                                    }
                                     renderInput={(params) => (
                                       <FormField
                                         {...params}
-                                        type={project.type}
-                                        label={
-                                          project.label +
-                                          (project.isRequired ? " *" : "")
-                                        }
-                                        name={project.name}
-                                        placeholder={project.placeholder}
+                                        type="text"
+                                        label="Period *"
+                                        name="period"
+                                        placeholder="Choose Period"
+                                        InputLabelProps={{ shrink: true }}
+                                        error={errors.period && touched.period}
+                                        success={checkingSuccessInput(
+                                          formValues.period,
+                                          errors.period
+                                        )}
+                                      />
+                                    )}
+                                  />
+                                </Grid>
+                                <Grid item xs={12} sm={6}>
+                                  <Field
+                                    name="nameF"
+                                    component={Autocomplete}
+                                    options={dataProject}
+                                    getOptionLabel={(option) =>
+                                      option.projectName
+                                    }
+                                    onChange={(e, value) => {
+                                      setFieldValue(
+                                        "nameF",
+                                        value !== null
+                                          ? value
+                                          : initialValues["nameF"]
+                                      );
+                                    }}
+                                    isOptionEqualToValue={(option, value) =>
+                                      option.value === value.value
+                                    }
+                                    renderInput={(params) => (
+                                      <FormField
+                                        {...params}
+                                        type="text"
+                                        label="Name"
+                                        name="nameF"
+                                        placeholder="Choose Name"
+                                        InputLabelProps={{ shrink: true }}
+                                        error={errors.nameF && touched.nameF}
+                                        success={checkingSuccessInput(
+                                          formValues.nameF,
+                                          errors.nameF
+                                        )}
+                                      />
+                                    )}
+                                  />
+                                </Grid>
+                                <Grid item xs={12} sm={6}>
+                                  <Field
+                                    name="project"
+                                    component={Autocomplete}
+                                    options={dataProject}
+                                    getOptionLabel={(option) =>
+                                      option.projectName
+                                    }
+                                    onChange={(e, value) => {
+                                      setFieldValue(
+                                        "project",
+                                        value !== null
+                                          ? value
+                                          : initialValues["project"]
+                                      );
+                                      onProjectChange(value);
+                                    }}
+                                    isOptionEqualToValue={(option, value) =>
+                                      option.value === value.value
+                                    }
+                                    renderInput={(params) => (
+                                      <FormField
+                                        {...params}
+                                        type="text"
+                                        label="Project"
+                                        name="project"
+                                        placeholder="Choose Project"
                                         InputLabelProps={{ shrink: true }}
                                         error={
                                           errors.project && touched.project
                                         }
                                         success={checkingSuccessInput(
-                                          project,
+                                          formValues.project,
                                           errors.project
                                         )}
                                       />
@@ -417,47 +536,123 @@ export default function WaterReading(props) {
                                   />
                                 </Grid>
                                 <Grid item xs={12} sm={6}>
-                                  <Autocomplete
-                                    // disableCloseOnSelect
-                                    key={cluster.name}
+                                  <Field
+                                    name="cluster"
+                                    component={Autocomplete}
                                     options={dataCluster}
-                                    value={values.cluster}
                                     getOptionLabel={(option) =>
                                       option.clusterCode +
                                       " - " +
                                       option.clusterName
                                     }
-                                    onChange={(e, value) =>
+                                    onChange={(e, value) => {
                                       setFieldValue(
-                                        cluster.name,
+                                        "cluster",
                                         value !== null
                                           ? value
-                                          : initialValues[cluster.name]
-                                      )
+                                          : initialValues["cluster"]
+                                      );
+                                    }}
+                                    isOptionEqualToValue={(option, value) =>
+                                      option.value === value.value
                                     }
                                     renderInput={(params) => (
                                       <FormField
                                         {...params}
-                                        type={cluster.type}
-                                        label={
-                                          cluster.label +
-                                          (cluster.isRequired ? " *" : "")
-                                        }
-                                        name={cluster.name}
-                                        placeholder={cluster.placeholder}
+                                        type="text"
+                                        label="Cluster"
+                                        name="cluster"
+                                        placeholder="Choose Cluster"
                                         InputLabelProps={{ shrink: true }}
                                         error={
                                           errors.cluster && touched.cluster
                                         }
                                         success={checkingSuccessInput(
-                                          cluster,
+                                          formValues.cluster,
                                           errors.cluster
                                         )}
                                       />
                                     )}
                                   />
                                 </Grid>
-
+                                <Grid item xs={12} sm={6}>
+                                  <Field
+                                    name="unitCode"
+                                    component={Autocomplete}
+                                    options={dataCluster}
+                                    getOptionLabel={(option) =>
+                                      option.clusterCode +
+                                      " - " +
+                                      option.clusterName
+                                    }
+                                    onChange={(e, value) => {
+                                      setFieldValue(
+                                        "unitCode",
+                                        value !== null
+                                          ? value
+                                          : initialValues["unitCode"]
+                                      );
+                                    }}
+                                    isOptionEqualToValue={(option, value) =>
+                                      option.value === value.value
+                                    }
+                                    renderInput={(params) => (
+                                      <FormField
+                                        {...params}
+                                        type="text"
+                                        label="Unit Code"
+                                        name="unitCode"
+                                        placeholder="Choose Unit Code"
+                                        InputLabelProps={{ shrink: true }}
+                                        error={
+                                          errors.unitCode && touched.unitCode
+                                        }
+                                        success={checkingSuccessInput(
+                                          formValues.unitCode,
+                                          errors.unitCode
+                                        )}
+                                      />
+                                    )}
+                                  />
+                                </Grid>
+                                <Grid item xs={12} sm={6}>
+                                  <Field
+                                    name="unitNo"
+                                    component={Autocomplete}
+                                    options={dataCluster}
+                                    getOptionLabel={(option) =>
+                                      option.clusterCode +
+                                      " - " +
+                                      option.clusterName
+                                    }
+                                    onChange={(e, value) => {
+                                      setFieldValue(
+                                        "unitNo",
+                                        value !== null
+                                          ? value
+                                          : initialValues["unitNo"]
+                                      );
+                                    }}
+                                    isOptionEqualToValue={(option, value) =>
+                                      option.value === value.value
+                                    }
+                                    renderInput={(params) => (
+                                      <FormField
+                                        {...params}
+                                        type="text"
+                                        label="Unit No"
+                                        name="unitNo"
+                                        placeholder="Choose Unit No"
+                                        InputLabelProps={{ shrink: true }}
+                                        error={errors.unitNo && touched.unitNo}
+                                        success={checkingSuccessInput(
+                                          formValues.unitNo,
+                                          errors.unitNo
+                                        )}
+                                      />
+                                    )}
+                                  />
+                                </Grid>
                                 <Grid item xs={12}>
                                   <MDBox
                                     display="flex"
@@ -505,17 +700,17 @@ export default function WaterReading(props) {
         <Card>
           <MDBox p={3} lineHeight={1}>
             <Grid container alignItems="center">
-              <Grid item xs={12} md={8}>
+              <Grid item xs={12} md={6}>
                 <MDBox mb={1}>
-                  <MDTypography variant="h5">Water Reading List</MDTypography>
+                  <MDTypography variant="h5">Invoice List</MDTypography>
                 </MDBox>
                 <MDBox mb={2}>
                   <MDTypography variant="body2" color="text">
-                    Water Reading Data plugin.
+                    Invoice Data
                   </MDTypography>
                 </MDBox>
               </Grid>
-              <Grid item xs={12} md={4} sx={{ textAlign: "right" }}>
+              <Grid item xs={12} md={6} sx={{ textAlign: "right" }}>
                 <Grid container alignItems="right" spacing={0}>
                   <Grid item xs={12}>
                     <MDBox
@@ -529,21 +724,31 @@ export default function WaterReading(props) {
                         disabled={customerResponse.rowData.length == 0}
                         onClick={handleExport}
                       >
-                        <Icon>add</Icon>&nbsp; Export Excel
+                        <Icon>add</Icon>&nbsp; RE-GENERATE
                       </MDButton>
                       <MDBox ml={{ xs: 0, sm: 1 }} mt={{ xs: 1, sm: 0 }}>
                         <MDButton
-                          variant="gradient"
+                          variant="outlined"
                           color="primary"
                           onClick={handleOpenUpload}
                         >
-                          <Icon>add</Icon>&nbsp; Add New
+                          <Icon>email</Icon>&nbsp; SEND EMAIL
                         </MDButton>
                         <UploadDataWater
                           site={site}
                           isOpen={openUpload}
                           onModalChanged={changeModalUpload}
                         />
+                      </MDBox>
+                      <MDBox ml={{ xs: 0, sm: 1 }} mt={{ xs: 1, sm: 0 }}>
+                        <MDButton
+                          variant="outlined"
+                          color="primary"
+                          disabled={customerResponse.rowData.length == 0}
+                          onClick={handleExport}
+                        >
+                          <WhatsAppIcon /> &nbsp; SEND WHATSAPP
+                        </MDButton>
                       </MDBox>
                     </MDBox>
                   </Grid>
@@ -552,6 +757,7 @@ export default function WaterReading(props) {
             </Grid>
           </MDBox>
           <DataTable
+            canSearch
             table={setCustomerTaskList(customerResponse.rowData)}
             manualPagination={true}
             totalRows={customerResponse.totalRows}

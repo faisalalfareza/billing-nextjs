@@ -93,7 +93,6 @@ function DataTableTotal({
     setGlobalFilter,
     state: { pageIndex, pageSize, globalFilter },
   } = tableInstance;
-  console.log("props", tableInstance);
 
   // Set the default value for the entries per page when component mounts
   useEffect(() => {

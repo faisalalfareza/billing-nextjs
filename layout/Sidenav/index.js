@@ -118,13 +118,10 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
   };
   // Render the all the collpases from the routes.js
   const renderCollapse = (collapses) => {
-    // console.log("————————RENDER COLLAPSE", collapses);
-    // console.log("");
     return collapses.map(({ name, collapse, route, href, key, onClick }) => {
       let returnValue;
 
       if (collapse) {
-        // console.log("————————————IF COLLAPSE", collapses);
         returnValue = (
           <SidenavItem
             key={key}
@@ -144,7 +141,6 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
         );
       } else {
         if (href) {
-          // console.log("————————————ELSE NONCOLLAPSE HREF", collapses);
           returnValue = (
             <MuiLink
               href={href}
@@ -164,22 +160,14 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
           onClick ||
           [name.toLowerCase(), key.toLowerCase()].indexOf("logout") != -1
         ) {
-          // console.log("————————————ELSE NONCOLLAPSE ONCLICK", collapses);
           returnValue = (
             <Link href={route} key={key} sx={{ textDecoration: "none" }}>
               <a
                 onClick={() => {
                   const cached = [
-                    {
-                      key: "application",
-                      value: localStorage.getItem("application"),
-                    },
-                    {
-                      key: "profilePicture",
-                      value: localStorage.getItem("profilePicture"),
-                    },
-                  ];
-                  localStorage.clear();
+                    { key: "application", value: localStorage.getItem("application") },
+                    { key: "profilePicture", value: localStorage.getItem("profilePicture") }
+                  ]; localStorage.clear();
                   cached.forEach((c) => localStorage.setItem(c.key, c.value));
                   document.cookie.split(";").forEach((c) => {
                     document.cookie = c
@@ -200,7 +188,6 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
             </Link>
           );
         } else {
-          // console.log("————————————ELSE NONCOLLAPSE ELSE", collapses);
           returnValue = (
             <Link href={route} key={key} sx={{ textDecoration: "none" }}>
               <a>
@@ -243,7 +230,6 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
   // Render all the routes from the routes.js (All the visible items on the Sidenav)
   // const renderRoutes = routes.map(
   //   ({ type, name, icon, title, collapse, noCollapse, key, href, route, onClick }) => {
-  // console.log("ROUTES", routes);
   const renderRoutes = routes.map((e) => {
     const {
       type,
@@ -293,8 +279,6 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
           </Link>
         );
       } else {
-        // console.log("————E", e);
-        // console.log("————————COLLAPSE", collapse);
         returnValue = (
           <SidenavCollapse
             key={key}
@@ -348,7 +332,6 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
 
     return returnValue;
   });
-  // console.log("RENDER ROUTES", renderRoutes);
 
   return (
     <SidenavRoot

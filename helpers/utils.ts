@@ -25,6 +25,5 @@ function joinUrl(url: any) {
   let indexTemp = part.indexOf("Temp");
   let length = part.length;
   let n = part.slice(indexTemp, length).join("/");
-  console.log("n", indexTemp);
   return n;
 }

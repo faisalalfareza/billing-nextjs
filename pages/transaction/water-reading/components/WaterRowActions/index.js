@@ -18,7 +18,6 @@ import MDButton from "/components/MDButton";
 const { publicRuntimeConfig } = getConfig();
 
 function WaterRowActions({ record, openModalonEdit, onDeleted }) {
-  console.log("detail------", record);
   const [{ accessToken, encryptedAccessToken }] = useCookies();
   const [menu, setMenu] = useState(false);
 
