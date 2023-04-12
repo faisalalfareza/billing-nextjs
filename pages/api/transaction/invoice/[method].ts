@@ -34,11 +34,11 @@ export default async function handler(
         case "findname":
           findName(res, body);
           break;
-        case "export":
-          exportExcel(res, body);
+        case "preview":
+          preview(res, body);
           break;
-        case "activePeriod":
-          getActivePeriod(res, body);
+        case "adjustment":
+          adjust(res, body);
           break;
         case "upload":
           uploadExcel(res, body);
@@ -237,10 +237,10 @@ async function findName(res: any, body: any) {
     );
 }
 
-async function exportExcel(res: any, body: any) {
+async function preview(res: any, body: any) {
   const { accessToken, params } = body;
 
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/ExportToExcelWaterReading`;
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetPreviewInvoicePdf`;
   const config = {
     headers: {
       Authorization: "Bearer " + accessToken,
@@ -251,7 +251,7 @@ async function exportExcel(res: any, body: any) {
   console.log("config----", config);
 
   axios
-    .post(url, params, config)
+    .get(url, config)
     .then((response) => {
       console.log("response----", response);
       res.send({
@@ -265,10 +265,10 @@ async function exportExcel(res: any, body: any) {
     );
 }
 
-async function getActivePeriod(res: any, body: any) {
+async function adjust(res: any, body: any) {
   const { accessToken, params } = body;
 
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetActivePeriod`;
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/ChangeAdjustmentInvoice`;
   const config = {
     headers: {
       Authorization: "Bearer " + accessToken,
@@ -277,9 +277,10 @@ async function getActivePeriod(res: any, body: any) {
     params: params,
   };
   console.log("config----", config);
+  console.log("params----", config);
 
   axios
-    .get(url, config)
+    .post(url, params, config)
     .then((response) =>
       res.send({
         result: response.data.result,

@@ -14,61 +14,24 @@ import CloseIcon from "@mui/icons-material/Close";
 import { Radio, Grid } from "@mui/material";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import FormField from "/pagesComponents/FormField";
+import NumberInput from "/pagesComponents/dropdown/NumberInput";
 
-export default function FindName(props) {
-  const { isOpen, site, period, close, handlePSCode } = props;
+export default function Adjustment(props) {
+  const { isOpen, params, close, handlePSCode } = props;
   const [modal, setModal] = useState(isOpen);
   const [isLoading, setLoading] = useState(false);
-  const [listDetail, setListDetail] = useState([]);
   const [{ accessToken, encryptedAccessToken }] = useCookies();
-  const [selectedPSCode, setSelectedPSCode] = useState(undefined);
+  console.log(props);
 
-  const setDetailList = () => {
-    return {
-      columns: [
-        {
-          Header: "Select",
-          accessor: "e",
-          Cell: ({ value }) => {
-            return (
-              <Radio
-                onChange={(e) => {
-                  handleCheck(value);
-                }}
-                value={value}
-                name="radio-buttons"
-                inputProps={{ "aria-label": "A" }}
-                checked={value.psCode == selectedPSCode?.psCode}
-              />
-            );
-          },
-        },
-        { Header: "ID Client", accessor: "psCode" },
-        { Header: "Name", accessor: "name" },
-      ],
-      rows: listDetail,
-    };
-  };
-
-  const handleCheck = (val) => {
-    setSelectedPSCode(val);
-  };
-
-  useEffect(() => {
-    // fetchData();
-  }, []);
-
-  const fetchData = async (values, actions) => {
+  const adjustData = async (values, actions) => {
     setLoading(true);
-    let response = await fetch("/api/transaction/invoice/findname", {
+    let response = await fetch("/api/transaction/invoice/adjustment", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
         params: {
-          PsCode: values.psCode,
-          CustName: values.name,
-          SiteId: site,
-          PeriodId: period,
+          InvoiceHeaderId: params.invoiceHeaderId,
+          adjNominal: values.adjustmentNominal,
         },
       }),
     });
@@ -78,16 +41,12 @@ export default function FindName(props) {
     if (response.error)
       alertService.error({ title: "Error", text: response.error.message });
     else {
-      const list = [];
-      const row = response.result.map((e, i) => {
-        list.push({
-          e,
-          psCode: e.psCode,
-          name: e.name,
-        });
+      alertService.success({
+        title: "Adjustment Succesfull",
+        text: "The adjustment for this invoice has been successfully saved",
       });
-      setListDetail(list);
       setLoading(false);
+      close();
     }
   };
   const toggle = () => setModal(!modal);
@@ -99,31 +58,28 @@ export default function FindName(props) {
   );
 
   const initialValues = {
-    psCode: "",
-    name: "",
+    adjustmentNominal: params?.totalTunggakan,
+    unitCode: params?.unitCode,
+    unitNo: params?.unitNo,
+    invoiceNo: params?.invoiceNo,
   };
   let schemeValidations = Yup.object().shape({
-    psCode: Yup.string()
-      .required("PSCode is required.")
-      .typeError("PSCode is required."),
-    name: Yup.string()
-      .required("Name is required.")
-      .typeError("Name is required."),
+    adjustmentNominal: Yup.string()
+      .required("Adjustment Nominal is required.")
+      .typeError("Adjustment Nominal is required."),
+    unitCode: Yup.string(),
+    unitNo: Yup.string(),
+    invoiceNo: Yup.string(),
   });
 
   const submitForm = async (values, actions) => {
-    fetchData(values, actions);
+    console.log("valadj------", values);
+    adjustData(values, actions);
   };
 
   const [formValues, setformValues] = useState(initialValues);
   const checkingSuccessInput = (value, error) => {
     return value != undefined && value != "" && value.length > 0 && !error;
-  };
-
-  const reset = () => {
-    setListDetail([]);
-    setSelectedPSCode(undefined);
-    close();
   };
 
   return (
@@ -137,7 +93,7 @@ export default function FindName(props) {
     >
       <ModalHeader toggle={toggle} close={closeBtn}>
         <MDBox mb={1}>
-          <MDTypography variant="h5">Find Name</MDTypography>
+          <MDTypography variant="h5">Adjustment</MDTypography>
         </MDBox>
       </ModalHeader>
       <ModalBody>
@@ -157,38 +113,98 @@ export default function FindName(props) {
                 values,
               }) => {
                 setformValues(values);
-                const isValifForm = () =>
-                  checkingSuccessInput(values.psCode, errors.psCode) &&
-                  checkingSuccessInput(values.name, errors.name);
+                const isValifForm = () => {
+                  console.log(
+                    "valif",
+                    checkingSuccessInput(
+                      values.adjustmentNominal,
+                      errors.adjustmentNominal
+                    )
+                  );
+                  return checkingSuccessInput(
+                    values.adjustmentNominal,
+                    errors.adjustmentNominal
+                  );
+                };
                 return (
-                  <Form id="findname-form" autoComplete="off" fullWidth>
+                  <Form id="adjustment-form" autoComplete="off" fullWidth>
                     <MDBox pb={3}>
                       <Grid container spacing={3}>
-                        <Grid item xs={6}>
+                        <Grid item xs={4}>
                           <FormField
                             type="text"
-                            label="PSCode "
-                            name="psCode"
+                            disabled
+                            label="Unit Code "
+                            name="unitCode"
                             placeholder="Type PSCode"
-                            error={errors.psCode && touched.psCode}
+                            error={errors.unitCode && touched.unitCode}
                             success={checkingSuccessInput(
-                              formValues.psCode,
-                              errors.psCode
+                              formValues.unitCode,
+                              errors.unitCode
                             )}
                           />
                         </Grid>
-                        <Grid item xs={6}>
+                        <Grid item xs={4}>
                           <FormField
                             type="text"
-                            label="Name "
-                            name="name"
-                            placeholder="Type Name"
-                            error={errors.name && touched.name}
+                            disabled
+                            label="Unit No "
+                            name="unitNo"
+                            placeholder="Type Unit No"
+                            error={errors.unitNo && touched.unitNo}
                             success={checkingSuccessInput(
-                              formValues.name,
-                              errors.name
+                              formValues.unitNo,
+                              errors.unitNo
                             )}
                           />
+                        </Grid>
+
+                        <Grid item xs={4}>
+                          <FormField
+                            type="text"
+                            disabled
+                            label="Invoice Number "
+                            name="invoiceNo"
+                            placeholder="Type Invoice Number"
+                            error={errors.invoiceNo && touched.invoiceNo}
+                            success={checkingSuccessInput(
+                              formValues.invoiceNo,
+                              errors.invoiceNo
+                            )}
+                          />
+                        </Grid>
+                        <Grid item xs={12}>
+                          <NumberInput
+                            label="Adjustment Nominal"
+                            placeholder="Type Adjustment Nominal"
+                            value={formValues.adjustmentNominal}
+                            onValueChange={(val) => {
+                              console.log("val-------", val);
+                              setFieldValue(
+                                "adjustmentNominal",
+                                val.floatValue
+                              );
+                            }}
+                            error={
+                              errors.adjustmentNominal &&
+                              touched.adjustmentNominal
+                            }
+                            success={checkingSuccessInput(
+                              formValues.adjustmentNominal,
+                              errors.adjustmentNominal
+                            )}
+                          />
+
+                          <MDBox mt={0.75}>
+                            <MDTypography
+                              component="div"
+                              variant="caption"
+                              color="error"
+                              fontWeight="regular"
+                            >
+                              <ErrorMessage name="adjustmentNominal" />
+                            </MDTypography>
+                          </MDBox>
                         </Grid>
                         <Grid item xs={12} md={12} sx={{ textAlign: "right" }}>
                           <Grid container alignItems="right" spacing={1}>
@@ -215,9 +231,13 @@ export default function FindName(props) {
                                     variant="gradient"
                                     color="primary"
                                     sx={{ height: "100%" }}
-                                    disabled={!isValifForm() || isLoading}
+                                    disabled={
+                                      !formValues.adjustmentNominal || isLoading
+                                    }
                                   >
-                                    {isLoading ? "Searching.." : "Search"}
+                                    {isLoading
+                                      ? "Saving..."
+                                      : "SAVE & REGENERATE INVOICE"}
                                   </MDButton>
                                 </MDBox>
                               </MDBox>
@@ -232,31 +252,7 @@ export default function FindName(props) {
             </Formik>
           </Grid>
         </Grid>
-        {listDetail.length > 0 && (
-          <DataTable
-            table={setDetailList()}
-            entriesPerPage={{ defaultValue: listDetail.length }}
-          />
-        )}
       </ModalBody>
-      {listDetail.length > 0 && (
-        <ModalFooter>
-          <MDButton variant="outlined" color="secondary" onClick={reset}>
-            Cancel
-          </MDButton>
-          <MDButton
-            variant="gradient"
-            color="primary"
-            onClick={() => {
-              handlePSCode(selectedPSCode);
-              reset();
-            }}
-            disabled={selectedPSCode == undefined}
-          >
-            SELECT THIS NAME
-          </MDButton>
-        </ModalFooter>
-      )}
     </Modal>
   );
 }

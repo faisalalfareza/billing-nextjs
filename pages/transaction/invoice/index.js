@@ -2,7 +2,7 @@ import Card from "@mui/material/Card";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 // @mui material components
-import { Grid, TextField } from "@mui/material";
+import { Grid, Checkbox } from "@mui/material";
 // NextJS Material Dashboard 2 PRO components
 import MDBox from "/components/MDBox";
 import MDTypography from "/components/MDTypography";
@@ -26,45 +26,25 @@ import { alertService } from "/helpers";
 
 // Data
 import { useEffect, useState } from "react";
-import UploadDataWater from "./components/UploadDataWater";
-import WaterRowActions from "./components/WaterRowActions";
-import EditDataWater from "./components/EditDataWater";
 import SiteDropdown from "/pagesComponents/dropdown/Site";
 import { NumericFormat } from "react-number-format";
 import Image from "next/image";
 import fileCheck from "/assets/images/file-check.svg";
 import FindName from "./components/FindName";
+import Swal from "sweetalert2";
+import Adjustment from "./components/Adjustment";
 
 export default function Invoice(props) {
   const [controller] = useMaterialUIController();
   const [customerResponse, setCustomerResponse] = useState({
-    rowData: [
-      {
-        siteId: 0,
-        invoiceId: 0,
-        period: 0,
-        projectId: 0,
-        projectCode: "string",
-        projectName: "string",
-        clusterId: 0,
-        clusterName: "string",
-        unitCodeID: 0,
-        unitId: 0,
-        unitCode: "string",
-        unitNo: "string",
-        psCode: "string",
-        name: "string",
-        invoiceNo: "string",
-        invoiceName: "string",
-        totalTunggakan: 123456,
-      },
-    ],
+    rowData: [],
     totalRows: undefined,
     totalPages: undefined,
   });
   const [openUpload, setOpenUpload] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [openFind, setOpenFind] = useState(false);
+  const [openAdjust, setOpenAdjust] = useState(false);
   const [dataCluster, setDataCluster] = useState([]);
   const [dataProject, setDataProject] = useState([]);
   const [dataPeriod, setDataPeriod] = useState([]);
@@ -77,6 +57,9 @@ export default function Invoice(props) {
   const handleOpenEdit = () => setOpenEdit(true);
   const [isLoading, setLoading] = useState(false);
   const [modalParams, setModalParams] = useState(undefined);
+  const [isCheckAll, setIsCheckAll] = useState(false);
+  const [isCheck, setIsCheck] = useState([]);
+  const [list, setList] = useState([]);
   const [{ accessToken, encrypftedAccessToken }] = useCookies();
 
   useEffect(() => {
@@ -168,7 +151,7 @@ export default function Invoice(props) {
     getPeriod();
   }, [site]);
   useEffect(() => {
-    // fetchData();
+    fetchData();
   }, [customerRequest.skipCount, customerRequest.recordsPerPage]);
 
   console.log("site------", site);
@@ -202,7 +185,83 @@ export default function Invoice(props) {
     return value != undefined && value != "" && value.length > 0 && !error;
   };
 
+  const swalWithBootstrapButtons = Swal.mixin({
+    customClass: {
+      confirmButton: "btn btn-success",
+      cancelButton: "btn btn-danger",
+    },
+    buttonsStyling: false,
+  });
+
+  const adjust = (val) => {
+    console.log("val------", val);
+    Swal.fire({
+      title: "Are you sure?",
+      text: "Are you sure want to make another adjustment?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#aaa",
+      cancelButtonText: "No",
+      confirmButtonText: "Yes",
+      reverseButtons: true,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setModalParams(val);
+        handleAdjust();
+      }
+    });
+  };
+
+  const handleSelectAll = (e) => {
+    setIsCheckAll(!isCheckAll);
+    setIsCheck(list.map((li) => li.invoiceHeaderId));
+    if (isCheckAll) {
+      setIsCheck([]);
+    }
+  };
+
+  const handleClick = (e) => {
+    const { id, checked } = e.target;
+    setIsCheck([...isCheck, id]);
+    if (!checked) {
+      setIsCheck(isCheck.filter((item) => item !== id));
+    }
+  };
+
+  console.log("isCheck------", isCheck);
+
   const columns = [
+    {
+      Header: ({ value }) => {
+        return (
+          <Checkbox
+            color="primary"
+            type="checkbox"
+            name="selectAll"
+            id="selectAll"
+            onChange={(e) => handleSelectAll(e.target.value)}
+            checked={isCheckAll}
+          />
+        );
+      },
+      accessor: "select",
+      width: "5%",
+      Cell: ({ value, row }) => {
+        console.log("row00000", row, value);
+        return (
+          <Checkbox
+            color="primary"
+            key={row.id}
+            type="checkbox"
+            // name={name}
+            id={value}
+            onChange={(e) => handleClick(e)}
+            checked={isCheck.includes(value)}
+          />
+        );
+      },
+    },
     { Header: "no", accessor: "no", width: "5%" },
     { Header: "period", accessor: "period", width: "25%" },
     { Header: "project", accessor: "project", width: "25%" },
@@ -231,7 +290,7 @@ export default function Invoice(props) {
     },
     {
       Header: "preview tunggakan",
-      accessor: "prev",
+      accessor: "invoiceHeaderId",
       align: "center",
       Cell: ({ value }) => {
         return (
@@ -241,6 +300,7 @@ export default function Invoice(props) {
             width={25}
             height={25}
             style={{ cursor: "pointer" }}
+            onClick={() => handlePreview(value)}
           />
         );
       },
@@ -251,12 +311,12 @@ export default function Invoice(props) {
       align: "center",
       Cell: ({ value }) => {
         return (
-          <u style={{ color: "#4593C4", cursor: "pointer" }}>Adjustment</u>
-          // <WaterRowActions
-          //   record={value}
-          //   openModalonEdit={openModalEdit}
-          //   onDeleted={fetchData}
-          // />
+          <MDButton
+            style={{ color: "#4593C4", cursor: "pointer" }}
+            onClick={() => adjust(value)}
+          >
+            Adjustment
+          </MDButton>
         );
       },
     },
@@ -264,63 +324,69 @@ export default function Invoice(props) {
   const [tasklist, setTasklist] = useState({ columns: columns, rows: [] });
 
   const fetchData = async (values, actions) => {
-    setLoading(false);
-    console.log("record--", recordsPerPage);
-    const { scheme, keywords, recordsPerPage, skipCount } = customerRequest;
-    let response = await fetch("/api/transaction/invoice/list", {
-      method: "POST",
-      body: JSON.stringify({
-        accessToken: accessToken,
-        params: {
-          SiteId: site?.siteId,
-          PeriodId: values.period?.periodId,
-          ProjectId: values.project?.projectId,
-          Cluster: values.cluster?.clusterName,
-          UnitCode: values.unitCode?.unitCode,
-          UnitNo: values.unitNo?.unitNo,
-          psCode: customer?.psCode,
-          MaxResultCount: recordsPerPage,
-          SkipCount: skipCount,
-        },
-      }),
-    });
-    if (!response.ok) throw new Error(`Error: ${response.status}`);
-    response = typeNormalization(await response.json());
-
-    // console.log("GET PERMISSIONS RESULT", response);
-
-    console.log("response----", response);
-    if (response.error)
-      alertService.error({ title: "Error", text: response.error.message });
-    else {
-      let data = response.result;
-      const list = [];
-      data.items.map((e, i) => {
-        list.push({
-          no: skipCount + i + 1,
-          project: e.projectName,
-          cluster: e.clusterName,
-          unitCode: e.unitCode,
-          unitNo: e.unitNo,
-          prev: e.prevRead,
-          curr: e.currentRead,
-          action: e,
-        });
+    let field = values ? values : formValues;
+    console.log("record--", field);
+    if (field?.period) {
+      setLoading(true);
+      const { scheme, keywords, recordsPerPage, skipCount } = customerRequest;
+      let response = await fetch("/api/transaction/invoice/list", {
+        method: "POST",
+        body: JSON.stringify({
+          accessToken: accessToken,
+          params: {
+            SiteId: site?.siteId,
+            PeriodId: field.period?.periodId,
+            ProjectId: field.project?.projectId,
+            Cluster: field.cluster?.clusterName,
+            UnitCode: field.unitCode?.unitCode,
+            UnitNo: field.unitNo?.unitNo,
+            psCode: customer?.psCode,
+            MaxResultCount: recordsPerPage,
+            SkipCount: skipCount,
+          },
+        }),
       });
-      setCustomerResponse((prevState) => ({
-        ...prevState,
-        rowData: list,
-        totalRows: data.totalCount,
-        totalPages: Math.ceil(data.totalCount / customerRequest.recordsPerPage),
-      }));
+      if (!response.ok) throw new Error(`Error: ${response.status}`);
+      response = typeNormalization(await response.json());
 
-      // setlistRow(list);
-      // return setTasklist({
-      //   columns: columns,
-      //   rows: list,
-      // });
-      console.log("list------", customerResponse);
-      setLoading(false);
+      // console.log("GET PERMISSIONS RESULT", response);
+
+      console.log("response----", response);
+      if (response.error)
+        alertService.error({ title: "Error", text: response.error.message });
+      else {
+        let data = response.result;
+        const list = [];
+        data.items.map((e, i) => {
+          list.push({
+            no: skipCount + i + 1,
+            project: e.projectName,
+            cluster: e.clusterName,
+            unitCode: e.unitCode,
+            unitNo: e.unitNo,
+            period: e.period,
+            psCode: e.psCode,
+            name: e.name,
+            invoiceNo: e.invoiceNo,
+            invoiceName: e.invoiceName,
+            invoiceHeaderId: e.invoiceHeaderId,
+            select: e.invoiceHeaderId,
+            totalTunggakan: e.totalTunggakan,
+            action: e,
+          });
+        });
+        setList(list);
+        setCustomerResponse((prevState) => ({
+          ...prevState,
+          rowData: list,
+          totalRows: data.totalCount,
+          totalPages: Math.ceil(
+            data.totalCount / customerRequest.recordsPerPage
+          ),
+        }));
+        console.log("list------", customerResponse);
+        setLoading(false);
+      }
     }
   };
 
@@ -331,18 +397,13 @@ export default function Invoice(props) {
     };
   };
 
-  const handleExport = async () => {
-    let response = await fetch("/api/transaction/water/export", {
+  const handlePreview = async (val) => {
+    let response = await fetch("/api/transaction/invoice/preview", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
         params: {
-          maxResultCount: 1000,
-          skipCount: 0,
-          siteId: site?.siteId,
-          projectId: formValues.project?.projectId,
-          clusterId: formValues.cluster?.clusterId,
-          search: undefined,
+          InvoiceId: val,
         },
       }),
     });
@@ -355,7 +416,7 @@ export default function Invoice(props) {
     if (response.error)
       alertService.error({ text: response.error.message, title: "Error" });
     else {
-      downloadTempFile(response.result.uri);
+      window.open(response.result, "_blank");
     }
   };
 
@@ -425,21 +486,6 @@ export default function Invoice(props) {
     console.log("unitNo------", dataUnitNo);
   };
 
-  const openModalEdit = (record) => {
-    setModalParams(record);
-    setOpenEdit(true);
-  };
-
-  const changeModalUpload = () => {
-    setOpenUpload(!openUpload);
-    // fetchData();
-  };
-
-  const changeModalEdit = () => {
-    setOpenEdit(false);
-    // fetchData();
-  };
-
   const handleSite = (siteVal) => {
     setSite(siteVal);
     localStorage.setItem("site", JSON.stringify(siteVal));
@@ -447,6 +493,11 @@ export default function Invoice(props) {
 
   const handleFind = () => {
     setOpenFind(!openFind);
+  };
+
+  const handleAdjust = () => {
+    setOpenAdjust(!openAdjust);
+    fetchData();
   };
 
   const handlePSCode = (val) => {
@@ -523,6 +574,7 @@ export default function Invoice(props) {
                               <Grid container spacing={3}>
                                 <Grid item xs={12} sm={6}>
                                   <Field
+                                    key="period-ddr"
                                     name="period"
                                     component={Autocomplete}
                                     options={dataPeriod}
@@ -597,10 +649,17 @@ export default function Invoice(props) {
                                     period={period?.periodId}
                                     handlePSCode={handlePSCode}
                                   />
+                                  <Adjustment
+                                    isOpen={openAdjust}
+                                    close={handleAdjust}
+                                    params={modalParams}
+                                    handlePSCode={handlePSCode}
+                                  />
                                 </Grid>
                                 <Grid item xs={12} sm={6}>
                                   <Field
                                     name="project"
+                                    key="project-ddr"
                                     component={Autocomplete}
                                     options={dataProject}
                                     getOptionLabel={(option) =>
@@ -638,6 +697,7 @@ export default function Invoice(props) {
                                 </Grid>
                                 <Grid item xs={12} sm={6}>
                                   <Field
+                                    key="cluster-ddr"
                                     name="cluster"
                                     component={Autocomplete}
                                     options={dataCluster}
@@ -678,6 +738,7 @@ export default function Invoice(props) {
                                 </Grid>
                                 <Grid item xs={12} sm={6}>
                                   <Field
+                                    key="unitcode-ddr"
                                     name="unitCode"
                                     component={Autocomplete}
                                     options={dataUnitCode}
@@ -714,6 +775,7 @@ export default function Invoice(props) {
                                 </Grid>
                                 <Grid item xs={12} sm={6}>
                                   <Field
+                                    key="unitno-ddr"
                                     name="unitNo"
                                     component={Autocomplete}
                                     options={dataUnitNo}
@@ -764,14 +826,14 @@ export default function Invoice(props) {
                                       ml={{ xs: 0, sm: 1 }}
                                       mt={{ xs: 1, sm: 0 }}
                                     >
-                                      ilo = {isLoading ? "bener" : "salah"} ,
-                                      upil = {isValifForm() ? "bener" : "salah"}
                                       <MDButton
                                         type="submit"
                                         variant="gradient"
                                         color="primary"
                                         sx={{ height: "100%" }}
-                                        disabled={!isValifForm() || isLoading}
+                                        disabled={
+                                          period == undefined || isLoading
+                                        }
                                       >
                                         {isLoading ? "Searching.." : "Search"}
                                       </MDButton>
@@ -817,7 +879,7 @@ export default function Invoice(props) {
                         variant="outlined"
                         color="primary"
                         disabled={customerResponse.rowData.length == 0}
-                        onClick={handleExport}
+                        onClick={handlePreview}
                       >
                         <Icon>add</Icon>&nbsp; RE-GENERATE
                       </MDButton>
@@ -829,18 +891,13 @@ export default function Invoice(props) {
                         >
                           <Icon>email</Icon>&nbsp; SEND EMAIL
                         </MDButton>
-                        <UploadDataWater
-                          site={site}
-                          isOpen={openUpload}
-                          onModalChanged={changeModalUpload}
-                        />
                       </MDBox>
                       <MDBox ml={{ xs: 0, sm: 1 }} mt={{ xs: 1, sm: 0 }}>
                         <MDButton
                           variant="outlined"
                           color="primary"
                           disabled={customerResponse.rowData.length == 0}
-                          onClick={handleExport}
+                          onClick={handlePreview}
                         >
                           <WhatsAppIcon /> &nbsp; SEND WHATSAPP
                         </MDButton>
@@ -866,12 +923,6 @@ export default function Invoice(props) {
             pagination={{ variant: "gradient", color: "primary" }}
           />
         </Card>
-        <EditDataWater
-          site={site}
-          isOpen={openEdit}
-          params={modalParams}
-          onModalChanged={changeModalEdit}
-        />
       </MDBox>
     </DashboardLayout>
   );
