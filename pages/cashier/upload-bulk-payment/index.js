@@ -154,7 +154,7 @@ const SheetJSFT = uploadaOptions.fileType.map((x) => ("." + x)).join(",");
   const checkingSuccessInput = (isRequired, value, error) => {
     return (!isRequired && true) || (isRequired && value != undefined && value != "" && !error);
   };
-  const onFormSubmit = (values, actions) => uploadBulkPayment(values, actions);
+  const handleUploadBulkPaymentSubmit = (values, actions) => uploadBulkPayment(values, actions);
 
   const [isLoadingUploadBulkPayment, setLoadingUploadBulkPayment] = useState(false);
   const uploadBulkPayment = async (values, actions) => {
@@ -246,7 +246,7 @@ const SheetJSFT = uploadaOptions.fileType.map((x) => ("." + x)).join(",");
                     <Formik
                       initialValues={schemeInitialValues}
                       validationSchema={schemeValidations}
-                      onSubmit={onFormSubmit}
+                      onSubmit={handleUploadBulkPaymentSubmit}
                     >
                       {({
                         values,

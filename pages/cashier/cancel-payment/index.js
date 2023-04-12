@@ -173,7 +173,7 @@ function CancelPayment() {
   const checkingSuccessInput = (isRequired, value, error) => {
     return (!isRequired && true) || (isRequired && value != undefined && value != "" && !error);
   };
-  const onFormSubmit = async (e) => {
+  const handleCustomerSubmit = async (e) => {
     e != undefined && e.preventDefault();
     getCustomerList();
   };
@@ -333,7 +333,7 @@ function CancelPayment() {
                           <MDBox
                             component="form"
                             role="form"
-                            onSubmit={(e) => onFormSubmit(e)}
+                            onSubmit={(e) => handleCustomerSubmit(e)}
                           >
                             <Grid container spacing={3}>
                               <Grid item xs={12} sm={9}>

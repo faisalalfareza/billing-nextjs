@@ -21,10 +21,11 @@ import FormField from "/pagesComponents/FormField";
 import { typeNormalization } from "../../../helpers/utils";
 import appInfo from "/appinfo.json";
 
+
 function SignIn(props) {
   const {} = props;
 
-  const [isLoadingSubmit, setLoadingSubmit] = useState(false);
+  const [isLoadingAuthentication, setLoadingAuthentication] = useState(false);
   const [cookies, setCookie, removeCookie] = useCookies([
     "accessToken",
     "encryptedAccessToken",
@@ -33,6 +34,7 @@ function SignIn(props) {
   const [userNameOrEmailAddressVF, setUserNameOrEmailAddress] = useState("");
   const [passwordVF, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
+
 
   const schemeModels = {
     formId: "auth-form",
@@ -75,13 +77,14 @@ function SignIn(props) {
     [userNameOrEmailAddress.name]: userNameOrEmailAddress.defaultValue,
     [password.name]: password.defaultValue,
   };
-
   useEffect(() => {
     document.getElementsByName(userNameOrEmailAddress.name)[0].focus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const checkingSuccessInput = (value, error) => {
-    return value != undefined && value != "" && value.length > 0 && !error;
+
+  const checkingSuccessInput = (isRequired, value, error) => {
+    return (!isRequired && true) || (isRequired && value != undefined && value != "" && !error);
   };
 
   const handleSetRememberMe = () => setRememberMe(!rememberMe);
@@ -89,13 +92,14 @@ function SignIn(props) {
   let [loginAttempt, setLoginAttempt] = useState(3);
   const handleSigninSubmit = async (e) => {
     e != undefined && e.preventDefault();
-    setLoadingSubmit(true);
+    setLoadingAuthentication(true);
 
     authenticate({
       userNameOrEmailAddress: userNameOrEmailAddressVF,
       password: passwordVF,
     });
   };
+
 
   async function authenticate(params) {
     let response = await fetch("/api/authentication/authenticate", {
@@ -109,7 +113,7 @@ function SignIn(props) {
     response = typeNormalization(await response.json());
 
     if (response.error) {
-      setLoadingSubmit(false);
+      setLoadingAuthentication(false);
       const error = response.error;
       if (error.response) {
         console.error("ERROR RESPONSE => ", error.response);
@@ -239,7 +243,7 @@ function SignIn(props) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error) setLoadingSubmit(false);
+    if (response.error) setLoadingAuthentication(false);
     else {
       const informations = response.result;
       const { application } = informations;
@@ -261,7 +265,7 @@ function SignIn(props) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error) setLoadingSubmit(false);
+    if (response.error) setLoadingAuthentication(false);
     else {
       const { allPermissions, grantedPermissions } = response.result;
 
@@ -292,13 +296,14 @@ function SignIn(props) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error) setLoadingSubmit(false);
+    if (response.error) setLoadingAuthentication(false);
     else {
       const { profilePicture } = response.result;
 
       localStorage.setItem("profilePicture", profilePicture);
     }
   }
+
 
   return (
     <IllustrationLayout
@@ -310,20 +315,19 @@ function SignIn(props) {
         initialValues={schemeInitialValues}
         validationSchema={schemeValidations}
       >
-        {({ values, errors, touched }) => {
+        {({
+          values,
+          errors,
+          touched
+        }) => {
           let {
             userNameOrEmailAddress: userNameOrEmailAddressV,
             password: passwordV,
           } = values;
-
-          const isValifForm = () => {
-            return checkingSuccessInput(
-              userNameOrEmailAddressV,
-              errors.userNameOrEmailAddress
-            ) && checkingSuccessInput(passwordV, errors.password)
-              ? true
-              : false;
-          };
+          const isValifForm = () => (
+            checkingSuccessInput(userNameOrEmailAddress.isRequired, userNameOrEmailAddressV, errors.userNameOrEmailAddress) &&
+            checkingSuccessInput(password.isRequired, passwordV, errors.password)
+          );
 
           return (
             <MDBox
@@ -342,14 +346,8 @@ function SignIn(props) {
                   name={userNameOrEmailAddress.name}
                   value={userNameOrEmailAddressV}
                   placeholder={userNameOrEmailAddress.placeholder}
-                  error={
-                    errors.userNameOrEmailAddress &&
-                    touched.userNameOrEmailAddress
-                  }
-                  success={checkingSuccessInput(
-                    userNameOrEmailAddressV,
-                    errors.userNameOrEmailAddress
-                  )}
+                  error={errors.userNameOrEmailAddress && touched.userNameOrEmailAddress}
+                  success={userNameOrEmailAddress.isRequired && checkingSuccessInput(userNameOrEmailAddress.isRequired, userNameOrEmailAddressV, errors.userNameOrEmailAddress)}
                   onKeyUp={(e) => setUserNameOrEmailAddress(e.target.value)}
                 />
               </MDBox>
@@ -361,7 +359,7 @@ function SignIn(props) {
                   value={passwordV}
                   placeholder={password.placeholder}
                   error={errors.password && touched.password}
-                  success={checkingSuccessInput(passwordV, errors.password)}
+                  success={password.isRequired && checkingSuccessInput(password.isRequired, passwordV, errors.password)}
                   inputProps={{ autoComplete: "" }}
                   onKeyUp={(e) => setPassword(e.target.value)}
                 />
@@ -385,9 +383,9 @@ function SignIn(props) {
                   color="primary"
                   size="large"
                   fullWidth
-                  disabled={!isValifForm() || isLoadingSubmit}
+                  disabled={!isValifForm() || isLoadingAuthentication}
                 >
-                  {isLoadingSubmit ? "Signing.." : "Sign In"}
+                  {isLoadingAuthentication ? "Signing.." : "Sign In"}
                 </MDButton>
               </MDBox>
               <MDBox mt={3} textAlign="center" lineHeight="1">

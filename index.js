@@ -1,3 +1,7 @@
+// Server Kustom (Custom Server)
+// https://nextjs.org/docs/advanced-features/custom-server
+// Secara default, Next.js menyertakan servernya sendiri dengan . Jika Anda memiliki backend yang ada, Anda masih dapat menggunakannya dengan Next.js (ini bukan server kustom). Server Next.js kustom memungkinkan Anda untuk memulai server 100% secara terprogram untuk menggunakan pola server kustom. Sebagian besar waktu, Anda tidak akan membutuhkan ini - tetapi tersedia untuk penyesuaian lengkap (Nota: Server kustom tidak dapat digunakan di Vercel.).
+
 const { createServer } = require("http");
 const { parse } = require("url");
 const next = require("next");
@@ -23,7 +27,7 @@ app.prepare().then(() => {
       // if (pathname === "/a") await app.render(req, res, "/a", query);
       // else if (pathname === "/b") await app.render(req, res, "/b", query);
       // else await handle(req, res, parsedUrl);
-
+      
       await handle(req, res, parsedUrl);
     } catch (err) {
       console.error("Error occurred handling", req.url, err);

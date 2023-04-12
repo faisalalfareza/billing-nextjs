@@ -86,7 +86,7 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
   const checkingSuccessInput = (isRequired, value, error) => {
     return (!isRequired && true) || (isRequired && value != undefined && value != "" && !error);
   };
-  const onFormSubmit = (values, actions) => cancelPayment(values, actions);
+  const handleCancelPaymentSubmit = (values, actions) => cancelPayment(values, actions);
 
   const [isLoadingCancelPayment, setLoadingCancelPayment] = useState(false);
   const cancelPayment = async (values, actions) => {
@@ -166,7 +166,7 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
           <Formik
             initialValues={schemeInitialValues}
             validationSchema={schemeValidations}
-            onSubmit={onFormSubmit}
+            onSubmit={handleCancelPaymentSubmit}
           >
             {({
               values,
