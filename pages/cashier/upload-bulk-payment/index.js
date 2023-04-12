@@ -102,11 +102,11 @@ function UploadBulkPayment() {
     fileType: ["xlsx", "xls"],
     maxFileSize: 1000000 * 2
   };
-const SheetJSFT = uploadaOptions.fileType.map((x) => ("." + x)).join(",");
+  const SheetJSFT = uploadaOptions.fileType.map((x) => ("." + x)).join(",");
   const downloadFile = () => {
     const element = document.createElement("a");
-    element.href = "/template/template-bulk-payment.xlsx";
-    element.download = "template-bulk-payment.xlsx";
+    element.href = "/template/template-upload-bulk-payment.xlsx";
+    element.download = "template-upload-bulk-payment.xlsx";
     element.click();
   };
   const onFileChange = (files) => (files && files[0]) && onFileUpload(files[0]);
@@ -182,21 +182,22 @@ const SheetJSFT = uploadaOptions.fileType.map((x) => ("." + x)).join(",");
           title: 'Upload Bulk Payment Successfull',
           html:
             `${response.result.totalSukses} data has been successfully uploaded.` +
-            (isFailed ? `<br><strong>${response.result.totalGagal} data failed to upload</strong>, <a href="${response.result.urlDataGagal}" download="template-bulk-payment.xlsx"><u>download here to see.</u></a>` : ``),
+            (isFailed ? `<br><strong>${response.result.totalGagal} data failed to upload</strong>, <a href="${response.result.urlDataGagal}" download="error-upload-bulk-payment.xlsx"><u>download here to see.</u></a>` : ``),
           icon: 'success',
           timerProgressBar: true,
           timer: !isFailed && 3000,
-        }).then(() => setTimeout(() => {
+        }).then(() => {
           if (isFailed) {
             actions.setFieldValue(fileUpload.name, null);
-            document.getElementsByName(fileUpload.name)[0].value = null;
+            setTimeout(() => document.getElementsByName(fileUpload.name)[0].value = null, 0);
           } else {
             actions.resetForm();
-            document.getElementsByName(paymentMethod.name)[0].value = null;
-            document.getElementsByName(fileUpload.name)[0].value = null;
-          }
-          setUploadedList([]);
-        }, 0));
+            setTimeout(() => {
+              document.getElementsByName(paymentMethod.name)[0].value = null;
+              document.getElementsByName(fileUpload.name)[0].value = null;
+            }, 0);
+          } setUploadedList([]);
+        });
       }
     } setLoadingUploadBulkPayment(false);
   };
