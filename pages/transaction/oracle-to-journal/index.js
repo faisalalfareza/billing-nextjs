@@ -1,143 +1,174 @@
-import Card from "@mui/material/Card";
+import React, { useState, useEffect } from "react";
+import { useCookies } from "react-cookie";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
-// @mui material components
-import { Grid, TextField } from "@mui/material";
-// NextJS Material Dashboard 2 PRO components
+import Swal from "sweetalert2";
+import * as XLSX from "xlsx";
+
+import { Card, Grid, Icon, Autocomplete, FormControl, FormLabel } from "@mui/material";
+
 import MDBox from "/components/MDBox";
 import MDTypography from "/components/MDTypography";
-import Icon from "@mui/material/Icon";
+import MDButton from "/components/MDButton";
 
-// NextJS Material Dashboard 2 PRO layout
+import { typeNormalization } from "/helpers/utils";
+import { alertService } from "/helpers/alert.service";
+
 import DashboardLayout from "/layout/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "/layout/Navbars/DashboardNavbar";
-import Footer from "/layout/Footer";
-import DataTable from "/layout/Tables/DataTable";
-import MDButton from "/components/MDButton";
-import MDInput from "/components/MDInput";
+
 import FormField from "/pagesComponents/FormField";
-import Autocomplete from "@mui/material/Autocomplete";
-import { useMaterialUIController } from "/context";
-import { useCookies } from "react-cookie";
-import * as React from "react";
-import { typeNormalization, downloadTempFile } from "/helpers/utils";
-import { alertService } from "/helpers";
-
-// Data
-
-import { useEffect, useState } from "react";
 import SiteDropdown from "../../../pagesComponents/dropdown/Site";
-import PeriodDropdown from "../../../pagesComponents/dropdown/Period";
-// import templateWaterReading from "../assets/template/template-water-reading.xlsx";
 
-export default function OracleToJournal(props){
-    const [controller] = useMaterialUIController();
-    const [customerResponse, setCustomerResponse] = useState({
-      rowData: [],
-      totalRows: undefined,
-      totalPages: undefined,
-    });
-
-    const [dataPeriod, setDataPeriod] = useState([]);
-    const [site, setSite] = useState(null);
+function OracleToJournal({params}) {
     const [{ accessToken, encryptedAccessToken }] = useCookies();
-
-    useEffect(() => {
-        let currentSite = JSON.parse(localStorage.getItem("site"));
-        console.log("currentSite-----------", currentSite);
-        if (currentSite == null) {
-        alertService.info({
-            title: "Info!",
-            text: "Please choose Site first",
-        });
-        } else {
-        setSite(currentSite);
-        }
-        getPeriod();
-    }, []);
-
-    const [customerRequest, setCustomerRequest] = useState({
-            scheme: site?.siteId,
-            keywords: "",
-            recordsPerPage: 10,
-            skipCount: 0,
-        });
-
-        const skipCountChangeHandler = (e) => {
-        customerRequest.skipCount = e;
-        setCustomerRequest((prevState) => ({
-        ...prevState,
-        skipCount: e,
-        }));
-    };
-    const recordsPerPageChangeHandler = (e) => {
-        customerRequest.recordsPerPage = e;
-        setCustomerRequest({
-        ...prevState,
-        recordsPerPage: e,
-        });
-    };
-    const keywordsChangeHandler = (e) => {
-        customerRequest.keywords = e;
-        setCustomerRequest((prevState) => ({
-        ...prevState,
-        keywords: e,
-        }));
-    };
-
-    const getPeriod = async (val) => {
-        let response = await fetch("/api/transaction/oracle-to-journal/dropdownperiod", {
-        method: "POST",
-        body: JSON.stringify({
-            accessToken: accessToken,
-            params: {
-            SiteId: site?.siteId,
-            },
-        }),
-        });
-        if (!response.ok) throw new Error(`Error: ${response.status}`);
-        response = typeNormalization(await response.json());
-        console.log("response----", response);
-        if (response.error) {
-        alertService.error({ title: "Error", text: response.error.message });
-        } else {
-        setDataPeriod(response.result);
-        }
-        console.log("project------", dataPeriod);
-    };
-    useEffect(() => {
-        getPeriod();
-    }, [site]);
-    useEffect(() => {
-        //fetchData();
-    }, [customerRequest.skipCount, customerRequest.recordsPerPage]);
-
+    const [ site, setSite ] = useState();
     const handleSite = (siteVal) => {
         setSite(siteVal);
         localStorage.setItem("site", JSON.stringify(siteVal));
     };
 
-    const form = {
+    const schemaModels = {
         formId: "oracle-to-journal",
         formField: {
-            period: {
-                name: "period",
+            periodMethod: {
+                name: "periodMethod",
                 label: "Period",
-                placeholder: "Type Period",
+                placeholder: "Choose Period",
                 type: "text",
                 isRequired: true,
-                errorMsg: "Period is required.",
+                errorMsg: "Period is required",
+                defaultValue: undefined
+            },
+            paymentMethod: {
+                name: "paymentMethod",
+                label: "Payment Type",
+                placeholder: "Choose Payment Type",
+                type: "text",
+                isRequired: true,
+                errorMsg: "Payment Type is required",
+                defaultValue: undefined
+            },
+            paymentStartDate: {
+                name: "paymentStartDate",
+                label: "Payment Start Date",
+                placeholder: "Choose Start Date",
+                type: "date",
+                isRequired: true,
+                errorMsg: "Start Date is required.",
                 defaultValue: "",
-            }
+            },
+            accountingDate: {
+                name: "accountingDate",
+                label: "Accounting Date",
+                placeholder: "Choose Accounting Date",
+                type: "date",
+                isRequired: true,
+                errorMsg: "Accounting Date is required.",
+                defaultValue: "",
+            },
+            
         }
-    }
+    };
 
-    const { period } = form.formField;
+    let { 
+        periodMethod, 
+        paymentMethod, 
+        paymentStartDate,
+        accountingDate, 
+        
+    } = schemaModels.formField;
+
+    let schemeValidations = Yup.object().shape({
+        [periodMethod.name]: periodMethod.isRequired ? Yup.object().required(periodMethod.errorMsg) : Yup.object().notRequired(),
+        [paymentMethod.name]: paymentMethod.isRequired ? Yup.object().required(paymentMethod.errorMsg) : Yup.object().notRequired(),
+        [paymentStartDate.name]: paymentStartDate.isRequired
+        ? Yup.date().required(paymentStartDate.errorMsg)
+        : Yup.date().notRequired(),
+        [accountingDate.name]: accountingDate.isRequired
+        ? Yup.date().required(accountingDate.errorMsg)
+        : Yup.date().notRequired(),
+        
+    });
+
+    const schemeInitialValues = {
+        [periodMethod.name]: params ? periodMethod.defaultValue : null,
+        [paymentMethod.name]: params ? paymentMethod.defaultValue : null,
+        [paymentStartDate.name]: params
+        ? dayjs(params.paymentStartDate).format("YYYY-MM-DD")
+        : null,
+        [accountingDate.name]: params
+        ? dayjs(params.accountingDate).format("YYYY-MM-DD")
+        : null,
+        
+    };
+
+    useEffect(() => {
+        document.getElementsByName(periodMethod.name)[0].focus();
+
+        let currentSite = typeNormalization(localStorage.getItem("site"));
+        if (currentSite == null) {
+            Swal.fire({
+                title: "Info!",
+                text: "Please choose Site first",
+                icon: "info",
+            });
+            } else setSite(currentSite);
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    const [ periodMethodList, setPeriodMethodList ] = useState([]);
+    const [ paymentMethodList, setPaymentMethodList ] = useState([]);
+
+    const getDropdownPeriodMethod = async () => {
+        let response = await fetch("/api/master/period/list", {
+            method: "POST",
+            body: JSON.stringify({
+              accessToken: accessToken,
+              params: {
+                "SiteId": site?.siteId
+              }
+            })
+        });
+        if (!response.ok) throw new Error(`Error: ${response.status}`);
+        response = typeNormalization(await response.json());
+    
+        if (response.error) alertService.error({ title: "Error", text: response.error.message });
+        else setPeriodMethodList(response.result);
+    };
+
+    useEffect(() => {
+        getDropdownPeriodMethod();
+    }, [site]);
+
+    const getDropdownPaymentMethod = async () => { 
+        let response = await fetch("/api/cashier/bulk-payment/listPaymentMethod", {
+          method: "POST",
+          body: JSON.stringify({
+            accessToken: accessToken
+          })
+        });
+        if (!response.ok) throw new Error(`Error: ${response.status}`);
+        response = typeNormalization(await response.json());
+    
+        if (response.error) alertService.error({ title: "Error", text: response.error.message });
+        else setPaymentMethodList(response);
+      };
+      useEffect(() => {
+        getDropdownPaymentMethod();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [site]);
+
+    const checkingSuccessInput = (isRequired, value, error) => {
+        return (!isRequired && true) || (isRequired && value != undefined && value != "" && !error);
+    };
+
+    const [formValues, setformValues] = useState(schemeInitialValues);
 
     return (
         <DashboardLayout>
             <DashboardNavbar/>
-            <MDBox
+            <MDBox 
                 p={3}
                 color="light"
                 bgColor="info"
@@ -145,11 +176,12 @@ export default function OracleToJournal(props){
                 borderRadius="lg"
                 shadow="lg"
                 opacity={1}
+                mb={2}
             >
                 <Grid container spacing={3}>
-                <Grid item xs={12} sm={12}>
-                    <SiteDropdown onSelectSite={handleSite} site={site} />
-                </Grid>
+                    <Grid item xs={12} sm={12}>
+                        <SiteDropdown onSelectSite={handleSite} site={site} />
+                    </Grid>
                 </Grid>
             </MDBox>
             <MDBox py={3}>
@@ -158,70 +190,137 @@ export default function OracleToJournal(props){
                         <Card>
                             <MDBox p={3} lineHeight={1}>
                                 <Grid container alignItems="center">
-                                    <Grid item xs={12} md={8}>
-                                        <MDBox mb={1}>
-                                            <MDTypography variant="h6">Transaction Oracle Journal</MDTypography>
-                                            <MDTypography variant="body2" color="text">
-                                                Billing Transaction to Oracle
+                                    <Grid item xs={12} md={8} mb={2}>
+                                        <MDBox>
+                                            <MDTypography variant="h5">
+                                                Oracle To Journal
                                             </MDTypography>
                                         </MDBox>
                                     </Grid>
-                                </Grid>
-                            </MDBox>
-                            <MDBox p={3} lineHeight={1}>
-                                <Grid container alignItems="center">
                                     <Grid item xs={12}>
-                                        <Grid item xs={12} md={6}>
-                                            <Autocomplete
-                                                // disableCloseOnSelect
-                                                // includeInputInList={true}
-                                                options={dataPeriod}
-                                                key={period.name}
-                                                value={values.project}
-                                                // getOptionSelected={(option, value) => {
-                                                //   return (
-                                                //     option.projectName === value.projectName
-                                                //   );
-                                                // }}
-                                                getOptionLabel={(option) =>
-                                                values.project != {}
-                                                    ? option.periodId +
-                                                    " - " +
-                                                    option.periodName
-                                                    : "Nothing selected"
-                                                }
-                                                onChange={(e, value) => {
-                                                setFieldValue(
-                                                    project.name,
-                                                    value !== null
-                                                    ? value
-                                                    : initialValues[period.name]
+                                        <Formik
+                                            initialValues={schemeInitialValues}
+                                            validationSchema={schemeValidations}
+                                            
+                                        >
+                                            {({
+                                                values,
+                                                errors,
+                                                touched,
+                                                setFieldValue
+                                            }) => {
+                                                let { 
+                                                paymentMethod: paymentMethodV,
+                                                fileUpload: fileUploadV
+                                                } = values;
+                                                const isValifForm = () => (
+                                                checkingSuccessInput(paymentMethod.isRequired, paymentMethodV, errors.paymentMethod) &&
+                                                checkingSuccessInput(fileUpload.isRequired, fileUploadV, errors.fileUpload)
                                                 );
-                                                onProjectChange(value);
-                                                }}
-                                                noOptionsText="No results"
-                                                renderInput={(params) => (
-                                                <FormField
-                                                    {...params}
-                                                    type={period.type}
-                                                    label={
-                                                    period.label +
-                                                    (period.isRequired ? " *" : "")
-                                                    }
-                                                    name={period.name}
-                                                    placeholder={period.placeholder}
-                                                    InputLabelProps={{ shrink: true }}
-                                                    error={
-                                                    errors.period && touched.period
-                                                    }
-                                                    success={checkingSuccessInput(
-                                                    period,
-                                                    errors.period
-                                                    )}
-                                                />
-                                                )}
-                                            />
-                                        </Grid>
+
+                                                return (
+                                                <Form id={schemaModels.formId} autoComplete="off">
+                                                    <MDBox lineHeight={2}>
+                                                        <Grid container spacing={3}>
+                                                            <Grid item xs={12} sm={6}>
+                                                                <Autocomplete 
+                                                                    style={{ paddingBottom: 20 }}
+                                                                    options={periodMethodList}
+                                                                    key={periodMethod.name}
+                                                                    // value={values.paymentMethod}
+                                                                    getOptionLabel={(option) => option.periodName}
+                                                                    onChange={(e, value) => {
+                                                                    setFieldValue(periodMethod.name, value);
+                                                                    }}
+                                                                    noOptionsText="No results"
+                                                                    renderInput={(params) => (
+                                                                    <FormField
+                                                                        {...params}
+                                                                        type={periodMethod.type}
+                                                                        label={
+                                                                        periodMethod.label +
+                                                                        (periodMethod.isRequired ? " ⁽*⁾" : "")
+                                                                        }
+                                                                        name={periodMethod.name}
+                                                                        placeholder={periodMethod.placeholder}
+                                                                        InputLabelProps={{ shrink: true }}
+                                                                        error={errors.periodMethod && touched.periodMethod}
+                                                                        success={periodMethod.isRequired && checkingSuccessInput(periodMethod.isRequired, values.periodMethod, errors.periodMethod)}
+                                                                    /> 
+                                                                    )}
+                                                                />
+                                                                
+                                                                <Autocomplete 
+                                                                    style={{ paddingBottom: 20 }}
+                                                                    options={paymentMethodList}
+                                                                    key={paymentMethod.name}
+                                                                    // value={values.paymentMethod}
+                                                                    getOptionLabel={(option) => option.paymentName}
+                                                                    onChange={(e, value) => {
+                                                                    setFieldValue(paymentMethod.name, value);
+                                                                    }}
+                                                                    noOptionsText="No results"
+                                                                    renderInput={(params) => (
+                                                                    <FormField
+                                                                        {...params}
+                                                                        type={paymentMethod.type}
+                                                                        label={
+                                                                        paymentMethod.label +
+                                                                        (paymentMethod.isRequired ? " ⁽*⁾" : "")
+                                                                        }
+                                                                        name={paymentMethod.name}
+                                                                        placeholder={paymentMethod.placeholder}
+                                                                        InputLabelProps={{ shrink: true }}
+                                                                        error={errors.paymentMethod && touched.paymentMethod}
+                                                                        success={paymentMethod.isRequired && checkingSuccessInput(paymentMethod.isRequired, values.paymentMethod, errors.paymentMethod)}
+                                                                    /> 
+                                                                    )}
+                                                                />
+
+                                                                <FormField
+                                                                    style={{ paddingBottom: 20 }}
+                                                                    type={paymentStartDate.type}
+                                                                    label={
+                                                                        paymentStartDate.label +
+                                                                        (paymentStartDate.isRequired ? " ⁽*⁾" : "")
+                                                                    }
+                                                                    name={paymentStartDate.name}
+                                                                    // value={formValues.startDate}
+                                                                    placeholder={paymentStartDate.placeholder}
+                                                                    error={errors.paymentStartDate && touched.paymentStartDate}
+                                                                    success={checkingSuccessInput(
+                                                                        formValues.paymentStartDate,
+                                                                        errors.paymentStartDate
+                                                                    )}
+                                                                    InputLabelProps={{ shrink: true }}
+                                                                />
+                                                            </Grid>
+                                                            <Grid item xs={12} sm={6}>
+                                                                <FormField
+                                                                    style={{ paddingBottom: 20 }}
+                                                                    type={accountingDate.type}
+                                                                    label={
+                                                                        accountingDate.label +
+                                                                        (accountingDate.isRequired ? " ⁽*⁾" : "")
+                                                                    }
+                                                                    name={accountingDate.name}
+                                                                    // value={formValues.startDate}
+                                                                    placeholder={accountingDate.placeholder}
+                                                                    error={errors.accountingDate && touched.accountingDate}
+                                                                    success={checkingSuccessInput(
+                                                                        formValues.accountingDate,
+                                                                        errors.accountingDate
+                                                                    )}
+                                                                    InputLabelProps={{ shrink: true }}
+                                                                />
+                                                                
+                                                            </Grid>
+                                                        </Grid>
+                                                    </MDBox>
+                                                </Form>
+                                                );
+                                            }}
+                                        </Formik>
                                     </Grid>
                                 </Grid>
                             </MDBox>
@@ -232,3 +331,5 @@ export default function OracleToJournal(props){
         </DashboardLayout>
     )
 }
+
+export default OracleToJournal;
