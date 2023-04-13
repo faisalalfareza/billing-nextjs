@@ -3,13 +3,11 @@ import { useCookies } from "react-cookie";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import Swal from "sweetalert2";
-import * as XLSX from "xlsx";
 
-import { Card, Grid, Icon, Autocomplete, FormControl, FormLabel } from "@mui/material";
+import { Card, Grid, Autocomplete, FormControl, FormLabel, RadioGroup } from "@mui/material";
 
 import MDBox from "/components/MDBox";
 import MDTypography from "/components/MDTypography";
-import MDButton from "/components/MDButton";
 
 import { typeNormalization } from "/helpers/utils";
 import { alertService } from "/helpers/alert.service";
@@ -20,9 +18,12 @@ import DashboardNavbar from "/layout/Navbars/DashboardNavbar";
 import FormField from "/pagesComponents/FormField";
 import SiteDropdown from "../../../pagesComponents/dropdown/Site";
 
+import Radio from '@mui/material/Radio';
+import FormControlLabel from '@mui/material/FormControlLabel';
+
 function OracleToJournal({params}) {
     const [{ accessToken, encryptedAccessToken }] = useCookies();
-    const [ site, setSite ] = useState();
+    const [ site, setSite ] = useState(null);
     const handleSite = (siteVal) => {
         setSite(siteVal);
         localStorage.setItem("site", JSON.stringify(siteVal));
@@ -67,7 +68,15 @@ function OracleToJournal({params}) {
                 errorMsg: "Accounting Date is required.",
                 defaultValue: "",
             },
-            
+            paymentEndDate: {
+                name: "paymentEndDate",
+                label: "Payment End Date",
+                placeholder: "Choose End Date",
+                type: "date",
+                isRequired: true,
+                errorMsg: "Start End is required.",
+                defaultValue: "",
+            },
         }
     };
 
@@ -76,7 +85,7 @@ function OracleToJournal({params}) {
         paymentMethod, 
         paymentStartDate,
         accountingDate, 
-        
+        paymentEndDate
     } = schemaModels.formField;
 
     let schemeValidations = Yup.object().shape({
@@ -88,7 +97,9 @@ function OracleToJournal({params}) {
         [accountingDate.name]: accountingDate.isRequired
         ? Yup.date().required(accountingDate.errorMsg)
         : Yup.date().notRequired(),
-        
+        [paymentEndDate.name]: paymentEndDate.isRequired
+        ? Yup.date().required(paymentEndDate.errorMsg)
+        : Yup.date().notRequired(),
     });
 
     const schemeInitialValues = {
@@ -100,7 +111,9 @@ function OracleToJournal({params}) {
         [accountingDate.name]: params
         ? dayjs(params.accountingDate).format("YYYY-MM-DD")
         : null,
-        
+        [paymentEndDate.name]: params
+        ? dayjs(params.paymentEndDate).format("YYYY-MM-DD")
+        : null,
     };
 
     useEffect(() => {
@@ -121,7 +134,7 @@ function OracleToJournal({params}) {
     const [ paymentMethodList, setPaymentMethodList ] = useState([]);
 
     const getDropdownPeriodMethod = async () => {
-        let response = await fetch("/api/master/period/list", {
+        let response = await fetch("/api/report/dropdownperiod", {
             method: "POST",
             body: JSON.stringify({
               accessToken: accessToken,
@@ -313,7 +326,34 @@ function OracleToJournal({params}) {
                                                                     )}
                                                                     InputLabelProps={{ shrink: true }}
                                                                 />
-                                                                
+                                                                <FormControl>
+                                                                    <FormLabel id="demo-radio-buttons-group-label">Bank Payment</FormLabel>
+                                                                    <RadioGroup
+                                                                        row
+                                                                        aria-labelledby="demo-radio-buttons-group-label"
+                                                                        defaultValue="female"
+                                                                        name="radio-buttons-group">
+                                                                        <FormControlLabel value="BCA" control={<Radio />} label="BCA" />
+                                                                        <FormControlLabel value="NonBCA" control={<Radio />} label="Non BCA" />
+                                                                    </RadioGroup>
+                                                                </FormControl>
+                                                                <FormField
+                                                                    style={{ paddingBottom: 20 }}
+                                                                    type={paymentEndDate.type}
+                                                                    label={
+                                                                        paymentEndDate.label +
+                                                                        (paymentEndDate.isRequired ? " ⁽*⁾" : "")
+                                                                    }
+                                                                    name={paymentEndDate.name}
+                                                                    // value={formValues.startDate}
+                                                                    placeholder={paymentEndDate.placeholder}
+                                                                    error={errors.paymentEndDate && touched.paymentEndDate}
+                                                                    success={checkingSuccessInput(
+                                                                        formValues.paymentEndDate,
+                                                                        errors.paymentEndDate
+                                                                    )}
+                                                                    InputLabelProps={{ shrink: true }}
+                                                                />
                                                             </Grid>
                                                         </Grid>
                                                     </MDBox>
