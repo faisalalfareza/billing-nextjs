@@ -206,7 +206,9 @@ function OracleToJournal({params}) {
                         <Card>
                             <MDBox p={3} lineHeight={1}>
                                 <Grid container alignItems="center">
-                                    <Grid item xs={12} md={8} mb={2}>
+                                    <Grid item xs={12} md={8} mb={2}
+                                    style={{ paddingBottom: 20 }}
+                                    >
                                         <MDBox>
                                             <MDTypography variant="h5">
                                                 Oracle To Journal
@@ -236,8 +238,7 @@ function OracleToJournal({params}) {
                                                 fileUpload: fileUploadV
                                                 } = values;
                                                 const isValifForm = () => (
-                                                checkingSuccessInput(paymentMethod.isRequired, paymentMethodV, errors.paymentMethod) &&
-                                                checkingSuccessInput(fileUpload.isRequired, fileUploadV, errors.fileUpload)
+                                                checkingSuccessInput(paymentMethod.isRequired, paymentMethodV, errors.paymentMethod)
                                                 );
 
                                                 return (
@@ -333,18 +334,24 @@ function OracleToJournal({params}) {
                                                                     <RadioGroup
                                                                         row
                                                                         aria-labelledby="demo-radio-buttons-group-label"
-                                                                        defaultValue="female"
+                                                                        defaultValue="BCA"
                                                                         name="radio-buttons-group">
                                                                         <FormControlLabel
+                                                                            
                                                                             value="BCA" 
                                                                             control={<Radio />} 
                                                                             label="BCA" />
-                                                                        <FormControlLabel value="NonBCA" control={<Radio />} label="Non BCA" />
+                                                                        <FormControlLabel 
+                                                                            
+                                                                            value="NonBCA" 
+                                                                            control={<Radio />} 
+                                                                            label="Non BCA" />
                                                                     </RadioGroup>
                                                                 </FormControl>
                                                             </Grid>
                                                         </Grid>                        
-                                                        <Grid container spacing={3}>
+                                                        <Grid container spacing={3}
+                                                        style={{ paddingBottom: 20 }}>
                                                             <Grid item xs={6} sm={6}>
                                                                 <FormField
                                                                     style={{ paddingBottom: 20 }}
