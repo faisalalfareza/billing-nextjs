@@ -4,7 +4,7 @@ import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import Swal from "sweetalert2";
 
-import { Card, Grid, Autocomplete, FormControl, FormLabel, RadioGroup } from "@mui/material";
+import { Card, Grid, Icon, Autocomplete, FormControl, FormLabel, RadioGroup } from "@mui/material";
 
 import MDBox from "/components/MDBox";
 import MDTypography from "/components/MDTypography";
@@ -20,6 +20,8 @@ import SiteDropdown from "../../../pagesComponents/dropdown/Site";
 
 import Radio from '@mui/material/Radio';
 import FormControlLabel from '@mui/material/FormControlLabel';
+
+import MDButton from "/components/MDButton";
 
 function OracleToJournal({params}) {
     const [{ accessToken, encryptedAccessToken }] = useCookies();
@@ -177,6 +179,7 @@ function OracleToJournal({params}) {
     };
 
     const [formValues, setformValues] = useState(schemeInitialValues);
+    const [isLoadingUploadToOracle, setLoadingUploadToOracle] = useState(false);
 
     return (
         <DashboardLayout>
@@ -208,6 +211,12 @@ function OracleToJournal({params}) {
                                             <MDTypography variant="h5">
                                                 Oracle To Journal
                                             </MDTypography>
+                                            <FormLabel 
+                                                id="demo-radio-buttons-group-label"
+                                                style={{ fontSize: '12px' }}
+                                            >
+                                                    Billing Transaction To Oracle
+                                            </FormLabel>
                                         </MDBox>
                                     </Grid>
                                     <Grid item xs={12}>
@@ -235,7 +244,7 @@ function OracleToJournal({params}) {
                                                 <Form id={schemaModels.formId} autoComplete="off">
                                                     <MDBox lineHeight={2}>
                                                         <Grid container spacing={3}>
-                                                            <Grid item xs={12} sm={6}>
+                                                            <Grid item xs={6} sm={6}>
                                                                 <Autocomplete 
                                                                     style={{ paddingBottom: 20 }}
                                                                     options={periodMethodList}
@@ -262,7 +271,29 @@ function OracleToJournal({params}) {
                                                                     /> 
                                                                     )}
                                                                 />
-                                                                
+                                                            </Grid>
+                                                            <Grid item xs={6} sm={6}>
+                                                                <FormField
+                                                                    style={{ paddingBottom: 20 }}
+                                                                    type={accountingDate.type}
+                                                                    label={
+                                                                        accountingDate.label +
+                                                                        (accountingDate.isRequired ? " ⁽*⁾" : "")
+                                                                    }
+                                                                    name={accountingDate.name}
+                                                                    // value={formValues.startDate}
+                                                                    placeholder={accountingDate.placeholder}
+                                                                    error={errors.accountingDate && touched.accountingDate}
+                                                                    success={checkingSuccessInput(
+                                                                        formValues.accountingDate,
+                                                                        errors.accountingDate
+                                                                    )}
+                                                                    InputLabelProps={{ shrink: true }}
+                                                                />
+                                                            </Grid>
+                                                        </Grid>
+                                                        <Grid container spacing={3}>
+                                                            <Grid item xs={6} sm={6}>
                                                                 <Autocomplete 
                                                                     style={{ paddingBottom: 20 }}
                                                                     options={paymentMethodList}
@@ -289,7 +320,32 @@ function OracleToJournal({params}) {
                                                                     /> 
                                                                     )}
                                                                 />
-
+                                                            </Grid>
+                                                            <Grid item xs={6} sm={6}>
+                                                                <FormControl 
+                                                                    style={{ paddingBottom: 20 }} >
+                                                                    <FormLabel 
+                                                                        id="demo-radio-buttons-group-label"
+                                                                        style={{ fontSize: '12px' }}
+                                                                    >
+                                                                            Bank Payment
+                                                                    </FormLabel>
+                                                                    <RadioGroup
+                                                                        row
+                                                                        aria-labelledby="demo-radio-buttons-group-label"
+                                                                        defaultValue="female"
+                                                                        name="radio-buttons-group">
+                                                                        <FormControlLabel
+                                                                            value="BCA" 
+                                                                            control={<Radio />} 
+                                                                            label="BCA" />
+                                                                        <FormControlLabel value="NonBCA" control={<Radio />} label="Non BCA" />
+                                                                    </RadioGroup>
+                                                                </FormControl>
+                                                            </Grid>
+                                                        </Grid>                        
+                                                        <Grid container spacing={3}>
+                                                            <Grid item xs={6} sm={6}>
                                                                 <FormField
                                                                     style={{ paddingBottom: 20 }}
                                                                     type={paymentStartDate.type}
@@ -308,35 +364,7 @@ function OracleToJournal({params}) {
                                                                     InputLabelProps={{ shrink: true }}
                                                                 />
                                                             </Grid>
-                                                            <Grid item xs={12} sm={6}>
-                                                                <FormField
-                                                                    style={{ paddingBottom: 20 }}
-                                                                    type={accountingDate.type}
-                                                                    label={
-                                                                        accountingDate.label +
-                                                                        (accountingDate.isRequired ? " ⁽*⁾" : "")
-                                                                    }
-                                                                    name={accountingDate.name}
-                                                                    // value={formValues.startDate}
-                                                                    placeholder={accountingDate.placeholder}
-                                                                    error={errors.accountingDate && touched.accountingDate}
-                                                                    success={checkingSuccessInput(
-                                                                        formValues.accountingDate,
-                                                                        errors.accountingDate
-                                                                    )}
-                                                                    InputLabelProps={{ shrink: true }}
-                                                                />
-                                                                <FormControl>
-                                                                    <FormLabel id="demo-radio-buttons-group-label">Bank Payment</FormLabel>
-                                                                    <RadioGroup
-                                                                        row
-                                                                        aria-labelledby="demo-radio-buttons-group-label"
-                                                                        defaultValue="female"
-                                                                        name="radio-buttons-group">
-                                                                        <FormControlLabel value="BCA" control={<Radio />} label="BCA" />
-                                                                        <FormControlLabel value="NonBCA" control={<Radio />} label="Non BCA" />
-                                                                    </RadioGroup>
-                                                                </FormControl>
+                                                            <Grid item xs={6} sm={6}>
                                                                 <FormField
                                                                     style={{ paddingBottom: 20 }}
                                                                     type={paymentEndDate.type}
@@ -357,6 +385,40 @@ function OracleToJournal({params}) {
                                                             </Grid>
                                                         </Grid>
                                                     </MDBox>
+                                                    <MDBox 
+                                                        lineHeight={2}
+                                                        style={{ textAlign: 'right' }}
+                                                    >
+                                                        <Grid item xs={12}>
+                                                            <MDButton 
+                                                                style={{ marginRight : 20}}
+                                                                variant="outlined" 
+                                                                color="dark">
+                                                                <Icon>search_outlined</Icon>&nbsp; search
+                                                            </MDButton>
+                                                            <MDButton 
+                                                                style={{ marginRight : 20}}
+                                                                variant="outlined" 
+                                                                color="dark">
+                                                                <Icon>add_outlined</Icon>&nbsp; generate payment journal
+                                                            </MDButton>
+                                                            <MDButton 
+                                                                style={{ marginRight : 20}}
+                                                                variant="outlined" 
+                                                                color="dark">
+                                                                <Icon>article_outlined</Icon>&nbsp; EXPORT TO EXCEL
+                                                            </MDButton>
+                                                            <MDButton
+                                                                type="submit"
+                                                                variant="gradient"
+                                                                color="primary"
+                                                                sx={{ height: "100%" }}
+                                                                disabled={isLoadingUploadToOracle || !isValifForm()}
+                                                            >
+                                                                <Icon>upload</Icon>&nbsp; { isLoadingUploadToOracle ? "Uploading To Oracle.." : "Upload To Oracle" }
+                                                            </MDButton>
+                                                        </Grid>
+                                                    </MDBox>
                                                 </Form>
                                                 );
                                             }}
@@ -364,6 +426,7 @@ function OracleToJournal({params}) {
                                     </Grid>
                                 </Grid>
                             </MDBox>
+                            
                         </Card>
                     </Grid>
                 </Grid>
