@@ -102,11 +102,11 @@ function UploadBulkPayment() {
     fileType: ["xlsx", "xls"],
     maxFileSize: 1000000 * 2
   };
-const SheetJSFT = uploadaOptions.fileType.map((x) => ("." + x)).join(",");
+  const SheetJSFT = uploadaOptions.fileType.map((x) => ("." + x)).join(",");
   const downloadFile = () => {
     const element = document.createElement("a");
-    element.href = "/template/template-bulk-payment.xlsx";
-    element.download = "template-bulk-payment.xlsx";
+    element.href = "/template/template-upload-bulk-payment.xlsx";
+    element.download = "template-upload-bulk-payment.xlsx";
     element.click();
   };
   const onFileChange = (files) => (files && files[0]) && onFileUpload(files[0]);
@@ -124,26 +124,25 @@ const SheetJSFT = uploadaOptions.fileType.map((x) => ("." + x)).join(",");
       const ws = wb.Sheets[wsname];
 
       const data = XLSX.utils.sheet_to_json(ws, { header: 2 });
-      debugger
-      // const data_formated = data.map(e => {
-      //   const date_splitted = e["Transaction Date"]?.split("/");
-      //   const date_formatted = new Date();
-      //   date_formatted.setUTCDate(date_splitted[0]);
-      //   date_formatted.setUTCMonth(parseInt(date_splitted[1]) - 1);
-      //   date_formatted.setUTCFullYear(date_splitted[2]);
-      //   date_formatted.setUTCHours(0, 0, 0, 0);
+      const data_formated = data.map(e => {
+        const date_splitted = e["Transaction Date"]?.split("/");
+        const date_formatted = new Date();
+        date_formatted.setUTCDate(date_splitted[0]);
+        date_formatted.setUTCMonth(parseInt(date_splitted[1]) - 1);
+        date_formatted.setUTCFullYear(date_splitted[2]);
+        date_formatted.setUTCHours(0, 0, 0, 0);
 
-      //   return ({
-      //     "idClient": e["ID Client"],
-      //     "unitCode": e["Unit Code"],
-      //     "unitNo": e["Unit No"],
-      //     "invoiceNumber": e["Invoice Number"],
-      //     "transactionDate": date_formatted.toISOString(),
-      //     "amount": e["Amount"]
-      //   })
-      // });
-      // console.log("UPLOADED FILE", data_formated);
-      // setUploadedList(data_formated);
+        return ({
+          "idClient": e["ID Client"],
+          "unitCode": e["Unit Code"],
+          "unitNo": e["Unit No"],
+          "invoiceNumber": e["Invoice Number"],
+          "transactionDate": date_formatted.toISOString(),
+          "amount": e["Amount"]
+        })
+      });
+      console.log("UPLOADED FILE", data_formated);
+      setUploadedList(data_formated);
     };
 
     if (rABS) reader.readAsBinaryString(file);
@@ -183,21 +182,22 @@ const SheetJSFT = uploadaOptions.fileType.map((x) => ("." + x)).join(",");
           title: 'Upload Bulk Payment Successfull',
           html:
             `${response.result.totalSukses} data has been successfully uploaded.` +
-            (isFailed ? `<br><strong>${response.result.totalGagal} data failed to upload</strong>, <a href="${response.result.urlDataGagal}" download="template-bulk-payment.xlsx"><u>download here to see.</u></a>` : ``),
+            (isFailed ? `<br><strong>${response.result.totalGagal} data failed to upload</strong>, <a href="${response.result.urlDataGagal}" download="error-upload-bulk-payment.xlsx"><u>download here to see.</u></a>` : ``),
           icon: 'success',
           timerProgressBar: true,
           timer: !isFailed && 3000,
-        }).then(() => setTimeout(() => {
+        }).then(() => {
           if (isFailed) {
             actions.setFieldValue(fileUpload.name, null);
-            document.getElementsByName(fileUpload.name)[0].value = null;
+            setTimeout(() => document.getElementsByName(fileUpload.name)[0].value = null, 0);
           } else {
             actions.resetForm();
-            document.getElementsByName(paymentMethod.name)[0].value = null;
-            document.getElementsByName(fileUpload.name)[0].value = null;
-          }
-          setUploadedList([]);
-        }, 0));
+            setTimeout(() => {
+              document.getElementsByName(paymentMethod.name)[0].value = null;
+              document.getElementsByName(fileUpload.name)[0].value = null;
+            }, 0);
+          } setUploadedList([]);
+        });
       }
     } setLoadingUploadBulkPayment(false);
   };

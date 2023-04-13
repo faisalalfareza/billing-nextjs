@@ -4,6 +4,16 @@ import axios from "axios";
 
 const { publicRuntimeConfig } = getConfig();
 
+export const config = {
+  api: {
+    // Penyelesai Eksternal (External Resolver)
+    // https://nextjs.org/docs/api-routes/request-helpers#custom-config
+    // externalResolver adalah bendera eksplisit yang memberi tahu server bahwa rute ini sedang ditangani oleh penyelesai eksternal seperti Express atau Connect. Mengaktifkan opsi ini akan menonaktifkan peringatan untuk permintaan yang belum terselesaikan.
+    // Ini adalah peringatan palsu karena dalam kode yang diberikan Anda selalu mengembalikan respons. Hanya saja Next.js tidak mengetahuinya. (NOTA: Jika Anda yakin bahwa Anda mengembalikan respons dalam setiap kasus, Anda dapat menonaktifkan peringatan untuk permintaan yang belum terselesaikan.)
+    externalResolver: true
+  },
+}
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
