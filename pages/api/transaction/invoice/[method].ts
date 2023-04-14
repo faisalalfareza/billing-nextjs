@@ -40,8 +40,14 @@ export default async function handler(
         case "adjustment":
           adjust(res, body);
           break;
-        case "upload":
-          uploadExcel(res, body);
+        case "regenerate":
+          regenerate(res, body);
+          break;
+        case "sendemail":
+          sendEmail(res, body);
+          break;
+        case "sendwa":
+          sendWa(res, body);
           break;
       }
       break;
@@ -293,10 +299,70 @@ async function adjust(res: any, body: any) {
     );
 }
 
-async function uploadExcel(res: any, body: any) {
+async function regenerate(res: any, body: any) {
   const { accessToken, params } = body;
 
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/UploadExcelWaterReading`;
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/ReGenerateInvoiceByInvoiceIdList`;
+  const config = {
+    headers: {
+      Authorization: "Bearer " + accessToken,
+      "Access-Control-Allow-Origin": "*",
+    },
+  };
+  console.log("config----", config);
+
+  console.log("body---", params);
+
+  axios
+    .post(url, params, config)
+    .then((response) => {
+      console.log("response-----", response);
+      res.send({
+        result: response.data.result,
+      });
+    })
+    .catch((error) => {
+      console.log("err-----", error.response);
+      res.send({
+        error: error,
+      });
+    });
+}
+
+async function sendEmail(res: any, body: any) {
+  const { accessToken, params } = body;
+
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/SendEmailInvoiceByInvoiceHeaderId`;
+  const config = {
+    headers: {
+      Authorization: "Bearer " + accessToken,
+      "Access-Control-Allow-Origin": "*",
+    },
+  };
+  console.log("config----", config);
+
+  console.log("body---", params);
+
+  axios
+    .post(url, params, config)
+    .then((response) => {
+      console.log("response-----", response);
+      res.send({
+        result: response.data.result,
+      });
+    })
+    .catch((error) => {
+      console.log("err-----", error.response);
+      res.send({
+        error: error,
+      });
+    });
+}
+
+async function sendWa(res: any, body: any) {
+  const { accessToken, params } = body;
+
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/SendWAInvoice`;
   const config = {
     headers: {
       Authorization: "Bearer " + accessToken,

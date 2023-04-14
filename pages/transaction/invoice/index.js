@@ -33,6 +33,7 @@ import fileCheck from "/assets/images/file-check.svg";
 import FindName from "./components/FindName";
 import Swal from "sweetalert2";
 import Adjustment from "./components/Adjustment";
+import PuffLoader from "react-spinners/PuffLoader";
 
 export default function Invoice(props) {
   const [controller] = useMaterialUIController();
@@ -53,14 +54,14 @@ export default function Invoice(props) {
   const [site, setSite] = useState(null);
   const [period, setPeriod] = useState(null);
   const [customer, setCustomer] = useState(null);
-  const handleOpenUpload = () => setOpenUpload(true);
-  const handleOpenEdit = () => setOpenEdit(true);
   const [isLoading, setLoading] = useState(false);
   const [modalParams, setModalParams] = useState(undefined);
   const [isCheckAll, setIsCheckAll] = useState(false);
   const [isCheck, setIsCheck] = useState([]);
   const [list, setList] = useState([]);
   const [{ accessToken, encrypftedAccessToken }] = useCookies();
+  const [isLoadingSend, setLoadingSend] = useState(false);
+  const [command, setCommand] = useState(null);
 
   useEffect(() => {
     let currentSite = JSON.parse(localStorage.getItem("site"));
@@ -198,7 +199,7 @@ export default function Invoice(props) {
     Swal.fire({
       title: "Are you sure?",
       text: "Are you sure want to make another adjustment?",
-      icon: "warning",
+      icon: "question",
       showCancelButton: true,
       confirmButtonColor: "#3085d6",
       cancelButtonColor: "#aaa",
@@ -223,13 +224,14 @@ export default function Invoice(props) {
 
   const handleClick = (e) => {
     const { id, checked } = e.target;
-    setIsCheck([...isCheck, id]);
+    console.log("coba-----", id, checked, typeof id);
+    setIsCheck([...isCheck, +id]);
     if (!checked) {
-      setIsCheck(isCheck.filter((item) => item !== id));
+      setIsCheck(isCheck.filter((item) => item !== +id));
     }
   };
 
-  console.log("isCheck------", isCheck);
+  console.log("coba------", isCheck);
 
   const columns = [
     {
@@ -511,6 +513,93 @@ export default function Invoice(props) {
     fetchData(values, actions);
   };
 
+  const handleCommand = async (data) => {
+    setCommand(data);
+    let text = "";
+    switch (data) {
+      case 1:
+        text = "You will Re-generate invoice for this Name, are you sure ?";
+        break;
+      case 2:
+        text = "You will send email invoice for this Name, are you sure ?";
+        break;
+      case 3:
+        text = "You will send Whatsapp invoice for this Name, are you sure ?";
+        break;
+    }
+    Swal.fire({
+      title: "Are you sure?",
+      text: text,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#aaa",
+      cancelButtonText: "No",
+      confirmButtonText: "Yes",
+      reverseButtons: true,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        processCommand(data);
+      }
+    });
+  };
+
+  const processCommand = async (val) => {
+    setLoadingSend(true);
+    let url = "",
+      text = "",
+      title = "";
+    switch (val) {
+      case 1:
+        url = "/api/transaction/invoice/regenerate";
+        title = "Re-Generate Succesfull";
+        text = "Re-generate for this invoice has been successfull";
+        break;
+      case 2:
+        url = "/api/transaction/invoice/sendemail";
+        title = "Email has been sent";
+        text = "Email has been sent successfully";
+        break;
+      case 3:
+        url = "/api/transaction/invoice/sendwa";
+        title = "Whatsapp has been sent";
+        text = "Whatsapp has been sent successfully";
+        break;
+    }
+    let response = await fetch(url, {
+      method: "POST",
+      body: JSON.stringify({
+        accessToken: accessToken,
+        params: isCheck,
+      }),
+    });
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
+
+    console.log("GET PERMISSIONS RESULT", response);
+
+    console.log("response----", response);
+    if (response.error)
+      alertService.error({ text: response.error.message, title: "Error" });
+    else {
+      alertService.success({
+        text: text,
+        title: title,
+      });
+    }
+    setLoadingSend(false);
+  };
+
+  const override = {
+    position: "absolute",
+    zIndex: "10",
+    margin: "auto",
+    right: "0",
+    left: "0",
+    top: "0",
+    bottom: "0",
+  };
+
   return (
     <DashboardLayout>
       <DashboardNavbar />
@@ -529,6 +618,15 @@ export default function Invoice(props) {
           </Grid>
         </Grid>
       </MDBox>
+      <PuffLoader
+        cssOverride={override}
+        size={250}
+        color={"#10569E"}
+        loading={isLoadingSend}
+        speedMultiplier={1}
+        aria-label="Loading Spinner"
+        data-testid="loader"
+      />
       <MDBox py={3}>
         <Grid container spacing={3}>
           <Grid item xs={12}>
@@ -878,28 +976,38 @@ export default function Invoice(props) {
                       <MDButton
                         variant="outlined"
                         color="primary"
-                        disabled={customerResponse.rowData.length == 0}
-                        onClick={handlePreview}
+                        disabled={isCheck.length == 0 || isLoadingSend}
+                        onClick={() => handleCommand(1)}
                       >
-                        <Icon>add</Icon>&nbsp; RE-GENERATE
+                        <Icon>add</Icon>&nbsp;{" "}
+                        {isLoadingSend && command == 1
+                          ? "Regenerating..."
+                          : "RE-GENERATE"}
                       </MDButton>
                       <MDBox ml={{ xs: 0, sm: 1 }} mt={{ xs: 1, sm: 0 }}>
                         <MDButton
                           variant="outlined"
                           color="primary"
-                          onClick={handleOpenUpload}
+                          disabled={isCheck.length == 0 || isLoadingSend}
+                          onClick={() => handleCommand(2)}
                         >
-                          <Icon>email</Icon>&nbsp; SEND EMAIL
+                          <Icon>email</Icon>&nbsp;{" "}
+                          {isLoadingSend && command == 2
+                            ? "Sending Email..."
+                            : "SEND EMAIL"}
                         </MDButton>
                       </MDBox>
                       <MDBox ml={{ xs: 0, sm: 1 }} mt={{ xs: 1, sm: 0 }}>
                         <MDButton
                           variant="outlined"
                           color="primary"
-                          disabled={customerResponse.rowData.length == 0}
-                          onClick={handlePreview}
+                          disabled={isCheck.length == 0 || isLoadingSend}
+                          onClick={() => handleCommand(3)}
                         >
-                          <WhatsAppIcon /> &nbsp; SEND WHATSAPP
+                          <WhatsAppIcon /> &nbsp;{" "}
+                          {isLoadingSend && command == 3
+                            ? "Sending Whatsapp..."
+                            : "SEND WHATSAPP"}
                         </MDButton>
                       </MDBox>
                     </MDBox>
