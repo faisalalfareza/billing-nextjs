@@ -13,6 +13,11 @@ export function capitalizeFirstLetter(value: any) {
   return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
+export function getExtension(filename: string) {
+  let parts = filename.split('.');
+  return parts[parts.length - 1];
+}
+
 export function downloadTempFile(uri: any) {
   let fileUrl = joinUrl(uri);
 
