@@ -7,32 +7,14 @@ export const alertService = {
   warn,
 };
 
-export const alertType = {
+const alertType = {
   Success: "success",
   Error: "error",
   Info: "info",
   Warning: "warning",
 };
 
-// convenience methods
-function success(options: any) {
-  Swal.fire({ ...options, icon: alertType.Success });
-}
-
-function error(options: any) {
-  Swal.fire({
-    ...options,
-    icon: alertType.Error,
-  });
-}
-
-function info(options: any) {
-  Swal.fire({
-    ...options,
-    icon: alertType.Info,
-  });
-}
-
-function warn(options: any) {
-  Swal.fire({ ...options, icon: alertType.Warning });
-}
+function success(options: any) { Swal.fire({ ...options, icon: alertType.Success }) }
+function error(options: any) { Swal.fire({ ...options, icon: alertType.Error }) }
+function info(options: any) { Swal.fire({ ...options, icon: alertType.Info }) }
+function warn(options: any) { Swal.fire({ ...options, icon: alertType.Warning }) }
