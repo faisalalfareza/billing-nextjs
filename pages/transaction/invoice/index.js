@@ -2,7 +2,7 @@ import Card from "@mui/material/Card";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 // @mui material components
-import { Grid, TextField } from "@mui/material";
+import { Grid, Checkbox } from "@mui/material";
 // NextJS Material Dashboard 2 PRO components
 import MDBox from "/components/MDBox";
 import MDTypography from "/components/MDTypography";
@@ -26,52 +26,42 @@ import { alertService } from "/helpers";
 
 // Data
 import { useEffect, useState } from "react";
-import UploadDataWater from "./components/UploadDataWater";
-import WaterRowActions from "./components/WaterRowActions";
-import EditDataWater from "./components/EditDataWater";
 import SiteDropdown from "/pagesComponents/dropdown/Site";
 import { NumericFormat } from "react-number-format";
 import Image from "next/image";
 import fileCheck from "/assets/images/file-check.svg";
+import FindName from "./components/FindName";
+import Swal from "sweetalert2";
+import Adjustment from "./components/Adjustment";
+import PuffLoader from "react-spinners/PuffLoader";
 
 export default function Invoice(props) {
   const [controller] = useMaterialUIController();
   const [customerResponse, setCustomerResponse] = useState({
-    rowData: [
-      {
-        siteId: 0,
-        invoiceId: 0,
-        period: 0,
-        projectId: 0,
-        projectCode: "string",
-        projectName: "string",
-        clusterId: 0,
-        clusterName: "string",
-        unitCodeID: 0,
-        unitId: 0,
-        unitCode: "string",
-        unitNo: "string",
-        psCode: "string",
-        name: "string",
-        invoiceNo: "string",
-        invoiceName: "string",
-        totalTunggakan: 123456,
-      },
-    ],
+    rowData: [],
     totalRows: undefined,
     totalPages: undefined,
   });
   const [openUpload, setOpenUpload] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
+  const [openFind, setOpenFind] = useState(false);
+  const [openAdjust, setOpenAdjust] = useState(false);
   const [dataCluster, setDataCluster] = useState([]);
   const [dataProject, setDataProject] = useState([]);
   const [dataPeriod, setDataPeriod] = useState([]);
+  const [dataUnitCode, setDataUnitCode] = useState([]);
+  const [dataUnitNo, setDataUnitNo] = useState([]);
   const [site, setSite] = useState(null);
-  const handleOpenUpload = () => setOpenUpload(true);
-  const handleOpenEdit = () => setOpenEdit(true);
+  const [period, setPeriod] = useState(null);
+  const [customer, setCustomer] = useState(null);
   const [isLoading, setLoading] = useState(false);
   const [modalParams, setModalParams] = useState(undefined);
-  const [{ accessToken, encryptedAccessToken }] = useCookies();
+  const [isCheckAll, setIsCheckAll] = useState(false);
+  const [isCheck, setIsCheck] = useState([]);
+  const [list, setList] = useState([]);
+  const [{ accessToken, encrypftedAccessToken }] = useCookies();
+  const [isLoadingSend, setLoadingSend] = useState(false);
+  const [command, setCommand] = useState(null);
 
   useEffect(() => {
     let currentSite = JSON.parse(localStorage.getItem("site"));
@@ -82,6 +72,7 @@ export default function Invoice(props) {
       setSite(currentSite);
     }
     getProject();
+    getPeriod();
   }, []);
 
   const [customerRequest, setCustomerRequest] = useState({
@@ -114,7 +105,29 @@ export default function Invoice(props) {
   };
 
   const getProject = async (val) => {
-    let response = await fetch("/api/transaction/water/dropdownproject", {
+    let response = await fetch("/api/transaction/invoice/dropdownproject", {
+      method: "POST",
+      body: JSON.stringify({
+        accessToken: accessToken,
+        params: {
+          SiteId: site?.siteId,
+          periodId: val?.periodId,
+        },
+      }),
+    });
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
+    console.log("response----", response);
+    if (response.error) {
+      alertService.error({ title: "Error", text: response.error.message });
+    } else {
+      setDataProject(response.result);
+    }
+    console.log("project------", dataProject);
+  };
+
+  const getPeriod = async (val) => {
+    let response = await fetch("/api/transaction/invoice/dropdownperiod", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
@@ -129,12 +142,14 @@ export default function Invoice(props) {
     if (response.error) {
       alertService.error({ title: "Error", text: response.error.message });
     } else {
-      setDataProject(response.result);
+      setDataPeriod(response.result);
     }
-    console.log("project------", dataProject);
+    console.log("period------", dataPeriod);
   };
+
   useEffect(() => {
     getProject();
+    getPeriod();
   }, [site]);
   useEffect(() => {
     fetchData();
@@ -146,7 +161,7 @@ export default function Invoice(props) {
     project: null,
     cluster: null,
     period: null,
-    nameF: null,
+    nameF: "",
     unitCode: null,
     unitNo: null,
   };
@@ -159,18 +174,96 @@ export default function Invoice(props) {
     period: Yup.object()
       .required("Period is required.")
       .typeError("Period is required."),
-    project: Yup.object(),
-    cluster: Yup.object(),
-    nameF: Yup.string(),
-    unitCode: Yup.object(),
-    unitNo: Yup.object(),
+    project: Yup.object().nullable(),
+    cluster: Yup.object().nullable(),
+    nameF: Yup.string().nullable(),
+    unitCode: Yup.object().nullable(),
+    unitNo: Yup.object().nullable(),
   });
 
   const checkingSuccessInput = (value, error) => {
+    console.log("-----", value, error);
     return value != undefined && value != "" && value.length > 0 && !error;
   };
 
+  const swalWithBootstrapButtons = Swal.mixin({
+    customClass: {
+      confirmButton: "btn btn-success",
+      cancelButton: "btn btn-danger",
+    },
+    buttonsStyling: false,
+  });
+
+  const adjust = (val) => {
+    console.log("val------", val);
+    Swal.fire({
+      title: "Are you sure?",
+      text: "Are you sure want to make another adjustment?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#aaa",
+      cancelButtonText: "No",
+      confirmButtonText: "Yes",
+      reverseButtons: true,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setModalParams(val);
+        handleAdjust();
+      }
+    });
+  };
+
+  const handleSelectAll = (e) => {
+    setIsCheckAll(!isCheckAll);
+    setIsCheck(list.map((li) => li.invoiceHeaderId));
+    if (isCheckAll) {
+      setIsCheck([]);
+    }
+  };
+
+  const handleClick = (e) => {
+    const { id, checked } = e.target;
+    console.log("coba-----", id, checked, typeof id);
+    setIsCheck([...isCheck, +id]);
+    if (!checked) {
+      setIsCheck(isCheck.filter((item) => item !== +id));
+    }
+  };
+
+  console.log("coba------", isCheck);
+
   const columns = [
+    {
+      Header: ({ value }) => {
+        return (
+          <Checkbox
+            color="primary"
+            type="checkbox"
+            name="selectAll"
+            id="selectAll"
+            onChange={(e) => handleSelectAll(e.target.value)}
+            checked={isCheckAll}
+          />
+        );
+      },
+      accessor: "select",
+      width: "5%",
+      Cell: ({ value, row }) => {
+        console.log("row00000", row, value);
+        return (
+          <Checkbox
+            color="primary"
+            key={row.id}
+            type="checkbox"
+            // name={name}
+            id={value}
+            onChange={(e) => handleClick(e)}
+            checked={isCheck.includes(value)}
+          />
+        );
+      },
+    },
     { Header: "no", accessor: "no", width: "5%" },
     { Header: "period", accessor: "period", width: "25%" },
     { Header: "project", accessor: "project", width: "25%" },
@@ -199,7 +292,7 @@ export default function Invoice(props) {
     },
     {
       Header: "preview tunggakan",
-      accessor: "prev",
+      accessor: "invoiceHeaderId",
       align: "center",
       Cell: ({ value }) => {
         return (
@@ -209,6 +302,7 @@ export default function Invoice(props) {
             width={25}
             height={25}
             style={{ cursor: "pointer" }}
+            onClick={() => handlePreview(value)}
           />
         );
       },
@@ -219,74 +313,82 @@ export default function Invoice(props) {
       align: "center",
       Cell: ({ value }) => {
         return (
-          <u style={{ color: "#4593C4", cursor: "pointer" }}>Adjustment</u>
-          // <WaterRowActions
-          //   record={value}
-          //   openModalonEdit={openModalEdit}
-          //   onDeleted={fetchData}
-          // />
+          <MDButton
+            style={{ color: "#4593C4", cursor: "pointer" }}
+            onClick={() => adjust(value)}
+          >
+            Adjustment
+          </MDButton>
         );
       },
     },
   ];
   const [tasklist, setTasklist] = useState({ columns: columns, rows: [] });
 
-  const fetchData = async (data) => {
-    console.log("record--", recordsPerPage);
-    const { scheme, keywords, recordsPerPage, skipCount } = customerRequest;
-    let response = await fetch("/api/transaction/invoice/list", {
-      method: "POST",
-      body: JSON.stringify({
-        accessToken: accessToken,
-        params: {
-          SiteId: site?.siteId,
-          PeriodId: formValues.period?.periodId,
-          ProjectId: formValues.project?.projectId,
-          ClusterId: formValues.cluster?.clusterId,
-          UnitCode: formValues.unitCode,
-          UnitNo: formValues.unitNo,
-          Name: formValues.nameF,
-          MaxResultCount: recordsPerPage,
-          SkipCount: skipCount,
-        },
-      }),
-    });
-    if (!response.ok) throw new Error(`Error: ${response.status}`);
-    response = typeNormalization(await response.json());
-
-    // console.log("GET PERMISSIONS RESULT", response);
-
-    console.log("response----", response);
-    if (response.error)
-      alertService.error({ title: "Error", text: response.error.message });
-    else {
-      let data = response.result;
-      const list = [];
-      data.items.map((e, i) => {
-        list.push({
-          no: skipCount + i + 1,
-          project: e.projectName,
-          cluster: e.clusterName,
-          unitCode: e.unitCode,
-          unitNo: e.unitNo,
-          prev: e.prevRead,
-          curr: e.currentRead,
-          action: e,
-        });
+  const fetchData = async (values, actions) => {
+    let field = values ? values : formValues;
+    console.log("record--", field);
+    if (field?.period) {
+      setLoading(true);
+      const { scheme, keywords, recordsPerPage, skipCount } = customerRequest;
+      let response = await fetch("/api/transaction/invoice/list", {
+        method: "POST",
+        body: JSON.stringify({
+          accessToken: accessToken,
+          params: {
+            SiteId: site?.siteId,
+            PeriodId: field.period?.periodId,
+            ProjectId: field.project?.projectId,
+            Cluster: field.cluster?.clusterName,
+            UnitCode: field.unitCode?.unitCode,
+            UnitNo: field.unitNo?.unitNo,
+            psCode: customer?.psCode,
+            MaxResultCount: recordsPerPage,
+            SkipCount: skipCount,
+          },
+        }),
       });
-      setCustomerResponse((prevState) => ({
-        ...prevState,
-        rowData: list,
-        totalRows: data.totalCount,
-        totalPages: Math.ceil(data.totalCount / customerRequest.recordsPerPage),
-      }));
+      if (!response.ok) throw new Error(`Error: ${response.status}`);
+      response = typeNormalization(await response.json());
 
-      // setlistRow(list);
-      // return setTasklist({
-      //   columns: columns,
-      //   rows: list,
-      // });
-      console.log("list------", customerResponse);
+      // console.log("GET PERMISSIONS RESULT", response);
+
+      console.log("response----", response);
+      if (response.error)
+        alertService.error({ title: "Error", text: response.error.message });
+      else {
+        let data = response.result;
+        const list = [];
+        data.items.map((e, i) => {
+          list.push({
+            no: skipCount + i + 1,
+            project: e.projectName,
+            cluster: e.clusterName,
+            unitCode: e.unitCode,
+            unitNo: e.unitNo,
+            period: e.period,
+            psCode: e.psCode,
+            name: e.name,
+            invoiceNo: e.invoiceNo,
+            invoiceName: e.invoiceName,
+            invoiceHeaderId: e.invoiceHeaderId,
+            select: e.invoiceHeaderId,
+            totalTunggakan: e.totalTunggakan,
+            action: e,
+          });
+        });
+        setList(list);
+        setCustomerResponse((prevState) => ({
+          ...prevState,
+          rowData: list,
+          totalRows: data.totalCount,
+          totalPages: Math.ceil(
+            data.totalCount / customerRequest.recordsPerPage
+          ),
+        }));
+        console.log("list------", customerResponse);
+        setLoading(false);
+      }
     }
   };
 
@@ -297,18 +399,13 @@ export default function Invoice(props) {
     };
   };
 
-  const handleExport = async () => {
-    let response = await fetch("/api/transaction/water/export", {
+  const handlePreview = async (val) => {
+    let response = await fetch("/api/transaction/invoice/preview", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
         params: {
-          maxResultCount: 1000,
-          skipCount: 0,
-          siteId: site?.siteId,
-          projectId: formValues.project?.projectId,
-          clusterId: formValues.cluster?.clusterId,
-          search: undefined,
+          InvoiceId: val,
         },
       }),
     });
@@ -321,18 +418,18 @@ export default function Invoice(props) {
     if (response.error)
       alertService.error({ text: response.error.message, title: "Error" });
     else {
-      downloadTempFile(response.result.uri);
+      window.open(response.result, "_blank");
     }
   };
 
-  const onProjectChange = async (val) => {
-    setLoading(true);
-    let response = await fetch("/api/master/site/dropdowncluster", {
+  const getCluster = async (val) => {
+    let response = await fetch("/api/transaction/invoice/dropdowncluster", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
         params: {
-          ProjectId: val.projectId,
+          SiteId: site?.siteId,
+          periodId: val?.periodId,
         },
       }),
     });
@@ -345,27 +442,162 @@ export default function Invoice(props) {
       setDataCluster(response.result);
     }
     console.log("cluster------", dataCluster);
-    setLoading(false);
   };
 
-  const openModalEdit = (record) => {
-    setModalParams(record);
-    setOpenEdit(true);
+  const getUnitCode = async (val) => {
+    let response = await fetch("/api/transaction/invoice/dropdownunitcode", {
+      method: "POST",
+      body: JSON.stringify({
+        accessToken: accessToken,
+        params: {
+          SiteId: site?.siteId,
+          periodId: val?.periodId,
+        },
+      }),
+    });
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
+    console.log("response----", response);
+    if (response.error) {
+      alertService.error({ title: "Error", text: response.error.message });
+    } else {
+      setDataUnitCode(response.result);
+    }
+    console.log("unitCode------", dataUnitCode);
   };
 
-  const changeModalUpload = () => {
-    setOpenUpload(!openUpload);
-    fetchData();
-  };
-
-  const changeModalEdit = () => {
-    setOpenEdit(false);
-    fetchData();
+  const getUnitNo = async (val) => {
+    let response = await fetch("/api/transaction/invoice/dropdownunitno", {
+      method: "POST",
+      body: JSON.stringify({
+        accessToken: accessToken,
+        params: {
+          SiteId: site?.siteId,
+          periodId: val?.periodId,
+        },
+      }),
+    });
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
+    console.log("response----", response);
+    if (response.error) {
+      alertService.error({ title: "Error", text: response.error.message });
+    } else {
+      setDataUnitNo(response.result);
+    }
+    console.log("unitNo------", dataUnitNo);
   };
 
   const handleSite = (siteVal) => {
     setSite(siteVal);
     localStorage.setItem("site", JSON.stringify(siteVal));
+  };
+
+  const handleFind = () => {
+    setOpenFind(!openFind);
+  };
+
+  const handleAdjust = () => {
+    setOpenAdjust(!openAdjust);
+    fetchData();
+  };
+
+  const handlePSCode = (val) => {
+    setCustomer(val);
+  };
+
+  useEffect(() => {}, [customer]);
+
+  const submitForm = async (values, actions) => {
+    console.log("formval------", values);
+    fetchData(values, actions);
+  };
+
+  const handleCommand = async (data) => {
+    setCommand(data);
+    let text = "";
+    switch (data) {
+      case 1:
+        text = "You will Re-generate invoice for this Name, are you sure ?";
+        break;
+      case 2:
+        text = "You will send email invoice for this Name, are you sure ?";
+        break;
+      case 3:
+        text = "You will send Whatsapp invoice for this Name, are you sure ?";
+        break;
+    }
+    Swal.fire({
+      title: "Are you sure?",
+      text: text,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#aaa",
+      cancelButtonText: "No",
+      confirmButtonText: "Yes",
+      reverseButtons: true,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        processCommand(data);
+      }
+    });
+  };
+
+  const processCommand = async (val) => {
+    setLoadingSend(true);
+    let url = "",
+      text = "",
+      title = "";
+    switch (val) {
+      case 1:
+        url = "/api/transaction/invoice/regenerate";
+        title = "Re-Generate Succesfull";
+        text = "Re-generate for this invoice has been successfull";
+        break;
+      case 2:
+        url = "/api/transaction/invoice/sendemail";
+        title = "Email has been sent";
+        text = "Email has been sent successfully";
+        break;
+      case 3:
+        url = "/api/transaction/invoice/sendwa";
+        title = "Whatsapp has been sent";
+        text = "Whatsapp has been sent successfully";
+        break;
+    }
+    let response = await fetch(url, {
+      method: "POST",
+      body: JSON.stringify({
+        accessToken: accessToken,
+        params: isCheck,
+      }),
+    });
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
+
+    console.log("GET PERMISSIONS RESULT", response);
+
+    console.log("response----", response);
+    if (response.error)
+      alertService.error({ text: response.error.message, title: "Error" });
+    else {
+      alertService.success({
+        text: text,
+        title: title,
+      });
+    }
+    setLoadingSend(false);
+  };
+
+  const override = {
+    position: "absolute",
+    zIndex: "10",
+    margin: "auto",
+    right: "0",
+    left: "0",
+    top: "0",
+    bottom: "0",
   };
 
   return (
@@ -386,6 +618,15 @@ export default function Invoice(props) {
           </Grid>
         </Grid>
       </MDBox>
+      <PuffLoader
+        cssOverride={override}
+        size={250}
+        color={"#10569E"}
+        loading={isLoadingSend}
+        speedMultiplier={1}
+        aria-label="Loading Spinner"
+        data-testid="loader"
+      />
       <MDBox py={3}>
         <Grid container spacing={3}>
           <Grid item xs={12}>
@@ -401,10 +642,7 @@ export default function Invoice(props) {
                     <Formik
                       initialValues={initialValues}
                       validationSchema={validations}
-                      onSubmit={(values, { setSubmitting }) => {
-                        fetchData(values);
-                        setSubmitting(false);
-                      }}
+                      onSubmit={submitForm}
                     >
                       {({
                         values,
@@ -420,18 +658,30 @@ export default function Invoice(props) {
                       }) => {
                         setformValues(values);
                         getFormData(values);
+                        const isValifForm = () => {
+                          return checkingSuccessInput(
+                            values.period,
+                            errors.period
+                          )
+                            ? true
+                            : false;
+                        };
                         return (
                           <Form id="invoice-filter" autoComplete="off">
                             <MDBox>
                               <Grid container spacing={3}>
                                 <Grid item xs={12} sm={6}>
                                   <Field
+                                    key="period-ddr"
                                     name="period"
                                     component={Autocomplete}
                                     options={dataPeriod}
                                     getOptionLabel={(option) =>
-                                      option.paymentName
+                                      option.periodName
                                     }
+                                    // isOptionEqualToValue={(option, value) =>
+                                    //   option.value === value.value
+                                    // }
                                     onChange={(e, value) => {
                                       setFieldValue(
                                         "period",
@@ -439,10 +689,12 @@ export default function Invoice(props) {
                                           ? value
                                           : initialValues["period"]
                                       );
+                                      getProject(value);
+                                      getCluster(value);
+                                      getUnitNo(value);
+                                      setPeriod(value);
+                                      getUnitCode(value);
                                     }}
-                                    isOptionEqualToValue={(option, value) =>
-                                      option.value === value.value
-                                    }
                                     renderInput={(params) => (
                                       <FormField
                                         {...params}
@@ -461,31 +713,14 @@ export default function Invoice(props) {
                                   />
                                 </Grid>
                                 <Grid item xs={12} sm={6}>
-                                  <Field
-                                    name="nameF"
-                                    component={Autocomplete}
-                                    options={dataProject}
-                                    getOptionLabel={(option) =>
-                                      option.projectName
-                                    }
-                                    onChange={(e, value) => {
-                                      setFieldValue(
-                                        "nameF",
-                                        value !== null
-                                          ? value
-                                          : initialValues["nameF"]
-                                      );
-                                    }}
-                                    isOptionEqualToValue={(option, value) =>
-                                      option.value === value.value
-                                    }
-                                    renderInput={(params) => (
+                                  <Grid container spacing={2}>
+                                    <Grid item xs={10}>
                                       <FormField
-                                        {...params}
                                         type="text"
                                         label="Name"
                                         name="nameF"
-                                        placeholder="Choose Name"
+                                        value={customer?.name}
+                                        placeholder="Type Name"
                                         InputLabelProps={{ shrink: true }}
                                         error={errors.nameF && touched.nameF}
                                         success={checkingSuccessInput(
@@ -493,12 +728,36 @@ export default function Invoice(props) {
                                           errors.nameF
                                         )}
                                       />
-                                    )}
+                                    </Grid>
+                                    <Grid item xs={2}>
+                                      <MDButton
+                                        variant="text"
+                                        color="info"
+                                        onClick={handleFind}
+                                        disabled={period == undefined}
+                                      >
+                                        Find
+                                      </MDButton>
+                                    </Grid>
+                                  </Grid>
+                                  <FindName
+                                    isOpen={openFind}
+                                    close={handleFind}
+                                    site={site?.siteId}
+                                    period={period?.periodId}
+                                    handlePSCode={handlePSCode}
+                                  />
+                                  <Adjustment
+                                    isOpen={openAdjust}
+                                    close={handleAdjust}
+                                    params={modalParams}
+                                    handlePSCode={handlePSCode}
                                   />
                                 </Grid>
                                 <Grid item xs={12} sm={6}>
                                   <Field
                                     name="project"
+                                    key="project-ddr"
                                     component={Autocomplete}
                                     options={dataProject}
                                     getOptionLabel={(option) =>
@@ -511,7 +770,6 @@ export default function Invoice(props) {
                                           ? value
                                           : initialValues["project"]
                                       );
-                                      onProjectChange(value);
                                     }}
                                     isOptionEqualToValue={(option, value) =>
                                       option.value === value.value
@@ -537,6 +795,7 @@ export default function Invoice(props) {
                                 </Grid>
                                 <Grid item xs={12} sm={6}>
                                   <Field
+                                    key="cluster-ddr"
                                     name="cluster"
                                     component={Autocomplete}
                                     options={dataCluster}
@@ -577,14 +836,11 @@ export default function Invoice(props) {
                                 </Grid>
                                 <Grid item xs={12} sm={6}>
                                   <Field
+                                    key="unitcode-ddr"
                                     name="unitCode"
                                     component={Autocomplete}
-                                    options={dataCluster}
-                                    getOptionLabel={(option) =>
-                                      option.clusterCode +
-                                      " - " +
-                                      option.clusterName
-                                    }
+                                    options={dataUnitCode}
+                                    getOptionLabel={(option) => option.unitCode}
                                     onChange={(e, value) => {
                                       setFieldValue(
                                         "unitCode",
@@ -617,14 +873,11 @@ export default function Invoice(props) {
                                 </Grid>
                                 <Grid item xs={12} sm={6}>
                                   <Field
+                                    key="unitno-ddr"
                                     name="unitNo"
                                     component={Autocomplete}
-                                    options={dataCluster}
-                                    getOptionLabel={(option) =>
-                                      option.clusterCode +
-                                      " - " +
-                                      option.clusterName
-                                    }
+                                    options={dataUnitNo}
+                                    getOptionLabel={(option) => option.unitNo}
                                     onChange={(e, value) => {
                                       setFieldValue(
                                         "unitNo",
@@ -659,14 +912,14 @@ export default function Invoice(props) {
                                     flexDirection={{ xs: "column", sm: "row" }}
                                     justifyContent="flex-end"
                                   >
-                                    <MDButton
+                                    {/* <MDButton
                                       type="reset"
                                       variant="outlined"
                                       color="secondary"
-                                      onClick={resetForm}
+                                      // onClick={resetForm}
                                     >
                                       Clear Filters
-                                    </MDButton>
+                                    </MDButton> */}
                                     <MDBox
                                       ml={{ xs: 0, sm: 1 }}
                                       mt={{ xs: 1, sm: 0 }}
@@ -676,9 +929,11 @@ export default function Invoice(props) {
                                         variant="gradient"
                                         color="primary"
                                         sx={{ height: "100%" }}
-                                        disabled={isSubmitting}
+                                        disabled={
+                                          period == undefined || isLoading
+                                        }
                                       >
-                                        Search
+                                        {isLoading ? "Searching.." : "Search"}
                                       </MDButton>
                                     </MDBox>
                                   </MDBox>
@@ -721,33 +976,38 @@ export default function Invoice(props) {
                       <MDButton
                         variant="outlined"
                         color="primary"
-                        disabled={customerResponse.rowData.length == 0}
-                        onClick={handleExport}
+                        disabled={isCheck.length == 0 || isLoadingSend}
+                        onClick={() => handleCommand(1)}
                       >
-                        <Icon>add</Icon>&nbsp; RE-GENERATE
+                        <Icon>add</Icon>&nbsp;{" "}
+                        {isLoadingSend && command == 1
+                          ? "Regenerating..."
+                          : "RE-GENERATE"}
                       </MDButton>
                       <MDBox ml={{ xs: 0, sm: 1 }} mt={{ xs: 1, sm: 0 }}>
                         <MDButton
                           variant="outlined"
                           color="primary"
-                          onClick={handleOpenUpload}
+                          disabled={isCheck.length == 0 || isLoadingSend}
+                          onClick={() => handleCommand(2)}
                         >
-                          <Icon>email</Icon>&nbsp; SEND EMAIL
+                          <Icon>email</Icon>&nbsp;{" "}
+                          {isLoadingSend && command == 2
+                            ? "Sending Email..."
+                            : "SEND EMAIL"}
                         </MDButton>
-                        <UploadDataWater
-                          site={site}
-                          isOpen={openUpload}
-                          onModalChanged={changeModalUpload}
-                        />
                       </MDBox>
                       <MDBox ml={{ xs: 0, sm: 1 }} mt={{ xs: 1, sm: 0 }}>
                         <MDButton
                           variant="outlined"
                           color="primary"
-                          disabled={customerResponse.rowData.length == 0}
-                          onClick={handleExport}
+                          disabled={isCheck.length == 0 || isLoadingSend}
+                          onClick={() => handleCommand(3)}
                         >
-                          <WhatsAppIcon /> &nbsp; SEND WHATSAPP
+                          <WhatsAppIcon /> &nbsp;{" "}
+                          {isLoadingSend && command == 3
+                            ? "Sending Whatsapp..."
+                            : "SEND WHATSAPP"}
                         </MDButton>
                       </MDBox>
                     </MDBox>
@@ -771,12 +1031,6 @@ export default function Invoice(props) {
             pagination={{ variant: "gradient", color: "primary" }}
           />
         </Card>
-        <EditDataWater
-          site={site}
-          isOpen={openEdit}
-          params={modalParams}
-          onModalChanged={changeModalEdit}
-        />
       </MDBox>
     </DashboardLayout>
   );

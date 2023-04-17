@@ -8,6 +8,7 @@ export default function NumberInput(props) {
     <NumericFormat
       placeholder="Number Format Input looses focus"
       isNumericString={true}
+      valueIsNumericString={true}
       value={value}
       onValueChange={(vals) => setValue(vals.formattedValue)}
       {...props}

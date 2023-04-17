@@ -16,20 +16,38 @@ export default async function handler(
         case "list":
           getList(res, body);
           break;
+        case "dropdownperiod":
+          getDropdownPeriod(res, body);
+          break;
         case "dropdownproject":
           getDropdownProject(res, body);
           break;
-        case "update":
-          update(res, body);
+        case "dropdowncluster":
+          getDropdownCluster(res, body);
           break;
-        case "export":
-          exportExcel(res, body);
+        case "dropdownunitcode":
+          getDropdownUnitCode(res, body);
           break;
-        case "activePeriod":
-          getActivePeriod(res, body);
+        case "dropdownunitno":
+          getDropdownUnitNo(res, body);
           break;
-        case "upload":
-          uploadExcel(res, body);
+        case "findname":
+          findName(res, body);
+          break;
+        case "preview":
+          preview(res, body);
+          break;
+        case "adjustment":
+          adjust(res, body);
+          break;
+        case "regenerate":
+          regenerate(res, body);
+          break;
+        case "sendemail":
+          sendEmail(res, body);
+          break;
+        case "sendwa":
+          sendWa(res, body);
           break;
       }
       break;
@@ -63,10 +81,10 @@ async function getList(res: any, body: any) {
     );
 }
 
-async function getDropdownProject(res: any, body: any) {
+async function getDropdownPeriod(res: any, body: any) {
   const { accessToken, params } = body;
 
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetDropdownProjectBySiteId`;
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/Report/GetDropdownPeriodBySiteId`;
   const config = {
     headers: {
       Authorization: "Bearer " + accessToken,
@@ -90,10 +108,201 @@ async function getDropdownProject(res: any, body: any) {
     );
 }
 
-async function update(res: any, body: any) {
+async function getDropdownProject(res: any, body: any) {
   const { accessToken, params } = body;
 
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/UpdateDetailWaterReading`;
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetDropdownProjectInvoice`;
+  const config = {
+    headers: {
+      Authorization: "Bearer " + accessToken,
+      "Access-Control-Allow-Origin": "*",
+    },
+    params: params,
+  };
+  console.log("config----", config);
+
+  axios
+    .get(url, config)
+    .then((response) =>
+      res.send({
+        result: response.data.result,
+      })
+    )
+    .catch((error) =>
+      res.send({
+        error: error,
+      })
+    );
+}
+
+async function getDropdownCluster(res: any, body: any) {
+  const { accessToken, params } = body;
+
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetDropdownClusterInvoice`;
+  const config = {
+    headers: {
+      Authorization: "Bearer " + accessToken,
+      "Access-Control-Allow-Origin": "*",
+    },
+    params: params,
+  };
+  console.log("config----", config);
+
+  axios
+    .get(url, config)
+    .then((response) =>
+      res.send({
+        result: response.data.result,
+      })
+    )
+    .catch((error) =>
+      res.send({
+        error: error,
+      })
+    );
+}
+
+async function getDropdownUnitCode(res: any, body: any) {
+  const { accessToken, params } = body;
+
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetDropdownUnitCodeByCluster`;
+  const config = {
+    headers: {
+      Authorization: "Bearer " + accessToken,
+      "Access-Control-Allow-Origin": "*",
+    },
+    params: params,
+  };
+  console.log("config----", config);
+
+  axios
+    .get(url, config)
+    .then((response) =>
+      res.send({
+        result: response.data.result,
+      })
+    )
+    .catch((error) =>
+      res.send({
+        error: error,
+      })
+    );
+}
+
+async function getDropdownUnitNo(res: any, body: any) {
+  const { accessToken, params } = body;
+
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetDropdownUnitInvoice`;
+  const config = {
+    headers: {
+      Authorization: "Bearer " + accessToken,
+      "Access-Control-Allow-Origin": "*",
+    },
+    params: params,
+  };
+  console.log("config----", config);
+
+  axios
+    .get(url, config)
+    .then((response) =>
+      res.send({
+        result: response.data.result,
+      })
+    )
+    .catch((error) =>
+      res.send({
+        error: error,
+      })
+    );
+}
+
+async function findName(res: any, body: any) {
+  const { accessToken, params } = body;
+
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetSearchPSCode`;
+  const config = {
+    headers: {
+      Authorization: "Bearer " + accessToken,
+      "Access-Control-Allow-Origin": "*",
+    },
+    params: params,
+  };
+  console.log("config----", config);
+
+  axios
+    .get(url, config)
+    .then((response) =>
+      res.send({
+        result: response.data.result,
+      })
+    )
+    .catch((error) =>
+      res.send({
+        error: error,
+      })
+    );
+}
+
+async function preview(res: any, body: any) {
+  const { accessToken, params } = body;
+
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetPreviewInvoicePdf`;
+  const config = {
+    headers: {
+      Authorization: "Bearer " + accessToken,
+      "Access-Control-Allow-Origin": "*",
+    },
+    params: params,
+  };
+  console.log("config----", config);
+
+  axios
+    .get(url, config)
+    .then((response) => {
+      console.log("response----", response);
+      res.send({
+        result: response.data.result,
+      });
+    })
+    .catch((error) =>
+      res.send({
+        error: error,
+      })
+    );
+}
+
+async function adjust(res: any, body: any) {
+  const { accessToken, params } = body;
+
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/ChangeAdjustmentInvoice`;
+  const config = {
+    headers: {
+      Authorization: "Bearer " + accessToken,
+      "Access-Control-Allow-Origin": "*",
+    },
+    params: params,
+  };
+  console.log("config----", config);
+  console.log("params----", config);
+
+  axios
+    .post(url, params, config)
+    .then((response) =>
+      res.send({
+        result: response.data.result,
+      })
+    )
+    .catch((error) =>
+      res.send({
+        error: error,
+      })
+    );
+}
+
+async function regenerate(res: any, body: any) {
+  const { accessToken, params } = body;
+
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/ReGenerateInvoiceByInvoiceIdList`;
   const config = {
     headers: {
       Authorization: "Bearer " + accessToken,
@@ -105,7 +314,7 @@ async function update(res: any, body: any) {
   console.log("body---", params);
 
   axios
-    .put(url, params, config)
+    .post(url, params, config)
     .then((response) => {
       console.log("response-----", response);
       res.send({
@@ -120,65 +329,40 @@ async function update(res: any, body: any) {
     });
 }
 
-async function exportExcel(res: any, body: any) {
+async function sendEmail(res: any, body: any) {
   const { accessToken, params } = body;
 
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/ExportToExcelWaterReading`;
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/SendEmailInvoiceByInvoiceHeaderId`;
   const config = {
     headers: {
       Authorization: "Bearer " + accessToken,
       "Access-Control-Allow-Origin": "*",
     },
-    params: params,
   };
   console.log("config----", config);
+
+  console.log("body---", params);
 
   axios
     .post(url, params, config)
     .then((response) => {
-      console.log("response----", response);
+      console.log("response-----", response);
       res.send({
         result: response.data.result,
       });
     })
-    .catch((error) =>
+    .catch((error) => {
+      console.log("err-----", error.response);
       res.send({
         error: error,
-      })
-    );
+      });
+    });
 }
 
-async function getActivePeriod(res: any, body: any) {
+async function sendWa(res: any, body: any) {
   const { accessToken, params } = body;
 
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetActivePeriod`;
-  const config = {
-    headers: {
-      Authorization: "Bearer " + accessToken,
-      "Access-Control-Allow-Origin": "*",
-    },
-    params: params,
-  };
-  console.log("config----", config);
-
-  axios
-    .get(url, config)
-    .then((response) =>
-      res.send({
-        result: response.data.result,
-      })
-    )
-    .catch((error) =>
-      res.send({
-        error: error,
-      })
-    );
-}
-
-async function uploadExcel(res: any, body: any) {
-  const { accessToken, params } = body;
-
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/UploadExcelWaterReading`;
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/SendWAInvoice`;
   const config = {
     headers: {
       Authorization: "Bearer " + accessToken,
