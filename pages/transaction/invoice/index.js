@@ -679,9 +679,9 @@ export default function Invoice(props) {
                                     getOptionLabel={(option) =>
                                       option.periodName
                                     }
-                                    // isOptionEqualToValue={(option, value) =>
-                                    //   option.value === value.value
-                                    // }
+                                    isOptionEqualToValue={(option, value) =>
+                                      option.periodId === value.periodId
+                                    }
                                     onChange={(e, value) => {
                                       setFieldValue(
                                         "period",
@@ -772,7 +772,7 @@ export default function Invoice(props) {
                                       );
                                     }}
                                     isOptionEqualToValue={(option, value) =>
-                                      option.value === value.value
+                                      option.projectId === value.projectId
                                     }
                                     renderInput={(params) => (
                                       <FormField
@@ -813,7 +813,7 @@ export default function Invoice(props) {
                                       );
                                     }}
                                     isOptionEqualToValue={(option, value) =>
-                                      option.value === value.value
+                                      option.clusterId === value.clusterId
                                     }
                                     renderInput={(params) => (
                                       <FormField
@@ -850,7 +850,7 @@ export default function Invoice(props) {
                                       );
                                     }}
                                     isOptionEqualToValue={(option, value) =>
-                                      option.value === value.value
+                                      option.unitCodeId === value.unitCodeId
                                     }
                                     renderInput={(params) => (
                                       <FormField
@@ -887,7 +887,7 @@ export default function Invoice(props) {
                                       );
                                     }}
                                     isOptionEqualToValue={(option, value) =>
-                                      option.value === value.value
+                                      option.unitId === value.unitId
                                     }
                                     renderInput={(params) => (
                                       <FormField

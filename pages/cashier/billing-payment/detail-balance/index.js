@@ -15,7 +15,6 @@ import CloseIcon from "@mui/icons-material/Close";
 
 export default function DetailBalance(props) {
   const { isOpen, params, close } = props;
-  console.log("props-detail----", props);
   const [modal, setModal] = useState(isOpen);
   const [listDetail, setListDetail] = useState([]);
   const [{ accessToken, encryptedAccessToken }] = useCookies();

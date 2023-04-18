@@ -13,7 +13,7 @@ export default async function handler(
   switch (method) {
     case "POST":
       switch (query.method) {
-        case "reportdaily":
+        case "repordaily":
           getReport(res, body);
           break;
       }
@@ -24,7 +24,7 @@ export default async function handler(
 async function getReport(res: any, body: any) {
   const { accessToken, params } = body;
 
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/Report/ReportDaily`;
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/Report/ReporDaily`;
   const config = {
     headers: {
       Authorization: "Bearer " + accessToken,

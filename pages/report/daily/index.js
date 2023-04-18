@@ -12,10 +12,10 @@ import FormField from "/pagesComponents/FormField";
 import * as Yup from "yup";
 import { typeNormalization } from "/helpers/utils";
 import { alertService } from "/helpers";
-import Icon from "@mui/material/Icon";
 import { useCookies } from "react-cookie";
 import SiteDropdown from "/pagesComponents/dropdown/Site";
 import BorderAllIcon from "@mui/icons-material/BorderAll";
+import * as dayjs from "dayjs";
 
 export default function ReportDaily(props) {
   let typeDummy = [
@@ -34,8 +34,26 @@ export default function ReportDaily(props) {
   const [dataPaymentMethod, setDataPaymentMethod] = useState([]);
 
   useEffect(() => {
+    getProject();
     getPeriod();
   }, [site]);
+
+  const getPaymentMethod = async () => {
+    let response = await fetch("/api/cashier/billing/dropdownpayment", {
+      method: "POST",
+      body: JSON.stringify({
+        accessToken: accessToken,
+      }),
+    });
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
+
+    if (response.error) {
+      alertService.error({ title: "Error", text: response.error.message });
+    } else {
+      setDataPaymentMethod(response.result);
+    }
+  };
 
   const getPeriod = async (val) => {
     let response = await fetch("/api/transaction/invoice/dropdownperiod", {
@@ -58,6 +76,10 @@ export default function ReportDaily(props) {
     console.log("period------", dataPeriod);
   };
 
+  const addDate = (val) => {
+    return dayjs(val).add(1, "day");
+  };
+
   useEffect(() => {
     let currentSite = JSON.parse(localStorage.getItem("site"));
     if (currentSite == null) {
@@ -65,6 +87,7 @@ export default function ReportDaily(props) {
     } else {
       setSite(currentSite);
     }
+    getPaymentMethod();
   }, []);
 
   //dari sini
@@ -77,6 +100,8 @@ export default function ReportDaily(props) {
       .required("Period is required.")
       .typeError("Period is required."),
     project: Yup.object().required("Project is required"),
+    startDate: Yup.date().nullable(),
+    endDate: Yup.date().nullable(),
   });
 
   const initialValues = {
@@ -85,8 +110,8 @@ export default function ReportDaily(props) {
     paymentMethod: null,
     period: null,
     cancelPayment: null,
-    startDate: null,
-    endDate: null,
+    startDate: "",
+    endDate: "",
   };
 
   const [formValues, setformValues] = useState(initialValues);
@@ -115,10 +140,13 @@ export default function ReportDaily(props) {
       projectId: fields.project?.projectId,
       clusterId: listCluster.length == 0 ? undefined : listCluster,
       periodId: fields.period.periodId,
-      reportType: fields.type.id,
+      paymentTypeId: fields.paymentMethod?.paymentType,
+      cancelPayment: fields.cancelPayment?.id,
+      startDate: fields.startDate != "" ? addDate(fields.startDate) : undefined,
+      endDate: fields.startDate != "" ? addDate(fields.endDate) : undefined,
     };
 
-    let response = await fetch("/api/report/daily/reportdaily", {
+    let response = await fetch("/api/report/daily/repordaily", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
@@ -140,13 +168,13 @@ export default function ReportDaily(props) {
   };
 
   const getCluster = async (val) => {
-    let response = await fetch("/api/transaction/invoice/dropdowncluster", {
+    let response = await fetch("/api/master/site/dropdowncluster", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
         params: {
           SiteId: site?.siteId,
-          periodId: val?.periodId,
+          ProjectId: val?.projectId,
         },
       }),
     });
@@ -162,13 +190,12 @@ export default function ReportDaily(props) {
   };
 
   const getProject = async (val) => {
-    let response = await fetch("/api/transaction/invoice/dropdownproject", {
+    let response = await fetch("/api/transaction/water/dropdownproject", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
         params: {
           SiteId: site?.siteId,
-          periodId: val?.periodId,
         },
       }),
     });
@@ -237,7 +264,8 @@ export default function ReportDaily(props) {
                       setformValues(values);
                       const isValifForm = () =>
                         checkingSuccessInput(values.period, errors.period) &&
-                        checkingSuccessInput(values.type, errors.type);
+                        checkingSuccessInput(values.project, errors.project) &&
+                        checkingSuccessInput(values.cluster, errors.cluster);
                       return (
                         <Form id="payment-detail" autoComplete="off" fullWidth>
                           <MDBox pb={3}>
@@ -258,9 +286,10 @@ export default function ReportDaily(props) {
                                         ? value
                                         : initialValues["project"]
                                     );
+                                    getCluster(value);
                                   }}
                                   isOptionEqualToValue={(option, value) =>
-                                    option.value === value.value
+                                    option.projectId === value.projectId
                                   }
                                   renderInput={(params) => (
                                     <FormField
@@ -282,10 +311,11 @@ export default function ReportDaily(props) {
                               <Grid item xs={6}>
                                 <Field
                                   key="cluster-ddr"
-                                  name="cluster *"
+                                  name="cluster"
                                   component={Autocomplete}
                                   options={dataCluster}
                                   multiple
+                                  disableCloseOnSelect
                                   getOptionLabel={(option) =>
                                     option.clusterCode +
                                     " - " +
@@ -300,13 +330,13 @@ export default function ReportDaily(props) {
                                     );
                                   }}
                                   isOptionEqualToValue={(option, value) =>
-                                    option.value === value.value
+                                    option.clusterId === value.clusterId
                                   }
                                   renderInput={(params) => (
                                     <FormField
                                       {...params}
                                       type="text"
-                                      label="Cluster"
+                                      label="Cluster *"
                                       name="cluster"
                                       placeholder="Choose Cluster"
                                       InputLabelProps={{ shrink: true }}
@@ -326,9 +356,9 @@ export default function ReportDaily(props) {
                                   component={Autocomplete}
                                   options={dataPeriod}
                                   getOptionLabel={(option) => option.periodName}
-                                  // isOptionEqualToValue={(option, value) =>
-                                  //   option.value === value.value
-                                  // }
+                                  isOptionEqualToValue={(option, value) =>
+                                    option.periodId === value.periodId
+                                  }
                                   onChange={(e, value) => {
                                     setFieldValue(
                                       "period",
@@ -336,8 +366,6 @@ export default function ReportDaily(props) {
                                         ? value
                                         : initialValues["period"]
                                     );
-                                    getProject(value);
-                                    getCluster(value);
                                   }}
                                   renderInput={(params) => (
                                     <FormField
@@ -357,39 +385,40 @@ export default function ReportDaily(props) {
                                 />
                               </Grid>
                               <Grid item xs={6}>
-                                <Field
-                                  key="type-ddr"
-                                  name="type"
-                                  component={Autocomplete}
-                                  options={dataCancel}
-                                  getOptionLabel={(option) => option.name}
-                                  // isOptionEqualToValue={(option, value) =>
-                                  //   option.value === value.value
-                                  // }
-                                  onChange={(e, value) => {
-                                    setFieldValue(
-                                      "type",
-                                      value !== null
-                                        ? value
-                                        : initialValues["type"]
-                                    );
-                                  }}
-                                  renderInput={(params) => (
+                                <Grid container spacing={3}>
+                                  <Grid item xs={6}>
                                     <FormField
-                                      {...params}
-                                      type="text"
-                                      label="Report Type *"
-                                      name="type"
-                                      placeholder="Choose Type"
+                                      key="startDate"
                                       InputLabelProps={{ shrink: true }}
-                                      error={errors.type && touched.type}
+                                      type="date"
+                                      label="Transaction Start Date"
+                                      name="startDate"
+                                      placeholder="Type Transaction Start Date"
+                                      error={
+                                        errors.startDate && touched.startDate
+                                      }
                                       success={checkingSuccessInput(
-                                        formValues.type,
-                                        errors.type
+                                        formValues.startDate,
+                                        errors.startDate
                                       )}
                                     />
-                                  )}
-                                />
+                                  </Grid>
+                                  <Grid item xs={6}>
+                                    <FormField
+                                      key="endDate"
+                                      InputLabelProps={{ shrink: true }}
+                                      type="date"
+                                      label="Transaction End Date"
+                                      name="endDate"
+                                      placeholder="Type Transaction End Date"
+                                      error={errors.endDate && touched.endDate}
+                                      success={checkingSuccessInput(
+                                        formValues.endDate,
+                                        errors.endDate
+                                      )}
+                                    />
+                                  </Grid>
+                                </Grid>
                               </Grid>
                               <Grid item xs={6}>
                                 <Field
@@ -399,6 +428,9 @@ export default function ReportDaily(props) {
                                   getOptionLabel={(option) =>
                                     option.paymentName
                                   }
+                                  isOptionEqualToValue={(option, value) =>
+                                    option.paymentType === value.paymentType
+                                  }
                                   onChange={(e, value) => {
                                     setFieldValue(
                                       "paymentMethod",
@@ -406,16 +438,12 @@ export default function ReportDaily(props) {
                                         ? value
                                         : initialValues["paymentMethod"]
                                     );
-                                    setIsCard(value);
                                   }}
-                                  isOptionEqualToValue={(option, value) =>
-                                    option.value === value.value
-                                  }
                                   renderInput={(params) => (
                                     <FormField
                                       {...params}
                                       type="text"
-                                      label="Payment Method *"
+                                      label="Payment Method"
                                       name="paymentMethod"
                                       placeholder="Choose Payment Method"
                                       InputLabelProps={{ shrink: true }}
@@ -426,6 +454,44 @@ export default function ReportDaily(props) {
                                       success={checkingSuccessInput(
                                         formValues.paymentMethod,
                                         errors.paymentMethod
+                                      )}
+                                    />
+                                  )}
+                                />
+                              </Grid>
+                              <Grid item xs={6}>
+                                <Field
+                                  key="cancelpayment-ddr"
+                                  name="cancelPayment"
+                                  component={Autocomplete}
+                                  options={dataCancel}
+                                  getOptionLabel={(option) => option.name}
+                                  isOptionEqualToValue={(option, value) =>
+                                    option.id === value.id
+                                  }
+                                  onChange={(e, value) => {
+                                    setFieldValue(
+                                      "cancelPayment",
+                                      value !== null
+                                        ? value
+                                        : initialValues["cancelPayment"]
+                                    );
+                                  }}
+                                  renderInput={(params) => (
+                                    <FormField
+                                      {...params}
+                                      type="text"
+                                      label="Cancel Payment"
+                                      name="cancelPayment"
+                                      placeholder="Choose Cancel Payment"
+                                      InputLabelProps={{ shrink: true }}
+                                      error={
+                                        errors.cancelPayment &&
+                                        touched.cancelPayment
+                                      }
+                                      success={checkingSuccessInput(
+                                        formValues.cancelPayment,
+                                        errors.cancelPayment
                                       )}
                                     />
                                   )}

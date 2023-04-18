@@ -28,7 +28,7 @@ export default async function handler(
         case "dropdownbank":
           getDropdownBank(res, body);
           break;
-        case "create":
+        case "paymentproses":
           create(res, body);
           break;
         case "balance":

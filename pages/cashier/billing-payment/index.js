@@ -24,6 +24,7 @@ import NumberInput from "/pagesComponents/dropdown/NumberInput";
 import TotalDisable from "/pagesComponents/dropdown/TotalDisable";
 import { NumericFormat } from "react-number-format";
 import DetailBalance from "./detail-balance";
+import Swal from "sweetalert2";
 
 export default function BillingPayment(props) {
   const [listBilling, setListBilling] = useState([]);
@@ -55,12 +56,12 @@ export default function BillingPayment(props) {
   const [customerRequest, setCustomerRequest] = useState({
     scheme: site?.siteId,
     keywords: "",
-    recordsPerPage: 2,
+    recordsPerPage: 10,
     skipCount: 0,
   });
 
   useEffect(() => {
-    fetchData();
+    customerRequest.keywords != "" && fetchData();
   }, [customerRequest.skipCount, customerRequest.recordsPerPage]);
 
   const skipCountChangeHandler = (e) => {
@@ -103,7 +104,7 @@ export default function BillingPayment(props) {
       bank: Yup.object()
         .required("Bank is required.")
         .typeError("Bank is required."),
-      remarks: Yup.string().required("Remarks is required."),
+      remarks: Yup.string(),
       charge: Yup.string(),
     });
   const [schema, setSchema] = useState(() => FormSchema(hasNote));
@@ -164,7 +165,7 @@ export default function BillingPayment(props) {
     bank: Yup.object()
       .required("Bank is required.")
       .typeError("Bank is required."),
-    remarks: Yup.string().required("Remarks is required."),
+    remarks: Yup.string(),
     charge: Yup.string(),
   });
 
@@ -174,20 +175,19 @@ export default function BillingPayment(props) {
   const initialValues = {
     cluster: detail?.clusterName,
     paymentMethod: "",
-    cardNumber: "",
+    cardNumber: undefined,
     amountPayment: null,
-    transactionDate: null,
+    transactionDate: dayjs().format("YYYY-MM-DD"),
     bank: null,
-    remarks: "",
-    charge: "",
+    remarks: undefined,
+    charge: undefined,
     isPrintOR: true,
     isAddSignee: true,
   };
 
   const [formValues, setformValues] = useState(initialValues);
 
-  const getFormData = (values) => {
-  };
+  const getFormData = (values) => {};
 
   const submitForm = async (values, actions) => {
     if (values.amountPayment != totalFooter.payment) {
@@ -201,17 +201,19 @@ export default function BillingPayment(props) {
   };
 
   const checkingSuccessInput = (value, error) => {
-    return value != undefined && value != "" && value.length > 0 && !error;
+    return value != undefined && value != "" && !error;
   };
 
   const paymentProcess = async (fields, actions) => {
     setLoading(true);
-
+    console.log("save----", detail);
+    console.log("save----", fields);
     const body = {
+      siteId: site?.siteId,
+      projectId: detail.projectId,
       paymentType: fields.paymentMethod.paymentType,
       cardNumber: fields.cardNumber,
       totalPayment: fields.amountPayment,
-      total: 0,
       charge: fields.charge,
       unitDataId: detail.unitDataId,
       unitCode: detail.unitCode,
@@ -222,7 +224,7 @@ export default function BillingPayment(props) {
       listInvoicePayment: listInvoice,
     };
 
-    let response = await fetch("/api/cashier/billing/create", {
+    let response = await fetch("/api/cashier/billing/paymentproses", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
@@ -234,19 +236,39 @@ export default function BillingPayment(props) {
     if (response.error) {
       alertService.error({ title: "Error", text: response.error.message });
     } else {
-      alertService.success({
+      Swal.fire({
+        icon: "success",
         title: "Input Payment Successfull",
         text: "Official receipt document will be displayed and will be sent to the customer via email",
+      }).then(() => {
+        let data = response.result;
+        if (data != null) window.open(data, "_blank");
       });
+      setFilterText("");
+      setCustomerRequest((prevState) => ({
+        ...prevState,
+        keywords: "",
+      }));
+      setCustomerResponse((prevState) => ({
+        ...prevState,
+        rowData: [],
+        totalRows: undefined,
+        totalPages: undefined,
+      }));
+      setSelectedPSCode(undefined);
 
-      setListInvoice([]);
-      setIsDetail(false);
-      setformValues({});
-      setTotalFooter({});
-      setTotalAc(0);
+      cancel();
     }
     actions.setSubmitting(false);
     setLoading(false);
+  };
+
+  const cancel = () => {
+    setListInvoice([]);
+    setIsDetail(false);
+    setformValues(initialValues);
+    setTotalFooter({});
+    setTotalAc(0);
   };
 
   const handleCheck = (val) => {
@@ -566,10 +588,14 @@ export default function BillingPayment(props) {
                 <MDBox mb={2}>
                   <MDInput
                     variant="standard"
+                    value={filterText}
                     label="Customer Name / ID Client *"
                     onChange={(e) => {
                       setFilterText(e.target.value);
-                      //   fetchData(filterText);
+                      setCustomerRequest((prevState) => ({
+                        ...prevState,
+                        keywords: e.target.value,
+                      }));
                     }}
                     fullWidth
                   />
@@ -581,6 +607,7 @@ export default function BillingPayment(props) {
                     <MDButton
                       variant="gradient"
                       color="primary"
+                      disabled={filterText == ""}
                       onClick={() => {
                         fetchData();
                       }}
@@ -592,34 +619,42 @@ export default function BillingPayment(props) {
               </Grid>
             </Grid>
           </MDBox>
-          <MDBox pl={3}>
-            <MDTypography variant="h5">Search Result</MDTypography>
-          </MDBox>
-          <DataTable
-            table={setBillingList(customerResponse.rowData)}
-            manualPagination={true}
-            totalRows={customerResponse.totalRows}
-            totalPages={customerResponse.totalPages}
-            recordsPerPage={customerRequest.recordsPerPage}
-            skipCount={customerRequest.skipCount}
-            pageChangeHandler={skipCountChangeHandler}
-            recordsPerPageChangeHandler={recordsPerPageChangeHandler}
-            keywordsChangeHandler={keywordsChangeHandler}
-            entriesPerPage={{ defaultValue: customerRequest.recordsPerPage }}
-            pagination={{ variant: "gradient", color: "primary" }}
-          />
-          <MDBox p={3} alignItems="center" textAlign="center">
-            <MDButton
-              disabled={selectedPSCode == undefined || selectedPSCode == null}
-              variant="gradient"
-              color="primary"
-              onClick={() => {
-                getDetail();
-              }}
-            >
-              <Icon>search</Icon>&nbsp; Show This Unit
-            </MDButton>
-          </MDBox>
+          {customerResponse.rowData.length > 0 && (
+            <MDBox>
+              <MDBox pl={3}>
+                <MDTypography variant="h5">Search Result</MDTypography>
+              </MDBox>
+              <DataTable
+                table={setBillingList(customerResponse.rowData)}
+                manualPagination={true}
+                totalRows={customerResponse.totalRows}
+                totalPages={customerResponse.totalPages}
+                recordsPerPage={customerRequest.recordsPerPage}
+                skipCount={customerRequest.skipCount}
+                pageChangeHandler={skipCountChangeHandler}
+                recordsPerPageChangeHandler={recordsPerPageChangeHandler}
+                keywordsChangeHandler={keywordsChangeHandler}
+                entriesPerPage={{
+                  defaultValue: customerRequest.recordsPerPage,
+                }}
+                pagination={{ variant: "gradient", color: "primary" }}
+              />
+              <MDBox p={3} alignItems="center" textAlign="center">
+                <MDButton
+                  disabled={
+                    selectedPSCode == undefined || selectedPSCode == null
+                  }
+                  variant="gradient"
+                  color="primary"
+                  onClick={() => {
+                    getDetail();
+                  }}
+                >
+                  <Icon>search</Icon>&nbsp; Show This Unit
+                </MDButton>
+              </MDBox>
+            </MDBox>
+          )}
         </Card>
       </MDBox>
       {isDetail && (
@@ -694,6 +729,16 @@ export default function BillingPayment(props) {
                             values,
                           }) => {
                             setformValues(values);
+                            const isValifForm = () =>
+                              checkingSuccessInput(
+                                values.paymentMethod,
+                                errors.paymentMethod
+                              ) &&
+                              checkingSuccessInput(
+                                values.amountPayment,
+                                errors.amountPayment
+                              ) &&
+                              checkingSuccessInput(values.bank, errors.bank);
                             return (
                               <Form
                                 id="payment-detail"
@@ -753,7 +798,8 @@ export default function BillingPayment(props) {
                                           setIsCard(value);
                                         }}
                                         isOptionEqualToValue={(option, value) =>
-                                          option.value === value.value
+                                          option.paymentType ===
+                                          value.paymentType
                                         }
                                         renderInput={(params) => (
                                           <FormField
@@ -792,7 +838,7 @@ export default function BillingPayment(props) {
                                           );
                                         }}
                                         isOptionEqualToValue={(option, value) =>
-                                          option.value === value.value
+                                          option.bankID === value.bankID
                                         }
                                         renderInput={(params) => (
                                           <FormField
@@ -830,7 +876,7 @@ export default function BillingPayment(props) {
                                     <Grid item xs={6}>
                                       <FormField
                                         type="text"
-                                        label="Remarks ⁽*⁾"
+                                        label="Remarks"
                                         name="remarks"
                                         placeholder="Type Remarks"
                                         error={
@@ -994,6 +1040,7 @@ export default function BillingPayment(props) {
                                       type="reset"
                                       variant="outlined"
                                       color="secondary"
+                                      onClick={() => cancel()}
                                     >
                                       Cancel
                                     </MDButton>
@@ -1006,15 +1053,9 @@ export default function BillingPayment(props) {
                                         variant="gradient"
                                         color="primary"
                                         sx={{ height: "100%" }}
-                                        disabled={isLoading}
+                                        disabled={!isValifForm() || isLoading}
                                       >
-                                        {isLoading
-                                          ? params == undefined
-                                            ? "Adding Period.."
-                                            : "Updating Period.."
-                                          : params == undefined
-                                          ? "Save"
-                                          : "Update"}
+                                        {isLoading ? "Saving..." : "Save"}
                                       </MDButton>
                                     </MDBox>
                                   </MDBox>

@@ -41,6 +41,7 @@ export default function SiteDropdown(props) {
       onChange={(e, value) => {
         handleSiteChange(value);
       }}
+      isOptionEqualToValue={(option, value) => option.siteId === value.siteId}
       noOptionsText="No results"
       setCustomKey={(option) => option.siteId}
       renderInput={(params) => (

@@ -246,9 +246,9 @@ export default function ReportInvoice(props) {
                                   component={Autocomplete}
                                   options={dataPeriod}
                                   getOptionLabel={(option) => option.periodName}
-                                  // isOptionEqualToValue={(option, value) =>
-                                  //   option.value === value.value
-                                  // }
+                                  isOptionEqualToValue={(option, value) =>
+                                    option.periodId === value.periodId
+                                  }
                                   onChange={(e, value) => {
                                     setFieldValue(
                                       "period",
@@ -283,9 +283,9 @@ export default function ReportInvoice(props) {
                                   component={Autocomplete}
                                   options={dataType}
                                   getOptionLabel={(option) => option.name}
-                                  // isOptionEqualToValue={(option, value) =>
-                                  //   option.value === value.value
-                                  // }
+                                  isOptionEqualToValue={(option, value) =>
+                                    option.id === value.id
+                                  }
                                   onChange={(e, value) => {
                                     setFieldValue(
                                       "type",
@@ -329,7 +329,7 @@ export default function ReportInvoice(props) {
                                     );
                                   }}
                                   isOptionEqualToValue={(option, value) =>
-                                    option.value === value.value
+                                    option.projectId === value.projectId
                                   }
                                   renderInput={(params) => (
                                     <FormField
@@ -369,7 +369,7 @@ export default function ReportInvoice(props) {
                                     );
                                   }}
                                   isOptionEqualToValue={(option, value) =>
-                                    option.value === value.value
+                                    option.clusterId === value.clusterId
                                   }
                                   renderInput={(params) => (
                                     <FormField
