@@ -22,6 +22,8 @@ import Radio from '@mui/material/Radio';
 import FormControlLabel from '@mui/material/FormControlLabel';
 
 import MDButton from "/components/MDButton";
+import { async } from "regenerator-runtime";
+
 
 function OracleToJournal({params}) {
     const [{ accessToken, encryptedAccessToken }] = useCookies();
@@ -181,6 +183,44 @@ function OracleToJournal({params}) {
     const [formValues, setformValues] = useState(schemeInitialValues);
     const [isLoadingUploadToOracle, setLoadingUploadToOracle] = useState(false);
 
+    const [isloadingGeneratePaymentJournal, setLoadingPaymentJournal] = useState(false);
+    
+    const generatePaymentJournal = async(values, actions) => 
+    {
+        setLoadingPaymentJournal(true);
+
+        let response = await fetch("/api/transaction/oracletojournal/generatepaymentjournal", {
+            method: "POST",
+            body: JSON.stringify({
+                accessToken: accessToken,
+                params: {
+                    period: periodMethod,
+                    paymentType: paymentMethod,
+                    accountingDate: accountingDate,
+                    bankPayment: bankPayment,
+                    paymentStartDate: paymentStartDate,
+                    paymentEndDate: paymentEndDate
+                }
+            }),
+        });
+        if(!response.ok) throw new Error(`Error: ${response.status}`);
+        response = typeNormalization(await response.json());
+
+        if(response.error) alertService.error({ title: "Error", text: response.error.message});
+        else{
+            if(response.success){
+                Swal.fire({
+                    title: 'Payment Journal Generated',
+                    html: `Payment Journal Successfully Generated`,
+                    icon: "success",
+                    timerProgressBar: true,
+                    timer:  3000,
+                });
+            } 
+        } 
+        setLoadingPaymentJournal(false);
+    };
+
     return (
         <DashboardLayout>
             <DashboardNavbar/>
@@ -238,7 +278,11 @@ function OracleToJournal({params}) {
                                                 fileUpload: fileUploadV
                                                 } = values;
                                                 const isValifForm = () => (
-                                                checkingSuccessInput(paymentMethod.isRequired, paymentMethodV, errors.paymentMethod)
+                                                checkingSuccessInput(periodMethod.isRequired, values.periodMethod, errors.periodMethod) &&
+                                                checkingSuccessInput(paymentMethod.isRequired, paymentMethodV, errors.paymentMethod) &&
+                                                checkingSuccessInput(formValues.accountingDate, values.accountingDate, errors.accountingDate) &&
+                                                checkingSuccessInput(formValues.paymentStartDate, values.paymentStartDate, errors.paymentStartDate ) &&
+                                                checkingSuccessInput(formValues.paymentEndDate, values.paymentEndDate, errors.paymentStartDate)
                                                 );
 
                                                 return (
