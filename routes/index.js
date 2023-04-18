@@ -170,7 +170,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           key: "customer-complaint",
           route: "/app/nsfp/list",
           permission: "Pages.Tenants.GenerateNoSeriFP.List",
-        }
+        },
       ],
     },
 
@@ -199,7 +199,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           name: "Cancel Payment",
           nameOnHeader: "Cancel Payment",
           key: "cancel-payment",
-          route: "/cashier/cancel-payment"
+          route: "/cashier/cancel-payment",
         },
         {
           name: "Upload Bulk Payment",
@@ -223,7 +223,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           name: "Daily Report",
           nameOnHeader: "Daily Report",
           key: "daily-report",
-          route: "/app/nsfp/generate",
+          route: "/report/daily",
           permission: "Pages.Tenants.GenerateNoSeriFP.Create",
         },
         {
@@ -237,7 +237,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           name: "Report Invoice",
           nameOnHeader: "Report Invoice",
           key: "report-invoice",
-          route: "/app/nsfp/list",
+          route: "/report/invoice",
           permission: "Pages.Tenants.GenerateNoSeriFP.List",
         },
         {
