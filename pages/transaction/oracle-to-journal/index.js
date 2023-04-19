@@ -130,7 +130,11 @@ function OracleToJournal({params}) {
                 text: "Please choose Site first",
                 icon: "info",
             });
-            } else setSite(currentSite);
+            } 
+        else {
+            setSite(currentSite);
+            setformValues({});
+        }
             // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -176,8 +180,9 @@ function OracleToJournal({params}) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [site]);
 
-    const checkingSuccessInput = (isRequired, value, error) => {
-        return (!isRequired && true) || (isRequired && value != undefined && value != "" && !error);
+    const checkingSuccessInput = (value, error) => {
+        return value != undefined && value != "" && value.length > 0 && !error;
+        //return (!isRequired && true) || (isRequired && value != undefined && value != "" && !error);
     };
 
     const [formValues, setformValues] = useState(schemeInitialValues);
@@ -219,6 +224,9 @@ function OracleToJournal({params}) {
             } 
         } 
         setLoadingPaymentJournal(false);
+    };
+
+    const getFormData = (values) => {
     };
 
     return (
@@ -273,17 +281,16 @@ function OracleToJournal({params}) {
                                                 touched,
                                                 setFieldValue
                                             }) => {
-                                                let { 
-                                                paymentMethod: paymentMethodV,
-                                                fileUpload: fileUploadV
-                                                } = values;
-                                                const isValifForm = () => (
-                                                checkingSuccessInput(periodMethod.isRequired, values.periodMethod, errors.periodMethod) &&
-                                                checkingSuccessInput(paymentMethod.isRequired, paymentMethodV, errors.paymentMethod) &&
-                                                checkingSuccessInput(formValues.accountingDate, values.accountingDate, errors.accountingDate) &&
-                                                checkingSuccessInput(formValues.paymentStartDate, values.paymentStartDate, errors.paymentStartDate ) &&
-                                                checkingSuccessInput(formValues.paymentEndDate, values.paymentEndDate, errors.paymentStartDate)
-                                                );
+                                                setformValues(values);
+                                                getFormData(values);
+
+                                                const isValifForm = () => {
+                                                // checkingSuccessInput(periodMethod.isRequired, values.periodMethod, errors.periodMethod) &&
+                                                // checkingSuccessInput(paymentMethod.isRequired, paymentMethodV, errors.paymentMethod) &&
+                                                // checkingSuccessInput(formValues.accountingDate, values.accountingDate, errors.accountingDate) &&
+                                                // checkingSuccessInput(formValues.paymentStartDate, values.paymentStartDate, errors.paymentStartDate ) &&
+                                                // checkingSuccessInput(formValues.paymentEndDate, values.paymentEndDate, errors.paymentStartDate)
+                                                };
 
                                                 return (
                                                 <Form id={schemaModels.formId} autoComplete="off">
