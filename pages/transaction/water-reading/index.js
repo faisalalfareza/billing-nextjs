@@ -159,7 +159,7 @@ export default function WaterReading(props) {
   });
 
   const checkingSuccessInput = (value, error) => {
-    return value != undefined && value != "" && value.length > 0 && !error;
+    return value != undefined && value != "" && !error;
   };
 
   const columns = [
@@ -189,6 +189,7 @@ export default function WaterReading(props) {
   const [tasklist, setTasklist] = useState({ columns: columns, rows: [] });
 
   const fetchData = async (data) => {
+    setLoading(true);
     const { scheme, keywords, recordsPerPage, skipCount } = customerRequest;
     let response = await fetch("/api/transaction/water/list", {
       method: "POST",
@@ -230,11 +231,7 @@ export default function WaterReading(props) {
         totalPages: Math.ceil(data.totalCount / customerRequest.recordsPerPage),
       }));
 
-      // setlistRow(list);
-      // return setTasklist({
-      //   columns: columns,
-      //   rows: list,
-      // });
+      setLoading(false);
     }
   };
 
@@ -271,13 +268,12 @@ export default function WaterReading(props) {
   };
 
   const onProjectChange = async (val) => {
-    setLoading(true);
     let response = await fetch("/api/master/site/dropdowncluster", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
         params: {
-          ProjectId: val.projectId,
+          ProjectId: val?.projectId,
         },
       }),
     });
@@ -289,7 +285,6 @@ export default function WaterReading(props) {
     } else {
       setDataCluster(response.result);
     }
-    setLoading(false);
   };
 
   const openModalEdit = (record) => {
@@ -361,6 +356,12 @@ export default function WaterReading(props) {
                       }) => {
                         setformValues(values);
                         getFormData(values);
+                        const isValifForm = () =>
+                          checkingSuccessInput(
+                            values.project,
+                            errors.project
+                          ) &&
+                          checkingSuccessInput(values.cluster, errors.cluster);
                         return (
                           <Form id={form.formId} autoComplete="off">
                             <MDBox>
@@ -372,11 +373,9 @@ export default function WaterReading(props) {
                                     options={dataProject}
                                     key={project.name}
                                     value={values.project}
-                                    // getOptionSelected={(option, value) => {
-                                    //   return (
-                                    //     option.projectName === value.projectName
-                                    //   );
-                                    // }}
+                                    isOptionEqualToValue={(option, value) =>
+                                      option.projectId === value.projectId
+                                    }
                                     getOptionLabel={(option) =>
                                       values.project != {}
                                         ? option.projectCode +
@@ -419,6 +418,9 @@ export default function WaterReading(props) {
                                 <Grid item xs={12} sm={6}>
                                   <Autocomplete
                                     // disableCloseOnSelect
+                                    isOptionEqualToValue={(option, value) =>
+                                      option.clusterId === value.clusterId
+                                    }
                                     key={cluster.name}
                                     options={dataCluster}
                                     value={values.cluster}
@@ -481,9 +483,9 @@ export default function WaterReading(props) {
                                         variant="gradient"
                                         color="primary"
                                         sx={{ height: "100%" }}
-                                        disabled={isSubmitting}
+                                        disabled={!isValifForm() || isLoading}
                                       >
-                                        Search
+                                        {isLoading ? "Searching..." : "Search"}
                                       </MDButton>
                                     </MDBox>
                                   </MDBox>

@@ -312,6 +312,9 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
                           disableCloseOnSelect
                           key="project-ddr"
                           component={Autocomplete}
+                          isOptionEqualToValue={(option, value) =>
+                            option.projectId === value.projectId
+                          }
                           options={dataProject}
                           getOptionLabel={(option) => option.projectName}
                           onChange={(e, value) => {
@@ -347,6 +350,9 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
                           options={dataCluster}
                           getOptionLabel={(option) =>
                             option.clusterCode + " - " + option.clusterName
+                          }
+                          isOptionEqualToValue={(option, value) =>
+                            option.clusterId === value.clusterId
                           }
                           key="cluster-ddr"
                           onChange={(e, value) => {
