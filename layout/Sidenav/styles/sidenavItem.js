@@ -98,7 +98,7 @@ function itemContent(theme, ownerState) {
           ? dark.main
           : white.main,
       // fontWeight: active ? fontWeightRegular : fontWeightLight,
-      fontWeight: active ? fontWeightBold : fontWeightRegular,
+      fontWeight: active ? fontWeightBold : fontWeightLight,
       fontSize: size.sm,
       opacity: miniSidenav ? 0 : 1,
       transition: transitions.create(["opacity", "color"], {
