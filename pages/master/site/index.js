@@ -30,7 +30,6 @@ export default function MasterSite(props) {
   const [modalParams, setModalParams] = useState(undefined);
   const [{ accessToken, encryptedAccessToken }] = useCookies();
 
-  //dari sini
 
   const checkingSuccessInput = (value, error) => {
     return value != undefined && value != "" && value.length > 0 && !error;
@@ -50,8 +49,8 @@ export default function MasterSite(props) {
           accessor: "project",
           Cell: ({ value }) => {
             return (
-              <Link href="#" underline="always">
-                {value} project choosen
+              <Link href="javascript:void(0)" underline="always" color="primary">
+                {value} Project Choosen
               </Link>
             );
           },
@@ -61,8 +60,8 @@ export default function MasterSite(props) {
           accessor: "cluster",
           Cell: ({ value }) => {
             return (
-              <Link href="#" underline="always">
-                {value} cluster choosen
+              <Link href="javascript:void(0)" underline="always" color="primary">
+                {value} Cluster Choosen
               </Link>
             );
           },
@@ -72,7 +71,7 @@ export default function MasterSite(props) {
           accessor: "logo",
           Cell: ({ value }) => {
             return (
-              <Link href="#" underline="always">
+              <Link href="javascript:void(0)" underline="always" color="primary">
                 View
               </Link>
             );
@@ -202,12 +201,12 @@ export default function MasterSite(props) {
   useEffect(() => {
     fetchData();
   }, []);
-  //sampai sini
+
 
   return (
     <DashboardLayout>
       <DashboardNavbar />
-      {/* tasklist */}
+
       <MDBox pb={3}>
         <Card>
           <MDBox p={3} lineHeight={1}>
@@ -215,12 +214,6 @@ export default function MasterSite(props) {
               <Grid item xs={12} md={8}>
                 <MDBox mb={1}>
                   <MDTypography variant="h5">Master Site List</MDTypography>
-                </MDBox>
-                <MDBox mb={2}>
-                  <MDTypography variant="body2" color="text">
-                    For site data maintenance{" "}
-                    {openModal ? "bukamodal" : "tutupModal"}
-                  </MDTypography>
                 </MDBox>
               </Grid>
               <Grid item xs={12} md={4} sx={{ textAlign: "right" }}>
@@ -240,12 +233,13 @@ export default function MasterSite(props) {
           </MDBox>
           <DataTable table={setSiteList()} canSearch />
         </Card>
-        <AddOrEditSite
-          isOpen={openModal}
-          params={modalParams}
-          onModalChanged={changeModalAddOrEdit}
-        />
       </MDBox>
+
+      <AddOrEditSite
+        isOpen={openModal}
+        params={modalParams}
+        onModalChanged={changeModalAddOrEdit}
+      />
     </DashboardLayout>
   );
 }
