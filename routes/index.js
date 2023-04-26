@@ -49,7 +49,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
       nameOnHeader: "Dashboards",
       key: "dashboards",
       route: "/dashboards",
-      permission: "Pages.Tenant.Dashboard",
+      // permission: "Pages.Tenant.Dashboard",
       icon: <Icon fontSize="medium">dashboard</Icon>,
       noCollapse: true,
     },
@@ -59,57 +59,64 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
       name: "Master",
       nameOnHeader: "Master",
       key: "master",
-      permission: "Pages.Tenants.GenerateNoSeriFP",
+      // permission: "Pages.Tenants.GenerateNoSeriFP",
       icon: <Icon fontSize="medium">apps</Icon>,
       collapse: [
         {
           name: "Master Site",
           nameOnHeader: "Master Site",
-          key: "master-site",
+          key: "site",
           route: "/master/site",
-          permission: "Pages.Tenants.GenerateNoSeriFP.Create",
+          // permission: "Pages.Tenants.GenerateNoSeriFP.Create",
         },
         {
           name: "Master Period",
           nameOnHeader: "Master Period",
-          key: "master-period",
+          key: "period",
           route: "/master/period",
-          permission: "Pages.Tenants.GenerateNoSeriFP.Create",
+          // permission: "Pages.Tenants.GenerateNoSeriFP.Create",
         },
         // {
         //   name: "Master Exchange Rate",
         //   nameOnHeader: "Master Exchange Rate",
-        //   key: "master-exchange-rate",
+        //   key: "exchange-rate",
+        //   route: "/master/exchange-rate"
         // },
         // {
         //   name: "Master Unit Data",
         //   nameOnHeader: "Master Unit Data",
-        //   key: "master-unit-data",
+        //   key: "unit-data",
+        //   route: "/master/unit-data"
         // },
         // {
         //   name: "Master Billing Item",
         //   nameOnHeader: "Master Billing Item",
-        //   key: "master-billing-item",
+        //   key: "billing-item",
+        //   route: "/master/billing-item"
         // },
         // {
         //   name: "Master Billing Item Rate",
         //   nameOnHeader: "Master Billing Item Rate",
-        //   key: "master-billing-item-rate",
+        //   key: "billing-item-rate",
+        //   route: "/master/billing-item-rate"
         // },
         // {
         //   name: "Master Mapping Template Invoice",
         //   nameOnHeader: "Master Mapping Template Invoice",
-        //   key: "master-mapping-template-invoice",
+        //   key: "mapping-template-invoice",
+        //   route: "/master/mapping-template-invoice"
         // },
         // {
         //   name: "Master Unit Item",
         //   nameOnHeader: "Master Unit Item",
-        //   key: "master-unit-item",
+        //   key: "unit-item",
+        //   route: "/master/unit-item"
         // },
         // {
         //   name: "Master Oracle Mapping",
         //   nameOnHeader: "Master Oracle Mapping",
-        //   key: "master-oracle-mapping",
+        //   key: "oracle-mapping",
+        //   route: "/master/oracle-mapping"
         // },
       ],
     },
@@ -119,7 +126,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
       name: "Transaction",
       nameOnHeader: "Transaction",
       key: "transaction",
-      permission: "Pages.Tenants.GenerateNoSeriFP",
+      // permission: "Pages.Tenants.GenerateNoSeriFP",
       icon: <Icon fontSize="medium">apps</Icon>,
       collapse: [
         {
@@ -127,37 +134,40 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           nameOnHeader: "Water Reading",
           key: "water-reading",
           route: "/transaction/water-reading",
-          permission: "Pages.Tenants.GenerateNoSeriFP.Create",
+          // permission: "Pages.Tenants.GenerateNoSeriFP.Create",
         },
         {
           name: "Invoice",
           nameOnHeader: "Invoice",
           key: "invoice",
           route: "/transaction/invoice",
-          permission: "Pages.Tenants.GenerateNoSeriFP.List",
+          // permission: "Pages.Tenants.GenerateNoSeriFP.List",
         },
         // {
         //   name: "Warning Letter",
         //   nameOnHeader: "Warning Letter",
         //   key: "waning-letter",
+        //   route: "/master/warning-letter"
         // },
         {
           name: "Oracle To Journal",
           nameOnHeader: "Oracle To Journal",
           key: "oracle-to-journal",
           route: "/transaction/oracle-to-journal",
-          permission: "Pages.Tenants.GenerateNoSeriFP.Create",
+          // permission: "Pages.Tenants.GenerateNoSeriFP.Create",
         },     
 
         // {
         //   name: "Billing Collection",
         //   nameOnHeader: "Billing Collection",
         //   key: "billing-collection",
+        //   route: "/master/billing-collection"
         // },
         // {
         //   name: "Customer Complaint",
         //   nameOnHeader: "Customer Complaint",
         //   key: "customer-complaint",
+        //   route: "/master/customer-complaint"
         // },
       ],
     },
@@ -166,8 +176,8 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
       type: "collapse",
       name: "Cashier System",
       nameOnHeader: "Cashier System",
-      key: "cashiersystem",
-      permission: "Pages.Tenants.GenerateNoSeriFP",
+      key: "cashier",
+      // permission: "Pages.Tenants.GenerateNoSeriFP",
       icon: <Icon fontSize="medium">apps</Icon>,
       collapse: [
         {
@@ -175,7 +185,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           nameOnHeader: "Billing Payment",
           key: "billing-payment",
           route: "/cashier/billing-payment",
-          permission: "Pages.Tenants.GenerateNoSeriFP.Create",
+          // permission: "Pages.Tenants.GenerateNoSeriFP.Create",
         },
         {
           name: "Reprint OR",
@@ -194,7 +204,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           nameOnHeader: "Upload Bulk Payment",
           key: "upload-bulk-payment",
           route: "/cashier/upload-bulk-payment",
-          permission: "Pages.Tenants.GenerateNoSeriFP.List",
+          // permission: "Pages.Tenants.GenerateNoSeriFP.List",
         },
       ],
     },
@@ -204,43 +214,47 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
       name: "Report",
       nameOnHeader: "Report",
       key: "report",
-      permission: "Pages.Tenants.GenerateNoSeriFP",
+      // permission: "Pages.Tenants.GenerateNoSeriFP",
       icon: <Icon fontSize="medium">apps</Icon>,
       collapse: [
         {
           name: "Report Invoice",
           nameOnHeader: "Report Invoice",
-          key: "report-invoice",
+          key: "invoice",
           route: "/report/invoice",
-          permission: "Pages.Tenants.GenerateNoSeriFP.List",
+          // permission: "Pages.Tenants.GenerateNoSeriFP.List",
         },
         {
           name: "Daily Report",
           nameOnHeader: "Daily Report",
-          key: "daily-report",
+          key: "daily",
           route: "/report/daily",
-          permission: "Pages.Tenants.GenerateNoSeriFP.Create",
+          // permission: "Pages.Tenants.GenerateNoSeriFP.Create",
         },
         // {
         //   name: "Report Detail Statement",
         //   nameOnHeader: "Report Detail Statement",
-        //   key: "report-detail-statement",
+        //   key: "detail-statement",
+        //   route: "/report/detail-statement"
         // },
         // {
         //   name: "Report Water Reading",
         //   nameOnHeader: "Report Water Reading",
-        //   key: "report-water-reading",
+        //   key: "water-reading",
+        //   route: "/report/water-reading"
         // },
 
         // {
         //   name: "Report Collection",
         //   nameOnHeader: "Report Collection",
-        //   key: "report-collection",
+        //   key: "collection",
+        //   route: "/report/collection"
         // },
         // {
         //   name: "Report Customer Complaint",
         //   nameOnHeader: "Report Customer Complaint",
-        //   key: "report-customer-complaint",
+        //   key: "customer-complaint",
+        //   route: "/report/customer-complaint"
         // },
       ],
     },
