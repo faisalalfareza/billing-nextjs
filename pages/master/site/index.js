@@ -128,7 +128,7 @@ export default function MasterSite(props) {
   const handleClose = () => setOpenModal(false);
 
   const fetchData = async (data) => {
-    let response = await fetch("/api/master/site/list", {
+    let response = await fetch("/api/master/site/getlistmastersite", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
@@ -218,8 +218,7 @@ export default function MasterSite(props) {
                 </MDBox>
                 <MDBox mb={2}>
                   <MDTypography variant="body2" color="text">
-                    For site data maintenance{" "}
-                    {openModal ? "bukamodal" : "tutupModal"}
+                    For site data maintenance
                   </MDTypography>
                 </MDBox>
               </Grid>
@@ -248,23 +247,4 @@ export default function MasterSite(props) {
       </MDBox>
     </DashboardLayout>
   );
-}
-
-export async function getStaticProps(context) {
-  const urlP = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetDropdownProject`;
-  const resProject = await fetch(urlP);
-  let listProject = await resProject.json();
-  const dataProject = listProject.result;
-  const resSite = await fetch(
-    `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetDropdownSite`
-  );
-  let listSite = await resSite.json();
-  const dataSite = listSite.result;
-  return {
-    props: {
-      dataProject,
-      dataSite,
-    },
-    revalidate: 60,
-  };
 }

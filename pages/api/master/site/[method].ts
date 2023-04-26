@@ -13,27 +13,21 @@ export default async function handler(
   switch (method) {
     case "POST":
       switch (query.method) {
-        case "list":
+        case "getlistmastersite":
           getList(res, body);
           break;
 
-        case "dropdownproject":
+        case "getdropdownproject":
           getDropdownProject(res, body);
           break;
 
-        case "dropdowncluster":
+        case "getdropdownclusterbyproject":
           getDropdownCluster(res, body);
           break;
-        case "create":
+        case "creatmastersite":
           create(res, body);
           break;
       }
-      break;
-
-    case "GET":
-      switch (query.method) {
-      }
-      break;
       break;
   }
 }

@@ -37,15 +37,18 @@ export default function ReportInvoice(props) {
   }, [site]);
 
   const getPeriod = async (val) => {
-    let response = await fetch("/api/transaction/invoice/dropdownperiod", {
-      method: "POST",
-      body: JSON.stringify({
-        accessToken: accessToken,
-        params: {
-          SiteId: site?.siteId,
-        },
-      }),
-    });
+    let response = await fetch(
+      "/api/transaction/invoice/getdropdownperiodbysiteid",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          accessToken: accessToken,
+          params: {
+            SiteId: site?.siteId,
+          },
+        }),
+      }
+    );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
     console.log("response----", response);
@@ -137,16 +140,19 @@ export default function ReportInvoice(props) {
   };
 
   const getCluster = async (val) => {
-    let response = await fetch("/api/transaction/invoice/dropdowncluster", {
-      method: "POST",
-      body: JSON.stringify({
-        accessToken: accessToken,
-        params: {
-          SiteId: site?.siteId,
-          periodId: val?.periodId,
-        },
-      }),
-    });
+    let response = await fetch(
+      "/api/transaction/invoice/getdropdownclusterinvoice",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          accessToken: accessToken,
+          params: {
+            SiteId: site?.siteId,
+            periodId: val?.periodId,
+          },
+        }),
+      }
+    );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
     console.log("response----", response);
@@ -159,16 +165,19 @@ export default function ReportInvoice(props) {
   };
 
   const getProject = async (val) => {
-    let response = await fetch("/api/transaction/invoice/dropdownproject", {
-      method: "POST",
-      body: JSON.stringify({
-        accessToken: accessToken,
-        params: {
-          SiteId: site?.siteId,
-          periodId: val?.periodId,
-        },
-      }),
-    });
+    let response = await fetch(
+      "/api/transaction/invoice/getdropdownprojectinvoice",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          accessToken: accessToken,
+          params: {
+            SiteId: site?.siteId,
+            periodId: val?.periodId,
+          },
+        }),
+      }
+    );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
     console.log("response----", response);

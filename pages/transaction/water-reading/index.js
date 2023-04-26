@@ -90,15 +90,18 @@ export default function WaterReading(props) {
   };
 
   const getProject = async (val) => {
-    let response = await fetch("/api/transaction/water/dropdownproject", {
-      method: "POST",
-      body: JSON.stringify({
-        accessToken: accessToken,
-        params: {
-          SiteId: site?.siteId,
-        },
-      }),
-    });
+    let response = await fetch(
+      "/api/transaction/water/getdropdownprojectbysiteid",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          accessToken: accessToken,
+          params: {
+            SiteId: site?.siteId,
+          },
+        }),
+      }
+    );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
     if (response.error) {
@@ -191,7 +194,7 @@ export default function WaterReading(props) {
   const fetchData = async (data) => {
     setLoading(true);
     const { scheme, keywords, recordsPerPage, skipCount } = customerRequest;
-    let response = await fetch("/api/transaction/water/list", {
+    let response = await fetch("/api/transaction/water/getwaterreadinglist", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
@@ -243,20 +246,23 @@ export default function WaterReading(props) {
   };
 
   const handleExport = async () => {
-    let response = await fetch("/api/transaction/water/export", {
-      method: "POST",
-      body: JSON.stringify({
-        accessToken: accessToken,
-        params: {
-          maxResultCount: 1000,
-          skipCount: 0,
-          siteId: site?.siteId,
-          projectId: formValues.project?.projectId,
-          clusterId: formValues.cluster?.clusterId,
-          search: undefined,
-        },
-      }),
-    });
+    let response = await fetch(
+      "/api/transaction/water/exporttoexcelwaterreading",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          accessToken: accessToken,
+          params: {
+            maxResultCount: 1000,
+            skipCount: 0,
+            siteId: site?.siteId,
+            projectId: formValues.project?.projectId,
+            clusterId: formValues.cluster?.clusterId,
+            search: undefined,
+          },
+        }),
+      }
+    );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
@@ -268,7 +274,7 @@ export default function WaterReading(props) {
   };
 
   const onProjectChange = async (val) => {
-    let response = await fetch("/api/master/site/dropdowncluster", {
+    let response = await fetch("/api/master/site/getdropdownclusterbyproject", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
@@ -395,12 +401,10 @@ export default function WaterReading(props) {
                                     noOptionsText="No results"
                                     renderInput={(params) => (
                                       <FormField
+                                        required={project.isRequired}
                                         {...params}
                                         type={project.type}
-                                        label={
-                                          project.label +
-                                          (project.isRequired ? " *" : "")
-                                        }
+                                        label={project.label}
                                         name={project.name}
                                         placeholder={project.placeholder}
                                         InputLabelProps={{ shrink: true }}
@@ -439,12 +443,10 @@ export default function WaterReading(props) {
                                     }
                                     renderInput={(params) => (
                                       <FormField
+                                        required={cluster.isRequired}
                                         {...params}
                                         type={cluster.type}
-                                        label={
-                                          cluster.label +
-                                          (cluster.isRequired ? " *" : "")
-                                        }
+                                        label={cluster.label}
                                         name={cluster.name}
                                         placeholder={cluster.placeholder}
                                         InputLabelProps={{ shrink: true }}
@@ -513,7 +515,7 @@ export default function WaterReading(props) {
                 </MDBox>
                 <MDBox mb={2}>
                   <MDTypography variant="body2" color="text">
-                    Water Reading Data plugin.
+                    Water Reading Data.
                   </MDTypography>
                 </MDBox>
               </Grid>

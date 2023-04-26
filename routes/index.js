@@ -65,14 +65,14 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
         {
           name: "Master Site",
           nameOnHeader: "Site",
-          key: "master-site",
+          key: "site",
           route: "/master/site",
           permission: "Pages.Tenants.GenerateNoSeriFP.Create",
         },
         {
           name: "Master Period",
           nameOnHeader: "Master Period",
-          key: "master-period",
+          key: "period",
           route: "/master/period",
           permission: "Pages.Tenants.GenerateNoSeriFP.Create",
         },
@@ -140,7 +140,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           name: "Warning Letter",
           nameOnHeader: "Warning Letter",
           key: "waning-letter",
-          route: "/app/nsfp/upload-batch",
+          route: "/transaction/warning-letter",
           permission: "Pages.Tenants.GenerateNoSeriFP.Create",
         },
         {
@@ -178,7 +178,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
       type: "collapse",
       name: "Cashier System",
       nameOnHeader: "Cashier System",
-      key: "cashiersystem",
+      key: "cashier",
       permission: "Pages.Tenants.GenerateNoSeriFP",
       icon: <Icon fontSize="medium">apps</Icon>,
       collapse: [
@@ -222,7 +222,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
         {
           name: "Daily Report",
           nameOnHeader: "Daily Report",
-          key: "daily-report",
+          key: "daily",
           route: "/report/daily",
           permission: "Pages.Tenants.GenerateNoSeriFP.Create",
         },
@@ -236,7 +236,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
         {
           name: "Report Invoice",
           nameOnHeader: "Report Invoice",
-          key: "report-invoice",
+          key: "invoice",
           route: "/report/invoice",
           permission: "Pages.Tenants.GenerateNoSeriFP.List",
         },

@@ -35,7 +35,7 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
   }, [isOpen]);
 
   const getProject = async () => {
-    let response = await fetch("/api/master/site/dropdownproject", {
+    let response = await fetch("/api/master/site/getdropdownproject", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
@@ -56,7 +56,7 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
   };
 
   const onProjectChange = async (val) => {
-    let response = await fetch("/api/master/site/dropdowncluster", {
+    let response = await fetch("/api/master/site/getdropdownclusterbyproject", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
@@ -105,7 +105,7 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
       projectDataList: listProject,
     };
 
-    let response = await fetch("/api/master/site/create", {
+    let response = await fetch("/api/master/site/creatmastersite", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
@@ -226,7 +226,8 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
                       <Grid item xs={12} sm={12}>
                         <FormField
                           type="text"
-                          label="Site ID ⁽*⁾"
+                          required
+                          label="Site ID"
                           name="id"
                           placeholder="Type Site ID"
                           error={errors.id && touched.id}
@@ -236,7 +237,8 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
                       <Grid item xs={12} sm={12}>
                         <FormField
                           type="text"
-                          label="Site Name ⁽*⁾"
+                          label="Site Name"
+                          required
                           name="name"
                           placeholder="Type Site Name"
                           error={errors.name && touched.name}
@@ -246,7 +248,8 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
                       <Grid item xs={12} sm={12}>
                         <FormField
                           type="text"
-                          label="Site Code ⁽*⁾"
+                          required
+                          label="Site Code"
                           name="code"
                           placeholder="Type Site Code"
                           error={errors.code && touched.code}
@@ -256,7 +259,8 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
                       <Grid item xs={12} sm={12}>
                         <FormField
                           type="text"
-                          label="Address ⁽*⁾"
+                          label="Address"
+                          required
                           name="address"
                           placeholder="Type Address"
                           error={errors.address && touched.address}
@@ -269,7 +273,8 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
                       <Grid item xs={12} sm={12}>
                         <FormField
                           type="text"
-                          label="Email ⁽*⁾"
+                          label="Email"
+                          required
                           name="email"
                           placeholder="Type Email"
                           error={errors.email && touched.email}
@@ -282,7 +287,8 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
                       <Grid item xs={12} sm={12}>
                         <FormField
                           type="text"
-                          label="Office Phone ⁽*⁾"
+                          required
+                          label="Office Phone"
                           name="phone"
                           placeholder="Type Office Phone"
                           error={errors.phone && touched.phone}
@@ -294,8 +300,9 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
                       </Grid>
                       <Grid item xs={12} sm={12}>
                         <FormField
+                          required
                           type="text"
-                          label="Handphone ⁽*⁾"
+                          label="Handphone"
                           name="handphone"
                           placeholder="Type Handphone"
                           error={errors.handphone && touched.handphone}
@@ -327,8 +334,9 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
                           renderInput={(params) => (
                             <FormField
                               {...params}
+                              required
                               type="text"
-                              label="Project ⁽*⁾"
+                              label="Project"
                               name="project"
                               placeholder="Type Project"
                               error={errors.project && touched.project}
@@ -365,7 +373,8 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
                             <FormField
                               {...params}
                               type="text"
-                              label="Cluster ⁽*⁾"
+                              label="Cluster"
+                              required
                               name="cluster"
                               placeholder="Type Cluster"
                               error={errors.cluster && touched.cluster}

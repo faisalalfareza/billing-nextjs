@@ -119,12 +119,11 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
 
   const [formValues, setformValues] = useState(initialValues);
 
-  const getFormData = (values) => {
-  };
+  const getFormData = (values) => {};
 
   const getLastPeriodNo = async (val) => {
     // setLoading(true);
-    let response = await fetch("/api/master/period/no", {
+    let response = await fetch("/api/master/period/getlastperiodno", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
@@ -153,12 +152,12 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
   };
   const createPeriod = async (values, actions) => {
     setLoadingSubmit(false);
-
+    console.log("values----", values);
     const body = {
       siteId: site.siteId,
       periodMonth: addDate(values.periodName),
       periodYear: addDate(values.periodName),
-      periodNumber: no,
+      periodNumber: params ? params.periodNumber : no,
       startDate: addDate(values.startDate),
       endDate: addDate(values.endDate),
       closeDate: addDate(values.closeDate),
@@ -166,7 +165,7 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
     };
 
     if (!params) {
-      let response = await fetch("/api/master/period/create", {
+      let response = await fetch("/api/master/period/createmasterperiod", {
         method: "POST",
         body: JSON.stringify({
           accessToken: accessToken,
@@ -198,15 +197,18 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
         });
       }
     } else {
-      body.periodId = params.periodId;
+      body.periodID = params.periodId;
 
-      let response = await fetch("/api/master/period/update", {
-        method: "POST",
-        body: JSON.stringify({
-          accessToken: accessToken,
-          params: body,
-        }),
-      });
+      let response = await fetch(
+        "/api/master/period/prosesupdatemasterperiod",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            accessToken: accessToken,
+            params: body,
+          }),
+        }
+      );
       if (!response.ok) throw new Error(`Error: ${response.status}`);
       response = typeNormalization(await response.json());
 
@@ -346,13 +348,11 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
                       <Grid item xs={12} sm={12}>
                         <FormField
                           disabled
+                          required={periodNumber.isRequired}
                           type={periodNumber.type}
-                          label={
-                            periodNumber.label +
-                            (periodNumber.isRequired ? " ⁽*⁾" : "")
-                          }
+                          label={periodNumber.label}
                           name={periodNumber.name}
-                          value={no}
+                          value={params ? params.periodNumber : no}
                           placeholder={periodNumber.placeholder}
                           error={errors.periodNumber && touched.periodNumber}
                           success={checkingSuccessInput(
@@ -366,6 +366,7 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
                           <DatePicker
                             label={periodName.label}
                             value={formValues.periodName}
+                            // closeOnSelect={true}
                             // variant="inline"
                             inputFormat="MMMM YYYY"
                             views={["year", "month"]}
@@ -380,6 +381,7 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
                             renderInput={(params) => (
                               <TextField
                                 {...params}
+                                required={periodName.isRequired}
                                 variant="standard"
                                 fullWidth
                                 error={errors.periodName && touched.periodName}
@@ -412,11 +414,9 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
                       <Grid item xs={12} sm={12}>
                         <FormField
                           type={startDate.type}
-                          label={
-                            startDate.label +
-                            (startDate.isRequired ? " ⁽*⁾" : "")
-                          }
+                          label={startDate.label}
                           name={startDate.name}
+                          required={startDate.isRequired}
                           // value={formValues.startDate}
                           placeholder={startDate.placeholder}
                           error={errors.startDate && touched.startDate}
@@ -430,11 +430,10 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
                       <Grid item xs={12} sm={12}>
                         <FormField
                           type={endDate.type}
-                          label={
-                            endDate.label + (endDate.isRequired ? " ⁽*⁾" : "")
-                          }
+                          label={endDate.label}
                           name={endDate.name}
                           // value={formValues.endDate}
+                          required={endDate.isRequired}
                           placeholder={endDate.placeholder}
                           error={errors.endDate && touched.endDate}
                           success={checkingSuccessInput(
@@ -447,11 +446,9 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
                       <Grid item xs={12} sm={12}>
                         <FormField
                           type={closeDate.type}
-                          label={
-                            closeDate.label +
-                            (closeDate.isRequired ? " ⁽*⁾" : "")
-                          }
+                          label={closeDate.label}
                           name={closeDate.name}
+                          required={closeDate.isRequired}
                           // value={formValues.closeDate}
                           placeholder={closeDate.placeholder}
                           error={errors.closeDate && touched.closeDate}

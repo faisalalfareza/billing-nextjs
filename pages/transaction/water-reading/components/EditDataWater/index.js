@@ -58,25 +58,27 @@ function EditDataWater({ isOpen, params, onModalChanged, site }) {
 
   const [formValues, setformValues] = useState(initialValues);
 
-  const getFormData = (values) => {
-  };
+  const getFormData = (values) => {};
 
   const updateWater = async (values, actions) => {
     const body = {
       waterReadingId: params.waterReadingId,
-      currentRead: values.current,
-      prevRead: values.prev,
+      currentRead: +values.current,
+      prevRead: +values.prev,
     };
 
     body.periodId = params.periodId;
 
-    let response = await fetch("/api/transaction/water/update", {
-      method: "POST",
-      body: JSON.stringify({
-        accessToken: accessToken,
-        params: body,
-      }),
-    });
+    let response = await fetch(
+      "/api/transaction/water/prosesupdatedetailwaterreading",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          accessToken: accessToken,
+          params: body,
+        }),
+      }
+    );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
@@ -294,7 +296,8 @@ function EditDataWater({ isOpen, params, onModalChanged, site }) {
                       <Grid item xs={12} sm={12}>
                         <FormField
                           type={prev.type}
-                          label={prev.label + (prev.isRequired ? " ⁽*⁾" : "")}
+                          required={prev.isRequired}
+                          label={prev.label}
                           name={prev.name}
                           value={formValues.prev}
                           placeholder={prev.placeholder}
@@ -308,9 +311,8 @@ function EditDataWater({ isOpen, params, onModalChanged, site }) {
                       <Grid item xs={12} sm={12}>
                         <FormField
                           type={current.type}
-                          label={
-                            current.label + (current.isRequired ? " ⁽*⁾" : "")
-                          }
+                          required={current.isRequired}
+                          label={current.label}
                           name={current.name}
                           value={formValues.current}
                           placeholder={current.placeholder}

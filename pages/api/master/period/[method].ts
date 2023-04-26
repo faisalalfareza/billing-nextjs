@@ -10,9 +10,9 @@ export const config = {
     // https://nextjs.org/docs/api-routes/request-helpers#custom-config
     // externalResolver adalah bendera eksplisit yang memberi tahu server bahwa rute ini sedang ditangani oleh penyelesai eksternal seperti Express atau Connect. Mengaktifkan opsi ini akan menonaktifkan peringatan untuk permintaan yang belum terselesaikan.
     // Ini adalah peringatan palsu karena dalam kode yang diberikan Anda selalu mengembalikan respons. Hanya saja Next.js tidak mengetahuinya. (NOTA: Jika Anda yakin bahwa Anda mengembalikan respons dalam setiap kasus, Anda dapat menonaktifkan peringatan untuk permintaan yang belum terselesaikan.)
-    externalResolver: true
+    externalResolver: true,
   },
-}
+};
 
 export default async function handler(
   req: NextApiRequest,
@@ -23,34 +23,28 @@ export default async function handler(
   switch (method) {
     case "POST":
       switch (query.method) {
-        case "list":
+        case "getlistmasterperiod":
           getList(res, body);
           break;
 
-        case "dropdownproject":
+        case "getdropdownproject":
           getDropdownProject(res, body);
           break;
 
-        case "dropdownsite":
+        case "getdropdownsite":
           getDropdownSite(res, body);
           break;
 
-        case "no":
+        case "getlastperiodno":
           getPeriodNo(res, body);
           break;
-        case "create":
+        case "createmasterperiod":
           create(res, body);
           break;
-        case "update":
+        case "prosesupdatemasterperiod":
           update(res, body);
           break;
       }
-      break;
-
-    case "GET":
-      switch (query.method) {
-      }
-      break;
       break;
   }
 }
@@ -71,13 +65,11 @@ async function getList(res: any, body: any) {
     .get(url, config)
     .then((response) =>
       res.send({
-        isCached: false,
         result: response.data.result.items,
       })
     )
     .catch((error) =>
       res.send({
-        isCached: false,
         error: error,
       })
     );
@@ -98,13 +90,11 @@ async function getDropdownProject(res: any, body: any) {
     .get(url, config)
     .then((response) =>
       res.send({
-        isCached: false,
         result: response.data.result.items,
       })
     )
     .catch((error) =>
       res.send({
-        isCached: false,
         error: error,
       })
     );
@@ -124,13 +114,11 @@ async function getDropdownSite(res: any, body: any) {
     .get(url, config)
     .then((response) =>
       res.send({
-        isCached: false,
         result: response.data.result,
       })
     )
     .catch((error) =>
       res.send({
-        isCached: false,
         error: error,
       })
     );
@@ -152,13 +140,11 @@ async function getPeriodNo(res: any, body: any) {
     .get(url, config)
     .then((response) =>
       res.send({
-        isCached: false,
         result: response.data.result,
       })
     )
     .catch((error) =>
       res.send({
-        isCached: false,
         error: error,
       })
     );
@@ -179,13 +165,11 @@ async function create(res: any, body: any) {
     .post(url, params, config)
     .then((response) => {
       res.send({
-        isCached: false,
         result: response.data.result,
       });
     })
     .catch((error) => {
       res.send({
-        isCached: false,
         error: error,
       });
     });
@@ -194,27 +178,25 @@ async function create(res: any, body: any) {
 async function update(res: any, body: any) {
   const { accessToken, params } = body;
 
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/MasterBilling/UpdateMasterPeriod`;
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/MasterBilling/ProsesUpdateMasterPeriod`;
   const config = {
     headers: {
       Authorization: "Bearer " + accessToken,
       "Access-Control-Allow-Origin": "*",
     },
-    params: params,
   };
 
   axios
-    .put(url, params, config)
+    .post(url, params, config)
     .then((response) =>
       res.send({
-        isCached: false,
         result: response.data.result,
       })
     )
-    .catch((error) =>
+    .catch((error) => {
+      console.log("error----", error);
       res.send({
-        isCached: false,
         error: error,
-      })
-    );
+      });
+    });
 }

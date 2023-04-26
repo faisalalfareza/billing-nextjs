@@ -56,15 +56,18 @@ export default function ReportDaily(props) {
   };
 
   const getPeriod = async (val) => {
-    let response = await fetch("/api/transaction/invoice/dropdownperiod", {
-      method: "POST",
-      body: JSON.stringify({
-        accessToken: accessToken,
-        params: {
-          SiteId: site?.siteId,
-        },
-      }),
-    });
+    let response = await fetch(
+      "/api/transaction/invoice/getdropdownperiodbysiteid",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          accessToken: accessToken,
+          params: {
+            SiteId: site?.siteId,
+          },
+        }),
+      }
+    );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
     console.log("response----", response);
@@ -168,7 +171,7 @@ export default function ReportDaily(props) {
   };
 
   const getCluster = async (val) => {
-    let response = await fetch("/api/master/site/dropdowncluster", {
+    let response = await fetch("/api/master/site/getdropdownclusterbyproject", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
@@ -190,15 +193,18 @@ export default function ReportDaily(props) {
   };
 
   const getProject = async (val) => {
-    let response = await fetch("/api/transaction/water/dropdownproject", {
-      method: "POST",
-      body: JSON.stringify({
-        accessToken: accessToken,
-        params: {
-          SiteId: site?.siteId,
-        },
-      }),
-    });
+    let response = await fetch(
+      "/api/transaction/water/getdropdownprojectbysiteid",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          accessToken: accessToken,
+          params: {
+            SiteId: site?.siteId,
+          },
+        }),
+      }
+    );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
     console.log("response----", response);

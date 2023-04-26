@@ -25,16 +25,19 @@ export default function Adjustment(props) {
 
   const adjustData = async (values, actions) => {
     setLoading(true);
-    let response = await fetch("/api/transaction/invoice/adjustment", {
-      method: "POST",
-      body: JSON.stringify({
-        accessToken: accessToken,
-        params: {
-          InvoiceHeaderId: params.invoiceHeaderId,
-          adjNominal: values.adjustmentNominal,
-        },
-      }),
-    });
+    let response = await fetch(
+      "/api/transaction/invoice/changeadjustmentinvoice",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          accessToken: accessToken,
+          params: {
+            InvoiceHeaderId: params.invoiceHeaderId,
+            adjNominal: values.adjustmentNominal,
+          },
+        }),
+      }
+    );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
