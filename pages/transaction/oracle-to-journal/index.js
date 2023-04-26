@@ -22,10 +22,11 @@ import Radio from '@mui/material/Radio';
 import FormControlLabel from '@mui/material/FormControlLabel';
 
 import MDButton from "/components/MDButton";
-import { async } from "regenerator-runtime";
+import { async, values } from "regenerator-runtime";
+import dayjs from "dayjs";
 
 
-function OracleToJournal({params}) {
+function OracleToJournal({ params }) {
     const [{ accessToken, encryptedAccessToken }] = useCookies();
     const [ site, setSite ] = useState(null);
     const handleSite = (siteVal) => {
@@ -118,6 +119,7 @@ function OracleToJournal({params}) {
         [paymentEndDate.name]: params
         ? dayjs(params.paymentEndDate).format("YYYY-MM-DD")
         : null,
+        
     };
 
     useEffect(() => {
@@ -192,43 +194,61 @@ function OracleToJournal({params}) {
     
     const generatePaymentJournal = async(values, actions) => 
     {
-        setLoadingPaymentJournal(true);
+        console.log(body);
+        // setLoadingPaymentJournal(true);
 
-        let response = await fetch("/api/transaction/oracletojournal/generatepaymentjournal", {
-            method: "POST",
-            body: JSON.stringify({
-                accessToken: accessToken,
-                params: {
-                    period: periodMethod,
-                    paymentType: paymentMethod,
-                    accountingDate: accountingDate,
-                    bankPayment: bankPayment,
-                    paymentStartDate: paymentStartDate,
-                    paymentEndDate: paymentEndDate
-                }
-            }),
-        });
-        if(!response.ok) throw new Error(`Error: ${response.status}`);
-        response = typeNormalization(await response.json());
+        // let response = await fetch("/api/transaction/oracletojournal/generatepaymentjournal", {
+        //     method: "POST",
+        //     body: JSON.stringify({
+        //         accessToken: accessToken,
+        //         params: body,
+        //     }),
+        // });
+        // if(!response.ok) throw new Error(`Error: ${response.status}`);
+        // response = typeNormalization(await response.json());
 
-        if(response.error) alertService.error({ title: "Error", text: response.error.message});
-        else{
-            if(response.success){
-                Swal.fire({
-                    title: 'Payment Journal Generated',
-                    html: `Payment Journal Successfully Generated`,
-                    icon: "success",
-                    timerProgressBar: true,
-                    timer:  3000,
-                });
-            } 
-        } 
-        setLoadingPaymentJournal(false);
+        // if(response.error) alertService.error({ title: "Error", text: response.error.message});
+        // else{
+        //     if(response.success){
+        //         Swal.fire({
+        //             title: 'Payment Journal Generated',
+        //             html: `Payment Journal Successfully Generated`,
+        //             icon: "success",
+        //             timerProgressBar: true,
+        //             timer:  3000,
+        //         });
+        //     } 
+        // } 
+        // setLoadingPaymentJournal(false);
     };
 
-    const getFormData = (values) => {
+    const getFormData = (values) => {};
+
+    const addDate = (val) => {
+        return dayjs(val).add(0, "day");
+    }
+
+    const [ bnkPayment, setbnkPayment ] = useState(0);
+
+    const handleRadio = (ev) => {
+        setbnkPayment(ev.target.value);
+        console.log(ev.target.value);
     };
 
+    const [period, setPeriod] = useState([]);
+
+    const handlePeriod = (event, value) => setPeriod(value);
+
+    const body = {
+        siteId: site?.siteId,
+        period: values.periodMethod?.periodId,
+        paymentType: paymentMethod.value,
+        accountingDate: addDate(values.accountingDate),
+        bankPayment: bnkPayment,
+        paymentStartDate: addDate(values.paymentStartDate),
+        paymentEndDate: addDate(values.paymentEndDate),
+    };
+    
     return (
         <DashboardLayout>
             <DashboardNavbar/>
@@ -281,16 +301,20 @@ function OracleToJournal({params}) {
                                                 touched,
                                                 setFieldValue
                                             }) => {
+                                                // let {
+                                                //     periodMethod: periodMethodV,
+                                                //     paymentMethod: paymentMethodV,
+                                                // } = values;
                                                 setformValues(values);
                                                 getFormData(values);
 
-                                                const isValifForm = () => {
-                                                // checkingSuccessInput(periodMethod.isRequired, values.periodMethod, errors.periodMethod) &&
-                                                // checkingSuccessInput(paymentMethod.isRequired, paymentMethodV, errors.paymentMethod) &&
+                                                const isValifForm = () => (
+                                                checkingSuccessInput(periodMethod.isRequired, values.periodMethodV, errors.periodMethod) &&
+                                                checkingSuccessInput(paymentMethod.isRequired, values.paymentMethodV, errors.paymentMethod) 
                                                 // checkingSuccessInput(formValues.accountingDate, values.accountingDate, errors.accountingDate) &&
                                                 // checkingSuccessInput(formValues.paymentStartDate, values.paymentStartDate, errors.paymentStartDate ) &&
                                                 // checkingSuccessInput(formValues.paymentEndDate, values.paymentEndDate, errors.paymentStartDate)
-                                                };
+                                                );
 
                                                 return (
                                                 <Form id={schemaModels.formId} autoComplete="off">
@@ -301,10 +325,14 @@ function OracleToJournal({params}) {
                                                                     style={{ paddingBottom: 20 }}
                                                                     options={periodMethodList}
                                                                     key={periodMethod.name}
-                                                                    // value={values.paymentMethod}
+                                                                    value={values.periodMethod}
                                                                     getOptionLabel={(option) => option.periodName}
                                                                     onChange={(e, value) => {
-                                                                    setFieldValue(periodMethod.name, value);
+                                                                        setFieldValue(periodMethod.name, 
+                                                                            value !== null 
+                                                                            ? value 
+                                                                            : initialValues[periodMethod.name]
+                                                                        );
                                                                     }}
                                                                     noOptionsText="No results"
                                                                     renderInput={(params) => (
@@ -319,7 +347,10 @@ function OracleToJournal({params}) {
                                                                         placeholder={periodMethod.placeholder}
                                                                         InputLabelProps={{ shrink: true }}
                                                                         error={errors.periodMethod && touched.periodMethod}
-                                                                        success={periodMethod.isRequired && checkingSuccessInput(periodMethod.isRequired, values.periodMethod, errors.periodMethod)}
+                                                                        success={
+                                                                            periodMethod.isRequired && 
+                                                                            checkingSuccessInput(periodMethod.isRequired, values.periodMethod, errors.periodMethod)
+                                                                        }
                                                                     /> 
                                                                     )}
                                                                 />
@@ -385,16 +416,17 @@ function OracleToJournal({params}) {
                                                                     <RadioGroup
                                                                         row
                                                                         aria-labelledby="demo-radio-buttons-group-label"
-                                                                        defaultValue="BCA"
-                                                                        name="radio-buttons-group">
+                                                                        defaultValue={0}
+                                                                        name="radio-buttons-group"
+                                                                        onChange={handleRadio}>
                                                                         <FormControlLabel
                                                                             
-                                                                            value="BCA" 
+                                                                            value={0} 
                                                                             control={<Radio />} 
                                                                             label="BCA" />
                                                                         <FormControlLabel 
                                                                             
-                                                                            value="NonBCA" 
+                                                                            value={1}
                                                                             control={<Radio />} 
                                                                             label="Non BCA" />
                                                                     </RadioGroup>
@@ -455,9 +487,12 @@ function OracleToJournal({params}) {
                                                                 <Icon>search_outlined</Icon>&nbsp; search
                                                             </MDButton>
                                                             <MDButton 
+                                                                type="submit"
                                                                 style={{ marginRight : 20}}
                                                                 variant="outlined" 
-                                                                color="dark">
+                                                                color="dark"
+                                                                onClick={generatePaymentJournal}
+                                                            >
                                                                 <Icon>add_outlined</Icon>&nbsp; generate payment journal
                                                             </MDButton>
                                                             <MDButton 
