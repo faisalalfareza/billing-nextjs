@@ -64,7 +64,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
       collapse: [
         {
           name: "Master Site",
-          nameOnHeader: "Site",
+          nameOnHeader: "Master Site",
           key: "site",
           route: "/master/site",
           // permission: "Pages.Tenants.GenerateNoSeriFP.Create",
@@ -74,7 +74,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           nameOnHeader: "Period",
           key: "period",
           route: "/master/period",
-          permission: "Pages.Tenants.GenerateNoSeriFP.Create",
+          // permission: "Pages.Tenants.GenerateNoSeriFP.Create",
         },
         // {
         //   name: "Master Exchange Rate",
@@ -134,28 +134,28 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           nameOnHeader: "Water Reading",
           key: "water-reading",
           route: "/transaction/water-reading",
-          permission: "Pages.Tenants.GenerateNoSeriFP.Create",
+          // permission: "Pages.Tenants.GenerateNoSeriFP.Create",
         },
         {
           name: "Warning Letter",
           nameOnHeader: "Warning Letter",
           key: "warning-letter",
           route: "/transaction/warning-letter",
-          permission: "Pages.Tenants.GenerateNoSeriFP.Create",
+          // permission: "Pages.Tenants.GenerateNoSeriFP.Create",
         },
         {
           name: "Oracle To Journal",
           nameOnHeader: "Oracle To Journal",
           key: "oracle-to-journal",
           route: "/transaction/oracle-to-journal",
-          permission: "Pages.Tenants.GenerateNoSeriFP.Create",
+          // permission: "Pages.Tenants.GenerateNoSeriFP.Create",
         },
         {
           name: "Invoice",
           nameOnHeader: "Invoice",
           key: "invoice",
           route: "/transaction/invoice",
-          permission: "Pages.Tenants.GenerateNoSeriFP.List",
+          // permission: "Pages.Tenants.GenerateNoSeriFP.List",
         },
         // {
         //   name: "Billing Collection",
@@ -191,7 +191,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
         },
         {
           name: "Reprint OR",
-          nameOnHeader: "Reprint OR",
+          nameOnHeader: "Reprint Official Receipt",
           key: "reprint-or",
           route: "/cashier/reprint-or",
         },
@@ -221,10 +221,10 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
       collapse: [
         {
           name: "Daily Report",
-          nameOnHeader: "Daily Report",
+          nameOnHeader: "Report Daily",
           key: "daily",
           route: "/report/daily",
-          permission: "Pages.Tenants.GenerateNoSeriFP.Create",
+          // permission: "Pages.Tenants.GenerateNoSeriFP.Create",
         },
         // {
         //   name: "Report Detail Statement",
