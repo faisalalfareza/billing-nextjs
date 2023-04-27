@@ -44,10 +44,14 @@ function DataTable({
   isSorted,
   noEndBorder,
 
-  manualPagination, 
-  totalRows, totalPages,
-  recordsPerPage, skipCount,
-  pageChangeHandler, recordsPerPageChangeHandler, keywordsChangeHandler
+  manualPagination,
+  totalRows,
+  totalPages,
+  recordsPerPage,
+  skipCount,
+  pageChangeHandler,
+  recordsPerPageChangeHandler,
+  keywordsChangeHandler,
 }) {
   const defaultValue = entriesPerPage.defaultValue
     ? entriesPerPage.defaultValue
@@ -59,31 +63,29 @@ function DataTable({
   const data = useMemo(() => table.rows, [table]);
 
   const currentPage = manualPagination
-    ? (skipCount > 0)
-      ? (Math.ceil(skipCount / recordsPerPage))
+    ? skipCount > 0
+      ? Math.ceil(skipCount / recordsPerPage)
       : 0
     : 0;
 
   const tableInstance = useTable(
     manualPagination
-      ?
-        {
+      ? {
           columns,
           data,
           initialState: {
             pageIndex: currentPage,
-            pageSize: recordsPerPage
+            pageSize: recordsPerPage,
           },
           manualPagination: manualPagination,
-          pageCount: totalPages
+          pageCount: totalPages,
         }
-      :
-        {
+      : {
           columns,
           data,
           initialState: {
-            pageIndex: 0
-          }
+            pageIndex: 0,
+          },
         },
     useGlobalFilter,
     useSortBy,
@@ -99,19 +101,18 @@ function DataTable({
   };
   const navigatePageCustom = (option) => {
     if (manualPagination) {
-      const param = (Number(option) > 0)
-        ? (Math.ceil(Number(option) * recordsPerPage))
-        : 0;
+      const param =
+        Number(option) > 0 ? Math.ceil(Number(option) * recordsPerPage) : 0;
       pageChangeHandler(param);
     } else gotoPage(Number(option));
-  }
-  const searchCustom = (value, key = undefined) => { 
-    setSearch(value); 
+  };
+  const searchCustom = (value, key = undefined) => {
+    setSearch(value);
     if (!manualPagination) onSearchChange(value);
-    if (manualPagination && (key == "Enter")) {
+    if (manualPagination && key == "Enter") {
       keywordsChangeHandler(value);
       navigatePageCustom(0);
-    } 
+    }
   };
 
   const {
@@ -133,7 +134,9 @@ function DataTable({
   } = tableInstance;
 
   // Set the default value for the entries per page when component mounts
-  useEffect(() => { setPageSize(defaultValue || 10) }, [defaultValue, setPageSize]);
+  useEffect(() => {
+    setPageSize(defaultValue || 10);
+  }, [defaultValue, setPageSize]);
 
   // Set the entries per page value based on the select value
   const setEntriesPerPage = (value) => {
@@ -141,7 +144,7 @@ function DataTable({
     if (manualPagination) {
       recordsPerPageChangeHandler(value);
       navigatePageCustom(0);
-    } 
+    }
   };
 
   // Render the paginations
@@ -160,14 +163,14 @@ function DataTable({
   const handleInputPagination = ({ target: { value } }) =>
     value > pageOptions.length || value < 0
       ? navigatePageCustom(0) /* gotoPage(0) */
-      : navigatePageCustom(value) /* gotoPage(Number(value)); */
+      : navigatePageCustom(value); /* gotoPage(Number(value)); */
 
   // Customized page options starting from 1
   const customizedPageOptions = pageOptions.map((option) => option + 1);
 
   // Setting value for the pagination input
   const handleInputPaginationValue = ({ target: value }) =>
-  navigatePageCustom(value.value - 1) /* gotoPage(Number(value.value - 1)) */;
+    navigatePageCustom(value.value - 1); /* gotoPage(Number(value.value - 1)) */
 
   // Search input value state
   const [search, setSearch] = useState(globalFilter);
@@ -215,14 +218,17 @@ function DataTable({
           justifyContent="space-between"
           alignItems="center"
           p={3}
+          sx={{ width: "100%" }}
         >
-          {(canEntriesPerPage && entriesPerPage) && (
+          {canEntriesPerPage && entriesPerPage && (
             <MDBox display="flex" alignItems="center">
               <Autocomplete
                 disableClearable
                 value={pageSize.toString()}
                 options={entries}
-                onChange={(event, newValue) => setEntriesPerPage(parseInt(newValue, 10))}
+                onChange={(event, newValue) =>
+                  setEntriesPerPage(parseInt(newValue, 10))
+                }
                 // size="small"
                 sx={{ width: "5rem" }}
                 renderInput={(params) => <MDInput {...params} />}
@@ -235,15 +241,28 @@ function DataTable({
           {canSearch && (
             <MDBox width="20.5rem" ml="auto">
               <MDInput
-                placeholder={pageOptions.length > 0
-                  ? (`Search${(manualPagination && serverSideSearch) ? (" from "+totalRows+" entries. Press enter to submit ~") : (" from "+rows.length+" entries ~")}`)
-                  : (`Search ...`)
+                placeholder={
+                  pageOptions.length > 0
+                    ? `Search${
+                        manualPagination && serverSideSearch
+                          ? " from " +
+                            totalRows +
+                            " entries. Press enter to submit ~"
+                          : " from " + rows.length + " entries ~"
+                      }`
+                    : `Search ...`
                 }
-                label={`Search by${((serverSideSearch != false) && (serverSideSearch.length > 0)) ? (" "+serverSideSearch.join(", ").toString()) : " keywords"}`}
+                label={`Search by${
+                  serverSideSearch != false && serverSideSearch.length > 0
+                    ? " " + serverSideSearch.join(", ").toString()
+                    : " keywords"
+                }`}
                 value={search}
                 // size="small"
                 fullWidth
-                onChange={({ currentTarget }) => searchCustom(currentTarget.value)}
+                onChange={({ currentTarget }) =>
+                  searchCustom(currentTarget.value)
+                }
                 onKeyPress={({ key }) => searchCustom(search, key)}
               />
             </MDBox>
@@ -258,7 +277,7 @@ function DataTable({
                 <DataTableHeadCell
                   key={key}
                   {...column.getHeaderProps(
-                    isSorted && column.getSortByToggleProps(),
+                    isSorted && column.getSortByToggleProps()
                   )}
                   width={column.width ? column.width : "auto"}
                   align={column.align ? column.align : "left"}
@@ -305,7 +324,8 @@ function DataTable({
               color="secondary"
               fontWeight="regular"
             >
-              Showing {entriesStart} to {entriesEnd} of {manualPagination ? totalRows : rows.length} entries
+              Showing {entriesStart} to {entriesEnd} of{" "}
+              {manualPagination ? totalRows : rows.length} entries
             </MDTypography>
           </MDBox>
         )}
@@ -315,7 +335,10 @@ function DataTable({
             color={pagination.color ? pagination.color : "dark"}
           >
             {canPreviousPage && (
-              <MDPagination item onClick={() => previousPageCustom() /* previousPage() */}>
+              <MDPagination
+                item
+                onClick={() => previousPageCustom() /* previousPage() */}
+              >
                 <Icon sx={{ fontWeight: "bold" }}>chevron_left</Icon>
               </MDPagination>
             )}
@@ -335,7 +358,10 @@ function DataTable({
               renderPagination
             )}
             {canNextPage && (
-              <MDPagination item onClick={() => nextPageCustom() /* nextPage() */}>
+              <MDPagination
+                item
+                onClick={() => nextPageCustom() /* nextPage() */}
+              >
                 <Icon sx={{ fontWeight: "bold" }}>chevron_right</Icon>
               </MDPagination>
             )}
@@ -359,9 +385,10 @@ DataTable.defaultProps = {
   noEndBorder: true,
 
   manualPagination: false,
-  totalRows: 0, totalPages: 0,
+  totalRows: 0,
+  totalPages: 0,
   recordsPerPage: 10,
-  skipCount: 0
+  skipCount: 0,
 };
 
 // Typechecking props for the DataTable
@@ -375,10 +402,7 @@ DataTable.propTypes = {
     PropTypes.bool,
   ]),
   canSearch: PropTypes.bool,
-  serverSideSearch: PropTypes.oneOfType([
-    PropTypes.array,
-    PropTypes.bool,
-  ]),
+  serverSideSearch: PropTypes.oneOfType([PropTypes.array, PropTypes.bool]),
   showTotalEntries: PropTypes.bool,
   table: PropTypes.objectOf(PropTypes.array).isRequired,
   pagination: PropTypes.shape({
@@ -397,9 +421,14 @@ DataTable.propTypes = {
   isSorted: PropTypes.bool,
   noEndBorder: PropTypes.bool,
 
-  manualPagination: PropTypes.bool, totalRows: PropTypes.number, totalPages: PropTypes.number,
-  recordsPerPage: PropTypes.number, skipCount: PropTypes.number,
-  pageChangeHandler: PropTypes.func, recordsPerPageChangeHandler: PropTypes.func, keywordsChangeHandler: PropTypes.func
+  manualPagination: PropTypes.bool,
+  totalRows: PropTypes.number,
+  totalPages: PropTypes.number,
+  recordsPerPage: PropTypes.number,
+  skipCount: PropTypes.number,
+  pageChangeHandler: PropTypes.func,
+  recordsPerPageChangeHandler: PropTypes.func,
+  keywordsChangeHandler: PropTypes.func,
 };
 
 export default DataTable;

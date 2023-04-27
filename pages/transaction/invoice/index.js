@@ -105,16 +105,19 @@ export default function Invoice(props) {
   };
 
   const getProject = async (val) => {
-    let response = await fetch("/api/transaction/invoice/dropdownproject", {
-      method: "POST",
-      body: JSON.stringify({
-        accessToken: accessToken,
-        params: {
-          SiteId: site?.siteId,
-          periodId: val?.periodId,
-        },
-      }),
-    });
+    let response = await fetch(
+      "/api/transaction/invoice/getdropdownprojectinvoice",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          accessToken: accessToken,
+          params: {
+            SiteId: site?.siteId,
+            periodId: val?.periodId,
+          },
+        }),
+      }
+    );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
     console.log("response----", response);
@@ -127,15 +130,18 @@ export default function Invoice(props) {
   };
 
   const getPeriod = async (val) => {
-    let response = await fetch("/api/transaction/invoice/dropdownperiod", {
-      method: "POST",
-      body: JSON.stringify({
-        accessToken: accessToken,
-        params: {
-          SiteId: site?.siteId,
-        },
-      }),
-    });
+    let response = await fetch(
+      "/api/transaction/invoice/getdropdownperiodbysiteid",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          accessToken: accessToken,
+          params: {
+            SiteId: site?.siteId,
+          },
+        }),
+      }
+    );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
     console.log("response----", response);
@@ -331,7 +337,7 @@ export default function Invoice(props) {
     if (field?.period) {
       setLoading(true);
       const { scheme, keywords, recordsPerPage, skipCount } = customerRequest;
-      let response = await fetch("/api/transaction/invoice/list", {
+      let response = await fetch("/api/transaction/invoice/getinvoicelist", {
         method: "POST",
         body: JSON.stringify({
           accessToken: accessToken,
@@ -400,15 +406,18 @@ export default function Invoice(props) {
   };
 
   const handlePreview = async (val) => {
-    let response = await fetch("/api/transaction/invoice/preview", {
-      method: "POST",
-      body: JSON.stringify({
-        accessToken: accessToken,
-        params: {
-          InvoiceId: val,
-        },
-      }),
-    });
+    let response = await fetch(
+      "/api/transaction/invoice/getpreviewinvoicepdf",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          accessToken: accessToken,
+          params: {
+            InvoiceId: val,
+          },
+        }),
+      }
+    );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
@@ -423,16 +432,19 @@ export default function Invoice(props) {
   };
 
   const getCluster = async (val) => {
-    let response = await fetch("/api/transaction/invoice/dropdowncluster", {
-      method: "POST",
-      body: JSON.stringify({
-        accessToken: accessToken,
-        params: {
-          SiteId: site?.siteId,
-          periodId: val?.periodId,
-        },
-      }),
-    });
+    let response = await fetch(
+      "/api/transaction/invoice/getdropdownclusterinvoice",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          accessToken: accessToken,
+          params: {
+            SiteId: site?.siteId,
+            periodId: val?.periodId,
+          },
+        }),
+      }
+    );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
     console.log("response----", response);
@@ -445,16 +457,19 @@ export default function Invoice(props) {
   };
 
   const getUnitCode = async (val) => {
-    let response = await fetch("/api/transaction/invoice/dropdownunitcode", {
-      method: "POST",
-      body: JSON.stringify({
-        accessToken: accessToken,
-        params: {
-          SiteId: site?.siteId,
-          periodId: val?.periodId,
-        },
-      }),
-    });
+    let response = await fetch(
+      "/api/transaction/invoice/getdropdownunitcodebycluster",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          accessToken: accessToken,
+          params: {
+            SiteId: site?.siteId,
+            periodId: val?.periodId,
+          },
+        }),
+      }
+    );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
     console.log("response----", response);
@@ -467,16 +482,19 @@ export default function Invoice(props) {
   };
 
   const getUnitNo = async (val) => {
-    let response = await fetch("/api/transaction/invoice/dropdownunitno", {
-      method: "POST",
-      body: JSON.stringify({
-        accessToken: accessToken,
-        params: {
-          SiteId: site?.siteId,
-          periodId: val?.periodId,
-        },
-      }),
-    });
+    let response = await fetch(
+      "/api/transaction/invoice/getdropdownunitinvoice",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          accessToken: accessToken,
+          params: {
+            SiteId: site?.siteId,
+            periodId: val?.periodId,
+          },
+        }),
+      }
+    );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
     console.log("response----", response);
@@ -551,17 +569,17 @@ export default function Invoice(props) {
       title = "";
     switch (val) {
       case 1:
-        url = "/api/transaction/invoice/regenerate";
+        url = "/api/transaction/invoice/regenerateinvoicebyinvoiceidlist";
         title = "Re-Generate Succesfull";
         text = "Re-generate for this invoice has been successfull";
         break;
       case 2:
-        url = "/api/transaction/invoice/sendemail";
+        url = "/api/transaction/invoice/sendemailinvoicebyinvoiceheaderid";
         title = "Email has been sent";
         text = "Email has been sent successfully";
         break;
       case 3:
-        url = "/api/transaction/invoice/sendwa";
+        url = "/api/transaction/invoice/sendwainvoice";
         title = "Whatsapp has been sent";
         text = "Whatsapp has been sent successfully";
         break;
@@ -699,7 +717,8 @@ export default function Invoice(props) {
                                       <FormField
                                         {...params}
                                         type="text"
-                                        label="Period *"
+                                        required
+                                        label="Period"
                                         name="period"
                                         placeholder="Choose Period"
                                         InputLabelProps={{ shrink: true }}
@@ -761,6 +780,8 @@ export default function Invoice(props) {
                                     component={Autocomplete}
                                     options={dataProject}
                                     getOptionLabel={(option) =>
+                                      option.projectCode +
+                                      " - " +
                                       option.projectName
                                     }
                                     onChange={(e, value) => {
@@ -912,14 +933,6 @@ export default function Invoice(props) {
                                     flexDirection={{ xs: "column", sm: "row" }}
                                     justifyContent="flex-end"
                                   >
-                                    {/* <MDButton
-                                      type="reset"
-                                      variant="outlined"
-                                      color="secondary"
-                                      // onClick={resetForm}
-                                    >
-                                      Clear Filters
-                                    </MDButton> */}
                                     <MDBox
                                       ml={{ xs: 0, sm: 1 }}
                                       mt={{ xs: 1, sm: 0 }}

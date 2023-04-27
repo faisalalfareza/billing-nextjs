@@ -10,9 +10,9 @@ export const config = {
     // https://nextjs.org/docs/api-routes/request-helpers#custom-config
     // externalResolver adalah bendera eksplisit yang memberi tahu server bahwa rute ini sedang ditangani oleh penyelesai eksternal seperti Express atau Connect. Mengaktifkan opsi ini akan menonaktifkan peringatan untuk permintaan yang belum terselesaikan.
     // Ini adalah peringatan palsu karena dalam kode yang diberikan Anda selalu mengembalikan respons. Hanya saja Next.js tidak mengetahuinya. (NOTA: Jika Anda yakin bahwa Anda mengembalikan respons dalam setiap kasus, Anda dapat menonaktifkan peringatan untuk permintaan yang belum terselesaikan.)
-    externalResolver: true
+    externalResolver: true,
   },
-}
+};
 
 export default async function handler(
   req: NextApiRequest,
@@ -22,19 +22,19 @@ export default async function handler(
   body = JSON.parse(body);
 
   switch (query.method) {
-    case "listCustomer":
+    case "getcustomerlist":
       getCustomerList(res, body);
       break;
 
-    case "listCancelPayment":
+    case "getlistcancelpayment":
       getListCancelPayment(res, body);
       break;
 
-    case "detailCancelPayment":
+    case "getdetailcancelpayment":
       getDetailCancelPayment(res, body);
       break;
-    
-    case "cancelPayment":
+
+    case "cancelpayment":
       cancelPayment(res, body);
       break;
   }
@@ -74,7 +74,7 @@ async function getDetailCancelPayment(res: any, body: any) {
   const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/GetDetailCancelPayment`;
   const config = {
     headers: { "Access-Control-Allow-Origin": "*" },
-    params: params
+    params: params,
   };
   axios
     .get(url, config)
@@ -88,7 +88,7 @@ async function cancelPayment(res: any, body: any) {
   const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/CancelPayment`;
   const config = {
     headers: {
-      "Authorization": "Bearer " + accessToken,
+      Authorization: "Bearer " + accessToken,
       "Access-Control-Allow-Origin": "*",
     },
     params: params,

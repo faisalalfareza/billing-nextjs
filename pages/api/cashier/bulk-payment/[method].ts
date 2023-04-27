@@ -10,9 +10,9 @@ export const config = {
     // https://nextjs.org/docs/api-routes/request-helpers#custom-config
     // externalResolver adalah bendera eksplisit yang memberi tahu server bahwa rute ini sedang ditangani oleh penyelesai eksternal seperti Express atau Connect. Mengaktifkan opsi ini akan menonaktifkan peringatan untuk permintaan yang belum terselesaikan.
     // Ini adalah peringatan palsu karena dalam kode yang diberikan Anda selalu mengembalikan respons. Hanya saja Next.js tidak mengetahuinya. (NOTA: Jika Anda yakin bahwa Anda mengembalikan respons dalam setiap kasus, Anda dapat menonaktifkan peringatan untuk permintaan yang belum terselesaikan.)
-    externalResolver: true
+    externalResolver: true,
   },
-}
+};
 
 export default async function handler(
   req: NextApiRequest,
@@ -22,10 +22,10 @@ export default async function handler(
   body = JSON.parse(body);
 
   switch (query.method) {
-    case "listPaymentMethod":
+    case "getdropdownpaymentmethod":
       getDropdownPaymentMethod(res, body);
       break;
-    
+
     case "uploadBulkPayment":
       uploadBulkPayment(res, body);
       break;
@@ -34,11 +34,11 @@ export default async function handler(
 
 async function getDropdownPaymentMethod(res: any, body: any) {
   const { accessToken } = body;
-  
+
   const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/GetDropdownPaymentMethod`;
   const config = {
     headers: {
-      "Authorization": "Bearer " + accessToken,
+      Authorization: "Bearer " + accessToken,
       "Access-Control-Allow-Origin": "*",
     },
   };
@@ -55,7 +55,7 @@ async function uploadBulkPayment(res: any, body: any) {
   const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/UploadBulkPayment`;
   const config = {
     headers: {
-      "Authorization": "Bearer " + accessToken,
+      Authorization: "Bearer " + accessToken,
       "Access-Control-Allow-Origin": "*",
     },
     params: params,

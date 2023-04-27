@@ -10,9 +10,9 @@ export const config = {
     // https://nextjs.org/docs/api-routes/request-helpers#custom-config
     // externalResolver adalah bendera eksplisit yang memberi tahu server bahwa rute ini sedang ditangani oleh penyelesai eksternal seperti Express atau Connect. Mengaktifkan opsi ini akan menonaktifkan peringatan untuk permintaan yang belum terselesaikan.
     // Ini adalah peringatan palsu karena dalam kode yang diberikan Anda selalu mengembalikan respons. Hanya saja Next.js tidak mengetahuinya. (NOTA: Jika Anda yakin bahwa Anda mengembalikan respons dalam setiap kasus, Anda dapat menonaktifkan peringatan untuk permintaan yang belum terselesaikan.)
-    externalResolver: true
+    externalResolver: true,
   },
-}
+};
 
 export default async function handler(
   req: NextApiRequest,
@@ -22,15 +22,15 @@ export default async function handler(
   body = JSON.parse(body);
 
   switch (query.method) {
-    case "listCustomer":
+    case "getcustomerlist":
       getCustomerList(res, body);
       break;
 
-    case "listOR":
+    case "getlistofficialreceipt":
       getListOfficialReceipt(res, body);
       break;
 
-    case "reprintOR":
+    case "reprintofficialreceipt":
       reprintOfficialReceipt(res, body);
       break;
   }
@@ -85,6 +85,9 @@ async function reprintOfficialReceipt(res: any, body: any) {
 
   axios
     .post(url, params, config)
-    .then((response) => res.send(response.data.result))
+    .then((response) => {
+      console.log("res---", response.data);
+      res.send(response.data);
+    })
     .catch((error) => res.send({ error: error }));
 }

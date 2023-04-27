@@ -30,7 +30,6 @@ export default function MasterSite(props) {
   const [modalParams, setModalParams] = useState(undefined);
   const [{ accessToken, encryptedAccessToken }] = useCookies();
 
-
   const checkingSuccessInput = (value, error) => {
     return value != undefined && value != "" && value.length > 0 && !error;
   };
@@ -49,7 +48,11 @@ export default function MasterSite(props) {
           accessor: "project",
           Cell: ({ value }) => {
             return (
-              <Link href="javascript:void(0)" underline="always" color="primary">
+              <Link
+                href="javascript:void(0)"
+                underline="always"
+                color="primary"
+              >
                 {value} Project Choosen
               </Link>
             );
@@ -60,7 +63,11 @@ export default function MasterSite(props) {
           accessor: "cluster",
           Cell: ({ value }) => {
             return (
-              <Link href="javascript:void(0)" underline="always" color="primary">
+              <Link
+                href="javascript:void(0)"
+                underline="always"
+                color="primary"
+              >
                 {value} Cluster Choosen
               </Link>
             );
@@ -71,7 +78,11 @@ export default function MasterSite(props) {
           accessor: "logo",
           Cell: ({ value }) => {
             return (
-              <Link href="javascript:void(0)" underline="always" color="primary">
+              <Link
+                href="javascript:void(0)"
+                underline="always"
+                color="primary"
+              >
                 View
               </Link>
             );
@@ -127,7 +138,7 @@ export default function MasterSite(props) {
   const handleClose = () => setOpenModal(false);
 
   const fetchData = async (data) => {
-    let response = await fetch("/api/master/site/list", {
+    let response = await fetch("/api/master/site/getlistmastersite", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
@@ -202,7 +213,6 @@ export default function MasterSite(props) {
     fetchData();
   }, []);
 
-
   return (
     <DashboardLayout>
       <DashboardNavbar />
@@ -214,6 +224,11 @@ export default function MasterSite(props) {
               <Grid item xs={12} md={8}>
                 <MDBox mb={1}>
                   <MDTypography variant="h5">Master Site List</MDTypography>
+                </MDBox>
+                <MDBox mb={2}>
+                  <MDTypography variant="body2" color="text">
+                    For site data maintenance
+                  </MDTypography>
                 </MDBox>
               </Grid>
               <Grid item xs={12} md={4} sx={{ textAlign: "right" }}>
@@ -242,23 +257,4 @@ export default function MasterSite(props) {
       />
     </DashboardLayout>
   );
-}
-
-export async function getStaticProps(context) {
-  const urlP = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetDropdownProject`;
-  const resProject = await fetch(urlP);
-  let listProject = await resProject.json();
-  const dataProject = listProject.result;
-  const resSite = await fetch(
-    `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetDropdownSite`
-  );
-  let listSite = await resSite.json();
-  const dataSite = listSite.result;
-  return {
-    props: {
-      dataProject,
-      dataSite,
-    },
-    revalidate: 60,
-  };
 }

@@ -39,12 +39,15 @@ export default function ReportDaily(props) {
   }, [site]);
 
   const getPaymentMethod = async () => {
-    let response = await fetch("/api/cashier/billing/dropdownpayment", {
-      method: "POST",
-      body: JSON.stringify({
-        accessToken: accessToken,
-      }),
-    });
+    let response = await fetch(
+      "/api/cashier/billing/getdropdownpaymentmethod",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          accessToken: accessToken,
+        }),
+      }
+    );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
@@ -56,15 +59,18 @@ export default function ReportDaily(props) {
   };
 
   const getPeriod = async (val) => {
-    let response = await fetch("/api/transaction/invoice/dropdownperiod", {
-      method: "POST",
-      body: JSON.stringify({
-        accessToken: accessToken,
-        params: {
-          SiteId: site?.siteId,
-        },
-      }),
-    });
+    let response = await fetch(
+      "/api/transaction/invoice/getdropdownperiodbysiteid",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          accessToken: accessToken,
+          params: {
+            SiteId: site?.siteId,
+          },
+        }),
+      }
+    );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
     console.log("response----", response);
@@ -168,7 +174,7 @@ export default function ReportDaily(props) {
   };
 
   const getCluster = async (val) => {
-    let response = await fetch("/api/master/site/dropdowncluster", {
+    let response = await fetch("/api/master/site/getdropdownclusterbyproject", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
@@ -190,15 +196,18 @@ export default function ReportDaily(props) {
   };
 
   const getProject = async (val) => {
-    let response = await fetch("/api/transaction/water/dropdownproject", {
-      method: "POST",
-      body: JSON.stringify({
-        accessToken: accessToken,
-        params: {
-          SiteId: site?.siteId,
-        },
-      }),
-    });
+    let response = await fetch(
+      "/api/transaction/water/getdropdownprojectbysiteid",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          accessToken: accessToken,
+          params: {
+            SiteId: site?.siteId,
+          },
+        }),
+      }
+    );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
     console.log("response----", response);
@@ -277,6 +286,8 @@ export default function ReportDaily(props) {
                                   component={Autocomplete}
                                   options={dataProject}
                                   getOptionLabel={(option) =>
+                                    option.projectCode +
+                                    " - " +
                                     option.projectName
                                   }
                                   onChange={(e, value) => {
@@ -295,7 +306,8 @@ export default function ReportDaily(props) {
                                     <FormField
                                       {...params}
                                       type="text"
-                                      label="Project *"
+                                      required
+                                      label="Project"
                                       name="project"
                                       placeholder="Choose Project"
                                       InputLabelProps={{ shrink: true }}
@@ -371,7 +383,8 @@ export default function ReportDaily(props) {
                                     <FormField
                                       {...params}
                                       type="text"
-                                      label="Period *"
+                                      required
+                                      label="Period"
                                       name="period"
                                       placeholder="Choose Period"
                                       InputLabelProps={{ shrink: true }}

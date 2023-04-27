@@ -51,7 +51,7 @@ export default function DetailBalance(props) {
   }, [params]);
 
   const fetchData = async (data) => {
-    let response = await fetch("/api/cashier/billing/balance", {
+    let response = await fetch("/api/cashier/billing/viewdetailbalance", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,

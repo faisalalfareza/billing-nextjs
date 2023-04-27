@@ -13,40 +13,40 @@ export default async function handler(
   switch (method) {
     case "POST":
       switch (query.method) {
-        case "list":
+        case "getinvoicelist":
           getList(res, body);
           break;
-        case "dropdownperiod":
+        case "getdropdownperiodbysiteid":
           getDropdownPeriod(res, body);
           break;
-        case "dropdownproject":
+        case "getdropdownprojectinvoice":
           getDropdownProject(res, body);
           break;
-        case "dropdowncluster":
+        case "getdropdownclusterinvoice":
           getDropdownCluster(res, body);
           break;
-        case "dropdownunitcode":
+        case "getdropdownunitcodebycluster":
           getDropdownUnitCode(res, body);
           break;
-        case "dropdownunitno":
+        case "getdropdownunitinvoice":
           getDropdownUnitNo(res, body);
           break;
-        case "findname":
+        case "getsearchpscode":
           findName(res, body);
           break;
-        case "preview":
+        case "getpreviewinvoicepdf":
           preview(res, body);
           break;
-        case "adjustment":
+        case "changeadjustmentinvoice":
           adjust(res, body);
           break;
-        case "regenerate":
+        case "regenerateinvoicebyinvoiceidlist":
           regenerate(res, body);
           break;
-        case "sendemail":
+        case "sendemailinvoicebyinvoiceheaderid":
           sendEmail(res, body);
           break;
-        case "sendwa":
+        case "sendwainvoice":
           sendWa(res, body);
           break;
       }

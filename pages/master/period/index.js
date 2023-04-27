@@ -106,7 +106,7 @@ export default function MasterPeriod(props) {
   const handleClose = () => setOpenModal(false);
 
   const fetchData = async (data) => {
-    let response = await fetch("/api/master/period/list", {
+    let response = await fetch("/api/master/period/getlistmasterperiod", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,

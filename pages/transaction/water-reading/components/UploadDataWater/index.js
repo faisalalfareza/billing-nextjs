@@ -92,7 +92,7 @@ function UploadDataWater(props) {
         label: "Cluster",
         placeholder: "Choose Cluster",
         type: "text",
-        isRequired: true,
+        isRequired: false,
         errorMsg: "Cluster is required.",
         defaultValue: "",
       },
@@ -125,15 +125,18 @@ function UploadDataWater(props) {
   };
 
   const getProject = async (val) => {
-    let response = await fetch("/api/transaction/water/dropdownproject", {
-      method: "POST",
-      body: JSON.stringify({
-        accessToken: accessToken,
-        params: {
-          SiteId: site?.siteId,
-        },
-      }),
-    });
+    let response = await fetch(
+      "/api/transaction/water/getdropdownprojectbysiteid",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          accessToken: accessToken,
+          params: {
+            SiteId: site?.siteId,
+          },
+        }),
+      }
+    );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
     if (response.error) {
@@ -144,7 +147,7 @@ function UploadDataWater(props) {
   };
 
   const getPeriod = async (val) => {
-    let response = await fetch("/api/transaction/water/activePeriod", {
+    let response = await fetch("/api/transaction/water/getactiveperiod", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
@@ -175,7 +178,7 @@ function UploadDataWater(props) {
   });
 
   const onProjectChange = async (val) => {
-    let response = await fetch("/api/master/site/dropdowncluster", {
+    let response = await fetch("/api/master/site/getdropdownclusterbyproject", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
@@ -220,13 +223,16 @@ function UploadDataWater(props) {
       waterReadingUploadDetailList: list,
     };
 
-    let response = await fetch("/api/transaction/water/upload", {
-      method: "POST",
-      body: JSON.stringify({
-        accessToken: accessToken,
-        params: body,
-      }),
-    });
+    let response = await fetch(
+      "/api/transaction/water/uploadexcelwaterreading",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          accessToken: accessToken,
+          params: body,
+        }),
+      }
+    );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
@@ -267,7 +273,7 @@ function UploadDataWater(props) {
     });
 
     const checkingSuccessInput = (value, error) => {
-      return value != undefined && value != "" && !error;
+      return value != undefined && value != "" && value != null && !error;
     };
     const sleep = (ms) =>
       new Promise((resolve) => {
@@ -368,7 +374,9 @@ function UploadDataWater(props) {
                             option.projectId === value.projectId
                           }
                           options={dataProject}
-                          getOptionLabel={(option) => option.projectName}
+                          getOptionLabel={(option) =>
+                            option.projectCode + " - " + option.projectName
+                          }
                           onChange={(e, value) => {
                             setFieldValue(
                               project.name,
@@ -382,9 +390,8 @@ function UploadDataWater(props) {
                             <FormField
                               {...params}
                               type={project.type}
-                              label={
-                                project.label + (project.isRequired ? " *" : "")
-                              }
+                              required={project.isRequired}
+                              label={project.label}
                               name={project.name}
                               placeholder={project.placeholder}
                               InputLabelProps={{ shrink: true }}
@@ -399,8 +406,8 @@ function UploadDataWater(props) {
                       </Grid>
                       <Grid item xs={12} sm={6}>
                         <Field
-                          name={cluster.name}
                           multiple
+                          name={cluster.name}
                           disableCloseOnSelect
                           component={Autocomplete}
                           options={dataCluster}
@@ -423,9 +430,8 @@ function UploadDataWater(props) {
                             <FormField
                               {...params}
                               type={cluster.type}
-                              label={
-                                cluster.label + (cluster.isRequired ? " *" : "")
-                              }
+                              required={cluster.isRequired}
+                              label={cluster.label}
                               name={cluster.name}
                               placeholder={cluster.placeholder}
                               InputLabelProps={{ shrink: true }}
@@ -442,10 +448,8 @@ function UploadDataWater(props) {
                       <Grid item xs={6}>
                         <FormField
                           type={fileUpload.type}
-                          label={
-                            fileUpload.label +
-                            (fileUpload.isRequired ? " *" : "")
-                          }
+                          required={fileUpload.isRequired}
+                          label={fileUpload.label}
                           name={fileUpload.name}
                           placeholder={fileUpload.placeholder}
                           InputLabelProps={{ shrink: true }}

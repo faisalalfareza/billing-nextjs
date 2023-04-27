@@ -14,7 +14,7 @@ export default function SiteDropdown(props) {
   }, []);
 
   const getSite = async () => {
-    let response = await fetch("/api/master/period/dropdownsite", {
+    let response = await fetch("/api/master/period/getdropdownsite", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
