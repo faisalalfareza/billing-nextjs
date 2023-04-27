@@ -146,6 +146,9 @@ export default function BillingPayment(props) {
 
   //dari sini
   const [isLoading, setLoading] = useState(false);
+  const [isLoadingSearch, setLoadingSearch] = useState(false);
+  const [isLoadingShow, setLoadingShow] = useState(false);
+
   let schemeValidations = Yup.object().shape({
     cluster: Yup.string(),
     paymentMethod: Yup.object().required("Payment Method is required."),
@@ -433,8 +436,9 @@ export default function BillingPayment(props) {
   };
 
   const fetchData = async (data) => {
+    setLoadingSearch(true);
     const { scheme, keywords, recordsPerPage, skipCount } = customerRequest;
-    let response = await fetch("/api/cashier/billing/list", {
+    let response = await fetch("/api/cashier/billing/getcustomerlist", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
@@ -449,7 +453,7 @@ export default function BillingPayment(props) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error) setLoading(false);
+    if (response.error) setLoadingSearch(false);
     else {
       const list = [];
       let data = response.result;
@@ -471,16 +475,20 @@ export default function BillingPayment(props) {
         totalRows: data.totalCount,
         totalPages: Math.ceil(data.totalCount / customerRequest.recordsPerPage),
       }));
+      setLoadingSearch(false);
     }
   };
 
   const getPaymentMethod = async () => {
-    let response = await fetch("/api/cashier/billing/dropdownpayment", {
-      method: "POST",
-      body: JSON.stringify({
-        accessToken: accessToken,
-      }),
-    });
+    let response = await fetch(
+      "/api/cashier/billing/getdropdownpaymentmethod",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          accessToken: accessToken,
+        }),
+      }
+    );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
@@ -493,7 +501,7 @@ export default function BillingPayment(props) {
   };
 
   const getBank = async () => {
-    let response = await fetch("/api/cashier/billing/dropdownbank", {
+    let response = await fetch("/api/cashier/billing/getdropdownbank", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
@@ -511,22 +519,26 @@ export default function BillingPayment(props) {
   };
 
   const getDetail = async (data) => {
-    let response = await fetch("/api/cashier/billing/detail", {
-      method: "POST",
-      body: JSON.stringify({
-        accessToken: accessToken,
-        params: {
-          PsCode: detail.psCode,
-          unitDataId: detail.unitDataId,
-        },
-      }),
-    });
+    setLoadingShow(true);
+    let response = await fetch(
+      "/api/cashier/billing/getpaymentdetailbypscode",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          accessToken: accessToken,
+          params: {
+            PsCode: detail.psCode,
+            unitDataId: detail.unitDataId,
+          },
+        }),
+      }
+    );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
     if (response.error) {
       const error = response.error;
-      setLoading(false);
+      setLoadingShow(false);
       alertService.error({ title: "Error", text: response.error.message });
     } else {
       const result = response.result.listInvoicePayment;
@@ -549,6 +561,7 @@ export default function BillingPayment(props) {
           payment: tp,
         };
       });
+      setLoadingShow(false);
     }
   };
 
@@ -589,7 +602,8 @@ export default function BillingPayment(props) {
                   <MDInput
                     variant="standard"
                     value={filterText}
-                    label="Customer Name / ID Client *"
+                    required
+                    label="Customer Name / ID Client"
                     onChange={(e) => {
                       setFilterText(e.target.value);
                       setCustomerRequest((prevState) => ({
@@ -597,6 +611,7 @@ export default function BillingPayment(props) {
                         keywords: e.target.value,
                       }));
                     }}
+                    error={filterText == ""}
                     fullWidth
                   />
                 </MDBox>
@@ -607,12 +622,13 @@ export default function BillingPayment(props) {
                     <MDButton
                       variant="gradient"
                       color="primary"
-                      disabled={filterText == ""}
+                      disabled={filterText == "" || isLoadingSearch}
                       onClick={() => {
                         fetchData();
                       }}
                     >
-                      <Icon>search</Icon>&nbsp; Search
+                      <Icon>search</Icon>&nbsp;{" "}
+                      {isLoadingSearch ? "Searching..." : "Search"}
                     </MDButton>
                   </Grid>
                 </Grid>
@@ -642,7 +658,9 @@ export default function BillingPayment(props) {
               <MDBox p={3} alignItems="center" textAlign="center">
                 <MDButton
                   disabled={
-                    selectedPSCode == undefined || selectedPSCode == null
+                    selectedPSCode == undefined ||
+                    selectedPSCode == null ||
+                    isLoadingShow
                   }
                   variant="gradient"
                   color="primary"
@@ -650,7 +668,8 @@ export default function BillingPayment(props) {
                     getDetail();
                   }}
                 >
-                  <Icon>search</Icon>&nbsp; Show This Unit
+                  <Icon>search</Icon>&nbsp;{" "}
+                  {isLoadingShow ? "Showing This Unit..." : "Show This Unit"}
                 </MDButton>
               </MDBox>
             </MDBox>

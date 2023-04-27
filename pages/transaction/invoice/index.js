@@ -780,6 +780,8 @@ export default function Invoice(props) {
                                     component={Autocomplete}
                                     options={dataProject}
                                     getOptionLabel={(option) =>
+                                      option.projectCode +
+                                      " - " +
                                       option.projectName
                                     }
                                     onChange={(e, value) => {

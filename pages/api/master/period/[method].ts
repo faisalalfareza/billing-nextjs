@@ -169,8 +169,9 @@ async function create(res: any, body: any) {
       });
     })
     .catch((error) => {
+      console.log("error-----", error.response.data);
       res.send({
-        error: error,
+        error: error.response.data,
       });
     });
 }

@@ -218,7 +218,7 @@ function DataTable({
           justifyContent="space-between"
           alignItems="center"
           p={3}
-          sx={{ width: "100vw" }}
+          sx={{ width: "100%" }}
         >
           {canEntriesPerPage && entriesPerPage && (
             <MDBox display="flex" alignItems="center">

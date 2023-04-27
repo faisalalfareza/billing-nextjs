@@ -22,7 +22,6 @@ import DetailCancelPayment from "./components/DetailCancelPayment";
 import FormField from "/pagesComponents/FormField";
 import SiteDropdown from "../../../pagesComponents/dropdown/Site";
 
-
 function CancelPayment() {
   const [site, setSite] = useState(null);
   const handleSite = (siteVal) => {
@@ -30,7 +29,6 @@ function CancelPayment() {
     localStorage.setItem("site", JSON.stringify(siteVal));
   };
 
-  
   const schemeModels = {
     formId: "reprint-or-form",
     formField: {
@@ -67,7 +65,6 @@ function CancelPayment() {
     } else setSite(currentSite);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
 
   const [isLoadingCustomer, setLoadingCustomer] = useState(false);
   const [customerRequest, setCustomerRequest] = useState({
@@ -109,7 +106,7 @@ function CancelPayment() {
     setLoadingCustomer(true);
 
     const { scheme, keywords, recordsPerPage, skipCount } = customerRequest;
-    let response = await fetch("/api/cashier/cancel-payment/listCustomer", {
+    let response = await fetch("/api/cashier/cancel-payment/getcustomerlist", {
       method: "POST",
       body: JSON.stringify({
         params: {
@@ -123,15 +120,19 @@ function CancelPayment() {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+    if (response.error)
+      alertService.error({ title: "Error", text: response.error.message });
     else {
       setCustomerResponse((prevState) => ({
         ...prevState,
         rowData: response.items,
         totalRows: response.totalCount,
-        totalPages: Math.ceil(response.totalCount / customerRequest.recordsPerPage),
+        totalPages: Math.ceil(
+          response.totalCount / customerRequest.recordsPerPage
+        ),
       }));
-    } setLoadingCustomer(false);
+    }
+    setLoadingCustomer(false);
   };
   const setCustomerTaskList = (rows) => {
     return {
@@ -169,15 +170,16 @@ function CancelPayment() {
     customerRequest.keywords != "" && getCustomerList();
   }, [customerRequest.skipCount, customerRequest.recordsPerPage]);
 
-
   const checkingSuccessInput = (isRequired, value, error) => {
-    return (!isRequired && true) || (isRequired && value != undefined && value != "" && !error);
+    return (
+      (!isRequired && true) ||
+      (isRequired && value != undefined && value != "" && !error)
+    );
   };
   const handleCustomerSubmit = async (e) => {
     e != undefined && e.preventDefault();
     getCustomerList();
   };
-
 
   const [isLoadingCancelPayment, setLoadingCancelPayment] = useState(false);
   const [cancelPaymentData, setCancelPaymentData] = useState({
@@ -189,28 +191,35 @@ function CancelPayment() {
   const getCancelPaymentList = async (unitDataID) => {
     setLoadingCancelPayment(true);
 
-    let response = await fetch("/api/cashier/cancel-payment/listCancelPayment", {
-      method: "POST",
-      body: JSON.stringify({
-        params: {
-          UnitDataId: unitDataID,
-          MaxResultCount: 1000, // Rows Per Page (Fixed). Start From 1
-          SkipCount: 0, // Increments Based On Page (Flexible). Start From 0
-        },
-      }),
-    });
+    let response = await fetch(
+      "/api/cashier/cancel-payment/getlistcancelpayment",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          params: {
+            UnitDataId: unitDataID,
+            MaxResultCount: 1000, // Rows Per Page (Fixed). Start From 1
+            SkipCount: 0, // Increments Based On Page (Flexible). Start From 0
+          },
+        }),
+      }
+    );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+    if (response.error)
+      alertService.error({ title: "Error", text: response.error.message });
     else {
       setCancelPaymentData((prevState) => ({
         ...prevState,
         rowData: response.items,
         totalRows: response.totalCount,
-        totalPages: Math.ceil(response.totalCount / customerRequest.recordsPerPage),
+        totalPages: Math.ceil(
+          response.totalCount / customerRequest.recordsPerPage
+        ),
       }));
-    } setLoadingCancelPayment(false);
+    }
+    setLoadingCancelPayment(false);
   };
   const setCancelPaymentTaskList = (rows) => {
     return {
@@ -265,18 +274,16 @@ function CancelPayment() {
     };
   };
 
-
   const [modalOpen, setModalOpen] = useState({
     isOpen: false,
-    params: undefined
+    params: undefined,
   });
   const openModal = (record = undefined) => {
     setModalOpen({
       isOpen: !modalOpen.isOpen,
-      params: record
+      params: record,
     });
   };
-
 
   return (
     <DashboardLayout>
@@ -307,9 +314,7 @@ function CancelPayment() {
                 <Grid container alignItems="center">
                   <Grid item xs={12} mb={2}>
                     <MDBox>
-                      <MDTypography variant="h5">
-                        Filter
-                      </MDTypography>
+                      <MDTypography variant="h5">Filter</MDTypography>
                     </MDBox>
                   </Grid>
                   <Grid item xs={12}>
@@ -317,17 +322,14 @@ function CancelPayment() {
                       initialValues={schemeInitialValues}
                       validationSchema={schemeValidations}
                     >
-                      {({
-                        values,
-                        errors,
-                        touched
-                      }) => {
-                        let {
-                          customerName: customerNameV
-                        } = values;
-                        const isValifForm = () => (
-                          checkingSuccessInput(customerName.isRequired, customerNameV, errors.customerName)
-                        );
+                      {({ values, errors, touched }) => {
+                        let { customerName: customerNameV } = values;
+                        const isValifForm = () =>
+                          checkingSuccessInput(
+                            customerName.isRequired,
+                            customerNameV,
+                            errors.customerName
+                          );
 
                         return (
                           <MDBox
@@ -339,15 +341,22 @@ function CancelPayment() {
                               <Grid item xs={12} sm={9}>
                                 <FormField
                                   type={customerName.type}
-                                  label={
-                                    customerName.label +
-                                    (customerName.isRequired ? " ⁽*⁾" : "")
-                                  }
+                                  required={customerName.isRequired}
+                                  label={customerName.label}
                                   name={customerName.name}
                                   value={customerNameV}
                                   placeholder={customerName.placeholder}
-                                  error={errors.customerName && touched.customerName}
-                                  success={customerName.isRequired && checkingSuccessInput(customerName.isRequired, customerNameV, errors.customerName)}
+                                  error={
+                                    errors.customerName && touched.customerName
+                                  }
+                                  success={
+                                    customerName.isRequired &&
+                                    checkingSuccessInput(
+                                      customerName.isRequired,
+                                      customerNameV,
+                                      errors.customerName
+                                    )
+                                  }
                                   onKeyUp={(e) =>
                                     setCustomerRequest((prevState) => ({
                                       ...prevState,
@@ -371,9 +380,14 @@ function CancelPayment() {
                                       variant="gradient"
                                       color="primary"
                                       sx={{ height: "100%" }}
-                                      disabled={!isValifForm() || isLoadingCustomer}
+                                      disabled={
+                                        !isValifForm() || isLoadingCustomer
+                                      }
                                     >
-                                      <Icon>search</Icon>&nbsp;{" "} { isLoadingCustomer ? "Searching.." : "Search" }
+                                      <Icon>search</Icon>&nbsp;{" "}
+                                      {isLoadingCustomer
+                                        ? "Searching.."
+                                        : "Search"}
                                     </MDButton>
                                   </MDBox>
                                 </MDBox>
@@ -385,7 +399,7 @@ function CancelPayment() {
                     </Formik>
                   </Grid>
                 </Grid>
-                { customerResponse.rowData.length > 0 && (
+                {customerResponse.rowData.length > 0 && (
                   <Grid container alignItems="center" pt={3}>
                     <Grid item xs={12} mb={2}>
                       <MDBox>
@@ -401,7 +415,9 @@ function CancelPayment() {
                         recordsPerPage={customerRequest.recordsPerPage}
                         skipCount={customerRequest.skipCount}
                         pageChangeHandler={skipCountChangeHandler}
-                        recordsPerPageChangeHandler={recordsPerPageChangeHandler}
+                        recordsPerPageChangeHandler={
+                          recordsPerPageChangeHandler
+                        }
                         keywordsChangeHandler={keywordsChangeHandler}
                       />
                       <MDBox pt={3} pb={1} px={3}>
@@ -417,10 +433,14 @@ function CancelPayment() {
                                 variant="gradient"
                                 color="primary"
                                 sx={{ height: "100%" }}
-                                onClick={() => getCancelPaymentList(selectedUnit.unitDataId)}
+                                onClick={() =>
+                                  getCancelPaymentList(selectedUnit.unitDataId)
+                                }
                                 disabled={!selectedUnit}
                               >
-                                { isLoadingCancelPayment ? "Showing this Unit.." : "Show this Unit" }
+                                {isLoadingCancelPayment
+                                  ? "Showing this Unit.."
+                                  : "Show this Unit"}
                               </MDButton>
                             </MDBox>
                           </MDBox>
@@ -428,12 +448,12 @@ function CancelPayment() {
                       </MDBox>
                     </Grid>
                   </Grid>
-                ) }
+                )}
               </MDBox>
             </Card>
           </Grid>
 
-          { cancelPaymentData.rowData.length > 0 && (
+          {cancelPaymentData.rowData.length > 0 && (
             <Grid item xs={12}>
               <Card>
                 <MDBox p={3} lineHeight={1}>
@@ -447,7 +467,9 @@ function CancelPayment() {
                     </Grid>
                     <Grid item xs={12}>
                       <DataTable
-                        table={setCancelPaymentTaskList(cancelPaymentData.rowData)}
+                        table={setCancelPaymentTaskList(
+                          cancelPaymentData.rowData
+                        )}
                         // canEntriesPerPage entriesPerPage={{ defaultValue: customerRequest.recordsPerPage }}
                         // canSearch
                       />
@@ -456,18 +478,19 @@ function CancelPayment() {
                 </MDBox>
               </Card>
 
-              { modalOpen.isOpen && <DetailCancelPayment
+              {modalOpen.isOpen && (
+                <DetailCancelPayment
                   isOpen={modalOpen.isOpen}
                   params={modalOpen.params}
                   onModalChanged={(isChanged) => {
                     setModalOpen((prevState) => ({
                       ...prevState,
-                      isOpen: !modalOpen.isOpen
+                      isOpen: !modalOpen.isOpen,
                     }));
                     isChanged && getCancelPaymentList(selectedUnit.unitDataId);
                   }}
                 />
-              }
+              )}
             </Grid>
           )}
         </Grid>

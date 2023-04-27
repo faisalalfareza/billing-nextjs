@@ -374,7 +374,9 @@ function UploadDataWater(props) {
                             option.projectId === value.projectId
                           }
                           options={dataProject}
-                          getOptionLabel={(option) => option.projectName}
+                          getOptionLabel={(option) =>
+                            option.projectCode + " - " + option.projectName
+                          }
                           onChange={(e, value) => {
                             setFieldValue(
                               project.name,

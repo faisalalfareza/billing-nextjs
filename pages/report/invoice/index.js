@@ -272,7 +272,8 @@ export default function ReportInvoice(props) {
                                     <FormField
                                       {...params}
                                       type="text"
-                                      label="Period *"
+                                      required
+                                      label="Period"
                                       name="period"
                                       placeholder="Choose Period"
                                       InputLabelProps={{ shrink: true }}
@@ -307,7 +308,8 @@ export default function ReportInvoice(props) {
                                     <FormField
                                       {...params}
                                       type="text"
-                                      label="Report Type *"
+                                      required
+                                      label="Report Type"
                                       name="type"
                                       placeholder="Choose Type"
                                       InputLabelProps={{ shrink: true }}

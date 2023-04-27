@@ -30,6 +30,7 @@ import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
 import { typeNormalization } from "/helpers/utils";
+import { alertService } from "/helpers";
 
 function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
   const [{ accessToken, encryptedAccessToken }] = useCookies();
@@ -176,10 +177,10 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
       response = typeNormalization(await response.json());
 
       if (response.error) {
-        Swal.fire({
+        let err = response.error;
+        alertService.error({
           title: "Error",
-          icon: "error",
-          text: response.error.message,
+          text: err.error.message,
         });
       } else {
         Swal.fire({
@@ -222,11 +223,7 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
         Swal.fire({
           title: "Period Updated",
           text:
-            "Period " +
-            values.periodName +
-            " in " +
-            values.periodNumber +
-            " has been successfully updated.",
+            "Period " + values.periodName + " has been successfully updated.",
           icon: "success",
           showConfirmButton: true,
           timerProgressBar: true,

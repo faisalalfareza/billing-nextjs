@@ -19,14 +19,12 @@ import { alertService } from "/helpers/alert.service";
 
 import FormField from "/pagesComponents/FormField";
 
-
 function DetailCancelPayment({ isOpen, params, onModalChanged }) {
   const [modalOpen, setModalOpen] = useState(true);
   const [{ accessToken }] = useCookies();
 
   const isCanceled = params?.canceled == "Yes";
 
-  
   const schemeModels = {
     formId: "cancel-payment-form",
     formField: {
@@ -59,7 +57,7 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
 
     const { billingHeaderId } = params;
     let response = await fetch(
-      "/api/cashier/cancel-payment/detailCancelPayment",
+      "/api/cashier/cancel-payment/getdetailcancelpayment",
       {
         method: "POST",
         body: JSON.stringify({
@@ -72,7 +70,8 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+    if (response.error)
+      alertService.error({ title: "Error", text: response.error.message });
     else setDetailCancelPayment(response);
 
     setLoadingDetailCancelPayment(false);
@@ -82,11 +81,14 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
-
   const checkingSuccessInput = (isRequired, value, error) => {
-    return (!isRequired && true) || (isRequired && value != undefined && value != "" && !error);
+    return (
+      (!isRequired && true) ||
+      (isRequired && value != undefined && value != "" && !error)
+    );
   };
-  const handleCancelPaymentSubmit = (values, actions) => cancelPayment(values, actions);
+  const handleCancelPaymentSubmit = (values, actions) =>
+    cancelPayment(values, actions);
 
   const [isLoadingCancelPayment, setLoadingCancelPayment] = useState(false);
   const cancelPayment = async (values, actions) => {
@@ -107,7 +109,7 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
         setLoadingCancelPayment(true);
 
         let response = await fetch(
-          "/api/cashier/cancel-payment/cancelPayment",
+          "/api/cashier/cancel-payment/cancelpayment",
           {
             method: "POST",
             body: JSON.stringify({
@@ -122,7 +124,8 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
         if (!response.ok) throw new Error(`Error: ${response.status}`);
         response = typeNormalization(await response.json());
 
-        if (response.error) alertService.error({ title: "Error", text: response.error.message });
+        if (response.error)
+          alertService.error({ title: "Error", text: response.error.message });
         else {
           response &&
             Swal.fire({
@@ -138,11 +141,11 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
               actions.resetForm();
               closeModal(true);
             });
-        } setLoadingCancelPayment(false);
+        }
+        setLoadingCancelPayment(false);
       }
     });
   };
-
 
   const openModal = () => setModalOpen(true);
   const toggleModal = () => setModalOpen(true);
@@ -152,12 +155,11 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
     setTimeout(() => onModalChanged(isChanged), 0);
   };
 
-  
   if (isOpen) {
     return (
       detailCancelPayment && (
         <Modal
-          size="lg"
+          size="xl"
           isOpen={isOpen}
           toggle={toggleModal}
           onOpened={openModal}
@@ -168,17 +170,14 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
             validationSchema={schemeValidations}
             onSubmit={handleCancelPaymentSubmit}
           >
-            {({
-              values,
-              errors,
-              touched
-            }) => {
-              let {
-                remarks: remarksV
-              } = values;
-              const isValifForm = () => (
-                checkingSuccessInput(remarks.isRequired, remarksV, errors.remarks)
-              );
+            {({ values, errors, touched }) => {
+              let { remarks: remarksV } = values;
+              const isValifForm = () =>
+                checkingSuccessInput(
+                  remarks.isRequired,
+                  remarksV,
+                  errors.remarks
+                );
 
               return (
                 <Form id={schemeModels.formId} autoComplete="off">
@@ -344,7 +343,9 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
                                         fontWeight="medium"
                                         textTransform="capitalize"
                                       >
-                                        {detailCancelPayment.remarks}
+                                        {detailCancelPayment.remarks == null
+                                          ? "-"
+                                          : detailCancelPayment.remarks}
                                       </MDTypography>
                                     </TableCell>
                                   </TableRow>
@@ -486,7 +487,7 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
                                 )
                               }
                               multiline
-                              rows={5}
+                              rows={1}
                             />
                           </Grid>
                         )}
