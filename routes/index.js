@@ -139,7 +139,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
         {
           name: "Warning Letter",
           nameOnHeader: "Warning Letter",
-          key: "waning-letter",
+          key: "warning-letter",
           route: "/transaction/warning-letter",
           permission: "Pages.Tenants.GenerateNoSeriFP.Create",
         },
