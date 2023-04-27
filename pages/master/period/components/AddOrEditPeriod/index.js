@@ -4,6 +4,7 @@ import Swal from "sweetalert2";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import { Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
+import { ClickAwayListener } from "@mui/base";
 
 // prop-types is a library for typechecking of props
 import PropTypes from "prop-types";
@@ -36,6 +37,7 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
   const [{ accessToken, encryptedAccessToken }] = useCookies();
   const [isLoadingSubmit, setLoadingSubmit] = useState(false);
   const [no, setNo] = useState(null);
+  const [open, setOpen] = useState(false);
 
   const schemeModels = {
     formId: "period-form",
@@ -185,8 +187,7 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
       } else {
         Swal.fire({
           title: "New Period Added",
-          text:
-            "Period " + values.periodNumber + " has been successfully added",
+          text: "Period " + no + " has been successfully added",
           icon: "success",
           showConfirmButton: true,
           timerProgressBar: true,
@@ -257,7 +258,7 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
   if (isOpen) {
     let schemeValidations = Yup.object().shape({
       [startDate.name]: startDate.isRequired
-        ? Yup.date().required(startDate.errorMsg)
+        ? Yup.date().required(startDate.errorMsg).typeError("Invalid Date")
         : Yup.date().notRequired(),
       [periodName.name]: periodName.isRequired
         ? Yup.string()
@@ -265,10 +266,10 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
             .max(periodName.maxLength, periodName.invalidMaxLengthMsg)
         : Yup.string().notRequired(),
       [endDate.name]: endDate.isRequired
-        ? Yup.date().required(endDate.errorMsg)
+        ? Yup.date().required(endDate.errorMsg).typeError("Invalid Date")
         : Yup.date().notRequired(),
       [closeDate.name]: closeDate.isRequired
-        ? Yup.date().required(closeDate.errorMsg)
+        ? Yup.date().required(closeDate.errorMsg).typeError("Invalid Date")
         : Yup.date().notRequired(),
     });
 
@@ -298,6 +299,10 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
       } else {
         createPeriod(values, actions);
       }
+    };
+
+    const onKeyDown = (e) => {
+      e.preventDefault();
     };
 
     return (
@@ -356,40 +361,54 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
                             formValues.periodNumber,
                             errors.periodNumber
                           )}
+                          InputLabelProps={{ shrink: true }}
                         />
                       </Grid>
                       <Grid item xs={12} sm={12}>
                         <LocalizationProvider dateAdapter={AdapterDayjs}>
-                          <DatePicker
-                            label={periodName.label}
-                            value={formValues.periodName}
-                            // closeOnSelect={true}
-                            // variant="inline"
-                            inputFormat="MMMM YYYY"
-                            views={["year", "month"]}
-                            onChange={(newValue) => {
-                              setFieldValue(
-                                periodName.name,
-                                newValue != null
-                                  ? newValue
-                                  : initialValues[periodName.name]
-                              );
+                          <ClickAwayListener
+                            mouseEvent="onMouseDown"
+                            onClickAway={() => {
+                              setOpen(false);
                             }}
-                            renderInput={(params) => (
-                              <TextField
-                                {...params}
-                                required={periodName.isRequired}
-                                variant="standard"
-                                fullWidth
-                                error={errors.periodName && touched.periodName}
-                                helperText={
-                                  errors.periodName && touched.periodName
-                                    ? periodName.errorMsg
-                                    : ""
-                                }
-                              />
-                            )}
-                          />
+                          >
+                            <DatePicker
+                              open={open}
+                              onOpen={() => setOpen(true)}
+                              onClose={() => setOpen(false)}
+                              label={periodName.label}
+                              value={formValues.periodName}
+                              disableCloseOnSelect={false}
+                              inputFormat="MMMM YYYY"
+                              views={["year", "month"]}
+                              onChange={(newValue) => {
+                                setFieldValue(
+                                  periodName.name,
+                                  newValue != null
+                                    ? newValue
+                                    : initialValues[periodName.name]
+                                );
+                              }}
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  onKeyDown={onKeyDown}
+                                  required={periodName.isRequired}
+                                  variant="standard"
+                                  fullWidth
+                                  onClick={(e) => setOpen(true)}
+                                  error={
+                                    errors.periodName && touched.periodName
+                                  }
+                                  helperText={
+                                    errors.periodName && touched.periodName
+                                      ? periodName.errorMsg
+                                      : ""
+                                  }
+                                />
+                              )}
+                            />
+                          </ClickAwayListener>
                         </LocalizationProvider>
 
                         {/* <FormField
@@ -408,6 +427,7 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
                           )}
                         /> */}
                       </Grid>
+
                       <Grid item xs={12} sm={12}>
                         <FormField
                           type={startDate.type}
