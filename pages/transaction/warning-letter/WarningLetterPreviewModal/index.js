@@ -30,7 +30,7 @@ function WarningLetterPreviewModal({ isOpen, params, onModalChanged }) {
   );
 
 if(isOpen){
-
+console.log('---is open---', isOpen, ' datanya ->', params);
   const {location} = params
   const {spDate} = params
   const {refNo} = params
@@ -49,8 +49,6 @@ if(isOpen){
   const {siteAddress} = params
   const {invoiceNo} = params
 
-
-  //console.log('---is open---', isOpen, ' datanya ->', params);
   return (
     <Modal
       size="xl"

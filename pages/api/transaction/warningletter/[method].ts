@@ -21,7 +21,7 @@ export default async function handler(
             case "dropdownproject":
               getDropdownProject(res, body);
               break;
-            case "dropdownCluster":
+            case "GetDropdownClusterByProject":
               getDropdownCluster(res, body);
               break;
             case "dropdownunitcode":
@@ -41,6 +41,9 @@ export default async function handler(
               break;
             case "SendEmailWarningLetter":
               SendEmailWarningLetter(res, body);
+              break;
+            case "ExportToExcelWarningLetter":
+              getExportToExcelWarningLetter(res, body);
               break;
           }
           break;
@@ -143,7 +146,7 @@ async function getDropdownPeriod(res: any, body: any) {
         Authorization: "Bearer " + accessToken,
         "Access-Control-Allow-Origin": "*",
       },
-      params1: params,
+      params: params,
     };
   
     axios
@@ -267,6 +270,40 @@ async function getDropdownPeriod(res: any, body: any) {
     const { accessToken, params } = body;
   
     const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/viewDetailWarLett`;
+    const config = {
+      headers: {
+        Authorization: "Bearer " + accessToken,
+        "Access-Control-Allow-Origin": "*",
+      },
+      params: params,
+    };
+  
+    axios
+      .post(url, params, config)
+      .then((response) =>
+        res.send({
+          result: response.data.result,
+        })
+      )
+      .catch((error) =>
+        res.send({
+          error: error,
+        })
+
+      );
+      /* .catch(function (error) {
+        if (error.response) {
+          console.log('err1 ',error.response.data);
+          console.log('err2 ',error.response.status);
+          console.log('err3 ',error.response.headers);
+        }
+      }); */
+  }
+
+  async function getExportToExcelWarningLetter(res: any, body: any) {
+    const { accessToken, params } = body;
+  
+    const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/ExportToExcelWarningLetter`;
     const config = {
       headers: {
         Authorization: "Bearer " + accessToken,

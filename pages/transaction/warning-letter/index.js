@@ -142,7 +142,7 @@ export default function WarningLetter(props) {
   const onProjectChange = async (val) =>{
     //console.log("onProjectChange ==", val);
     setLoading(true);
-    let response = await fetch("/api/master/site/dropdowncluster", {
+    let response = await fetch("/api/transaction/warningletter/GetDropdownClusterByProject", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
@@ -159,7 +159,7 @@ export default function WarningLetter(props) {
     } else {
       setDataCluster(response.result);
     }
-    //console.log("dataCluster ------", dataCluster);
+    //console.log("dataCluster ------", response);
     setLoading(false);
   }
 
@@ -415,8 +415,51 @@ export default function WarningLetter(props) {
   /* end form builder  */
   
 
-  /* start load dataTableData */
+  /* start export excel */
+  const handleExport = async () => {
+    console.log(formValues);
+    console.log(site?.siteId);
+    let response = await fetch("/api/transaction/warningletter/ExportToExcelWarningLetter",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          accessToken: accessToken,
+          params: {
+            maxResultCount: 1000,
+            skipCount: 0,
+            siteId: site?.siteId,
+            projectId: formValues.project?.projectId,
+            clusterId: formValues.cluster?.clusterId,
+            cluster: formValues.cluster?.clusterCode,
+            unitCode: formValues.unitCode?.unitCode,
+            unitNo: formValues.unitNo?.unitNo,
+            invoiceName: formValues.invoiceName?.invoiceName,
+            search: undefined,
+            sp:formValues.sp?.sp
+            /* "projectId": 0,
+  "clusterId": 0,
+  "cluster": "string",
+  "unitCode": "string",
+  "unitNo": "string",
+  "invoiceName": "string",
+  "search": "string",
+  "sp": 0 */
+          },
+        }),
+      }
+    );
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
+      console.log(response);
+    if (response.error)
+      alertService.error({ text: response.error.message, title: "Error" });
+    else {
+      downloadTempFile(response.result.uri);
+    }
+  };
+  /* end export excel */
 
+  /* start load dataTableData */
   const handlerPriview = async(data)=>{
     //console.log(data);
   }
@@ -599,11 +642,10 @@ export default function WarningLetter(props) {
         params: {
           warningLetterId: record,
         },
-        
       }),
     });
     if (!response.ok) throw new Error(`Error: ${response.status}`);
-    //response = typeNormalization(await response.json());
+    response = typeNormalization(await response.json());
     if (response.error)
       alertService.error({ title: "Error", text: response.error.message });
     else {
@@ -1145,7 +1187,7 @@ export default function WarningLetter(props) {
                           variant="outlined"
                           color="primary"
                           disabled={customerResponse.rowData.length == 0}
-                          onClick=""
+                          onClick={handleExport}
                         >
                           <Icon>add</Icon>&nbsp; Export Excel
                         </MDButton>
