@@ -769,7 +769,8 @@ export default function BillingPayment(props) {
                                     <Grid item xs={6}>
                                       <FormField
                                         type="text"
-                                        label="Cluster ⁽*⁾"
+                                        required
+                                        label="Cluster"
                                         name="cluster"
                                         disabled
                                         placeholder="Type Cluster"
@@ -786,7 +787,8 @@ export default function BillingPayment(props) {
                                       <FormField
                                         InputLabelProps={{ shrink: true }}
                                         type="date"
-                                        label="Transaction Date ⁽*⁾"
+                                        required
+                                        label="Transaction Date"
                                         name="transactionDate"
                                         placeholder="Type Transaction Date"
                                         error={
@@ -824,7 +826,8 @@ export default function BillingPayment(props) {
                                           <FormField
                                             {...params}
                                             type="text"
-                                            label="Payment Method *"
+                                            required
+                                            label="Payment Method"
                                             name="paymentMethod"
                                             placeholder="Choose Payment Method"
                                             InputLabelProps={{ shrink: true }}
@@ -909,7 +912,8 @@ export default function BillingPayment(props) {
                                     </Grid>
                                     <Grid item xs={4}>
                                       <NumberInput
-                                        label="Amount Payment ⁽*⁾"
+                                        required
+                                        label="Amount Payment"
                                         placeholder="Type Amount Payment"
                                         value={formValues.amountPayment}
                                         onValueChange={(val) => {
