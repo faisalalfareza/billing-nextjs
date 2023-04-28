@@ -56,10 +56,9 @@ function RePrintOR() {
 
     let currentSite = typeNormalization(localStorage.getItem("site"));
     if (currentSite == null) {
-      Swal.fire({
+      alertService.info({
         title: "Info!",
         text: "Please choose Site first",
-        icon: "info",
       });
     } else setSite(currentSite);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -494,7 +493,6 @@ function RePrintOR() {
                         table={setOfficialReceiptTaskList(
                           officialReceiptData.rowData
                         )}
-                        canEntriesPerPage
                         entriesPerPage={{
                           defaultValue: customerRequest.recordsPerPage,
                         }}

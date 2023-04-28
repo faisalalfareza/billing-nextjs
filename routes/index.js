@@ -221,7 +221,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
       collapse: [
         {
           name: "Daily Report",
-          nameOnHeader: "Report Daily",
+          nameOnHeader: "Daily",
           key: "daily",
           route: "/report/daily",
           // permission: "Pages.Tenants.GenerateNoSeriFP.Create",
@@ -235,7 +235,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
         // },
         {
           name: "Report Invoice",
-          nameOnHeader: "Report Invoice",
+          nameOnHeader: "Invoice",
           key: "invoice",
           route: "/report/invoice",
           // permission: "Pages.Tenants.GenerateNoSeriFP.List",

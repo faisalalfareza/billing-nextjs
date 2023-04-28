@@ -128,7 +128,11 @@ export default function ReportInvoice(props) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
     if (response.error) {
-      alertService.error({ title: "Error", text: response.error.message });
+      let err = response.error;
+      alertService.error({
+        title: "Error",
+        text: err.error.message,
+      });
     } else {
       let data = response.result.uri;
       if (data != null) window.open(data, "_blank");
