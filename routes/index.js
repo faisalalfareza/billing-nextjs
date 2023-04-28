@@ -140,7 +140,8 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           name: "Warning Letter",
           nameOnHeader: "Warning Letter",
           key: "waning-letter",
-          route: "/app/nsfp/upload-batch",
+          route: "/transaction/warning-letter",
+          //route: "/app/nsfp/upload-batch",
           permission: "Pages.Tenants.GenerateNoSeriFP.Create",
         },
         {
