@@ -13,22 +13,22 @@ export default async function handler(
   switch (method) {
     case "POST":
       switch (query.method) {
-        case "list":
+        case "getwaterreadinglist":
           getList(res, body);
           break;
-        case "dropdownproject":
+        case "getdropdownprojectbysiteid":
           getDropdownProject(res, body);
           break;
-        case "update":
+        case "prosesupdatedetailwaterreading":
           update(res, body);
           break;
-        case "export":
+        case "exporttoexcelwaterreading":
           exportExcel(res, body);
           break;
-        case "activePeriod":
+        case "getactiveperiod":
           getActivePeriod(res, body);
           break;
-        case "upload":
+        case "uploadexcelwaterreading":
           uploadExcel(res, body);
           break;
       }
@@ -91,7 +91,7 @@ async function getDropdownProject(res: any, body: any) {
 async function update(res: any, body: any) {
   const { accessToken, params } = body;
 
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/UpdateDetailWaterReading`;
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/ProsesUpdateDetailWaterReading`;
   const config = {
     headers: {
       Authorization: "Bearer " + accessToken,
@@ -100,7 +100,7 @@ async function update(res: any, body: any) {
   };
 
   axios
-    .put(url, params, config)
+    .post(url, params, config)
     .then((response) => {
       res.send({
         result: response.data.result,

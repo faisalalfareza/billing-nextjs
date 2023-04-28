@@ -254,7 +254,7 @@ function DataTableTotal({
             <TableCell>
               <TotalDisable title="Total Balance" value={totalFooter.balance} />{" "}
             </TableCell>
-            <TableCell>
+            <TableCell width="20%">
               <TotalDisable
                 title="Total End Balance"
                 value={totalFooter.endBalance}

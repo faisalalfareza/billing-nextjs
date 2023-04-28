@@ -165,9 +165,16 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
               <a
                 onClick={() => {
                   const cached = [
-                    { key: "application", value: localStorage.getItem("application") },
-                    { key: "profilePicture", value: localStorage.getItem("profilePicture") }
-                  ]; localStorage.clear();
+                    {
+                      key: "application",
+                      value: localStorage.getItem("application"),
+                    },
+                    {
+                      key: "profilePicture",
+                      value: localStorage.getItem("profilePicture"),
+                    },
+                  ];
+                  localStorage.clear();
                   cached.forEach((c) => localStorage.setItem(c.key, c.value));
                   document.cookie.split(";").forEach((c) => {
                     document.cookie = c
@@ -345,7 +352,7 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
         darkMode,
       }}
     >
-      <MDBox pt={3} pb={1} px={4} textAlign="center">
+      <MDBox pt={3} pb={1} px={3} textAlign="center">
         <MDBox
           display={{ xs: "block", xl: "none" }}
           position="absolute"
@@ -367,7 +374,7 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
                   component="img"
                   src={brand.src}
                   alt={brandName}
-                  width={miniSidenav ? "1.75rem" : "5rem"}
+                  width={miniSidenav ? "1.75rem" : "4rem"}
                 />
               ) : (
                 brand
@@ -384,6 +391,7 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
                   letterSpacing="1px"
                   textTransform="uppercase"
                   ml={1}
+                  sx={{ whiteSpace: "nowrap" }}
                 >
                   {brandName}
                 </MDTypography>

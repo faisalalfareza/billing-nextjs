@@ -23,10 +23,10 @@ import FormField from "/pagesComponents/FormField";
 import { typeNormalization } from "/helpers/utils";
 import { alertService } from "/helpers";
 import { useCookies } from "react-cookie";
-function UploadDataWater({ isOpen, onModalChanged, site }) {
+function UploadDataWater(props) {
+  const { isOpen, onModalChanged, site } = props;
   const [modalOpen, setModalOpen] = useState(true);
   const [{ accessToken, encryptedAccessToken }] = useCookies();
-  const [isLoadingSubmit, setLoadingSubmit] = useState(false);
   const [isLoading, setLoading] = useState(false);
   const [dataProject, setDataProject] = useState([]);
   const [dataCluster, setDataCluster] = useState([]);
@@ -92,7 +92,7 @@ function UploadDataWater({ isOpen, onModalChanged, site }) {
         label: "Cluster",
         placeholder: "Choose Cluster",
         type: "text",
-        isRequired: true,
+        isRequired: false,
         errorMsg: "Cluster is required.",
         defaultValue: "",
       },
@@ -121,18 +121,22 @@ function UploadDataWater({ isOpen, onModalChanged, site }) {
   const [formValues, setformValues] = useState(initialValues);
 
   const getFormData = (values) => {
+    console.log("val----", values);
   };
 
   const getProject = async (val) => {
-    let response = await fetch("/api/transaction/water/dropdownproject", {
-      method: "POST",
-      body: JSON.stringify({
-        accessToken: accessToken,
-        params: {
-          SiteId: site?.siteId,
-        },
-      }),
-    });
+    let response = await fetch(
+      "/api/transaction/water/getdropdownprojectbysiteid",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          accessToken: accessToken,
+          params: {
+            SiteId: site?.siteId,
+          },
+        }),
+      }
+    );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
     if (response.error) {
@@ -143,7 +147,7 @@ function UploadDataWater({ isOpen, onModalChanged, site }) {
   };
 
   const getPeriod = async (val) => {
-    let response = await fetch("/api/transaction/water/activePeriod", {
+    let response = await fetch("/api/transaction/water/getactiveperiod", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
@@ -174,8 +178,7 @@ function UploadDataWater({ isOpen, onModalChanged, site }) {
   });
 
   const onProjectChange = async (val) => {
-    setLoading(true);
-    let response = await fetch("/api/master/site/dropdowncluster", {
+    let response = await fetch("/api/master/site/getdropdownclusterbyproject", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
@@ -196,9 +199,9 @@ function UploadDataWater({ isOpen, onModalChanged, site }) {
     } else {
       setDataCluster(response.result);
     }
-    setLoading(false);
   };
   const uploadExcel = async (values, actions) => {
+    setLoading(true);
     let listCluster = [];
     formValues.cluster.map((e) => {
       listCluster.push(e.clusterId);
@@ -220,26 +223,28 @@ function UploadDataWater({ isOpen, onModalChanged, site }) {
       waterReadingUploadDetailList: list,
     };
 
-    let response = await fetch("/api/transaction/water/upload", {
-      method: "POST",
-      body: JSON.stringify({
-        accessToken: accessToken,
-        params: body,
-      }),
-    });
+    let response = await fetch(
+      "/api/transaction/water/uploadexcelwaterreading",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          accessToken: accessToken,
+          params: body,
+        }),
+      }
+    );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
     if (response.error) {
       alertService.error({ text: response.error.message, title: "Error" });
-      setLoadingSubmit(false);
     } else {
       Swal.fire({
         title: "Uploading success",
         text: dataWater.length + " rows data has been successfully uploaded",
         icon: "success",
       }).then(() => {
-        setLoadingSubmit(false);
+        setLoading(false);
         actions.resetForm();
         closeModal();
       });
@@ -268,7 +273,7 @@ function UploadDataWater({ isOpen, onModalChanged, site }) {
     });
 
     const checkingSuccessInput = (value, error) => {
-      return value != undefined && value != "" && value.length > 0 && !error;
+      return value != undefined && value != "" && value != null && !error;
     };
     const sleep = (ms) =>
       new Promise((resolve) => {
@@ -306,6 +311,7 @@ function UploadDataWater({ isOpen, onModalChanged, site }) {
 
     return (
       <Modal
+        {...props}
         size="lg"
         isOpen={isOpen}
         toggle={toggleModal}
@@ -328,13 +334,10 @@ function UploadDataWater({ isOpen, onModalChanged, site }) {
             setformValues(values);
             getFormData(values);
 
-            const isValifForm = () => {
-              // return checkingSuccessInput(companyV, errors.periodNumber) &&
-              //   checkingSuccessInput(officerNameV, errors.periodName) &&
-              //   checkingSuccessInput(officerTitleV, errors.startDate)
-              //   ? true
-              //   : false;
-            };
+            const isValifForm = () =>
+              checkingSuccessInput(values.project, errors.project) &&
+              checkingSuccessInput(values.cluster, errors.cluster) &&
+              checkingSuccessInput(values.fileUpload, errors.fileUpload);
 
             return (
               <Form id={schemeModels.formId} autoComplete="off">
@@ -355,9 +358,11 @@ function UploadDataWater({ isOpen, onModalChanged, site }) {
                       <Grid item xs={12} sm={12}>
                         <MDTypography variant="caption">
                           Active Period :{" "}
-                          <MDTypography variant="caption" color="info">
-                            {period?.periodName}
-                          </MDTypography>
+                          {period && (
+                            <MDTypography variant="caption" color="info">
+                              {period?.periodName}
+                            </MDTypography>
+                          )}
                         </MDTypography>
                       </Grid>
                       <Grid item xs={12} sm={6}>
@@ -365,8 +370,13 @@ function UploadDataWater({ isOpen, onModalChanged, site }) {
                           name={project.name}
                           key={project.name}
                           component={Autocomplete}
+                          isOptionEqualToValue={(option, value) =>
+                            option.projectId === value.projectId
+                          }
                           options={dataProject}
-                          getOptionLabel={(option) => option.projectName}
+                          getOptionLabel={(option) =>
+                            option.projectCode + " - " + option.projectName
+                          }
                           onChange={(e, value) => {
                             setFieldValue(
                               project.name,
@@ -380,9 +390,8 @@ function UploadDataWater({ isOpen, onModalChanged, site }) {
                             <FormField
                               {...params}
                               type={project.type}
-                              label={
-                                project.label + (project.isRequired ? " *" : "")
-                              }
+                              required={project.isRequired}
+                              label={project.label}
                               name={project.name}
                               placeholder={project.placeholder}
                               InputLabelProps={{ shrink: true }}
@@ -397,13 +406,16 @@ function UploadDataWater({ isOpen, onModalChanged, site }) {
                       </Grid>
                       <Grid item xs={12} sm={6}>
                         <Field
-                          name={cluster.name}
                           multiple
+                          name={cluster.name}
                           disableCloseOnSelect
                           component={Autocomplete}
                           options={dataCluster}
                           getOptionLabel={(option) =>
                             option.clusterCode + " - " + option.clusterName
+                          }
+                          isOptionEqualToValue={(option, value) =>
+                            option.clusterId === value.clusterId
                           }
                           key={cluster.name}
                           onChange={(e, value) => {
@@ -418,9 +430,8 @@ function UploadDataWater({ isOpen, onModalChanged, site }) {
                             <FormField
                               {...params}
                               type={cluster.type}
-                              label={
-                                cluster.label + (cluster.isRequired ? " *" : "")
-                              }
+                              required={cluster.isRequired}
+                              label={cluster.label}
                               name={cluster.name}
                               placeholder={cluster.placeholder}
                               InputLabelProps={{ shrink: true }}
@@ -437,10 +448,8 @@ function UploadDataWater({ isOpen, onModalChanged, site }) {
                       <Grid item xs={6}>
                         <FormField
                           type={fileUpload.type}
-                          label={
-                            fileUpload.label +
-                            (fileUpload.isRequired ? " *" : "")
-                          }
+                          required={fileUpload.isRequired}
+                          label={fileUpload.label}
                           name={fileUpload.name}
                           placeholder={fileUpload.placeholder}
                           InputLabelProps={{ shrink: true }}
@@ -449,7 +458,7 @@ function UploadDataWater({ isOpen, onModalChanged, site }) {
                             fileUpload,
                             errors.fileUpload
                           )}
-                          setFieldValue={setFieldValue}
+                          // setFieldValue={setFieldValue}
                           accept={SheetJSFT}
                           onChange={(e, value) => {
                             handleChangeFile(e);
@@ -492,9 +501,9 @@ function UploadDataWater({ isOpen, onModalChanged, site }) {
                         variant="gradient"
                         color="primary"
                         sx={{ height: "100%" }}
-                        disabled={isLoadingSubmit}
+                        disabled={!isValifForm() || isLoading}
                       >
-                        {isLoadingSubmit ? "Adding Water Reading.." : "Save"}
+                        {isLoading ? "Saving..." : "Save"}
                       </MDButton>
                     </MDBox>
                   </MDBox>

@@ -15,7 +15,6 @@ import CloseIcon from "@mui/icons-material/Close";
 
 export default function DetailBalance(props) {
   const { isOpen, params, close } = props;
-  console.log("props-detail----", props);
   const [modal, setModal] = useState(isOpen);
   const [listDetail, setListDetail] = useState([]);
   const [{ accessToken, encryptedAccessToken }] = useCookies();
@@ -52,7 +51,7 @@ export default function DetailBalance(props) {
   }, [params]);
 
   const fetchData = async (data) => {
-    let response = await fetch("/api/cashier/billing/balance", {
+    let response = await fetch("/api/cashier/billing/viewdetailbalance", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,

@@ -60,7 +60,7 @@ export default function FindName(props) {
 
   const fetchData = async (values, actions) => {
     setLoading(true);
-    let response = await fetch("/api/transaction/invoice/findname", {
+    let response = await fetch("/api/transaction/invoice/getsearchpscode", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
@@ -103,12 +103,8 @@ export default function FindName(props) {
     name: "",
   };
   let schemeValidations = Yup.object().shape({
-    psCode: Yup.string()
-      .required("PSCode is required.")
-      .typeError("PSCode is required."),
-    name: Yup.string()
-      .required("Name is required.")
-      .typeError("Name is required."),
+    psCode: Yup.string(),
+    name: Yup.string(),
   });
 
   const submitForm = async (values, actions) => {
@@ -158,7 +154,7 @@ export default function FindName(props) {
               }) => {
                 setformValues(values);
                 const isValifForm = () =>
-                  checkingSuccessInput(values.psCode, errors.psCode) &&
+                  checkingSuccessInput(values.psCode, errors.psCode) ||
                   checkingSuccessInput(values.name, errors.name);
                 return (
                   <Form id="findname-form" autoComplete="off" fullWidth>
@@ -170,7 +166,7 @@ export default function FindName(props) {
                             label="PSCode "
                             name="psCode"
                             placeholder="Type PSCode"
-                            error={errors.psCode && touched.psCode}
+                            // error={errors.psCode && touched.psCode}
                             success={checkingSuccessInput(
                               formValues.psCode,
                               errors.psCode
@@ -183,7 +179,7 @@ export default function FindName(props) {
                             label="Name "
                             name="name"
                             placeholder="Type Name"
-                            error={errors.name && touched.name}
+                            // error={errors.name && touched.name}
                             success={checkingSuccessInput(
                               formValues.name,
                               errors.name

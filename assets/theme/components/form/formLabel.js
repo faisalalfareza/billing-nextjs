@@ -23,6 +23,12 @@ const formLabel = {
     root: {
       color: text.main,
     },
+    asterisk: {
+      color: "#db3131",
+      "&$error": {
+        color: "#db3131",
+      },
+    },
   },
 };
 
