@@ -5,9 +5,9 @@ import MDTypography from "/components/MDTypography";
 import Grid from "@mui/material/Grid";
 import { Autocomplete, TextField, Radio } from "@mui/material";
 import MDButton from "/components/MDButton";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Card from "@mui/material/Card";
-import { Formik, Form, Field, ErrorMessage } from "formik";
+import { Formik, Form, Field, useFormikContext } from "formik";
 import FormField from "/pagesComponents/FormField";
 import * as Yup from "yup";
 import { typeNormalization } from "/helpers/utils";
@@ -32,8 +32,20 @@ export default function ReportDaily(props) {
   const [dataCancel, setDataCancel] = useState(typeDummy);
   const [dataPeriod, setDataPeriod] = useState([]);
   const [dataPaymentMethod, setDataPaymentMethod] = useState([]);
+  const formikRef = useRef();
 
   useEffect(() => {
+    setformValues((prevState) => ({
+      ...prevState,
+      project: null,
+      period: null,
+      cluster: [],
+    }));
+    if (formikRef.current) {
+      formikRef.current.setFieldValue("project", null);
+      formikRef.current.setFieldValue("period", null);
+      formikRef.current.setFieldValue("cluster", []);
+    }
     getProject();
     getPeriod();
   }, [site]);
@@ -99,19 +111,24 @@ export default function ReportDaily(props) {
   //dari sini
   const [isLoading, setLoading] = useState(false);
   let schemeValidations = Yup.object().shape({
-    cluster: Yup.array().required("Cluster is required"),
+    cluster: Yup.array()
+      .required("Cluster is required")
+      .min(1)
+      .typeError("Cluster is required."),
     cancelPayment: Yup.object().nullable(),
     paymentMethod: Yup.object().nullable(),
     period: Yup.object()
       .required("Period is required.")
       .typeError("Period is required."),
-    project: Yup.object().required("Project is required"),
+    project: Yup.object()
+      .required("Project is required")
+      .typeError("Project is required."),
     startDate: Yup.date().nullable(),
     endDate: Yup.date().nullable(),
   });
 
   const initialValues = {
-    cluster: null,
+    cluster: [],
     project: null,
     paymentMethod: null,
     period: null,
@@ -223,6 +240,11 @@ export default function ReportDaily(props) {
     setSite(siteVal);
     localStorage.setItem("site", JSON.stringify(siteVal));
   };
+
+  useEffect(() => {
+    console.log("formval----", formValues);
+  }, [formValues]);
+
   //sampai sini
   return (
     <DashboardLayout>
@@ -258,6 +280,7 @@ export default function ReportDaily(props) {
                 </MDBox>
                 <MDBox mb={2}>
                   <Formik
+                    innerRef={formikRef}
                     initialValues={initialValues}
                     validationSchema={schemeValidations}
                     onSubmit={submitForm}
@@ -270,6 +293,7 @@ export default function ReportDaily(props) {
                       resetForm,
                       values,
                     }) => {
+                      console.log("valies----", values);
                       setformValues(values);
                       const isValifForm = () =>
                         checkingSuccessInput(values.period, errors.period) &&
@@ -281,16 +305,16 @@ export default function ReportDaily(props) {
                             <Grid container spacing={3}>
                               <Grid item xs={6}>
                                 <Field
-                                  name="project"
-                                  key="project-ddr"
-                                  component={Autocomplete}
                                   options={dataProject}
                                   getOptionLabel={(option) =>
                                     option.projectCode +
                                     " - " +
                                     option.projectName
                                   }
-                                  onChange={(e, value) => {
+                                  component={Autocomplete}
+                                  id="project-daily"
+                                  value={formValues.project}
+                                  onChange={(event, value) => {
                                     setFieldValue(
                                       "project",
                                       value !== null
@@ -299,9 +323,6 @@ export default function ReportDaily(props) {
                                     );
                                     getCluster(value);
                                   }}
-                                  isOptionEqualToValue={(option, value) =>
-                                    option.projectId === value.projectId
-                                  }
                                   renderInput={(params) => (
                                     <FormField
                                       {...params}
@@ -322,10 +343,10 @@ export default function ReportDaily(props) {
                               </Grid>
                               <Grid item xs={6}>
                                 <Field
-                                  key="cluster-ddr"
+                                  options={dataCluster}
+                                  id="cluster-ddr"
                                   name="cluster"
                                   component={Autocomplete}
-                                  options={dataCluster}
                                   multiple
                                   disableCloseOnSelect
                                   getOptionLabel={(option) =>
@@ -333,6 +354,7 @@ export default function ReportDaily(props) {
                                     " - " +
                                     option.clusterName
                                   }
+                                  value={formValues.cluster}
                                   onChange={(e, value) => {
                                     setFieldValue(
                                       "cluster",
@@ -363,10 +385,11 @@ export default function ReportDaily(props) {
                               </Grid>
                               <Grid item xs={6}>
                                 <Field
-                                  key="period-ddr"
-                                  name="period"
-                                  component={Autocomplete}
                                   options={dataPeriod}
+                                  id="period-ddr"
+                                  name="period"
+                                  value={formValues.period}
+                                  component={Autocomplete}
                                   getOptionLabel={(option) => option.periodName}
                                   isOptionEqualToValue={(option, value) =>
                                     option.periodId === value.periodId

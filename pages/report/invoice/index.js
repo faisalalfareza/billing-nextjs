@@ -5,7 +5,7 @@ import MDTypography from "/components/MDTypography";
 import Grid from "@mui/material/Grid";
 import { Autocomplete, TextField, Radio } from "@mui/material";
 import MDButton from "/components/MDButton";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Card from "@mui/material/Card";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import FormField from "/pagesComponents/FormField";
@@ -31,9 +31,21 @@ export default function ReportInvoice(props) {
   const [dataProject, setDataProject] = useState([]);
   const [dataType, setDataType] = useState(typeDummy);
   const [dataPeriod, setDataPeriod] = useState([]);
+  const formikRef = useRef();
 
   useEffect(() => {
     getPeriod();
+    setformValues((prevState) => ({
+      ...prevState,
+      project: null,
+      period: null,
+      cluster: [],
+    }));
+    if (formikRef.current) {
+      formikRef.current.setFieldValue("project", null);
+      formikRef.current.setFieldValue("period", null);
+      formikRef.current.setFieldValue("cluster", []);
+    }
   }, [site]);
 
   const getPeriod = async (val) => {
@@ -83,7 +95,7 @@ export default function ReportInvoice(props) {
   });
 
   const initialValues = {
-    cluster: null,
+    cluster: [],
     project: null,
     type: null,
     period: null,
@@ -232,6 +244,7 @@ export default function ReportInvoice(props) {
                 </MDBox>
                 <MDBox mb={2}>
                   <Formik
+                    innerRef={formikRef}
                     initialValues={initialValues}
                     validationSchema={schemeValidations}
                     onSubmit={submitForm}
@@ -254,7 +267,7 @@ export default function ReportInvoice(props) {
                             <Grid container spacing={3}>
                               <Grid item xs={6}>
                                 <Field
-                                  key="period-ddr"
+                                  id="period-invoice"
                                   name="period"
                                   component={Autocomplete}
                                   options={dataPeriod}
@@ -262,6 +275,7 @@ export default function ReportInvoice(props) {
                                   isOptionEqualToValue={(option, value) =>
                                     option.periodId === value.periodId
                                   }
+                                  value={formValues.period}
                                   onChange={(e, value) => {
                                     setFieldValue(
                                       "period",
@@ -292,7 +306,7 @@ export default function ReportInvoice(props) {
                               </Grid>
                               <Grid item xs={6}>
                                 <Field
-                                  key="type-ddr"
+                                  id="type-invoice"
                                   name="type"
                                   component={Autocomplete}
                                   options={dataType}
@@ -329,7 +343,8 @@ export default function ReportInvoice(props) {
                               <Grid item xs={6}>
                                 <Field
                                   name="project"
-                                  key="project-ddr"
+                                  id="project-invoice"
+                                  value={formValues.project}
                                   component={Autocomplete}
                                   options={dataProject}
                                   getOptionLabel={(option) =>
@@ -365,16 +380,18 @@ export default function ReportInvoice(props) {
                               </Grid>
                               <Grid item xs={6}>
                                 <Field
-                                  key="cluster-ddr"
+                                  options={dataCluster}
+                                  id="cluster-invoice"
                                   name="cluster"
                                   component={Autocomplete}
-                                  options={dataCluster}
                                   multiple
+                                  disableCloseOnSelect
                                   getOptionLabel={(option) =>
                                     option.clusterCode +
                                     " - " +
                                     option.clusterName
                                   }
+                                  value={formValues.cluster}
                                   onChange={(e, value) => {
                                     setFieldValue(
                                       "cluster",
