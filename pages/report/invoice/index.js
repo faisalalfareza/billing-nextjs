@@ -215,7 +215,7 @@ export default function ReportInvoice(props) {
         borderRadius="lg"
         shadow="lg"
         opacity={1}
-        mt={2}
+        mt={2} mb={0}
       >
         <Grid container spacing={2}>
           <Grid item xs={12}>
@@ -239,215 +239,213 @@ export default function ReportInvoice(props) {
                     </MDBox> */}
                   </Grid>
                   <Grid item xs={12}>
-                    <MDBox mb={2}>
-                      <Formik
-                        innerRef={formikRef}
-                        initialValues={initialValues}
-                        validationSchema={schemeValidations}
-                        onSubmit={submitForm}
-                      >
-                        {({
-                          errors,
-                          touched,
-                          isSubmitting,
-                          setFieldValue,
-                          resetForm,
-                          values,
-                        }) => {
-                          setformValues(values);
-                          const isValifForm = () =>
-                            checkingSuccessInput(values.period, errors.period) &&
-                            checkingSuccessInput(values.type, errors.type);
-                          return (
-                            <Form id="payment-detail" autoComplete="off" fullWidth>
-                              <MDBox>
-                                <Grid container spacing={3}>
-                                  <Grid item xs={6} sm={6}>
-                                    <Field
-                                      id="period-invoice"
-                                      name="period"
-                                      component={Autocomplete}
-                                      options={dataPeriod}
-                                      getOptionLabel={(option) => option.periodName}
-                                      isOptionEqualToValue={(option, value) =>
-                                        option.periodId === value.periodId
-                                      }
-                                      value={formValues.period}
-                                      onChange={(e, value) => {
-                                        setFieldValue(
-                                          "period",
-                                          value !== null
-                                            ? value
-                                            : initialValues["period"]
-                                        );
-                                        getProject(value);
-                                        getCluster(value);
-                                      }}
-                                      renderInput={(params) => (
-                                        <FormField
-                                          {...params}
-                                          type="text"
-                                          required
-                                          label="Period"
-                                          name="period"
-                                          placeholder="Choose Period"
-                                          InputLabelProps={{ shrink: true }}
-                                          error={errors.period && touched.period}
-                                          success={checkingSuccessInput(
-                                            formValues.period,
-                                            errors.period
-                                          )}
-                                        />
-                                      )}
-                                    />
-                                  </Grid>
-                                  <Grid item xs={6} sm={6}>
-                                    <Field
-                                      id="type-invoice"
-                                      name="type"
-                                      component={Autocomplete}
-                                      options={dataType}
-                                      getOptionLabel={(option) => option.name}
-                                      isOptionEqualToValue={(option, value) =>
-                                        option.id === value.id
-                                      }
-                                      onChange={(e, value) => {
-                                        setFieldValue(
-                                          "type",
-                                          value !== null
-                                            ? value
-                                            : initialValues["type"]
-                                        );
-                                      }}
-                                      renderInput={(params) => (
-                                        <FormField
-                                          {...params}
-                                          type="text"
-                                          required
-                                          label="Report Type"
-                                          name="type"
-                                          placeholder="Choose Type"
-                                          InputLabelProps={{ shrink: true }}
-                                          error={errors.type && touched.type}
-                                          success={checkingSuccessInput(
-                                            formValues.type,
-                                            errors.type
-                                          )}
-                                        />
-                                      )}
-                                    />
-                                  </Grid>
-                                  <Grid item xs={6} sm={6}>
-                                    <Field
-                                      name="project"
-                                      id="project-invoice"
-                                      value={formValues.project}
-                                      component={Autocomplete}
-                                      options={dataProject}
-                                      getOptionLabel={(option) =>
-                                        option.projectName
-                                      }
-                                      onChange={(e, value) => {
-                                        setFieldValue(
-                                          "project",
-                                          value !== null
-                                            ? value
-                                            : initialValues["project"]
-                                        );
-                                      }}
-                                      isOptionEqualToValue={(option, value) =>
-                                        option.projectId === value.projectId
-                                      }
-                                      renderInput={(params) => (
-                                        <FormField
-                                          {...params}
-                                          type="text"
-                                          label="Project"
-                                          name="project"
-                                          placeholder="Choose Project"
-                                          InputLabelProps={{ shrink: true }}
-                                          error={errors.project && touched.project}
-                                          success={checkingSuccessInput(
-                                            formValues.project,
-                                            errors.project
-                                          )}
-                                        />
-                                      )}
-                                    />
-                                  </Grid>
-                                  <Grid item xs={6} sm={6}>
-                                    <Field
-                                      options={dataCluster}
-                                      id="cluster-invoice"
-                                      name="cluster"
-                                      component={Autocomplete}
-                                      multiple
-                                      disableCloseOnSelect
-                                      getOptionLabel={(option) =>
-                                        option.clusterCode +
-                                        " - " +
-                                        option.clusterName
-                                      }
-                                      value={formValues.cluster}
-                                      onChange={(e, value) => {
-                                        setFieldValue(
-                                          "cluster",
-                                          value !== null
-                                            ? value
-                                            : initialValues["cluster"]
-                                        );
-                                      }}
-                                      isOptionEqualToValue={(option, value) =>
-                                        option.clusterId === value.clusterId
-                                      }
-                                      renderInput={(params) => (
-                                        <FormField
-                                          {...params}
-                                          type="text"
-                                          label="Cluster"
-                                          name="cluster"
-                                          placeholder="Choose Cluster"
-                                          InputLabelProps={{ shrink: true }}
-                                          error={errors.cluster && touched.cluster}
-                                          success={checkingSuccessInput(
-                                            formValues.cluster,
-                                            errors.cluster
-                                          )}
-                                        />
-                                      )}
-                                    />
-                                  </Grid>
-                                  <Grid item xs={12}>
-                                    <MDBox
-                                      display="flex"
-                                      flexDirection={{ xs: "column", sm: "row" }}
-                                      justifyContent="flex-end"
-                                    >
-                                      <MDButton
-                                        type="submit"
-                                        variant="gradient"
-                                        color="primary"
-                                        sx={{ height: "100%" }}
-                                        disabled={
-                                          isLoading ||
-                                          !isValifForm()
-                                        }
-                                      >
-                                        <BorderAllIcon />&nbsp;{" "}
-                                        {isLoading
-                                          ? "Exporting to Excel.."
-                                          : "Export to Excel"
-                                        }
-                                      </MDButton>
-                                    </MDBox>
-                                  </Grid>
+                    <Formik
+                      innerRef={formikRef}
+                      initialValues={initialValues}
+                      validationSchema={schemeValidations}
+                      onSubmit={submitForm}
+                    >
+                      {({
+                        errors,
+                        touched,
+                        isSubmitting,
+                        setFieldValue,
+                        resetForm,
+                        values,
+                      }) => {
+                        setformValues(values);
+                        const isValifForm = () =>
+                          checkingSuccessInput(values.period, errors.period) &&
+                          checkingSuccessInput(values.type, errors.type);
+                        return (
+                          <Form id="payment-detail" autoComplete="off" fullWidth>
+                            <MDBox>
+                              <Grid container spacing={3}>
+                                <Grid item xs={6} sm={6}>
+                                  <Field
+                                    id="period-invoice"
+                                    name="period"
+                                    component={Autocomplete}
+                                    options={dataPeriod}
+                                    getOptionLabel={(option) => option.periodName}
+                                    isOptionEqualToValue={(option, value) =>
+                                      option.periodId === value.periodId
+                                    }
+                                    value={formValues.period}
+                                    onChange={(e, value) => {
+                                      setFieldValue(
+                                        "period",
+                                        value !== null
+                                          ? value
+                                          : initialValues["period"]
+                                      );
+                                      getProject(value);
+                                      getCluster(value);
+                                    }}
+                                    renderInput={(params) => (
+                                      <FormField
+                                        {...params}
+                                        type="text"
+                                        required
+                                        label="Period"
+                                        name="period"
+                                        placeholder="Choose Period"
+                                        InputLabelProps={{ shrink: true }}
+                                        error={errors.period && touched.period}
+                                        success={checkingSuccessInput(
+                                          formValues.period,
+                                          errors.period
+                                        )}
+                                      />
+                                    )}
+                                  />
                                 </Grid>
-                              </MDBox>
-                            </Form>
-                          );
-                        }}
-                      </Formik>
-                    </MDBox>
+                                <Grid item xs={6} sm={6}>
+                                  <Field
+                                    id="type-invoice"
+                                    name="type"
+                                    component={Autocomplete}
+                                    options={dataType}
+                                    getOptionLabel={(option) => option.name}
+                                    isOptionEqualToValue={(option, value) =>
+                                      option.id === value.id
+                                    }
+                                    onChange={(e, value) => {
+                                      setFieldValue(
+                                        "type",
+                                        value !== null
+                                          ? value
+                                          : initialValues["type"]
+                                      );
+                                    }}
+                                    renderInput={(params) => (
+                                      <FormField
+                                        {...params}
+                                        type="text"
+                                        required
+                                        label="Report Type"
+                                        name="type"
+                                        placeholder="Choose Type"
+                                        InputLabelProps={{ shrink: true }}
+                                        error={errors.type && touched.type}
+                                        success={checkingSuccessInput(
+                                          formValues.type,
+                                          errors.type
+                                        )}
+                                      />
+                                    )}
+                                  />
+                                </Grid>
+                                <Grid item xs={6} sm={6}>
+                                  <Field
+                                    name="project"
+                                    id="project-invoice"
+                                    value={formValues.project}
+                                    component={Autocomplete}
+                                    options={dataProject}
+                                    getOptionLabel={(option) =>
+                                      option.projectName
+                                    }
+                                    onChange={(e, value) => {
+                                      setFieldValue(
+                                        "project",
+                                        value !== null
+                                          ? value
+                                          : initialValues["project"]
+                                      );
+                                    }}
+                                    isOptionEqualToValue={(option, value) =>
+                                      option.projectId === value.projectId
+                                    }
+                                    renderInput={(params) => (
+                                      <FormField
+                                        {...params}
+                                        type="text"
+                                        label="Project"
+                                        name="project"
+                                        placeholder="Choose Project"
+                                        InputLabelProps={{ shrink: true }}
+                                        error={errors.project && touched.project}
+                                        success={checkingSuccessInput(
+                                          formValues.project,
+                                          errors.project
+                                        )}
+                                      />
+                                    )}
+                                  />
+                                </Grid>
+                                <Grid item xs={6} sm={6}>
+                                  <Field
+                                    options={dataCluster}
+                                    id="cluster-invoice"
+                                    name="cluster"
+                                    component={Autocomplete}
+                                    multiple
+                                    disableCloseOnSelect
+                                    getOptionLabel={(option) =>
+                                      option.clusterCode +
+                                      " - " +
+                                      option.clusterName
+                                    }
+                                    value={formValues.cluster}
+                                    onChange={(e, value) => {
+                                      setFieldValue(
+                                        "cluster",
+                                        value !== null
+                                          ? value
+                                          : initialValues["cluster"]
+                                      );
+                                    }}
+                                    isOptionEqualToValue={(option, value) =>
+                                      option.clusterId === value.clusterId
+                                    }
+                                    renderInput={(params) => (
+                                      <FormField
+                                        {...params}
+                                        type="text"
+                                        label="Cluster"
+                                        name="cluster"
+                                        placeholder="Choose Cluster"
+                                        InputLabelProps={{ shrink: true }}
+                                        error={errors.cluster && touched.cluster}
+                                        success={checkingSuccessInput(
+                                          formValues.cluster,
+                                          errors.cluster
+                                        )}
+                                      />
+                                    )}
+                                  />
+                                </Grid>
+                                <Grid item xs={12}>
+                                  <MDBox
+                                    display="flex"
+                                    flexDirection={{ xs: "column", sm: "row" }}
+                                    justifyContent="flex-end"
+                                  >
+                                    <MDButton
+                                      type="submit"
+                                      variant="gradient"
+                                      color="primary"
+                                      sx={{ height: "100%" }}
+                                      disabled={
+                                        isLoading ||
+                                        !isValifForm()
+                                      }
+                                    >
+                                      <BorderAllIcon />&nbsp;{" "}
+                                      {isLoading
+                                        ? "Exporting to Excel.."
+                                        : "Export to Excel"
+                                      }
+                                    </MDButton>
+                                  </MDBox>
+                                </Grid>
+                              </Grid>
+                            </MDBox>
+                          </Form>
+                        );
+                      }}
+                    </Formik>
                   </Grid>
                 </Grid>
               </MDBox>
