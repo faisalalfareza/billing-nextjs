@@ -390,7 +390,8 @@ function RePrintOR() {
                                       <Icon>search</Icon>&nbsp;{" "}
                                       {isLoadingCustomer
                                         ? "Searching.."
-                                        : "Search"}
+                                        : "Search"
+                                      }
                                     </MDButton>
                                   </MDBox>
                                 </MDBox>

@@ -66,7 +66,6 @@ export default function Invoice(props) {
 
   useEffect(() => {
     let currentSite = JSON.parse(localStorage.getItem("site"));
-    console.log("currentSite-----------", currentSite);
     if (currentSite == null) {
       alertService.info({ title: "Info", text: "Please choose Site first" });
     } else {
@@ -121,13 +120,11 @@ export default function Invoice(props) {
     );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    console.log("response----", response);
     if (response.error) {
       alertService.error({ title: "Error", text: response.error.message });
     } else {
       setDataProject(response.result);
     }
-    console.log("project------", dataProject);
   };
 
   const getPeriod = async (val) => {
@@ -145,13 +142,11 @@ export default function Invoice(props) {
     );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    console.log("response----", response);
     if (response.error) {
       alertService.error({ title: "Error", text: response.error.message });
     } else {
       setDataPeriod(response.result);
     }
-    console.log("period------", dataPeriod);
   };
 
   useEffect(() => {
@@ -177,7 +172,6 @@ export default function Invoice(props) {
     fetchData();
   }, [customerRequest.skipCount, customerRequest.recordsPerPage]);
 
-  console.log("site------", site);
 
   const initialValues = {
     project: null,
@@ -204,7 +198,6 @@ export default function Invoice(props) {
   });
 
   const checkingSuccessInput = (value, error) => {
-    console.log("-----", value, error);
     return value != undefined && value != "" && !error;
   };
 
@@ -217,7 +210,6 @@ export default function Invoice(props) {
   });
 
   const adjust = (val) => {
-    console.log("val------", val);
     Swal.fire({
       title: "Are you sure?",
       text: "Are you sure want to make another adjustment?",
@@ -246,14 +238,12 @@ export default function Invoice(props) {
 
   const handleClick = (e) => {
     const { id, checked } = e.target;
-    console.log("coba-----", id, checked, typeof id);
     setIsCheck([...isCheck, +id]);
     if (!checked) {
       setIsCheck(isCheck.filter((item) => item !== +id));
     }
   };
 
-  console.log("coba------", isCheck);
 
   const columns = [
     {
@@ -272,7 +262,6 @@ export default function Invoice(props) {
       accessor: "select",
       width: "5%",
       Cell: ({ value, row }) => {
-        console.log("row00000", row, value);
         return (
           <Checkbox
             color="primary"
@@ -349,7 +338,6 @@ export default function Invoice(props) {
 
   const fetchData = async (values, actions) => {
     let field = values ? values : formValues;
-    console.log("record--", field);
     if (field?.period) {
       setLoading(true);
       const { scheme, keywords, recordsPerPage, skipCount } = customerRequest;
@@ -373,9 +361,6 @@ export default function Invoice(props) {
       if (!response.ok) throw new Error(`Error: ${response.status}`);
       response = typeNormalization(await response.json());
 
-      // console.log("GET PERMISSIONS RESULT", response);
-
-      console.log("response----", response);
       if (response.error)
         alertService.error({ title: "Error", text: response.error.message });
       else {
@@ -408,9 +393,7 @@ export default function Invoice(props) {
             data.totalCount / customerRequest.recordsPerPage
           ),
         }));
-        console.log("list------", customerResponse);
-        setLoading(false);
-      }
+      } setLoading(false);
     }
   };
 
@@ -437,9 +420,6 @@ export default function Invoice(props) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    console.log("GET PERMISSIONS RESULT", response);
-
-    console.log("response----", response);
     if (response.error)
       alertService.error({ text: response.error.message, title: "Error" });
     else {
@@ -463,13 +443,11 @@ export default function Invoice(props) {
     );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    console.log("response----", response);
     if (response.error) {
       alertService.error({ title: "Error", text: response.error.message });
     } else {
       setDataCluster(response.result);
     }
-    console.log("cluster------", dataCluster);
   };
 
   const getUnitCode = async (val) => {
@@ -488,13 +466,11 @@ export default function Invoice(props) {
     );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    console.log("response----", response);
     if (response.error) {
       alertService.error({ title: "Error", text: response.error.message });
     } else {
       setDataUnitCode(response.result);
     }
-    console.log("unitCode------", dataUnitCode);
   };
 
   const getUnitNo = async (val) => {
@@ -513,13 +489,11 @@ export default function Invoice(props) {
     );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    console.log("response----", response);
     if (response.error) {
       alertService.error({ title: "Error", text: response.error.message });
     } else {
       setDataUnitNo(response.result);
     }
-    console.log("unitNo------", dataUnitNo);
   };
 
   const handleSite = (siteVal) => {
@@ -543,7 +517,6 @@ export default function Invoice(props) {
   useEffect(() => {}, [customer]);
 
   const submitForm = async (values, actions) => {
-    console.log("formval------", values);
     fetchData(values, actions);
   };
 
@@ -610,9 +583,6 @@ export default function Invoice(props) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    console.log("GET PERMISSIONS RESULT", response);
-
-    console.log("response----", response);
     if (response.error)
       alertService.error({ text: response.error.message, title: "Error" });
     else {
@@ -637,6 +607,7 @@ export default function Invoice(props) {
   return (
     <DashboardLayout>
       <DashboardNavbar />
+
       <MDBox
         p={3}
         color="light"
@@ -645,13 +616,15 @@ export default function Invoice(props) {
         borderRadius="lg"
         shadow="lg"
         opacity={1}
+        mt={2}
       >
-        <Grid container spacing={3}>
-          <Grid item xs={12} sm={12}>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
             <SiteDropdown onSelectSite={handleSite} site={site} />
           </Grid>
         </Grid>
       </MDBox>
+
       <PuffLoader
         cssOverride={override}
         size={250}
@@ -661,14 +634,15 @@ export default function Invoice(props) {
         aria-label="Loading Spinner"
         data-testid="loader"
       />
-      <MDBox py={3}>
-        <Grid container spacing={3}>
+
+      <MDBox mt={2}>
+        <Grid container spacing={2}>
           <Grid item xs={12}>
             <Card>
               <MDBox p={3} lineHeight={1}>
-                <Grid container alignItems="center">
-                  <Grid item xs={12} md={8}>
-                    <MDBox mb={1}>
+                <Grid container alignItems="center" spacing={2}>
+                  <Grid item xs={12}>
+                    <MDBox>
                       <MDTypography variant="h5">Filter</MDTypography>
                     </MDBox>
                   </Grid>
@@ -693,12 +667,10 @@ export default function Invoice(props) {
                       }) => {
                         setformValues(values);
                         getFormData(values);
-                        const isValifForm = () => {
-                          return checkingSuccessInput(
-                            values.period,
-                            errors.period
-                          );
-                        };
+                        const isValifForm = () => (
+                          checkingSuccessInput(values.period, errors.period)
+                        );
+
                         return (
                           <Form id="invoice-filter" autoComplete="off">
                             <MDBox>
@@ -962,9 +934,16 @@ export default function Invoice(props) {
                                         variant="gradient"
                                         color="primary"
                                         sx={{ height: "100%" }}
-                                        disabled={!isValifForm() || isLoading}
+                                        disabled={
+                                          isLoading ||
+                                          !isValifForm()
+                                        }
                                       >
-                                        {isLoading ? "Searching.." : "Search"}
+                                        <Icon>search</Icon>&nbsp;{" "}
+                                        {isLoading ?
+                                          "Searching..." :
+                                          "Search"
+                                        }
                                       </MDButton>
                                     </MDBox>
                                   </MDBox>
@@ -982,85 +961,74 @@ export default function Invoice(props) {
           </Grid>
         </Grid>
       </MDBox>
-      <MDBox pb={3}>
+
+      <MDBox mt={5}>
+        <MDBox
+          display="flex"
+          justifyContent="flex-end"
+          alignItems="flex-start"
+          mb={2}
+        >
+          <MDBox display="flex">
+            <MDBox>
+              <MDButton variant="outlined" color="primary"
+                disabled={isCheck.length == 0 || isLoadingSend}
+                onClick={() => handleCommand(1)}
+              >
+                <Icon>add</Icon>&nbsp;{" "}
+                {isLoadingSend && (command == 1) 
+                  ? "Regenerating.."
+                  : "Re-Generate"
+                }
+              </MDButton>
+            </MDBox>
+            <MDBox ml={1}>
+              <MDButton variant="outlined" color="primary"
+                disabled={isCheck.length == 0 || isLoadingSend}
+                onClick={() => handleCommand(2)}
+              >
+                <Icon>email</Icon>&nbsp;{" "}
+                {isLoadingSend && (command == 2)
+                  ? "Sending Email.."
+                  : "Send Email"
+                }
+              </MDButton>
+            </MDBox>
+            <MDBox ml={1}>
+              <MDButton variant="outlined" color="primary"
+                disabled={isCheck.length == 0 || isLoadingSend}
+                onClick={() => handleCommand(3)}
+              >
+                <WhatsAppIcon /> &nbsp;{" "}
+                {isLoadingSend && (command == 3)
+                  ? "Sending Whatsapp.."
+                  : "Send Whatsapp"
+                }
+              </MDButton>
+            </MDBox>
+          </MDBox>
+        </MDBox>
         <Card>
-          <MDBox p={3} lineHeight={1}>
+          <MDBox>
             <Grid container alignItems="center">
-              <Grid item xs={12} md={6}>
-                <MDBox mb={1}>
-                  <MDTypography variant="h5">Invoice List</MDTypography>
-                </MDBox>
-                <MDBox mb={2}>
-                  <MDTypography variant="body2" color="text">
-                    Invoice Data
-                  </MDTypography>
-                </MDBox>
-              </Grid>
-              <Grid item xs={12} md={6} sx={{ textAlign: "right" }}>
-                <Grid container alignItems="right" spacing={0}>
-                  <Grid item xs={12}>
-                    <MDBox
-                      display="flex"
-                      flexDirection={{ xs: "column", sm: "row" }}
-                      justifyContent="flex-end"
-                    >
-                      <MDButton
-                        variant="outlined"
-                        color="primary"
-                        disabled={isCheck.length == 0 || isLoadingSend}
-                        onClick={() => handleCommand(1)}
-                      >
-                        <Icon>add</Icon>&nbsp;{" "}
-                        {isLoadingSend && command == 1
-                          ? "Regenerating..."
-                          : "RE-GENERATE"}
-                      </MDButton>
-                      <MDBox ml={{ xs: 0, sm: 1 }} mt={{ xs: 1, sm: 0 }}>
-                        <MDButton
-                          variant="outlined"
-                          color="primary"
-                          disabled={isCheck.length == 0 || isLoadingSend}
-                          onClick={() => handleCommand(2)}
-                        >
-                          <Icon>email</Icon>&nbsp;{" "}
-                          {isLoadingSend && command == 2
-                            ? "Sending Email..."
-                            : "SEND EMAIL"}
-                        </MDButton>
-                      </MDBox>
-                      <MDBox ml={{ xs: 0, sm: 1 }} mt={{ xs: 1, sm: 0 }}>
-                        <MDButton
-                          variant="outlined"
-                          color="primary"
-                          disabled={isCheck.length == 0 || isLoadingSend}
-                          onClick={() => handleCommand(3)}
-                        >
-                          <WhatsAppIcon /> &nbsp;{" "}
-                          {isLoadingSend && command == 3
-                            ? "Sending Whatsapp..."
-                            : "SEND WHATSAPP"}
-                        </MDButton>
-                      </MDBox>
-                    </MDBox>
-                  </Grid>
-                </Grid>
+              <Grid item xs={12}>
+                <DataTable
+                  title="Invoice List" description="Invoice Data"
+                  table={setCustomerTaskList(customerResponse.rowData)}
+                  manualPagination={true}
+                  totalRows={customerResponse.totalRows}
+                  totalPages={customerResponse.totalPages}
+                  recordsPerPage={customerRequest.recordsPerPage}
+                  skipCount={customerRequest.skipCount}
+                  pageChangeHandler={skipCountChangeHandler}
+                  recordsPerPageChangeHandler={recordsPerPageChangeHandler}
+                  keywordsChangeHandler={keywordsChangeHandler}
+                  entriesPerPage={{ defaultValue: customerRequest.recordsPerPage }}
+                  canSearch pagination={{ variant: "gradient", color: "primary" }}
+                />
               </Grid>
             </Grid>
           </MDBox>
-          <DataTable
-            canSearch
-            table={setCustomerTaskList(customerResponse.rowData)}
-            manualPagination={true}
-            totalRows={customerResponse.totalRows}
-            totalPages={customerResponse.totalPages}
-            recordsPerPage={customerRequest.recordsPerPage}
-            skipCount={customerRequest.skipCount}
-            pageChangeHandler={skipCountChangeHandler}
-            recordsPerPageChangeHandler={recordsPerPageChangeHandler}
-            keywordsChangeHandler={keywordsChangeHandler}
-            entriesPerPage={{ defaultValue: customerRequest.recordsPerPage }}
-            pagination={{ variant: "gradient", color: "primary" }}
-          />
         </Card>
       </MDBox>
     </DashboardLayout>

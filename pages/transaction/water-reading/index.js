@@ -209,6 +209,7 @@ export default function WaterReading(props) {
           ClusterId: formValues.cluster?.clusterId,
           MaxResultCount: recordsPerPage,
           SkipCount: skipCount,
+          Search: keywords
         },
       }),
     });
@@ -321,6 +322,7 @@ export default function WaterReading(props) {
   return (
     <DashboardLayout>
       <DashboardNavbar />
+
       <MDBox
         p={3}
         color="light"
@@ -329,21 +331,23 @@ export default function WaterReading(props) {
         borderRadius="lg"
         shadow="lg"
         opacity={1}
+        mt={2}
       >
-        <Grid container spacing={3}>
-          <Grid item xs={12} sm={12}>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
             <SiteDropdown onSelectSite={handleSite} site={site} />
           </Grid>
         </Grid>
       </MDBox>
-      <MDBox py={3}>
-        <Grid container spacing={3}>
+
+      <MDBox mt={2}>
+        <Grid container spacing={2}>
           <Grid item xs={12}>
             <Card>
               <MDBox p={3} lineHeight={1}>
-                <Grid container alignItems="center">
-                  <Grid item xs={12} md={8}>
-                    <MDBox mb={1}>
+                <Grid container alignItems="center" spacing={2}>
+                  <Grid item xs={12}>
+                    <MDBox>
                       <MDTypography variant="h5">Filter</MDTypography>
                     </MDBox>
                   </Grid>
@@ -364,16 +368,14 @@ export default function WaterReading(props) {
                         isSubmitting,
                         setFieldValue,
                         resetForm,
-                        /* and other goodies */
                       }) => {
                         setformValues(values);
                         getFormData(values);
-                        const isValifForm = () =>
-                          checkingSuccessInput(
-                            values.project,
-                            errors.project
-                          ) &&
-                          checkingSuccessInput(values.cluster, errors.cluster);
+                        const isValifForm = () => (
+                          checkingSuccessInput(values.project, errors.project) &&
+                          checkingSuccessInput(values.cluster, errors.cluster)
+                        );
+                        
                         return (
                           <Form id={form.formId} autoComplete="off">
                             <MDBox>
@@ -467,21 +469,12 @@ export default function WaterReading(props) {
                                     )}
                                   />
                                 </Grid>
-
                                 <Grid item xs={12}>
                                   <MDBox
                                     display="flex"
                                     flexDirection={{ xs: "column", sm: "row" }}
                                     justifyContent="flex-end"
                                   >
-                                    <MDButton
-                                      type="reset"
-                                      variant="outlined"
-                                      color="secondary"
-                                      onClick={resetForm}
-                                    >
-                                      Clear Filters
-                                    </MDButton>
                                     <MDBox
                                       ml={{ xs: 0, sm: 1 }}
                                       mt={{ xs: 1, sm: 0 }}
@@ -491,9 +484,16 @@ export default function WaterReading(props) {
                                         variant="gradient"
                                         color="primary"
                                         sx={{ height: "100%" }}
-                                        disabled={!isValifForm() || isLoading}
+                                        disabled={
+                                          isLoading ||
+                                          !isValifForm()
+                                        }
                                       >
-                                        {isLoading ? "Searching..." : "Search"}
+                                        <Icon>search</Icon>&nbsp;{" "}
+                                        {isLoading ?
+                                          "Searching..." :
+                                          "Search"
+                                        }
                                       </MDButton>
                                     </MDBox>
                                   </MDBox>
@@ -511,77 +511,66 @@ export default function WaterReading(props) {
           </Grid>
         </Grid>
       </MDBox>
-      <MDBox pb={3}>
+
+      <MDBox mt={5}>
+        <MDBox
+          display="flex"
+          justifyContent="flex-end"
+          alignItems="flex-start"
+          mb={2}
+        >
+          <MDBox display="flex">
+            <MDBox>
+              <MDButton variant="outlined" color="primary"
+                disabled={customerResponse.rowData.length == 0}
+                onClick={handleExport}
+              >
+                <Icon>description</Icon>&nbsp;Export Excel
+              </MDButton>
+            </MDBox>
+            <MDBox ml={1}>
+              <MDButton variant="gradient" color="primary" onClick={handleOpenUpload}>
+                <Icon>add</Icon>&nbsp; Add New Water Reading
+              </MDButton>
+            </MDBox>
+          </MDBox>
+        </MDBox>
         <Card>
-          <MDBox p={3} lineHeight={1}>
+          <MDBox>
             <Grid container alignItems="center">
-              <Grid item xs={12} md={8}>
-                <MDBox mb={1}>
-                  <MDTypography variant="h5">Water Reading List</MDTypography>
-                </MDBox>
-                <MDBox mb={2}>
-                  <MDTypography variant="body2" color="text">
-                    Water Reading Data.
-                  </MDTypography>
-                </MDBox>
-              </Grid>
-              <Grid item xs={12} md={4} sx={{ textAlign: "right" }}>
-                <Grid container alignItems="right" spacing={0}>
-                  <Grid item xs={12}>
-                    <MDBox
-                      display="flex"
-                      flexDirection={{ xs: "column", sm: "row" }}
-                      justifyContent="flex-end"
-                    >
-                      <MDButton
-                        variant="outlined"
-                        color="primary"
-                        disabled={customerResponse.rowData.length == 0}
-                        onClick={handleExport}
-                      >
-                        <Icon>add</Icon>&nbsp; Export Excel
-                      </MDButton>
-                      <MDBox ml={{ xs: 0, sm: 1 }} mt={{ xs: 1, sm: 0 }}>
-                        <MDButton
-                          variant="gradient"
-                          color="primary"
-                          onClick={handleOpenUpload}
-                        >
-                          <Icon>add</Icon>&nbsp; Add New
-                        </MDButton>
-                        <UploadDataWater
-                          site={site}
-                          isOpen={openUpload}
-                          onModalChanged={changeModalUpload}
-                        />
-                      </MDBox>
-                    </MDBox>
-                  </Grid>
-                </Grid>
+              <Grid item xs={12}>
+                <DataTable
+                  title="Water Reading List" description="Water Reading Data"
+                  table={setCustomerTaskList(customerResponse.rowData)}
+                  manualPagination={true}
+                  totalRows={customerResponse.totalRows}
+                  totalPages={customerResponse.totalPages}
+                  recordsPerPage={customerRequest.recordsPerPage}
+                  skipCount={customerRequest.skipCount}
+                  pageChangeHandler={skipCountChangeHandler}
+                  recordsPerPageChangeHandler={recordsPerPageChangeHandler}
+                  keywordsChangeHandler={keywordsChangeHandler}
+                  entriesPerPage={{ defaultValue: customerRequest.recordsPerPage }}
+                  canSearch pagination={{ variant: "gradient", color: "primary" }}
+                />
               </Grid>
             </Grid>
           </MDBox>
-          <DataTable
-            table={setCustomerTaskList(customerResponse.rowData)}
-            manualPagination={true}
-            totalRows={customerResponse.totalRows}
-            totalPages={customerResponse.totalPages}
-            recordsPerPage={customerRequest.recordsPerPage}
-            skipCount={customerRequest.skipCount}
-            pageChangeHandler={skipCountChangeHandler}
-            recordsPerPageChangeHandler={recordsPerPageChangeHandler}
-            keywordsChangeHandler={keywordsChangeHandler}
-            entriesPerPage={{ defaultValue: customerRequest.recordsPerPage }}
-            pagination={{ variant: "gradient", color: "primary" }}
-          />
         </Card>
-        <EditDataWater
-          site={site}
-          isOpen={openEdit}
-          params={modalParams}
-          onModalChanged={changeModalEdit}
-        />
       </MDBox>
+
+      <UploadDataWater
+        site={site}
+        isOpen={openUpload}
+        onModalChanged={changeModalUpload}
+      />
+      <EditDataWater
+        site={site}
+        isOpen={openEdit}
+        params={modalParams}
+        onModalChanged={changeModalEdit}
+      />
+      
     </DashboardLayout>
   );
 }

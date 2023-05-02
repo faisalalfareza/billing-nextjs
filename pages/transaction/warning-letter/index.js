@@ -111,7 +111,6 @@ export default function WarningLetter(props) {
     } else {
       setDataPeriode(response.result);
     }
-    //console.log("Periode------", dataPeriode[0]);
   };
 
   useEffect(() => {
@@ -120,7 +119,6 @@ export default function WarningLetter(props) {
 
   //dropdown project
   const onPeriodeChange = async (val) => {
-    //console.log("Periode------", val);
     let resProject = await fetch(
       "/api/transaction/warningletter/dropdownproject",
       {
@@ -135,7 +133,7 @@ export default function WarningLetter(props) {
     );
     if (!resProject.ok) throw new Error(`Error: ${resProject.status}`);
     resProject = typeNormalization(await resProject.json());
-    //console.log("resProject----", resProject);
+
     if (resProject.error) {
       alertService.error({ title: "Error", text: resProject.error.message });
     } else {
@@ -146,7 +144,6 @@ export default function WarningLetter(props) {
 
   //dropdown cluster
   const onProjectChange = async (val) => {
-    //console.log("onProjectChange ==", val);
     setLoading(true);
     let response = await fetch(
       "/api/transaction/warningletter/GetDropdownClusterByProject",
@@ -162,20 +159,16 @@ export default function WarningLetter(props) {
     );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    //console.log("response----", response);
     if (response.error) {
       alertService.error({ title: "Error", text: response.error.message });
     } else {
       setDataCluster(response.result);
     }
-    //console.log("dataCluster ------", response);
     setLoading(false);
   };
 
   // dropdown unitcode
   async function onUnitCode(periodeId) {
-    //debugger
-    //console.log(periodeId);
     let response = await fetch(
       "/api/transaction/warningletter/dropdownunitcode",
       {
@@ -191,7 +184,7 @@ export default function WarningLetter(props) {
     );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    //console.log("response setDataUnitCode----", response);
+
     if (response.error) {
       alertService.error({ title: "Error", text: response.error.message });
     } else {
@@ -203,8 +196,6 @@ export default function WarningLetter(props) {
 
   // dropdown unitno
   async function onUnitNo(periodeId) {
-    //debugger
-    //console.log(periodeId);
     let response = await fetch(
       "/api/transaction/warningletter/dropdownunitno",
       {
@@ -220,7 +211,7 @@ export default function WarningLetter(props) {
     );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    //console.log("response setDataUnitNo----", response);
+
     if (response.error) {
       alertService.error({ title: "Error", text: response.error.message });
     } else {
@@ -231,8 +222,6 @@ export default function WarningLetter(props) {
 
   // dropdown SP
   async function onSP(periodeId) {
-    //debugger
-    //console.log(periodeId);
     let response = await fetch("/api/transaction/warningletter/dropdownsp", {
       method: "POST",
       body: JSON.stringify({
@@ -245,7 +234,7 @@ export default function WarningLetter(props) {
     });
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    //console.log("response setDataSP----", response);
+
     if (response.error) {
       alertService.error({ title: "Error", text: response.error.message });
     } else {
@@ -256,8 +245,6 @@ export default function WarningLetter(props) {
 
   // dropdown InvoiceName
   async function onInvoiceName(periodeId) {
-    //debugger
-    //console.log(periodeId);
     let response = await fetch(
       "/api/transaction/warningletter/dropdowninvoicename",
       {
@@ -273,7 +260,7 @@ export default function WarningLetter(props) {
     );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    //console.log("response setDataInvoiceName----", response);
+
     if (response.error) {
       alertService.error({ title: "Error", text: response.error.message });
     } else {
@@ -426,8 +413,6 @@ export default function WarningLetter(props) {
 
   /* start export excel */
   const handleExport = async () => {
-    console.log(formValues);
-    console.log(site?.siteId);
     let response = await fetch(
       "/api/transaction/warningletter/ExportToExcelWarningLetter",
       {
@@ -460,7 +445,7 @@ export default function WarningLetter(props) {
     );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    console.log(response);
+
     if (response.error)
       alertService.error({ text: response.error.message, title: "Error" });
     else {
@@ -471,7 +456,6 @@ export default function WarningLetter(props) {
 
   /* start load dataTableData */
   const handlerPriview = async (data) => {
-    //console.log(data);
   };
   /* end load dataTableData */
   useEffect(() => {
@@ -487,6 +471,7 @@ export default function WarningLetter(props) {
   const handleOpenUpload = () => setOpenUpload(true);
 
   const fetchData = async (data) => {
+    setLoading(true);
     const { scheme, keywords, recordsPerPage, skipCount } = customerRequest;
     let response = await fetch("/api/transaction/warningletter/list", {
       method: "POST",
@@ -506,8 +491,7 @@ export default function WarningLetter(props) {
     });
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    //console.log('datatable1 -> ',response);
-    //console.log('formValues -> ',formValues);
+
     if (response.error)
       alertService.error({ title: "Error", text: response.error.message });
     else {
@@ -532,8 +516,6 @@ export default function WarningLetter(props) {
           //action: e,
         });
       });
-      /* console.log('datatable2 -> ',data);
-      console.log('datatable3 list -> ',list); */
       setCustomerResponse((prevState) => ({
         ...prevState,
         rowData: list,
@@ -546,7 +528,7 @@ export default function WarningLetter(props) {
       //   columns: columns,
       //   rows: list,
       // });
-    }
+    } setLoading(false);
   };
 
   const [isCheckAll, setIsCheckAll] = useState(false);
@@ -563,14 +545,10 @@ export default function WarningLetter(props) {
 
   const handleClick = (e) => {
     const { id, checked } = e.target;
-    /* console.log("Array checked = ", id, checked, typeof id); */
     setIsCheck([...isCheck, +id]);
-    //console.log("Array isCheck = ", [...isCheck]);
     if (!checked) {
       setIsCheck(isCheck.filter((item) => item !== +id));
     }
-
-    //console.log("Array isCheck = ", isCheck);
   };
 
   const columns = [
@@ -590,7 +568,6 @@ export default function WarningLetter(props) {
       accessor: "prev",
       width: "5%",
       Cell: ({ value, row }) => {
-        //console.log("row00000", row, value);
         return (
           <Checkbox
             color="primary"
@@ -641,7 +618,6 @@ export default function WarningLetter(props) {
   const [modalParams, setModalParams] = useState(undefined);
 
   const setOpenPreview = async (record = undefined) => {
-    //console.log('setOpenPreview', record);
     let response = await fetch(
       "/api/transaction/warningletter/viewDetailWarLett",
       {
@@ -656,12 +632,12 @@ export default function WarningLetter(props) {
     );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
+
     if (response.error)
       alertService.error({ title: "Error", text: response.error.message });
     else {
       let data = response.result;
     }
-    //console.log('viewDetailWarLett -> ',response);
     setModalParams(response);
     setOpenModal({
       isOpen: !openModal.isOpen,
@@ -700,8 +676,6 @@ export default function WarningLetter(props) {
 
   /* start send email */
   const sendEmail = (val) => {
-    //console.log("val------", val);
-    //console.log('sendEmail = ', isCheck);
     Swal.fire({
       title: "Are you sure?",
       text: "Are you sure want to Send Email",
@@ -720,7 +694,6 @@ export default function WarningLetter(props) {
   };
 
   const gotoSendEmail = async (e) => {
-    //console.log('sendEmail = ', isCheck);
     setLoadingSend(true);
     let response = await fetch(
       "/api/transaction/warningletter/SendEmailWarningLetter",
@@ -753,14 +726,13 @@ export default function WarningLetter(props) {
         }
       });
     }
-    console.log("SendEmail WarLett -> ", response.status);
   };
   /* end send email */
 
   return (
     <DashboardLayout>
       <DashboardNavbar />
-      {/* start bagian site */}
+    
       <MDBox
         p={3}
         color="light"
@@ -769,14 +741,15 @@ export default function WarningLetter(props) {
         borderRadius="lg"
         shadow="lg"
         opacity={1}
+        mt={2}
       >
-        <Grid container spacing={3}>
-          <Grid item xs={12} sm={12}>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
             <SiteDropdown onSelectSite={handleSite} site={site} />
           </Grid>
         </Grid>
       </MDBox>
-      {/* End bagian site */}
+
       <PuffLoader
         cssOverride={override}
         size={250}
@@ -786,15 +759,15 @@ export default function WarningLetter(props) {
         aria-label="Loading Spinner"
         data-testid="loader"
       />
-      {/* start bagian filterisasi */}
-      <MDBox py={3}>
-        <Grid container spacing={3}>
+
+      <MDBox mt={2}>
+        <Grid container spacing={2}>
           <Grid item xs={12}>
             <Card>
               <MDBox p={3} lineHeight={1}>
-                <Grid container alignItems="center">
-                  <Grid item xs={12} md={8}>
-                    <MDBox mb={1}>
+                <Grid container alignItems="center" spacing={2}>
+                  <Grid item xs={12}>
+                    <MDBox>
                       <MDTypography variant="h5">Filter</MDTypography>
                     </MDBox>
                   </Grid>
@@ -818,11 +791,11 @@ export default function WarningLetter(props) {
                       }) => {
                         setformValues(values);
                         getFormData(values);
+
                         return (
                           <Form id={form.formId} autoComplete="off">
                             <MDBox>
                               <Grid container spacing={3}>
-                                {/* data period */}
                                 <Grid item xs={12} sm={12}>
                                   <Autocomplete
                                     options={dataPeriode}
@@ -847,10 +820,7 @@ export default function WarningLetter(props) {
                                       <FormField
                                         {...params}
                                         type={periode.type}
-                                        label={mandatoryComp(
-                                          periode.label,
-                                          periode.isRequired
-                                        )}
+                                        label={periode.label}
                                         name={periode.name}
                                         placeholder={periode.placeholder}
                                         InputLabelProps={{ shrink: true }}
@@ -865,7 +835,6 @@ export default function WarningLetter(props) {
                                     )}
                                   />
                                 </Grid>
-                                {/* data project */}
                                 <Grid item xs={12} sm={6}>
                                   <Autocomplete
                                     options={dataProject}
@@ -892,10 +861,7 @@ export default function WarningLetter(props) {
                                       <FormField
                                         {...params}
                                         type={project.type}
-                                        label={mandatoryComp(
-                                          project.label,
-                                          project.isRequired
-                                        )}
+                                        label={project.label} required
                                         name={project.name}
                                         placeholder={project.placeholder}
                                         InputLabelProps={{ shrink: true }}
@@ -910,7 +876,6 @@ export default function WarningLetter(props) {
                                     )}
                                   />
                                 </Grid>
-                                {/* data cluster */}
                                 <Grid item xs={12} sm={6}>
                                   <Autocomplete
                                     // disableCloseOnSelect
@@ -932,10 +897,7 @@ export default function WarningLetter(props) {
                                       <FormField
                                         {...params}
                                         type={cluster.type}
-                                        label={mandatoryComp(
-                                          cluster.label,
-                                          cluster.isRequired
-                                        )}
+                                        label={cluster.label} required
                                         name={cluster.name}
                                         placeholder={cluster.placeholder}
                                         InputLabelProps={{ shrink: true }}
@@ -950,7 +912,6 @@ export default function WarningLetter(props) {
                                     )}
                                   />
                                 </Grid>
-                                {/* data unitCode */}
                                 <Grid item xs={12} sm={6}>
                                   <Autocomplete
                                     // disableCloseOnSelect
@@ -976,10 +937,7 @@ export default function WarningLetter(props) {
                                       <FormField
                                         {...params}
                                         type={unitCode.type}
-                                        label={mandatoryComp(
-                                          unitCode.label,
-                                          unitCode.isRequired
-                                        )}
+                                        label={unitCode.label} required
                                         name={unitCode.name}
                                         placeholder={unitCode.placeholder}
                                         InputLabelProps={{ shrink: true }}
@@ -994,7 +952,6 @@ export default function WarningLetter(props) {
                                     )}
                                   />
                                 </Grid>
-                                {/* data unitNo */}
                                 <Grid item xs={12} sm={6}>
                                   <Autocomplete
                                     options={dataUnitNo}
@@ -1018,10 +975,7 @@ export default function WarningLetter(props) {
                                       <FormField
                                         {...params}
                                         type={unitNo.type}
-                                        label={mandatoryComp(
-                                          unitNo.label,
-                                          unitNo.isRequired
-                                        )}
+                                        label={unitNo.label} required
                                         name={unitNo.name}
                                         placeholder={unitNo.placeholder}
                                         InputLabelProps={{ shrink: true }}
@@ -1034,7 +988,6 @@ export default function WarningLetter(props) {
                                     )}
                                   />
                                 </Grid>
-                                {/* data sp */}
                                 <Grid item xs={12} sm={6}>
                                   <Autocomplete
                                     // disableCloseOnSelect
@@ -1053,17 +1006,13 @@ export default function WarningLetter(props) {
                                           ? value
                                           : initialValues[sp.name]
                                       );
-                                      //console.log(value, ' - ', sp);
                                     }}
                                     renderInput={(params) => (
                                       <FormField
                                         {...params}
                                         defaultValue={params}
                                         type={sp.type}
-                                        label={mandatoryComp(
-                                          sp.label,
-                                          sp.isRequired
-                                        )}
+                                        label={sp.label} required
                                         name={sp.name}
                                         placeholder={sp.placeholder}
                                         InputLabelProps={{ shrink: true }}
@@ -1076,7 +1025,6 @@ export default function WarningLetter(props) {
                                     )}
                                   />
                                 </Grid>
-                                {/* data invoiceName */}
                                 <Grid item xs={12} sm={6}>
                                   <Autocomplete
                                     // disableCloseOnSelect
@@ -1100,10 +1048,7 @@ export default function WarningLetter(props) {
                                       <FormField
                                         {...params}
                                         type={invoiceName.type}
-                                        label={mandatoryComp(
-                                          invoiceName.label,
-                                          invoiceName.isRequired
-                                        )}
+                                        label={invoiceName.label} required
                                         name={invoiceName.name}
                                         placeholder={invoiceName.placeholder}
                                         InputLabelProps={{ shrink: true }}
@@ -1119,21 +1064,12 @@ export default function WarningLetter(props) {
                                     )}
                                   />
                                 </Grid>
-                                {/* action search */}
                                 <Grid item xs={12}>
                                   <MDBox
                                     display="flex"
                                     flexDirection={{ xs: "column", sm: "row" }}
                                     justifyContent="flex-end"
                                   >
-                                    {/* <MDButton
-                                      type="reset"
-                                      variant="outlined"
-                                      color="secondary"
-                                      onClick={resetForm}
-                                    >
-                                      Clear Filters
-                                    </MDButton> */}
                                     <MDBox
                                       ml={{ xs: 0, sm: 1 }}
                                       mt={{ xs: 1, sm: 0 }}
@@ -1143,9 +1079,13 @@ export default function WarningLetter(props) {
                                         variant="gradient"
                                         color="primary"
                                         sx={{ height: "100%" }}
-                                        disabled={isSubmitting}
+                                        disabled={isLoading}
                                       >
-                                        Search
+                                        <Icon>search</Icon>&nbsp;{" "}
+                                        {isLoading ?
+                                          "Searching..." :
+                                          "Search"
+                                        }
                                       </MDButton>
                                     </MDBox>
                                   </MDBox>
@@ -1163,115 +1103,67 @@ export default function WarningLetter(props) {
           </Grid>
         </Grid>
       </MDBox>
-      {/* end bagian filterisasi */}
 
-      <MDBox pb={3}>
-        {/* Start bagian Datatable */}
+      <MDBox mt={5}>
+      <MDBox
+          display="flex"
+          justifyContent="flex-end"
+          alignItems="flex-start"
+          mb={2}
+        >
+          <MDBox display="flex">
+            <MDBox>
+              <MDButton variant="outlined" color="primary"
+                disabled={customerResponse.rowData.length == 0}
+                onClick={handleExport}
+              >
+                <Icon>description</Icon>&nbsp;Export Excel
+              </MDButton>
+            </MDBox>
+            <MDBox ml={1}>
+              <MDButton variant="outlined" color="primary"
+                onClick={(e) => sendEmail(e)}
+              >
+                <Icon>email</Icon>&nbsp;Send Email
+              </MDButton>
+            </MDBox>
+          </MDBox>
+        </MDBox>
         <Card>
-          <MDBox p={3} lineHeight={1}>
+          <MDBox>
             <Grid container alignItems="center">
-              <Grid item xs={12} md={5}>
-                <MDBox mb={1}>
-                  <MDTypography variant="h5">Warning Letter List</MDTypography>
-                </MDBox>
-                <MDBox mb={2}>
-                  <MDTypography variant="body2" color="text">
-                    Warning Letter Data.
-                  </MDTypography>
-                </MDBox>
-              </Grid>
-              <Grid item xs={12} md={7} sx={{ textAlign: "right" }}>
-                <Grid container alignItems="left" spacing={2}>
-                  <Grid item xs={12}>
-                    <MDBox
-                      display="flex"
-                      flexDirection={{ xs: "column", sm: "row" }}
-                      justifyContent="flex-end"
-                    >
-                      <MDBox mr={{ xs: 0, sm: 2 }} mt={{ xs: 1, sm: 0 }}>
-                        <MDInput
-                          label="search here"
-                          size="small"
-                          onChange={
-                            (e, value) => {}
-                            /* setFieldValue(
-                              txtSearch.name,
-                              value !== null
-                                ? value
-                                : initialValues[txtSearch.name]
-                            ) */
-                          }
-                          renderInput={(params) => (
-                            <FormField
-                              {...params}
-                              type={txtSearch.type}
-                              name={txtSearch.name}
-                              placeholder={txtSearch.placeholder}
-                              InputLabelProps={{ shrink: true }}
-                            />
-                          )}
-                        />
-                      </MDBox>
-
-                      <MDBox>
-                        <MDButton
-                          variant="outlined"
-                          color="primary"
-                          disabled={customerResponse.rowData.length == 0}
-                          onClick={handleExport}
-                        >
-                          <Icon>add</Icon>&nbsp; Export Excel
-                        </MDButton>
-                      </MDBox>
-
-                      <MDBox ml={{ xs: 0, sm: 2 }} mt={{ xs: 1, sm: 0 }}>
-                        <MDButton
-                          variant="gradient"
-                          color="primary"
-                          onClick={(e) => sendEmail(e)}
-                        >
-                          <Icon>email</Icon>&nbsp; Send Email
-                        </MDButton>
-                        {/* <UploadDataWater
-                          site={site}
-                          isOpen=""
-                          onModalChanged="{changeModalUpload}"
-                        /> */}
-                      </MDBox>
-                    </MDBox>
-                  </Grid>
-                </Grid>
+              <Grid item xs={12}>
+                <DataTable
+                  title="Warning Letter List" description="Warning Letter Data"
+                  table={setCustomerTaskList(customerResponse.rowData)}
+                  manualPagination={true}
+                  totalRows={customerResponse.totalRows}
+                  totalPages={customerResponse.totalPages}
+                  recordsPerPage={customerRequest.recordsPerPage}
+                  skipCount={customerRequest.skipCount}
+                  pageChangeHandler={skipCountChangeHandler}
+                  recordsPerPageChangeHandler={recordsPerPageChangeHandler}
+                  keywordsChangeHandler={keywordsChangeHandler}
+                  entriesPerPage={{ defaultValue: customerRequest.recordsPerPage }}
+                  canSearch pagination={{ variant: "gradient", color: "primary" }}
+                />
               </Grid>
             </Grid>
-          </MDBox>
-          <DataTable
-            table={setCustomerTaskList(customerResponse.rowData)}
-            manualPagination={true}
-            totalRows={customerResponse.totalRows}
-            totalPages={customerResponse.totalPages}
-            recordsPerPage={customerRequest.recordsPerPage}
-            skipCount={customerRequest.skipCount}
-            pageChangeHandler={skipCountChangeHandler}
-            recordsPerPageChangeHandler={recordsPerPageChangeHandler}
-            keywordsChangeHandler={keywordsChangeHandler}
-            entriesPerPage={{ defaultValue: customerRequest.recordsPerPage }}
-            pagination={{ variant: "gradient", color: "primary" }}
-          />
+          </MDBox> 
         </Card>
-        {/* End bagian Datatable */}
-        {/* Start bagian Modal */}
-        <WarningLetterPreviewModal
-          isOpen={openModal.isOpen}
-          params={openModal.params}
-          onModalChanged={(isChanged) => {
-            setOpenModal((prevState) => ({
-              ...prevState,
-              isOpen: !openModal.isOpen,
-            }));
-          }}
-        />
-        {/* End bagian Modal */}
       </MDBox>
+
+      <WarningLetterPreviewModal
+        isOpen={openModal.isOpen}
+        params={openModal.params}
+        onModalChanged={(isChanged) => {
+          setOpenModal((prevState) => ({
+            ...prevState,
+            isOpen: !openModal.isOpen,
+          }));
+        }}
+      />
+      
     </DashboardLayout>
   );
 }
