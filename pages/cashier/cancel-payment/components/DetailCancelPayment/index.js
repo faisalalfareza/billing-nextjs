@@ -487,7 +487,7 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
                                 )
                               }
                               multiline
-                              rows={1}
+                              rows={4}
                             />
                           </Grid>
                         )}
