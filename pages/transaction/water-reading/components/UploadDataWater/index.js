@@ -239,14 +239,45 @@ function UploadDataWater(props) {
     if (response.error) {
       alertService.error({ text: response.error.message, title: "Error" });
     } else {
+      const isFailed = response.result.totalGagal > 0;
+      // Swal.fire({
+      //   title: "Uploading success",
+      //   text: dataWater.length + " rows data has been successfully uploaded",
+      //   icon: "success",
+      // }).then(() => {
+      //   setLoading(false);
+      //   actions.resetForm();
+      //   closeModal();
+      // });
+
       Swal.fire({
-        title: "Uploading success",
-        text: dataWater.length + " rows data has been successfully uploaded",
+        title: "Upload Water Reading Successfull",
+        html:
+          `${response.result.totalSukses} data has been successfully uploaded.` +
+          (isFailed
+            ? `<br><strong>${response.result.totalGagal} data failed to upload</strong>, <a href="${response.result.urlDataGagal}" download="error-upload-bulk-payment.xlsx"><u>download here to see.</u></a>`
+            : ``),
         icon: "success",
+        timerProgressBar: true,
+        timer: !isFailed && 3000,
       }).then(() => {
+        if (isFailed) {
+          actions.setFieldValue(fileUpload.name, null);
+          setTimeout(
+            () => (document.getElementsByName(fileUpload.name)[0].value = null),
+            0
+          );
+        } else {
+          actions.resetForm();
+          setTimeout(() => {
+            document.getElementsByName(paymentMethod.name)[0].value = null;
+            document.getElementsByName(fileUpload.name)[0].value = null;
+          }, 0);
+        }
+        setDataWater([]);
         setLoading(false);
-        actions.resetForm();
-        closeModal();
+        // actions.resetForm();
+        // closeModal();
       });
     }
   };
@@ -397,7 +428,7 @@ function UploadDataWater(props) {
                               InputLabelProps={{ shrink: true }}
                               error={errors.project && touched.project}
                               success={checkingSuccessInput(
-                                project,
+                                formValues.project,
                                 errors.project
                               )}
                             />
@@ -437,7 +468,7 @@ function UploadDataWater(props) {
                               InputLabelProps={{ shrink: true }}
                               error={errors.cluster && touched.cluster}
                               success={checkingSuccessInput(
-                                cluster,
+                                formValues.cluster,
                                 errors.cluster
                               )}
                             />
@@ -455,7 +486,7 @@ function UploadDataWater(props) {
                           InputLabelProps={{ shrink: true }}
                           error={errors.fileUpload && touched.fileUpload}
                           success={checkingSuccessInput(
-                            fileUpload,
+                            formValues.fileUpload,
                             errors.fileUpload
                           )}
                           // setFieldValue={setFieldValue}
