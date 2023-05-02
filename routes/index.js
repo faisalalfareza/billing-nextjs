@@ -73,7 +73,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
         },
         {
           name: "Master Period",
-          nameOnHeader: "Period",
+          nameOnHeader: "Master Period",
           key: "period",
           route: "/master/period",
           // permission: "Pages.Tenants.GenerateNoSeriFP.Create",
@@ -222,8 +222,15 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
       icon: <Icon fontSize="medium">apps</Icon>,
       collapse: [
         {
+          name: "Report Invoice",
+          nameOnHeader: "Report Invoice",
+          key: "invoice",
+          route: "/report/invoice",
+          // permission: "Pages.Tenants.GenerateNoSeriFP.List",
+        },
+        {
           name: "Daily Report",
-          nameOnHeader: "Daily",
+          nameOnHeader: "Report Daily",
           key: "daily",
           route: "/report/daily",
           // permission: "Pages.Tenants.GenerateNoSeriFP.Create",
@@ -235,13 +242,6 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
         //   route: "/report/detail-statement",
         //   permission: "Pages.Tenants.GenerateNoSeriFP.Create",
         // },
-        {
-          name: "Report Invoice",
-          nameOnHeader: "Invoice",
-          key: "invoice",
-          route: "/report/invoice",
-          // permission: "Pages.Tenants.GenerateNoSeriFP.List",
-        },
         // {
         //   name: "Report Water Reading",
         //   nameOnHeader: "Report Water Reading",

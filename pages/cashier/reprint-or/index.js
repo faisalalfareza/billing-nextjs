@@ -315,7 +315,7 @@ function RePrintOR() {
         <Grid container spacing={2}>
           <Grid item xs={12}>
             <Card>
-              <MDBox p={3} lineHeight={1}>
+              <MDBox px={3} pt={3} pb={2} lineHeight={1}>
                 <Grid container alignItems="center" spacing={2}>
                   <Grid item xs={12}>
                     <MDBox>
@@ -402,10 +402,12 @@ function RePrintOR() {
                     </Formik>
                   </Grid>
                 </Grid>
-                {customerResponse.rowData.length > 0 && (
-                  <Grid container alignItems="center" pt={2}>
+              </MDBox>
+              {customerResponse.rowData.length > 0 && (
+                <MDBox>
+                  <Grid container alignItems="center">
                     <Grid item xs={12}>
-                      <MDBox>
+                      <MDBox pl={3}>
                         <MDTypography variant="h5">Search Result</MDTypography>
                       </MDBox>
                     </Grid>
@@ -423,7 +425,7 @@ function RePrintOR() {
                         entriesPerPage={{ defaultValue: customerRequest.recordsPerPage }}
                         pagination={{ variant: "gradient", color: "primary" }}
                       />
-                      <MDBox pt={1} pb={1} px={3}>
+                      <MDBox p={3} pt={0}>
                         <Grid item xs={12}>
                           <MDBox
                             display="flex"
@@ -436,11 +438,7 @@ function RePrintOR() {
                                 variant="gradient"
                                 color="primary"
                                 sx={{ height: "100%" }}
-                                onClick={() =>
-                                  getOfficialReceiptList(
-                                    selectedUnit.unitDataId
-                                  )
-                                }
+                                onClick={() => getOfficialReceiptList(selectedUnit.unitDataId)}
                                 disabled={!selectedUnit}
                               >
                                 {isLoadingOfficialReceipt
@@ -453,24 +451,21 @@ function RePrintOR() {
                       </MDBox>
                     </Grid>
                   </Grid>
-                )}
-              </MDBox>
+                </MDBox>
+              )}
             </Card>
           </Grid>
 
           {officialReceiptData.rowData.length > 0 && (
             <Grid item xs={12}>
               <Card>
-                <MDBox p={3} lineHeight={1}>
+                <MDBox>
                   <Grid container alignItems="center">
                     <Grid item xs={12}>
                       <DataTable
                         title="Reprint Official Receipt List"
-                        // description="A callback function can be added as the second parameter. The callback function can be used for all types of notifications. The notifications with the callback function do not disappear until they were clicked."
                         table={setOfficialReceiptTaskList(officialReceiptData.rowData)}
-                        // canEntriesPerPage entriesPerPage={{ defaultValue: customerRequest.recordsPerPage }}
-                        canSearch
-                        pagination={{ variant: "gradient", color: "primary" }}
+                        canSearch pagination={{ variant: "gradient", color: "primary" }}
                       />
                     </Grid>
                   </Grid>

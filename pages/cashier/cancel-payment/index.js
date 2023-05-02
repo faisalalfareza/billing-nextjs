@@ -34,7 +34,7 @@ function CancelPayment() {
     formField: {
       customerName: {
         name: "customerName",
-        label: "Customer Name or ID Client",
+        label: "Customer Name / ID Client",
         placeholder: "Entry the Customer Name or ID Client",
         type: "text",
         isRequired: true,
@@ -149,7 +149,7 @@ function CancelPayment() {
               />
             );
           },
-          align: "center",
+          // align: "center",
         },
         {
           Header: "No",
@@ -297,22 +297,22 @@ function CancelPayment() {
         borderRadius="lg"
         shadow="lg"
         opacity={1}
-        mb={2}
+        mt={2}
       >
-        <Grid container spacing={3}>
-          <Grid item xs={12} sm={12}>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
             <SiteDropdown onSelectSite={handleSite} site={site} />
           </Grid>
         </Grid>
       </MDBox>
 
-      <MDBox py={3}>
-        <Grid container spacing={3}>
+      <MDBox mt={2}>
+        <Grid container spacing={2}>
           <Grid item xs={12}>
             <Card>
-              <MDBox p={3} lineHeight={1}>
-                <Grid container alignItems="center">
-                  <Grid item xs={12} mb={2}>
+              <MDBox px={3} pt={3} pb={2} lineHeight={1}>
+                <Grid container alignItems="center" spacing={2}>
+                  <Grid item xs={12}>
                     <MDBox>
                       <MDTypography variant="h5">Filter</MDTypography>
                     </MDBox>
@@ -338,7 +338,7 @@ function CancelPayment() {
                             onSubmit={(e) => handleCustomerSubmit(e)}
                           >
                             <Grid container spacing={3}>
-                              <Grid item xs={12} sm={9}>
+                              <Grid item xs={12} sm={10}>
                                 <FormField
                                   type={customerName.type}
                                   required={customerName.isRequired}
@@ -365,7 +365,7 @@ function CancelPayment() {
                                   }
                                 />
                               </Grid>
-                              <Grid item xs={12} sm={3}>
+                              <Grid item xs={12} sm={2}>
                                 <MDBox
                                   display="flex"
                                   flexDirection={{ xs: "column", sm: "row" }}
@@ -399,10 +399,12 @@ function CancelPayment() {
                     </Formik>
                   </Grid>
                 </Grid>
-                {customerResponse.rowData.length > 0 && (
-                  <Grid container alignItems="center" pt={3}>
-                    <Grid item xs={12} mb={2}>
-                      <MDBox>
+              </MDBox>
+              {customerResponse.rowData.length > 0 && (
+                <MDBox>
+                  <Grid container alignItems="center">
+                    <Grid item xs={12}>
+                      <MDBox pl={3}>
                         <MDTypography variant="h5">Search Result</MDTypography>
                       </MDBox>
                     </Grid>
@@ -417,8 +419,10 @@ function CancelPayment() {
                         pageChangeHandler={skipCountChangeHandler}
                         recordsPerPageChangeHandler={recordsPerPageChangeHandler}
                         keywordsChangeHandler={keywordsChangeHandler}
+                        entriesPerPage={{ defaultValue: customerRequest.recordsPerPage }}
+                        pagination={{ variant: "gradient", color: "primary" }}
                       />
-                      <MDBox pt={3} pb={1} px={3}>
+                      <MDBox p={3} pt={0}>
                         <Grid item xs={12}>
                           <MDBox
                             display="flex"
@@ -431,9 +435,7 @@ function CancelPayment() {
                                 variant="gradient"
                                 color="primary"
                                 sx={{ height: "100%" }}
-                                onClick={() =>
-                                  getCancelPaymentList(selectedUnit.unitDataId)
-                                }
+                                onClick={() => getCancelPaymentList(selectedUnit.unitDataId)}
                                 disabled={!selectedUnit}
                               >
                                 {isLoadingCancelPayment
@@ -446,30 +448,21 @@ function CancelPayment() {
                       </MDBox>
                     </Grid>
                   </Grid>
-                )}
-              </MDBox>
+                </MDBox>
+              )}
             </Card>
           </Grid>
 
           {cancelPaymentData.rowData.length > 0 && (
             <Grid item xs={12}>
               <Card>
-                <MDBox p={3} lineHeight={1}>
+                <MDBox>
                   <Grid container alignItems="center">
-                    <Grid item xs={12} mb={2}>
-                      <MDBox>
-                        <MDTypography variant="h5">
-                          Cancel Payment List
-                        </MDTypography>
-                      </MDBox>
-                    </Grid>
                     <Grid item xs={12}>
                       <DataTable
-                        table={setCancelPaymentTaskList(
-                          cancelPaymentData.rowData
-                        )}
-                        // canEntriesPerPage entriesPerPage={{ defaultValue: customerRequest.recordsPerPage }}
-                        // canSearch
+                        title="Cancel Payment List"
+                        table={setCancelPaymentTaskList(cancelPaymentData.rowData)}
+                        canSearch pagination={{ variant: "gradient", color: "primary" }}
                       />
                     </Grid>
                   </Grid>

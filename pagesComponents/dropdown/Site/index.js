@@ -3,6 +3,7 @@ import { TextField } from "@mui/material";
 import { useState, useEffect } from "react";
 import { useCookies } from "react-cookie";
 import { typeNormalization } from "/helpers/utils";
+import { BorderBottom } from "@mui/icons-material";
 
 export default function SiteDropdown(props) {
   const [dataSite, setDataSite] = useState([]);
@@ -35,12 +36,8 @@ export default function SiteDropdown(props) {
       options={dataSite}
       key="site-dropdown"
       value={props.site}
-      getOptionLabel={(option) =>
-        option.siteName ? option.siteId + " - " + option.siteName : ""
-      }
-      onChange={(e, value) => {
-        handleSiteChange(value);
-      }}
+      getOptionLabel={(option) => option.siteName ? option.siteId + " - " + option.siteName : ""}
+      onChange={(e, value) => handleSiteChange(value)}
       isOptionEqualToValue={(option, value) => option.siteId === value.siteId}
       noOptionsText="No results"
       setCustomKey={(option) => option.siteId}
@@ -49,7 +46,12 @@ export default function SiteDropdown(props) {
           {...params}
           label="Site Name"
           variant="standard"
-          color="dark"
+          sx={{
+            label: { color: '#FFFFFF' },
+            input: { color: '#FFFFFF' },
+            div: { borderBottom: '1px solid #FFFFFF' },
+            button: { color: '#FFFFFF' },
+          }}
         />
       )}
     />

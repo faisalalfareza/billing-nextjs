@@ -212,14 +212,16 @@ function DataTable({
     entriesEnd = pageSize * (pageIndex + 1);
   }
 
+  const isActions = (title || description) || (canEntriesPerPage && entriesPerPage) || canSearch;
+
   return (
     <TableContainer sx={{ boxShadow: "none" }}>
-      {(title || description) || entriesPerPage || canSearch ? (
+      {isActions ? (
         <MDBox
           display="flex"
           justifyContent="space-between"
           alignItems="center"
-          pt={2} pb={3} // p={3}
+          p={3}
           sx={{ width: "100%" }}
         >
           {(title || description) && (
@@ -275,7 +277,7 @@ function DataTable({
           )}
         </MDBox>
       ) : null}
-      <Table {...getTableProps()}>
+      <Table {...getTableProps()} sx={{marginTop: isActions ? 0 : 2}}>
         <MDBox component="thead">
           {headerGroups.map((headerGroup, key) => (
             <TableRow key={key} {...headerGroup.getHeaderGroupProps()}>

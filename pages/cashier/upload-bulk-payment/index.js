@@ -288,26 +288,24 @@ function UploadBulkPayment() {
         borderRadius="lg"
         shadow="lg"
         opacity={1}
-        mb={2}
+        mt={2}
       >
-        <Grid container spacing={3}>
-          <Grid item xs={12} sm={12}>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
             <SiteDropdown onSelectSite={handleSite} site={site} />
           </Grid>
         </Grid>
       </MDBox>
 
-      <MDBox py={3}>
-        <Grid container spacing={3}>
+      <MDBox mt={2}>
+        <Grid container spacing={2}>
           <Grid item xs={12}>
             <Card>
               <MDBox p={3} lineHeight={1}>
-                <Grid container alignItems="center">
+                <Grid container alignItems="center" spacing={2}>
                   <Grid item xs={12} md={8} mb={2}>
                     <MDBox>
-                      <MDTypography variant="h5">
-                        Upload Bulk Payment
-                      </MDTypography>
+                      <MDTypography variant="h5">Upload Bulk Payment</MDTypography>
                     </MDBox>
                   </Grid>
                   <Grid item xs={12} md={4} sx={{ textAlign: "right" }}>
