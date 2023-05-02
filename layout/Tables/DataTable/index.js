@@ -226,8 +226,8 @@ function DataTable({
         >
           {(title || description) && (
             <MDBox>
-              {title && <MDBox mb={description ? 1 : 0}><MDTypography variant="h5">{title}</MDTypography></MDBox>}
-              {description && <MDBox mb={2}><MDTypography variant="body2" color="text">{description}</MDTypography></MDBox>}
+              {title && <MDBox><MDTypography variant="h5">{title}</MDTypography></MDBox>}
+              {description && <MDBox><MDTypography variant="button" color="text">{description}</MDTypography></MDBox>}
             </MDBox>
           )}
           {(!title && canEntriesPerPage && entriesPerPage) && (
@@ -260,11 +260,12 @@ function DataTable({
                       }`
                     : `Search ...`
                 }
-                label={`Search by${
-                  serverSideSearch != false && serverSideSearch.length > 0
-                    ? " " + serverSideSearch.join(", ").toString()
-                    : " keywords"
-                }`}
+                label="Search here"
+                // label={`Search by${
+                //   serverSideSearch != false && serverSideSearch.length > 0
+                //     ? " " + serverSideSearch.join(", ").toString()
+                //     : " keywords"
+                // }`}
                 value={search}
                 // size="small"
                 fullWidth

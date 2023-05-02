@@ -463,7 +463,7 @@ function RePrintOR() {
                   <Grid container alignItems="center">
                     <Grid item xs={12}>
                       <DataTable
-                        title="Reprint Official Receipt List"
+                        title="Reprint Official Receipt List" description="Official Receipt Data"
                         table={setOfficialReceiptTaskList(officialReceiptData.rowData)}
                         canSearch pagination={{ variant: "gradient", color: "primary" }}
                       />

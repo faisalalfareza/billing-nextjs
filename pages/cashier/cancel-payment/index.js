@@ -460,7 +460,7 @@ function CancelPayment() {
                   <Grid container alignItems="center">
                     <Grid item xs={12}>
                       <DataTable
-                        title="Cancel Payment List"
+                        title="Cancel Payment List" description="Cancel Payment Data"
                         table={setCancelPaymentTaskList(cancelPaymentData.rowData)}
                         canSearch pagination={{ variant: "gradient", color: "primary" }}
                       />

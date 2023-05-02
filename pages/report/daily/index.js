@@ -263,9 +263,8 @@ export default function ReportDaily(props) {
               <MDBox p={3} lineHeight={1}>
                 <Grid container alignItems="center" spacing={2}>
                   <Grid item xs={12} mb={2}>
-                    <MDBox>
-                      <MDTypography variant="h5">Daily Report</MDTypography>
-                    </MDBox>
+                    <MDBox><MDTypography variant="h5">Daily Report</MDTypography></MDBox>
+                    <MDBox><MDTypography variant="button" color="text">Generate Daily Reports</MDTypography></MDBox>
                     {/* <MDBox mb={4}>
                       <MDTypography variant="body2" color="text">Generate Daily Reports</MDTypography>
                     </MDBox> */}

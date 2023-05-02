@@ -24,14 +24,14 @@ import MDBox from "/components/MDBox";
 import MDTypography from "/components/MDTypography";
 import MDInput from "/components/MDInput";
 
-function FormField({ label, name, ...rest }) {
+function FormField({ label, name, variant, ...rest }) {
   return (
     <MDBox mb={1.5}>
       <Field
         {...rest}
         name={name}
         as={MDInput}
-        variant="standard"
+        variant={variant}
         label={label}
         fullWidth
       />
@@ -49,10 +49,16 @@ function FormField({ label, name, ...rest }) {
   );
 }
 
-// typechecking props for FormField
+// Setting default value for the props of DetailCancelPayment
+FormField.defaultProps = {
+  variant: "standard"
+};
+
+// Typechecking props for FormField
 FormField.propTypes = {
   label: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
+  variant: PropTypes.string.isRequired
 };
 
 export default FormField;

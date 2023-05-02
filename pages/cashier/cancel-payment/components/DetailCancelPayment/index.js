@@ -102,6 +102,7 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
       confirmButtonColor: "#3085d6",
       cancelButtonColor: "#d33",
       confirmButtonText: "Yes, cancel it!",
+      cancelButtonText: "No",
       reverseButtons: true,
       focusConfirm: false,
     }).then(async (result) => {
@@ -131,7 +132,7 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
             Swal.fire({
               title: "Payment Canceled",
               text: `Payment of this receipt number${
-                receiptNumber ? ` ${receiptNumber}` : ` `
+                receiptNumber ? ` ${receiptNumber} ` : ` `
               }has been canceled.`,
               icon: "success",
               showConfirmButton: true,
@@ -182,317 +183,308 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
               return (
                 <Form id={schemeModels.formId} autoComplete="off">
                   <ModalHeader>
-                    <Grid container spacing={3}>
-                      <Grid item xs={12} md={12}>
-                        <MDBox>
-                          <MDTypography variant="h5">
-                            {!isCanceled
-                              ? "Detail Payment"
-                              : "Detail Canceled Payment"}
-                          </MDTypography>
-                        </MDBox>
-                      </Grid>
+                    <Grid item xs={12} md={12}>
+                      <MDBox>
+                        <MDTypography variant="h5">Detail</MDTypography>
+                      </MDBox>
                     </Grid>
                   </ModalHeader>
-                  <ModalBody>
-                    <MDBox>
-                      <Grid container spacing={3}>
-                        <Grid item xs={12} sm={12}>
-                          <MDBox
-                            component="li"
-                            display="flex"
-                            justifyContent="space-between"
-                            alignItems="flex-start"
-                            bgColor="grey-100"
-                            borderRadius="lg"
-                            p={3}
-                          >
-                            <MDBox
-                              width="100%"
-                              display="flex"
-                              flexDirection="column"
-                              lineHeight={1}
+                  <ModalBody style={{ paddingBottom: 0 }}>
+                    <Grid item xs={12} sm={12}>
+                      <MDBox
+                        component="li"
+                        display="flex"
+                        justifyContent="space-between"
+                        alignItems="flex-start"
+                        bgColor="grey-100"
+                        borderRadius="lg"
+                        pb={2}
+                      >
+                        <MDBox
+                          width="100%"
+                          display="flex"
+                          flexDirection="column"
+                          lineHeight={1}
+                        >
+                          <MDBox mb={1} py={1.5} style={{ borderBottom: "0.0625rem solid #f0f2f5" }}>
+                            <MDTypography
+                              variant="button"
+                              fontWeight="medium"
+                              textTransform="capitalize"
+                              ml={2}
                             >
-                              <MDBox mb={2}>
-                                <MDTypography
-                                  variant="button"
-                                  fontWeight="medium"
-                                  textTransform="capitalize"
-                                >
-                                  Main Information
-                                </MDTypography>
-                              </MDBox>
-                              <Table sx={{ minWidth: 650 }} size="small">
-                                <TableBody>
-                                  <TableRow>
-                                    <TableCell
-                                      sx={{
-                                        paddingTop: 0,
-                                        paddingBottom: 0.2,
-                                        border: 0,
-                                      }}
-                                    >
-                                      <MDTypography
-                                        variant="caption"
-                                        textTransform="capitalize"
-                                      >
-                                        Receipt Number
-                                      </MDTypography>
-                                    </TableCell>
-                                    <TableCell
-                                      sx={{
-                                        paddingTop: 0,
-                                        paddingBottom: 0.2,
-                                        border: 0,
-                                      }}
-                                    >
-                                      <MDTypography
-                                        variant="caption"
-                                        fontWeight="medium"
-                                        textTransform="uppercase"
-                                      >
-                                        {detailCancelPayment.receiptNumber}
-                                      </MDTypography>
-                                    </TableCell>
-
-                                    <TableCell
-                                      sx={{
-                                        paddingTop: 0,
-                                        paddingBottom: 0.2,
-                                        border: 0,
-                                      }}
-                                    >
-                                      <MDTypography
-                                        variant="caption"
-                                        textTransform="capitalize"
-                                      >
-                                        Payment Method
-                                      </MDTypography>
-                                    </TableCell>
-                                    <TableCell
-                                      sx={{
-                                        paddingTop: 0,
-                                        paddingBottom: 0.2,
-                                        border: 0,
-                                      }}
-                                    >
-                                      <MDTypography
-                                        variant="caption"
-                                        fontWeight="medium"
-                                        textTransform="capitalize"
-                                      >
-                                        {detailCancelPayment.method}
-                                      </MDTypography>
-                                    </TableCell>
-                                  </TableRow>
-
-                                  <TableRow>
-                                    <TableCell
-                                      sx={{
-                                        paddingTop: 0,
-                                        paddingBottom: 0.2,
-                                        border: 0,
-                                      }}
-                                    >
-                                      <MDTypography
-                                        variant="caption"
-                                        textTransform="capitalize"
-                                      >
-                                        Unit Code
-                                      </MDTypography>
-                                    </TableCell>
-                                    <TableCell
-                                      sx={{
-                                        paddingTop: 0,
-                                        paddingBottom: 0.2,
-                                        border: 0,
-                                      }}
-                                    >
-                                      <MDTypography
-                                        variant="caption"
-                                        fontWeight="medium"
-                                        textTransform="uppercase"
-                                      >
-                                        {detailCancelPayment.unitCode}
-                                      </MDTypography>
-                                    </TableCell>
-
-                                    <TableCell
-                                      sx={{
-                                        paddingTop: 0,
-                                        paddingBottom: 0.2,
-                                        border: 0,
-                                      }}
-                                    >
-                                      <MDTypography
-                                        variant="caption"
-                                        textTransform="capitalize"
-                                      >
-                                        Remarks
-                                      </MDTypography>
-                                    </TableCell>
-                                    <TableCell
-                                      sx={{
-                                        paddingTop: 0,
-                                        paddingBottom: 0.2,
-                                        border: 0,
-                                      }}
-                                    >
-                                      <MDTypography
-                                        variant="caption"
-                                        fontWeight="medium"
-                                        textTransform="capitalize"
-                                      >
-                                        {detailCancelPayment.remarks == null
-                                          ? "-"
-                                          : detailCancelPayment.remarks}
-                                      </MDTypography>
-                                    </TableCell>
-                                  </TableRow>
-
-                                  <TableRow>
-                                    <TableCell
-                                      sx={{
-                                        paddingTop: 0,
-                                        paddingBottom: 0.2,
-                                        border: 0,
-                                      }}
-                                    >
-                                      <MDTypography
-                                        variant="caption"
-                                        textTransform="capitalize"
-                                      >
-                                        Unit No
-                                      </MDTypography>
-                                    </TableCell>
-                                    <TableCell
-                                      sx={{
-                                        paddingTop: 0,
-                                        paddingBottom: 0.2,
-                                        border: 0,
-                                      }}
-                                    >
-                                      <MDTypography
-                                        variant="caption"
-                                        fontWeight="medium"
-                                        textTransform="uppercase"
-                                      >
-                                        {detailCancelPayment.unitNo}
-                                      </MDTypography>
-                                    </TableCell>
-
-                                    <TableCell
-                                      rowSpan={2}
-                                      sx={{
-                                        paddingTop: 0,
-                                        paddingBottom: 0.2,
-                                        border: 0,
-                                      }}
-                                    >
-                                      <MDTypography
-                                        variant="caption"
-                                        textTransform="capitalize"
-                                      >
-                                        Total Amount
-                                      </MDTypography>
-                                    </TableCell>
-                                    <TableCell
-                                      rowSpan={2}
-                                      sx={{
-                                        paddingTop: 0,
-                                        paddingBottom: 0.2,
-                                        border: 0,
-                                      }}
-                                    >
-                                      <MDBadge
-                                        variant="contained"
-                                        color="info"
-                                        badgeContent={
-                                          <NumericFormat
-                                            displayType="text"
-                                            value={
-                                              detailCancelPayment.totalAmount
-                                            }
-                                            decimalSeparator=","
-                                            prefix="Rp. "
-                                            thousandSeparator="."
-                                          />
-                                        }
-                                        size="lg"
-                                        container
-                                      />
-                                    </TableCell>
-                                  </TableRow>
-
-                                  <TableRow
-                                    sx={{
-                                      "&:last-child td, &:last-child th": {
-                                        border: 0,
-                                      },
-                                    }}
-                                  >
-                                    <TableCell
-                                      sx={{
-                                        paddingTop: 0,
-                                        paddingBottom: 0.2,
-                                        border: 0,
-                                      }}
-                                    >
-                                      <MDTypography
-                                        variant="caption"
-                                        textTransform="capitalize"
-                                      >
-                                        Transaction Date
-                                      </MDTypography>
-                                    </TableCell>
-                                    <TableCell
-                                      sx={{
-                                        paddingTop: 0,
-                                        paddingBottom: 0.2,
-                                        border: 0,
-                                      }}
-                                    >
-                                      <MDTypography
-                                        variant="caption"
-                                        fontWeight="medium"
-                                      >
-                                        {detailCancelPayment.transactionDate}
-                                      </MDTypography>
-                                    </TableCell>
-                                  </TableRow>
-                                </TableBody>
-                              </Table>
-                            </MDBox>
+                              Main Information
+                            </MDTypography>
                           </MDBox>
-                        </Grid>
-                        {!isCanceled && (
-                          <Grid item xs={12} sm={12}>
-                            <FormField
-                              type={remarks.type}
-                              label={
-                                remarks.label +
-                                (remarks.isRequired ? " ⁽*⁾" : "")
-                              }
-                              name={remarks.name}
-                              value={remarksV}
-                              placeholder={remarks.placeholder}
-                              InputLabelProps={{ shrink: true }}
-                              error={errors.remarks && touched.remarks}
-                              success={
-                                remarks.isRequired &&
-                                checkingSuccessInput(
-                                  remarks.isRequired,
-                                  remarksV,
-                                  errors.remarks
-                                )
-                              }
-                              multiline
-                              rows={4}
-                            />
-                          </Grid>
-                        )}
+                          <Table sx={{ minWidth: 650 }} size="small">
+                            <TableBody>
+                              <TableRow>
+                                <TableCell
+                                  sx={{
+                                    paddingTop: 0,
+                                    paddingBottom: 0.2,
+                                    border: 0,
+                                  }}
+                                >
+                                  <MDTypography
+                                    variant="caption"
+                                    textTransform="capitalize"
+                                  >
+                                    Receipt Number
+                                  </MDTypography>
+                                </TableCell>
+                                <TableCell
+                                  sx={{
+                                    paddingTop: 0,
+                                    paddingBottom: 0.2,
+                                    border: 0,
+                                  }}
+                                >
+                                  <MDTypography
+                                    variant="caption"
+                                    fontWeight="medium"
+                                    textTransform="uppercase"
+                                  >
+                                    {detailCancelPayment.receiptNumber}
+                                  </MDTypography>
+                                </TableCell>
+
+                                <TableCell
+                                  sx={{
+                                    paddingTop: 0,
+                                    paddingBottom: 0.2,
+                                    border: 0,
+                                  }}
+                                >
+                                  <MDTypography
+                                    variant="caption"
+                                    textTransform="capitalize"
+                                  >
+                                    Payment Method
+                                  </MDTypography>
+                                </TableCell>
+                                <TableCell
+                                  sx={{
+                                    paddingTop: 0,
+                                    paddingBottom: 0.2,
+                                    border: 0,
+                                  }}
+                                >
+                                  <MDTypography
+                                    variant="caption"
+                                    fontWeight="medium"
+                                    textTransform="capitalize"
+                                  >
+                                    {detailCancelPayment.method}
+                                  </MDTypography>
+                                </TableCell>
+                              </TableRow>
+
+                              <TableRow>
+                                <TableCell
+                                  sx={{
+                                    paddingTop: 0,
+                                    paddingBottom: 0.2,
+                                    border: 0,
+                                  }}
+                                >
+                                  <MDTypography
+                                    variant="caption"
+                                    textTransform="capitalize"
+                                  >
+                                    Unit Code
+                                  </MDTypography>
+                                </TableCell>
+                                <TableCell
+                                  sx={{
+                                    paddingTop: 0,
+                                    paddingBottom: 0.2,
+                                    border: 0,
+                                  }}
+                                >
+                                  <MDTypography
+                                    variant="caption"
+                                    fontWeight="medium"
+                                    textTransform="uppercase"
+                                  >
+                                    {detailCancelPayment.unitCode}
+                                  </MDTypography>
+                                </TableCell>
+
+                                <TableCell
+                                  sx={{
+                                    paddingTop: 0,
+                                    paddingBottom: 0.2,
+                                    border: 0,
+                                  }}
+                                >
+                                  <MDTypography
+                                    variant="caption"
+                                    textTransform="capitalize"
+                                  >
+                                    Remarks
+                                  </MDTypography>
+                                </TableCell>
+                                <TableCell
+                                  sx={{
+                                    paddingTop: 0,
+                                    paddingBottom: 0.2,
+                                    border: 0,
+                                  }}
+                                >
+                                  <MDTypography
+                                    variant="caption"
+                                    fontWeight="medium"
+                                    textTransform="capitalize"
+                                  >
+                                    {detailCancelPayment.remarks == null
+                                      ? "-"
+                                      : detailCancelPayment.remarks}
+                                  </MDTypography>
+                                </TableCell>
+                              </TableRow>
+
+                              <TableRow>
+                                <TableCell
+                                  sx={{
+                                    paddingTop: 0,
+                                    paddingBottom: 0.2,
+                                    border: 0,
+                                  }}
+                                >
+                                  <MDTypography
+                                    variant="caption"
+                                    textTransform="capitalize"
+                                  >
+                                    Unit No
+                                  </MDTypography>
+                                </TableCell>
+                                <TableCell
+                                  sx={{
+                                    paddingTop: 0,
+                                    paddingBottom: 0.2,
+                                    border: 0,
+                                  }}
+                                >
+                                  <MDTypography
+                                    variant="caption"
+                                    fontWeight="medium"
+                                    textTransform="uppercase"
+                                  >
+                                    {detailCancelPayment.unitNo}
+                                  </MDTypography>
+                                </TableCell>
+
+                                <TableCell
+                                  rowSpan={2}
+                                  sx={{
+                                    paddingTop: 0,
+                                    paddingBottom: 0.2,
+                                    border: 0,
+                                  }}
+                                >
+                                  <MDTypography
+                                    variant="caption"
+                                    textTransform="capitalize"
+                                  >
+                                    Total Amount
+                                  </MDTypography>
+                                </TableCell>
+                                <TableCell
+                                  rowSpan={2}
+                                  sx={{
+                                    paddingTop: 0,
+                                    paddingBottom: 0.2,
+                                    border: 0,
+                                  }}
+                                >
+                                  <MDBadge
+                                    variant="contained"
+                                    color="info"
+                                    badgeContent={
+                                      <NumericFormat
+                                        displayType="text"
+                                        value={detailCancelPayment.totalAmount}
+                                        decimalSeparator=","
+                                        prefix="Rp. "
+                                        thousandSeparator="."
+                                      />
+                                    }
+                                    size="lg"
+                                    container
+                                    sx={{ textTransform: "capitalize" }}
+                                  />
+                                </TableCell>
+                              </TableRow>
+
+                              <TableRow
+                                sx={{
+                                  "&:last-child td, &:last-child th": {
+                                    border: 0,
+                                  },
+                                }}
+                              >
+                                <TableCell
+                                  sx={{
+                                    paddingTop: 0,
+                                    paddingBottom: 0.2,
+                                    border: 0,
+                                  }}
+                                >
+                                  <MDTypography
+                                    variant="caption"
+                                    textTransform="capitalize"
+                                  >
+                                    Transaction Date
+                                  </MDTypography>
+                                </TableCell>
+                                <TableCell
+                                  sx={{
+                                    paddingTop: 0,
+                                    paddingBottom: 0.2,
+                                    border: 0,
+                                  }}
+                                >
+                                  <MDTypography
+                                    variant="caption"
+                                    fontWeight="medium"
+                                  >
+                                    {detailCancelPayment.transactionDate}
+                                  </MDTypography>
+                                </TableCell>
+                              </TableRow>
+                            </TableBody>
+                          </Table>
+                        </MDBox>
+                      </MDBox>
+                    </Grid>
+                    {!isCanceled && (
+                      <Grid item xs={12} sm={12} mt={5}>
+                        <FormField
+                          type={remarks.type}
+                          label={
+                            remarks.label +
+                            (remarks.isRequired ? " ⁽*⁾" : "")
+                          }
+                          name={remarks.name}
+                          value={remarksV}
+                          placeholder={remarks.placeholder}
+                          InputLabelProps={{ shrink: true }}
+                          error={errors.remarks && touched.remarks}
+                          success={
+                            remarks.isRequired &&
+                            checkingSuccessInput(
+                              remarks.isRequired,
+                              remarksV,
+                              errors.remarks
+                            )
+                          }
+                          multiline
+                          rows={4}
+                          variant="outlined"
+                        />
                       </Grid>
-                    </MDBox>
+                    )}
                   </ModalBody>
                   <ModalFooter>
                     <MDBox

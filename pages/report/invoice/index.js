@@ -231,12 +231,8 @@ export default function ReportInvoice(props) {
               <MDBox p={3} lineHeight={1}>
                 <Grid container alignItems="center" spacing={2}>
                   <Grid item xs={12} mb={2}>
-                    <MDBox>
-                      <MDTypography variant="h5">Report Invoice</MDTypography>
-                    </MDBox>
-                    {/* <MDBox mb={4}>
-                      <MDTypography variant="body2" color="text">Generate Invoice Reports</MDTypography>
-                    </MDBox> */}
+                    <MDBox><MDTypography variant="h5">Report Invoice</MDTypography></MDBox>
+                    <MDBox><MDTypography variant="button" color="text">Generate Invoice Reports</MDTypography></MDBox>
                   </Grid>
                   <Grid item xs={12}>
                     <Formik
