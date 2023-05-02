@@ -27,9 +27,11 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
   return [
     {
       type: "collapse",
-      name: "Brooklyn Alice",
+      // name: "Brooklyn Alice",
+      name: informations ? capitalizeFirstLetter(informations['user']['userName']) : "Brooklyn Alice",
       key: "username",
-      icon: <MDAvatar src={profilePicture.src} size="sm" />,
+      // icon: <MDAvatar src={profilePicture.src} size="sm" />,
+      icon: <MDAvatar src={profiles ? `data:image/png;base64, ${profiles}` : profilePicture.src} alt={informations ? capitalizeFirstLetter(informations['user']['name']) : "Brooklyn Alice"} size="sm" />,
       collapse: [
         {
           name: "Logout",

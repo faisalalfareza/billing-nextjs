@@ -98,7 +98,7 @@ function Breadcrumbs({ icon, title, route, light }) {
       <MDTypography
         fontWeight="bold"
         textTransform="capitalize"
-        variant="h3"
+        variant="h6"
         color={light ? "white" : "dark"}
         noWrap
       >

@@ -415,9 +415,7 @@ function CancelPayment() {
                         recordsPerPage={customerRequest.recordsPerPage}
                         skipCount={customerRequest.skipCount}
                         pageChangeHandler={skipCountChangeHandler}
-                        recordsPerPageChangeHandler={
-                          recordsPerPageChangeHandler
-                        }
+                        recordsPerPageChangeHandler={recordsPerPageChangeHandler}
                         keywordsChangeHandler={keywordsChangeHandler}
                       />
                       <MDBox pt={3} pb={1} px={3}>

@@ -34,6 +34,8 @@ import DataTableHeadCell from "/layout/Tables/DataTable/DataTableHeadCell";
 import DataTableBodyCell from "/layout/Tables/DataTable/DataTableBodyCell";
 
 function DataTable({
+  title,
+  description,
   canEntriesPerPage,
   entriesPerPage,
   canSearch,
@@ -212,23 +214,27 @@ function DataTable({
 
   return (
     <TableContainer sx={{ boxShadow: "none" }}>
-      {entriesPerPage || canSearch ? (
+      {(title || description) || entriesPerPage || canSearch ? (
         <MDBox
           display="flex"
           justifyContent="space-between"
           alignItems="center"
-          p={3}
+          pt={2} pb={3} // p={3}
           sx={{ width: "100%" }}
         >
-          {canEntriesPerPage && entriesPerPage && (
+          {(title || description) && (
+            <MDBox>
+              {title && <MDBox mb={description ? 1 : 0}><MDTypography variant="h5">{title}</MDTypography></MDBox>}
+              {description && <MDBox mb={2}><MDTypography variant="body2" color="text">{description}</MDTypography></MDBox>}
+            </MDBox>
+          )}
+          {(!title && canEntriesPerPage && entriesPerPage) && (
             <MDBox display="flex" alignItems="center">
               <Autocomplete
                 disableClearable
                 value={pageSize.toString()}
                 options={entries}
-                onChange={(event, newValue) =>
-                  setEntriesPerPage(parseInt(newValue, 10))
-                }
+                onChange={(event, newValue) => setEntriesPerPage(parseInt(newValue, 10))}
                 // size="small"
                 sx={{ width: "5rem" }}
                 renderInput={(params) => <MDInput {...params} />}
@@ -374,6 +380,8 @@ function DataTable({
 
 // Setting default values for the props of DataTable
 DataTable.defaultProps = {
+  title: "",
+  description: "",
   canEntriesPerPage: false,
   // entriesPerPage: { defaultValue: 10, entries: [5, 10, 15, 20, 25] },
   entriesPerPage: false,
@@ -393,6 +401,8 @@ DataTable.defaultProps = {
 
 // Typechecking props for the DataTable
 DataTable.propTypes = {
+  title: PropTypes.string,
+  description: PropTypes.string,
   canEntriesPerPage: PropTypes.bool,
   entriesPerPage: PropTypes.oneOfType([
     PropTypes.shape({

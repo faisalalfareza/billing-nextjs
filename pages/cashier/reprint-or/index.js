@@ -33,7 +33,7 @@ function RePrintOR() {
     formField: {
       customerName: {
         name: "customerName",
-        label: "Customer Name or ID Client",
+        label: "Customer Name / ID Client",
         placeholder: "Entry the Customer Name or ID Client",
         type: "text",
         isRequired: true,
@@ -150,7 +150,7 @@ function RePrintOR() {
               />
             );
           },
-          align: "center",
+          // align: "center",
         },
         {
           Header: "No",
@@ -294,6 +294,7 @@ function RePrintOR() {
   return (
     <DashboardLayout>
       <DashboardNavbar />
+
       <MDBox
         p={3}
         color="light"
@@ -302,22 +303,23 @@ function RePrintOR() {
         borderRadius="lg"
         shadow="lg"
         opacity={1}
-        mb={2}
+        mt={2}
       >
-        <Grid container spacing={3}>
-          <Grid item xs={12} sm={12}>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
             <SiteDropdown onSelectSite={handleSite} site={site} />
           </Grid>
         </Grid>
       </MDBox>
-      <MDBox py={3}>
-        <Grid container spacing={3}>
+
+      <MDBox mt={2}>
+        <Grid container spacing={2}>
           <Grid item xs={12}>
             <Card>
               <MDBox p={3} lineHeight={1}>
-                <Grid container alignItems="center">
+                <Grid container alignItems="center" spacing={2}>
                   <Grid item xs={12}>
-                    <MDBox mb={1}>
+                    <MDBox>
                       <MDTypography variant="h5">Filter</MDTypography>
                     </MDBox>
                   </Grid>
@@ -342,7 +344,7 @@ function RePrintOR() {
                             onSubmit={(e) => handleCustomerSubmit(e)}
                           >
                             <Grid container spacing={3}>
-                              <Grid item xs={12} sm={9}>
+                              <Grid item xs={12} sm={10}>
                                 <FormField
                                   type={customerName.type}
                                   required={customerName.isRequired}
@@ -350,9 +352,7 @@ function RePrintOR() {
                                   name={customerName.name}
                                   value={customerNameV}
                                   placeholder={customerName.placeholder}
-                                  error={
-                                    errors.customerName && touched.customerName
-                                  }
+                                  error={errors.customerName && touched.customerName}
                                   success={
                                     customerName.isRequired &&
                                     checkingSuccessInput(
@@ -369,7 +369,7 @@ function RePrintOR() {
                                   }
                                 />
                               </Grid>
-                              <Grid item xs={12} sm={3}>
+                              <Grid item xs={12} sm={2}>
                                 <MDBox
                                   display="flex"
                                   flexDirection={{ xs: "column", sm: "row" }}
@@ -404,16 +404,10 @@ function RePrintOR() {
                   </Grid>
                 </Grid>
                 {customerResponse.rowData.length > 0 && (
-                  <Grid container alignItems="center" pt={3}>
+                  <Grid container alignItems="center" pt={2}>
                     <Grid item xs={12}>
-                      <MDBox mb={1}>
+                      <MDBox>
                         <MDTypography variant="h5">Search Result</MDTypography>
-                      </MDBox>
-                      <MDBox mb={2}>
-                        <MDTypography variant="body2" color="text">
-                          Customers related to search `
-                          {customerRequest.keywords}`.
-                        </MDTypography>
                       </MDBox>
                     </Grid>
                     <Grid item xs={12}>
@@ -425,13 +419,9 @@ function RePrintOR() {
                         recordsPerPage={customerRequest.recordsPerPage}
                         skipCount={customerRequest.skipCount}
                         pageChangeHandler={skipCountChangeHandler}
-                        recordsPerPageChangeHandler={
-                          recordsPerPageChangeHandler
-                        }
+                        recordsPerPageChangeHandler={recordsPerPageChangeHandler}
                         keywordsChangeHandler={keywordsChangeHandler}
-                        entriesPerPage={{
-                          defaultValue: customerRequest.recordsPerPage,
-                        }}
+                        entriesPerPage={{ defaultValue: customerRequest.recordsPerPage }}
                         pagination={{ variant: "gradient", color: "primary" }}
                       />
                       <MDBox pt={1} pb={1} px={3}>
@@ -475,30 +465,13 @@ function RePrintOR() {
                 <MDBox p={3} lineHeight={1}>
                   <Grid container alignItems="center">
                     <Grid item xs={12}>
-                      <MDBox mb={1}>
-                        <MDTypography variant="h5">
-                          Re-Print Official Receipt List
-                        </MDTypography>
-                      </MDBox>
-                      <MDBox mb={2}>
-                        <MDTypography variant="body2" color="text">
-                          Official receipts of {selectedUnit.projectName}{" "}
-                          {selectedUnit.unitName} {selectedUnit.unitCode}{" "}
-                          {selectedUnit.unitNo} on behalf of{" "}
-                          {selectedUnit.customerName}.
-                        </MDTypography>
-                      </MDBox>
-                    </Grid>
-                    <Grid item xs={12}>
                       <DataTable
-                        table={setOfficialReceiptTaskList(
-                          officialReceiptData.rowData
-                        )}
-                        canEntriesPerPage
-                        entriesPerPage={{
-                          defaultValue: customerRequest.recordsPerPage,
-                        }}
+                        title="Reprint Official Receipt List"
+                        // description="A callback function can be added as the second parameter. The callback function can be used for all types of notifications. The notifications with the callback function do not disappear until they were clicked."
+                        table={setOfficialReceiptTaskList(officialReceiptData.rowData)}
+                        // canEntriesPerPage entriesPerPage={{ defaultValue: customerRequest.recordsPerPage }}
                         canSearch
+                        pagination={{ variant: "gradient", color: "primary" }}
                       />
                     </Grid>
                   </Grid>
