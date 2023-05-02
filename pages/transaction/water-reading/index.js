@@ -11,26 +11,21 @@ import Icon from "@mui/material/Icon";
 // NextJS Material Dashboard 2 PRO layout
 import DashboardLayout from "/layout/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "/layout/Navbars/DashboardNavbar";
-import Footer from "/layout/Footer";
 import DataTable from "/layout/Tables/DataTable";
 import MDButton from "/components/MDButton";
-import MDInput from "/components/MDInput";
 import FormField from "/pagesComponents/FormField";
 import Autocomplete from "@mui/material/Autocomplete";
 import { useMaterialUIController } from "/context";
 import { useCookies } from "react-cookie";
-import * as React from "react";
+import { useEffect, useState, useRef } from "react";
 import { typeNormalization, downloadTempFile } from "/helpers/utils";
 import { alertService } from "/helpers";
 
 // Data
-import dataTableData from "/pagesComponents/applications/data-tables/data/dataTableData";
-import { useEffect, useState } from "react";
 import UploadDataWater from "./components/UploadDataWater";
 import WaterRowActions from "./components/WaterRowActions";
 import EditDataWater from "./components/EditDataWater";
 import SiteDropdown from "../../../pagesComponents/dropdown/Site";
-// import templateWaterReading from "../assets/template/template-water-reading.xlsx";
 
 export default function WaterReading(props) {
   const [controller] = useMaterialUIController();
@@ -49,6 +44,7 @@ export default function WaterReading(props) {
   const [isLoading, setLoading] = useState(false);
   const [modalParams, setModalParams] = useState(undefined);
   const [{ accessToken, encryptedAccessToken }] = useCookies();
+  const formikRef = useRef();
 
   useEffect(() => {
     let currentSite = JSON.parse(localStorage.getItem("site"));
@@ -112,6 +108,15 @@ export default function WaterReading(props) {
   };
   useEffect(() => {
     getProject();
+    setformValues((prevState) => ({
+      ...prevState,
+      project: null,
+      cluster: null,
+    }));
+    if (formikRef.current) {
+      formikRef.current.setFieldValue("project", null);
+      formikRef.current.setFieldValue("cluster", null);
+    }
   }, [site]);
   useEffect(() => {
     fetchData();
@@ -135,7 +140,7 @@ export default function WaterReading(props) {
         placeholder: "Type Cluster",
         type: "text",
         isRequired: true,
-        errorMsg: "CLuster is required.",
+        errorMsg: "Cluster is required.",
         defaultValue: "",
       },
     },
@@ -344,6 +349,7 @@ export default function WaterReading(props) {
                   </Grid>
                   <Grid item xs={12}>
                     <Formik
+                      innerRef={formikRef}
                       initialValues={initialValues}
                       validationSchema={validations}
                       onSubmit={fetchData}
@@ -377,7 +383,7 @@ export default function WaterReading(props) {
                                     // disableCloseOnSelect
                                     // includeInputInList={true}
                                     options={dataProject}
-                                    key={project.name}
+                                    id="project-cluster"
                                     value={values.project}
                                     isOptionEqualToValue={(option, value) =>
                                       option.projectId === value.projectId
@@ -412,7 +418,7 @@ export default function WaterReading(props) {
                                           errors.project && touched.project
                                         }
                                         success={checkingSuccessInput(
-                                          project,
+                                          formValues.project,
                                           errors.project
                                         )}
                                       />
@@ -425,7 +431,7 @@ export default function WaterReading(props) {
                                     isOptionEqualToValue={(option, value) =>
                                       option.clusterId === value.clusterId
                                     }
-                                    key={cluster.name}
+                                    id="cluster-water"
                                     options={dataCluster}
                                     value={values.cluster}
                                     getOptionLabel={(option) =>
@@ -454,7 +460,7 @@ export default function WaterReading(props) {
                                           errors.cluster && touched.cluster
                                         }
                                         success={checkingSuccessInput(
-                                          cluster,
+                                          formValues.cluster,
                                           errors.cluster
                                         )}
                                       />

@@ -4,6 +4,7 @@ import Swal from "sweetalert2";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import { Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
+import { ClickAwayListener } from "@mui/base";
 
 // prop-types is a library for typechecking of props
 import PropTypes from "prop-types";
@@ -36,6 +37,7 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
   const [{ accessToken, encryptedAccessToken }] = useCookies();
   const [isLoadingSubmit, setLoadingSubmit] = useState(false);
   const [no, setNo] = useState(null);
+  const [open, setOpen] = useState(false);
 
   const schemeModels = {
     formId: "period-form",
@@ -178,15 +180,14 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
 
       if (response.error) {
         let err = response.error;
-        alertService.error({
-          title: "Error",
+        alertService.warn({
+          title: "Warning",
           text: err.error.message,
         });
       } else {
         Swal.fire({
           title: "New Period Added",
-          text:
-            "Period " + values.periodNumber + " has been successfully added",
+          text: "Period " + no + " has been successfully added",
           icon: "success",
           showConfirmButton: true,
           timerProgressBar: true,
@@ -214,10 +215,10 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
       response = typeNormalization(await response.json());
 
       if (response.error) {
-        Swal.fire({
-          title: "Error",
-          icon: "error",
-          text: response.error.message,
+        let err = response.error;
+        alertService.warn({
+          title: "Warning",
+          text: err.error.message,
         });
       } else {
         Swal.fire({
@@ -257,7 +258,7 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
   if (isOpen) {
     let schemeValidations = Yup.object().shape({
       [startDate.name]: startDate.isRequired
-        ? Yup.date().required(startDate.errorMsg)
+        ? Yup.date().required(startDate.errorMsg).typeError("Invalid Date")
         : Yup.date().notRequired(),
       [periodName.name]: periodName.isRequired
         ? Yup.string()
@@ -265,10 +266,10 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
             .max(periodName.maxLength, periodName.invalidMaxLengthMsg)
         : Yup.string().notRequired(),
       [endDate.name]: endDate.isRequired
-        ? Yup.date().required(endDate.errorMsg)
+        ? Yup.date().required(endDate.errorMsg).typeError("Invalid Date")
         : Yup.date().notRequired(),
       [closeDate.name]: closeDate.isRequired
-        ? Yup.date().required(closeDate.errorMsg)
+        ? Yup.date().required(closeDate.errorMsg).typeError("Invalid Date")
         : Yup.date().notRequired(),
     });
 
@@ -298,6 +299,10 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
       } else {
         createPeriod(values, actions);
       }
+    };
+
+    const onKeyDown = (e) => {
+      e.preventDefault();
     };
 
     return (
@@ -341,58 +346,70 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
                 </ModalHeader>
                 <ModalBody>
                   <MDBox pb={3} px={3}>
-                    <Grid container spacing={3}>
-                      <Grid item xs={12} sm={12}>
-                        <FormField
-                          disabled
-                          required={periodNumber.isRequired}
-                          type={periodNumber.type}
-                          label={periodNumber.label}
-                          name={periodNumber.name}
-                          value={params ? params.periodNumber : no}
-                          placeholder={periodNumber.placeholder}
-                          error={errors.periodNumber && touched.periodNumber}
-                          success={checkingSuccessInput(
-                            formValues.periodNumber,
-                            errors.periodNumber
-                          )}
-                        />
-                      </Grid>
-                      <Grid item xs={12} sm={12}>
-                        <LocalizationProvider dateAdapter={AdapterDayjs}>
-                          <DatePicker
-                            label={periodName.label}
-                            value={formValues.periodName}
-                            // closeOnSelect={true}
-                            // variant="inline"
-                            inputFormat="MMMM YYYY"
-                            views={["year", "month"]}
-                            onChange={(newValue) => {
-                              setFieldValue(
-                                periodName.name,
-                                newValue != null
-                                  ? newValue
-                                  : initialValues[periodName.name]
-                              );
-                            }}
-                            renderInput={(params) => (
-                              <TextField
-                                {...params}
-                                required={periodName.isRequired}
-                                variant="standard"
-                                fullWidth
-                                error={errors.periodName && touched.periodName}
-                                helperText={
-                                  errors.periodName && touched.periodName
-                                    ? periodName.errorMsg
-                                    : ""
-                                }
-                              />
+                    <ClickAwayListener
+                      mouseEvent="onMouseDown"
+                      onClickAway={() => {
+                        setOpen(false);
+                      }}
+                    >
+                      <Grid container spacing={3}>
+                        <Grid item xs={12} sm={12}>
+                          <FormField
+                            disabled
+                            required={periodNumber.isRequired}
+                            type={periodNumber.type}
+                            label={periodNumber.label}
+                            name={periodNumber.name}
+                            value={params ? params.periodNumber : no}
+                            placeholder={periodNumber.placeholder}
+                            error={errors.periodNumber && touched.periodNumber}
+                            success={checkingSuccessInput(
+                              formValues.periodNumber,
+                              errors.periodNumber
                             )}
+                            InputLabelProps={{ shrink: true }}
                           />
-                        </LocalizationProvider>
+                        </Grid>
+                        <Grid item xs={12} sm={12}>
+                          <LocalizationProvider dateAdapter={AdapterDayjs}>
+                            <DatePicker
+                              open={open}
+                              onOpen={() => setOpen(true)}
+                              onClose={() => setOpen(false)}
+                              label={periodName.label}
+                              value={formValues.periodName}
+                              inputFormat="MMMM YYYY"
+                              views={["year", "month"]}
+                              onChange={(newValue) => {
+                                setFieldValue(
+                                  periodName.name,
+                                  newValue != null
+                                    ? newValue
+                                    : initialValues[periodName.name]
+                                );
+                              }}
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  onKeyDown={onKeyDown}
+                                  required={periodName.isRequired}
+                                  variant="standard"
+                                  fullWidth
+                                  onClick={(e) => setOpen(true)}
+                                  error={
+                                    errors.periodName && touched.periodName
+                                  }
+                                  helperText={
+                                    errors.periodName && touched.periodName
+                                      ? periodName.errorMsg
+                                      : ""
+                                  }
+                                />
+                              )}
+                            />
+                          </LocalizationProvider>
 
-                        {/* <FormField
+                          {/* <FormField
                           type={periodName.type}
                           label={
                             periodName.label +
@@ -407,80 +424,81 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
                             errors.periodName
                           )}
                         /> */}
-                      </Grid>
-                      <Grid item xs={12} sm={12}>
-                        <FormField
-                          type={startDate.type}
-                          label={startDate.label}
-                          name={startDate.name}
-                          required={startDate.isRequired}
-                          // value={formValues.startDate}
-                          placeholder={startDate.placeholder}
-                          error={errors.startDate && touched.startDate}
-                          success={checkingSuccessInput(
-                            formValues.startDate,
-                            errors.startDate
-                          )}
-                          InputLabelProps={{ shrink: true }}
-                        />
-                      </Grid>
-                      <Grid item xs={12} sm={12}>
-                        <FormField
-                          type={endDate.type}
-                          label={endDate.label}
-                          name={endDate.name}
-                          // value={formValues.endDate}
-                          required={endDate.isRequired}
-                          placeholder={endDate.placeholder}
-                          error={errors.endDate && touched.endDate}
-                          success={checkingSuccessInput(
-                            formValues.endDate,
-                            errors.endDate
-                          )}
-                          InputLabelProps={{ shrink: true }}
-                        />
-                      </Grid>
-                      <Grid item xs={12} sm={12}>
-                        <FormField
-                          type={closeDate.type}
-                          label={closeDate.label}
-                          name={closeDate.name}
-                          required={closeDate.isRequired}
-                          // value={formValues.closeDate}
-                          placeholder={closeDate.placeholder}
-                          error={errors.closeDate && touched.closeDate}
-                          success={checkingSuccessInput(
-                            formValues.closeDate,
-                            errors.closeDate
-                          )}
-                          InputLabelProps={{ shrink: true }}
-                        />
-                      </Grid>
-                      {params && (
-                        <Grid item xs={12} sm={12}>
-                          <FormGroup>
-                            <FormControlLabel
-                              control={
-                                <Checkbox
-                                  disabled={!formValues.isActive}
-                                  name={isActive.name}
-                                  checked={formValues.isActive}
-                                  onChange={(e) => {
-                                    setFieldValue(
-                                      isActive.name,
-                                      e.target.checked != null
-                                        ? e.target.checked
-                                        : initialValues[isActive.name]
-                                    );
-                                  }}
-                                />
-                              }
-                              label="Active"
-                            />
-                          </FormGroup>
                         </Grid>
-                      )}
-                    </Grid>
+
+                        <Grid item xs={12} sm={12}>
+                          <FormField
+                            type={startDate.type}
+                            label={startDate.label}
+                            name={startDate.name}
+                            required={startDate.isRequired}
+                            // value={formValues.startDate}
+                            placeholder={startDate.placeholder}
+                            error={errors.startDate && touched.startDate}
+                            success={checkingSuccessInput(
+                              formValues.startDate,
+                              errors.startDate
+                            )}
+                            InputLabelProps={{ shrink: true }}
+                          />
+                        </Grid>
+                        <Grid item xs={12} sm={12}>
+                          <FormField
+                            type={endDate.type}
+                            label={endDate.label}
+                            name={endDate.name}
+                            // value={formValues.endDate}
+                            required={endDate.isRequired}
+                            placeholder={endDate.placeholder}
+                            error={errors.endDate && touched.endDate}
+                            success={checkingSuccessInput(
+                              formValues.endDate,
+                              errors.endDate
+                            )}
+                            InputLabelProps={{ shrink: true }}
+                          />
+                        </Grid>
+                        <Grid item xs={12} sm={12}>
+                          <FormField
+                            type={closeDate.type}
+                            label={closeDate.label}
+                            name={closeDate.name}
+                            required={closeDate.isRequired}
+                            // value={formValues.closeDate}
+                            placeholder={closeDate.placeholder}
+                            error={errors.closeDate && touched.closeDate}
+                            success={checkingSuccessInput(
+                              formValues.closeDate,
+                              errors.closeDate
+                            )}
+                            InputLabelProps={{ shrink: true }}
+                          />
+                        </Grid>
+                        {params && (
+                          <Grid item xs={12} sm={12}>
+                            <FormGroup>
+                              <FormControlLabel
+                                control={
+                                  <Checkbox
+                                    name={isActive.name}
+                                    checked={formValues.isActive}
+                                    onChange={(e) => {
+                                      setFieldValue(
+                                        isActive.name,
+                                        e.target.checked != null
+                                          ? e.target.checked
+                                          : initialValues[isActive.name]
+                                      );
+                                    }}
+                                  />
+                                }
+                                label="Active"
+                              />
+                            </FormGroup>
+                          </Grid>
+                        )}
+                      </Grid>
+                    </ClickAwayListener>
                   </MDBox>
                 </ModalBody>
                 <ModalFooter>

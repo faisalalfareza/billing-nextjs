@@ -25,7 +25,7 @@ import { typeNormalization, downloadTempFile } from "/helpers/utils";
 import { alertService } from "/helpers";
 
 // Data
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import SiteDropdown from "/pagesComponents/dropdown/Site";
 import { NumericFormat } from "react-number-format";
 import Image from "next/image";
@@ -62,6 +62,7 @@ export default function Invoice(props) {
   const [{ accessToken, encrypftedAccessToken }] = useCookies();
   const [isLoadingSend, setLoadingSend] = useState(false);
   const [command, setCommand] = useState(null);
+  const formikRef = useRef();
 
   useEffect(() => {
     let currentSite = JSON.parse(localStorage.getItem("site"));
@@ -154,6 +155,21 @@ export default function Invoice(props) {
   };
 
   useEffect(() => {
+    setformValues((prevState) => ({
+      ...prevState,
+      project: null,
+      period: null,
+      cluster: null,
+      unitCode: null,
+      unitNo: null,
+    }));
+    if (formikRef.current) {
+      formikRef.current.setFieldValue("project", null);
+      formikRef.current.setFieldValue("period", null);
+      formikRef.current.setFieldValue("cluster", null);
+      formikRef.current.setFieldValue("unitCode", null);
+      formikRef.current.setFieldValue("unitNo", null);
+    }
     getProject();
     getPeriod();
   }, [site]);
@@ -189,7 +205,7 @@ export default function Invoice(props) {
 
   const checkingSuccessInput = (value, error) => {
     console.log("-----", value, error);
-    return value != undefined && value != "" && value.length > 0 && !error;
+    return value != undefined && value != "" && !error;
   };
 
   const swalWithBootstrapButtons = Swal.mixin({
@@ -658,6 +674,7 @@ export default function Invoice(props) {
                   </Grid>
                   <Grid item xs={12}>
                     <Formik
+                      innerRef={formikRef}
                       initialValues={initialValues}
                       validationSchema={validations}
                       onSubmit={submitForm}
@@ -680,9 +697,7 @@ export default function Invoice(props) {
                           return checkingSuccessInput(
                             values.period,
                             errors.period
-                          )
-                            ? true
-                            : false;
+                          );
                         };
                         return (
                           <Form id="invoice-filter" autoComplete="off">
@@ -690,7 +705,7 @@ export default function Invoice(props) {
                               <Grid container spacing={3}>
                                 <Grid item xs={12} sm={6}>
                                   <Field
-                                    key="period-ddr"
+                                    id="period-invoicet"
                                     name="period"
                                     component={Autocomplete}
                                     options={dataPeriod}
@@ -700,6 +715,7 @@ export default function Invoice(props) {
                                     isOptionEqualToValue={(option, value) =>
                                       option.periodId === value.periodId
                                     }
+                                    value={formValues.period}
                                     onChange={(e, value) => {
                                       setFieldValue(
                                         "period",
@@ -776,7 +792,7 @@ export default function Invoice(props) {
                                 <Grid item xs={12} sm={6}>
                                   <Field
                                     name="project"
-                                    key="project-ddr"
+                                    id="project-invoicet"
                                     component={Autocomplete}
                                     options={dataProject}
                                     getOptionLabel={(option) =>
@@ -784,6 +800,7 @@ export default function Invoice(props) {
                                       " - " +
                                       option.projectName
                                     }
+                                    value={formValues.project}
                                     onChange={(e, value) => {
                                       setFieldValue(
                                         "project",
@@ -816,7 +833,7 @@ export default function Invoice(props) {
                                 </Grid>
                                 <Grid item xs={12} sm={6}>
                                   <Field
-                                    key="cluster-ddr"
+                                    id="cluster-invoicet"
                                     name="cluster"
                                     component={Autocomplete}
                                     options={dataCluster}
@@ -825,6 +842,7 @@ export default function Invoice(props) {
                                       " - " +
                                       option.clusterName
                                     }
+                                    value={formValues.cluster}
                                     onChange={(e, value) => {
                                       setFieldValue(
                                         "cluster",
@@ -857,7 +875,7 @@ export default function Invoice(props) {
                                 </Grid>
                                 <Grid item xs={12} sm={6}>
                                   <Field
-                                    key="unitcode-ddr"
+                                    id="unitcode-invoicet"
                                     name="unitCode"
                                     component={Autocomplete}
                                     options={dataUnitCode}
@@ -870,6 +888,7 @@ export default function Invoice(props) {
                                           : initialValues["unitCode"]
                                       );
                                     }}
+                                    value={formValues.unitCode}
                                     isOptionEqualToValue={(option, value) =>
                                       option.unitCodeId === value.unitCodeId
                                     }
@@ -894,7 +913,7 @@ export default function Invoice(props) {
                                 </Grid>
                                 <Grid item xs={12} sm={6}>
                                   <Field
-                                    key="unitno-ddr"
+                                    id="unitno-invoicet"
                                     name="unitNo"
                                     component={Autocomplete}
                                     options={dataUnitNo}
@@ -910,6 +929,7 @@ export default function Invoice(props) {
                                     isOptionEqualToValue={(option, value) =>
                                       option.unitId === value.unitId
                                     }
+                                    value={formValues.unitNo}
                                     renderInput={(params) => (
                                       <FormField
                                         {...params}
@@ -942,9 +962,7 @@ export default function Invoice(props) {
                                         variant="gradient"
                                         color="primary"
                                         sx={{ height: "100%" }}
-                                        disabled={
-                                          period == undefined || isLoading
-                                        }
+                                        disabled={!isValifForm() || isLoading}
                                       >
                                         {isLoading ? "Searching.." : "Search"}
                                       </MDButton>

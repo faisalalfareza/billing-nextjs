@@ -40,9 +40,9 @@ async function getReportInvoice(res: any, body: any) {
         result: response.data.result,
       })
     )
-    .catch((error) =>
+    .catch((error) => {
       res.send({
-        error: error,
-      })
-    );
+        error: error.response.data,
+      });
+    });
 }
