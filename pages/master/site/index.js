@@ -217,36 +217,33 @@ export default function MasterSite(props) {
     <DashboardLayout>
       <DashboardNavbar />
 
-      <MDBox pb={3}>
+      <MDBox mt={3}>
+      <MDBox
+          display="flex"
+          justifyContent="flex-end"
+          alignItems="flex-start"
+          mb={2}
+        >
+          <MDBox display="flex">
+            <MDBox>
+              <MDButton variant="gradient" color="primary" onClick={openModalAddOrEditOnAdd}>
+                <Icon>add</Icon>&nbsp; Add New Site
+              </MDButton>
+            </MDBox>
+          </MDBox>
+        </MDBox>
         <Card>
-          <MDBox p={3} lineHeight={1}>
+          <MDBox>
             <Grid container alignItems="center">
-              <Grid item xs={12} md={8}>
-                <MDBox mb={1}>
-                  <MDTypography variant="h5">Master Site List</MDTypography>
-                </MDBox>
-                <MDBox mb={2}>
-                  <MDTypography variant="body2" color="text">
-                    For site data maintenance
-                  </MDTypography>
-                </MDBox>
-              </Grid>
-              <Grid item xs={12} md={4} sx={{ textAlign: "right" }}>
-                <Grid container alignItems="right" spacing={1}>
-                  <Grid item xs={12} md={12}>
-                    <MDButton
-                      variant="gradient"
-                      color="primary"
-                      onClick={openModalAddOrEditOnAdd}
-                    >
-                      <Icon>add</Icon>&nbsp; Add New Site
-                    </MDButton>
-                  </Grid>
-                </Grid>
+              <Grid item xs={12}>
+                <DataTable
+                  title="Master Site List" description="For Site Data Maintenance"
+                  table={setSiteList()}
+                  canSearch
+                />
               </Grid>
             </Grid>
-          </MDBox>
-          <DataTable table={setSiteList()} canSearch />
+          </MDBox> 
         </Card>
       </MDBox>
 
@@ -255,6 +252,7 @@ export default function MasterSite(props) {
         params={modalParams}
         onModalChanged={changeModalAddOrEdit}
       />
+
     </DashboardLayout>
   );
 }

@@ -1105,7 +1105,7 @@ export default function WarningLetter(props) {
       </MDBox>
 
       <MDBox mt={5}>
-      <MDBox
+        <MDBox
           display="flex"
           justifyContent="flex-end"
           alignItems="flex-start"
