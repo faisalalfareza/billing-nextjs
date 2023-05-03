@@ -19,23 +19,21 @@ import DataTable from "/layout/Tables/DataTable";
 import FormField from "/pagesComponents/FormField";
 import SiteDropdown from "../../../pagesComponents/dropdown/Site";
 
-
 function RePrintOR() {
   const [{ accessToken, encryptedAccessToken }] = useCookies();
-  
+
   const [site, setSite] = useState(null);
   const handleSite = (siteVal) => {
     setSite(siteVal);
     localStorage.setItem("site", JSON.stringify(siteVal));
   };
 
-
   const schemeModels = {
     formId: "reprint-or-form",
     formField: {
       customerName: {
         name: "customerName",
-        label: "Customer Name or ID Client",
+        label: "Customer Name / ID Client",
         placeholder: "Entry the Customer Name or ID Client",
         type: "text",
         isRequired: true,
@@ -58,15 +56,13 @@ function RePrintOR() {
 
     let currentSite = typeNormalization(localStorage.getItem("site"));
     if (currentSite == null) {
-      Swal.fire({
+      alertService.info({
         title: "Info!",
         text: "Please choose Site first",
-        icon: "info",
       });
     } else setSite(currentSite);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
 
   const [isLoadingCustomer, setLoadingCustomer] = useState(false);
   const [customerRequest, setCustomerRequest] = useState({
@@ -108,7 +104,7 @@ function RePrintOR() {
     setLoadingCustomer(true);
 
     const { scheme, keywords, recordsPerPage, skipCount } = customerRequest;
-    let response = await fetch("/api/cashier/reprint-or/listCustomer", {
+    let response = await fetch("/api/cashier/reprintor/getcustomerlist", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
@@ -123,15 +119,19 @@ function RePrintOR() {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+    if (response.error)
+      alertService.error({ title: "Error", text: response.error.message });
     else {
       setCustomerResponse((prevState) => ({
         ...prevState,
         rowData: response.items,
         totalRows: response.totalCount,
-        totalPages: Math.ceil(response.totalCount / customerRequest.recordsPerPage),
+        totalPages: Math.ceil(
+          response.totalCount / customerRequest.recordsPerPage
+        ),
       }));
-    } setLoadingCustomer(false);
+    }
+    setLoadingCustomer(false);
   };
 
   const setCustomerTaskList = (rows) => {
@@ -149,7 +149,7 @@ function RePrintOR() {
               />
             );
           },
-          align: "center",
+          // align: "center",
         },
         {
           Header: "No",
@@ -170,15 +170,16 @@ function RePrintOR() {
     customerRequest.keywords != "" && getCustomerList();
   }, [customerRequest.skipCount, customerRequest.recordsPerPage]);
 
-
   const checkingSuccessInput = (isRequired, value, error) => {
-    return (!isRequired && true) || (isRequired && value != undefined && value != "" && !error);
+    return (
+      (!isRequired && true) ||
+      (isRequired && value != undefined && value != "" && !error)
+    );
   };
   const handleCustomerSubmit = async (e) => {
     e != undefined && e.preventDefault();
     getCustomerList();
   };
-
 
   const [isLoadingOfficialReceipt, setLoadingOfficialReceipt] = useState(false);
   const [officialReceiptData, setOfficialReceiptData] = useState({
@@ -190,29 +191,36 @@ function RePrintOR() {
   const getOfficialReceiptList = async (unitDataID) => {
     setLoadingOfficialReceipt(true);
 
-    let response = await fetch("/api/cashier/reprint-or/listOR", {
-      method: "POST",
-      body: JSON.stringify({
-        accessToken: accessToken,
-        params: {
-          UnitDataId: unitDataID,
-          MaxResultCount: 1000, // Rows Per Page (Fixed). Start From 1
-          SkipCount: 0, // Increments Based On Page (Flexible). Start From 0
-        },
-      }),
-    });
+    let response = await fetch(
+      "/api/cashier/reprintor/getlistofficialreceipt",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          accessToken: accessToken,
+          params: {
+            UnitDataId: unitDataID,
+            MaxResultCount: 1000, // Rows Per Page (Fixed). Start From 1
+            SkipCount: 0, // Increments Based On Page (Flexible). Start From 0
+          },
+        }),
+      }
+    );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+    if (response.error)
+      alertService.error({ title: "Error", text: response.error.message });
     else {
       setOfficialReceiptData((prevState) => ({
         ...prevState,
         rowData: response.items,
         totalRows: response.totalCount,
-        totalPages: Math.ceil(response.totalCount / customerRequest.recordsPerPage),
+        totalPages: Math.ceil(
+          response.totalCount / customerRequest.recordsPerPage
+        ),
       }));
-    } setLoadingOfficialReceipt(false);
+    }
+    setLoadingOfficialReceipt(false);
   };
   const setOfficialReceiptTaskList = (rows) => {
     return {
@@ -242,6 +250,7 @@ function RePrintOR() {
                 onClick={(e) =>
                   reprintOfficialReceipt(row.original.billingHeaderId)
                 }
+                disabled={isLoadingOfficialReceipt}
               >
                 <Icon>print</Icon>&nbsp; Re-Print
               </MDButton>
@@ -261,26 +270,30 @@ function RePrintOR() {
       SiteId: site?.siteId,
       BillingHeaderId: billingHeaderId,
     };
-    let response = await fetch("/api/cashier/reprint-or/reprintOR", {
-      method: "POST",
-      body: JSON.stringify({
-        accessToken: accessToken,
-        params: body,
-      }),
-    });
+    let response = await fetch(
+      "/api/cashier/reprintor/reprintofficialreceipt",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          accessToken: accessToken,
+          params: body,
+        }),
+      }
+    );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error) alertService.error({ title: "Error", text: response.error.message });
-    else window.open(response);
-      
+    if (response.error)
+      alertService.error({ title: "Error", text: response.error.message });
+    else window.open(response.result, "_blank");
+
     setLoadingOfficialReceipt(false);
   };
-
 
   return (
     <DashboardLayout>
       <DashboardNavbar />
+
       <MDBox
         p={3}
         color="light"
@@ -289,28 +302,24 @@ function RePrintOR() {
         borderRadius="lg"
         shadow="lg"
         opacity={1}
-        mb={2}
+        mt={2}
       >
-        <Grid container spacing={3}>
-          <Grid item xs={12} sm={12}>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
             <SiteDropdown onSelectSite={handleSite} site={site} />
           </Grid>
         </Grid>
       </MDBox>
-      <MDBox py={3}>
-        <Grid container spacing={3}>
+
+      <MDBox mt={2}>
+        <Grid container spacing={2}>
           <Grid item xs={12}>
             <Card>
-              <MDBox p={3} lineHeight={1}>
-                <Grid container alignItems="center">
+              <MDBox px={3} pt={3} pb={2} lineHeight={1}>
+                <Grid container alignItems="center" spacing={2}>
                   <Grid item xs={12}>
-                    <MDBox mb={1}>
+                    <MDBox>
                       <MDTypography variant="h5">Filter</MDTypography>
-                    </MDBox>
-                    <MDBox mb={2}>
-                      <MDTypography variant="body2" color="text">
-                        Used to view tax invoices based on available filters.
-                      </MDTypography>
                     </MDBox>
                   </Grid>
                   <Grid item xs={12}>
@@ -319,12 +328,13 @@ function RePrintOR() {
                       validationSchema={schemeValidations}
                     >
                       {({ values, errors, touched }) => {
-                        let {
-                          customerName: customerNameV
-                        } = values;
-                        const isValifForm = () => (
-                          checkingSuccessInput(customerName.isRequired, customerNameV, errors.customerName)
-                        );
+                        let { customerName: customerNameV } = values;
+                        const isValifForm = () =>
+                          checkingSuccessInput(
+                            customerName.isRequired,
+                            customerNameV,
+                            errors.customerName
+                          );
 
                         return (
                           <MDBox
@@ -333,18 +343,23 @@ function RePrintOR() {
                             onSubmit={(e) => handleCustomerSubmit(e)}
                           >
                             <Grid container spacing={3}>
-                              <Grid item xs={12} sm={9}>
+                              <Grid item xs={12} sm={10}>
                                 <FormField
                                   type={customerName.type}
-                                  label={
-                                    customerName.label +
-                                    (customerName.isRequired ? " ⁽*⁾" : "")
-                                  }
+                                  required={customerName.isRequired}
+                                  label={customerName.label}
                                   name={customerName.name}
                                   value={customerNameV}
                                   placeholder={customerName.placeholder}
                                   error={errors.customerName && touched.customerName}
-                                  success={customerName.isRequired && checkingSuccessInput(customerName.isRequired, customerNameV, errors.customerName)}
+                                  success={
+                                    customerName.isRequired &&
+                                    checkingSuccessInput(
+                                      customerName.isRequired,
+                                      customerNameV,
+                                      errors.customerName
+                                    )
+                                  }
                                   onKeyUp={(e) =>
                                     setCustomerRequest((prevState) => ({
                                       ...prevState,
@@ -353,7 +368,7 @@ function RePrintOR() {
                                   }
                                 />
                               </Grid>
-                              <Grid item xs={12} sm={3}>
+                              <Grid item xs={12} sm={2}>
                                 <MDBox
                                   display="flex"
                                   flexDirection={{ xs: "column", sm: "row" }}
@@ -375,7 +390,8 @@ function RePrintOR() {
                                       <Icon>search</Icon>&nbsp;{" "}
                                       {isLoadingCustomer
                                         ? "Searching.."
-                                        : "Search"}
+                                        : "Search"
+                                      }
                                     </MDButton>
                                   </MDBox>
                                 </MDBox>
@@ -387,17 +403,13 @@ function RePrintOR() {
                     </Formik>
                   </Grid>
                 </Grid>
-                {customerResponse.rowData.length > 0 && (
-                  <Grid container alignItems="center" pt={3}>
+              </MDBox>
+              {customerResponse.rowData.length > 0 && (
+                <MDBox>
+                  <Grid container alignItems="center">
                     <Grid item xs={12}>
-                      <MDBox mb={1}>
+                      <MDBox pl={3}>
                         <MDTypography variant="h5">Search Result</MDTypography>
-                      </MDBox>
-                      <MDBox mb={2}>
-                        <MDTypography variant="body2" color="text">
-                          Customers related to search `
-                          {customerRequest.keywords}`.
-                        </MDTypography>
                       </MDBox>
                     </Grid>
                     <Grid item xs={12}>
@@ -409,16 +421,12 @@ function RePrintOR() {
                         recordsPerPage={customerRequest.recordsPerPage}
                         skipCount={customerRequest.skipCount}
                         pageChangeHandler={skipCountChangeHandler}
-                        recordsPerPageChangeHandler={
-                          recordsPerPageChangeHandler
-                        }
+                        recordsPerPageChangeHandler={recordsPerPageChangeHandler}
                         keywordsChangeHandler={keywordsChangeHandler}
-                        entriesPerPage={{
-                          defaultValue: customerRequest.recordsPerPage,
-                        }}
+                        entriesPerPage={{ defaultValue: customerRequest.recordsPerPage }}
                         pagination={{ variant: "gradient", color: "primary" }}
                       />
-                      <MDBox pt={1} pb={1} px={3}>
+                      <MDBox p={3} pt={0}>
                         <Grid item xs={12}>
                           <MDBox
                             display="flex"
@@ -434,7 +442,9 @@ function RePrintOR() {
                                 onClick={() => getOfficialReceiptList(selectedUnit.unitDataId)}
                                 disabled={!selectedUnit}
                               >
-                                { isLoadingOfficialReceipt ? "Showing this Unit.." : "Show this Unit" }
+                                {isLoadingOfficialReceipt
+                                  ? "Showing this Unit.."
+                                  : "Show this Unit"}
                               </MDButton>
                             </MDBox>
                           </MDBox>
@@ -442,41 +452,21 @@ function RePrintOR() {
                       </MDBox>
                     </Grid>
                   </Grid>
-                )}
-              </MDBox>
+                </MDBox>
+              )}
             </Card>
           </Grid>
 
           {officialReceiptData.rowData.length > 0 && (
             <Grid item xs={12}>
               <Card>
-                <MDBox p={3} lineHeight={1}>
+                <MDBox>
                   <Grid container alignItems="center">
                     <Grid item xs={12}>
-                      <MDBox mb={1}>
-                        <MDTypography variant="h5">
-                          Re-Print Official Receipt List
-                        </MDTypography>
-                      </MDBox>
-                      <MDBox mb={2}>
-                        <MDTypography variant="body2" color="text">
-                          Official receipts of {selectedUnit.projectName}{" "}
-                          {selectedUnit.unitName} {selectedUnit.unitCode}{" "}
-                          {selectedUnit.unitNo} on behalf of{" "}
-                          {selectedUnit.customerName}.
-                        </MDTypography>
-                      </MDBox>
-                    </Grid>
-                    <Grid item xs={12}>
                       <DataTable
-                        table={setOfficialReceiptTaskList(
-                          officialReceiptData.rowData
-                        )}
-                        canEntriesPerPage
-                        entriesPerPage={{
-                          defaultValue: customerRequest.recordsPerPage,
-                        }}
-                        canSearch
+                        title="Reprint Official Receipt List" description="Official Receipt Data"
+                        table={setOfficialReceiptTaskList(officialReceiptData.rowData)}
+                        canSearch pagination={{ variant: "gradient", color: "primary" }}
                       />
                     </Grid>
                   </Grid>

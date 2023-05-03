@@ -13,34 +13,28 @@ export default async function handler(
   switch (method) {
     case "POST":
       switch (query.method) {
-        case "list":
+        case "getcustomerlist":
           getList(res, body);
           break;
 
-        case "detail":
+        case "getpaymentdetailbypscode":
           getDetail(res, body);
           break;
 
-        case "dropdownpayment":
+        case "getdropdownpaymentmethod":
           getDropdownPayment(res, body);
           break;
 
-        case "dropdownbank":
+        case "getdropdownbank":
           getDropdownBank(res, body);
           break;
-        case "create":
+        case "paymentproses":
           create(res, body);
           break;
-        case "balance":
+        case "viewdetailbalance":
           getBalance(res, body);
           break;
       }
-      break;
-
-    case "GET":
-      switch (query.method) {
-      }
-      break;
       break;
   }
 }

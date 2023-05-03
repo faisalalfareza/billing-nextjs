@@ -106,7 +106,7 @@ export default function MasterPeriod(props) {
   const handleClose = () => setOpenModal(false);
 
   const fetchData = async (data) => {
-    let response = await fetch("/api/master/period/list", {
+    let response = await fetch("/api/master/period/getlistmasterperiod", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
@@ -161,6 +161,7 @@ export default function MasterPeriod(props) {
   return (
     <DashboardLayout>
       <DashboardNavbar />
+
       <MDBox
         p={3}
         color="light"
@@ -169,53 +170,52 @@ export default function MasterPeriod(props) {
         borderRadius="lg"
         shadow="lg"
         opacity={1}
-        mb={2}
+        mt={2}
       >
-        <Grid container spacing={3}>
-          <Grid item xs={12} sm={12}>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
             <SiteDropdown onSelectSite={handleSite} site={site} />
           </Grid>
         </Grid>
       </MDBox>
-      {/* tasklist */}
-      <MDBox pb={3}>
+
+      <MDBox mt={5}>
+        <MDBox
+          display="flex"
+          justifyContent="flex-end"
+          alignItems="flex-start"
+          mb={2}
+        >
+          <MDBox display="flex">
+            <MDBox>
+              <MDButton variant="gradient" color="primary" onClick={openModalAddOrEditOnAdd}>
+                <Icon>add</Icon>&nbsp; Add New Period
+              </MDButton>
+            </MDBox>
+          </MDBox>
+        </MDBox>
         <Card>
-          <MDBox p={3} lineHeight={1}>
+          <MDBox>
             <Grid container alignItems="center">
-              <Grid item xs={12} md={8}>
-                <MDBox mb={1}>
-                  <MDTypography variant="h5">Master Period List</MDTypography>
-                </MDBox>
-                <MDBox mb={2}>
-                  <MDTypography variant="body2" color="text">
-                    For period data maintenance
-                  </MDTypography>
-                </MDBox>
-              </Grid>
-              <Grid item xs={12} md={4} sx={{ textAlign: "right" }}>
-                <Grid container alignItems="right" spacing={1}>
-                  <Grid item xs={12} md={12}>
-                    <MDButton
-                      variant="gradient"
-                      color="primary"
-                      onClick={openModalAddOrEditOnAdd}
-                    >
-                      <Icon>add</Icon>&nbsp; Add New Period
-                    </MDButton>
-                  </Grid>
-                </Grid>
+              <Grid item xs={12}>
+                <DataTable
+                  title="Master Period List" description="For Period Data Maintenance"
+                  table={setSiteList()}
+                  canSearch
+                />
               </Grid>
             </Grid>
-          </MDBox>
-          <DataTable table={setSiteList()} canSearch />
+          </MDBox> 
         </Card>
-        <AddOrEditPeriod
-          site={site}
-          isOpen={openModal}
-          params={modalParams}
-          onModalChanged={changeModalAddOrEdit}
-        />
       </MDBox>
+
+      <AddOrEditPeriod
+        site={site}
+        isOpen={openModal}
+        params={modalParams}
+        onModalChanged={changeModalAddOrEdit}
+      />
+      
     </DashboardLayout>
   );
 }

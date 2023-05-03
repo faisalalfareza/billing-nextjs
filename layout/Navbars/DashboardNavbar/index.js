@@ -193,11 +193,12 @@ function DashboardNavbar({ absolute, light, isMini }) {
             </Icon>
           </IconButton>
         </MDBox>
-        {isMini ? null : (
+        
+        {/* {isMini ? null : (
           <MDBox sx={(theme) => navbarRow(theme, { isMini })}>
-            {/* <MDBox pr={1}>
+            <MDBox pr={1}>
               <MDInput label="Search here" />
-            </MDBox> */}
+            </MDBox>
             <MDBox color={light ? "white" : "inherit"}>
               <Link href="/authentication/sign-in/basic" passHref>
                 <IconButton sx={navbarIconButton} size="small" disableRipple>
@@ -241,7 +242,7 @@ function DashboardNavbar({ absolute, light, isMini }) {
               {renderMenu()}
             </MDBox>
           </MDBox>
-        )}
+        )} */}
       </Toolbar>
     </AppBar>
   );

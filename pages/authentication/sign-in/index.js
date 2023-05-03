@@ -21,7 +21,6 @@ import FormField from "/pagesComponents/FormField";
 import { typeNormalization } from "../../../helpers/utils";
 import appInfo from "/appinfo.json";
 
-
 function SignIn(props) {
   const {} = props;
 
@@ -34,7 +33,6 @@ function SignIn(props) {
   const [userNameOrEmailAddressVF, setUserNameOrEmailAddress] = useState("");
   const [passwordVF, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
-
 
   const schemeModels = {
     formId: "auth-form",
@@ -82,9 +80,11 @@ function SignIn(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-
   const checkingSuccessInput = (isRequired, value, error) => {
-    return (!isRequired && true) || (isRequired && value != undefined && value != "" && !error);
+    return (
+      (!isRequired && true) ||
+      (isRequired && value != undefined && value != "" && !error)
+    );
   };
 
   const handleSetRememberMe = () => setRememberMe(!rememberMe);
@@ -99,7 +99,6 @@ function SignIn(props) {
       password: passwordVF,
     });
   };
-
 
   async function authenticate(params) {
     let response = await fetch("/api/authentication/authenticate", {
@@ -304,7 +303,6 @@ function SignIn(props) {
     }
   }
 
-
   return (
     <IllustrationLayout
       formTitle={appInfo.formTitle}
@@ -315,19 +313,22 @@ function SignIn(props) {
         initialValues={schemeInitialValues}
         validationSchema={schemeValidations}
       >
-        {({
-          values,
-          errors,
-          touched
-        }) => {
+        {({ values, errors, touched }) => {
           let {
             userNameOrEmailAddress: userNameOrEmailAddressV,
             password: passwordV,
           } = values;
-          const isValifForm = () => (
-            checkingSuccessInput(userNameOrEmailAddress.isRequired, userNameOrEmailAddressV, errors.userNameOrEmailAddress) &&
-            checkingSuccessInput(password.isRequired, passwordV, errors.password)
-          );
+          const isValifForm = () =>
+            checkingSuccessInput(
+              userNameOrEmailAddress.isRequired,
+              userNameOrEmailAddressV,
+              errors.userNameOrEmailAddress
+            ) &&
+            checkingSuccessInput(
+              password.isRequired,
+              passwordV,
+              errors.password
+            );
 
           return (
             <MDBox
@@ -339,27 +340,43 @@ function SignIn(props) {
               <MDBox mb={2}>
                 <FormField
                   type={userNameOrEmailAddress.type}
-                  label={
-                    userNameOrEmailAddress.label +
-                    (userNameOrEmailAddress.isRequired ? " ⁽*⁾" : "")
-                  }
+                  required={userNameOrEmailAddress.isRequired}
+                  label={userNameOrEmailAddress.label}
                   name={userNameOrEmailAddress.name}
                   value={userNameOrEmailAddressV}
                   placeholder={userNameOrEmailAddress.placeholder}
-                  error={errors.userNameOrEmailAddress && touched.userNameOrEmailAddress}
-                  success={userNameOrEmailAddress.isRequired && checkingSuccessInput(userNameOrEmailAddress.isRequired, userNameOrEmailAddressV, errors.userNameOrEmailAddress)}
+                  error={
+                    errors.userNameOrEmailAddress &&
+                    touched.userNameOrEmailAddress
+                  }
+                  success={
+                    userNameOrEmailAddress.isRequired &&
+                    checkingSuccessInput(
+                      userNameOrEmailAddress.isRequired,
+                      userNameOrEmailAddressV,
+                      errors.userNameOrEmailAddress
+                    )
+                  }
                   onKeyUp={(e) => setUserNameOrEmailAddress(e.target.value)}
                 />
               </MDBox>
               <MDBox mb={2}>
                 <FormField
                   type={password.type}
-                  label={password.label + (password.isRequired ? " ⁽*⁾" : "")}
+                  required={password.isRequired}
+                  label={password.label}
                   name={password.name}
                   value={passwordV}
                   placeholder={password.placeholder}
                   error={errors.password && touched.password}
-                  success={password.isRequired && checkingSuccessInput(password.isRequired, passwordV, errors.password)}
+                  success={
+                    password.isRequired &&
+                    checkingSuccessInput(
+                      password.isRequired,
+                      passwordV,
+                      errors.password
+                    )
+                  }
                   inputProps={{ autoComplete: "" }}
                   onKeyUp={(e) => setPassword(e.target.value)}
                 />

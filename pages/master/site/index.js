@@ -30,8 +30,6 @@ export default function MasterSite(props) {
   const [modalParams, setModalParams] = useState(undefined);
   const [{ accessToken, encryptedAccessToken }] = useCookies();
 
-  //dari sini
-
   const checkingSuccessInput = (value, error) => {
     return value != undefined && value != "" && value.length > 0 && !error;
   };
@@ -50,8 +48,12 @@ export default function MasterSite(props) {
           accessor: "project",
           Cell: ({ value }) => {
             return (
-              <Link href="#" underline="always">
-                {value} project choosen
+              <Link
+                href="javascript:void(0)"
+                underline="always"
+                color="primary"
+              >
+                {value} Project Choosen
               </Link>
             );
           },
@@ -61,8 +63,12 @@ export default function MasterSite(props) {
           accessor: "cluster",
           Cell: ({ value }) => {
             return (
-              <Link href="#" underline="always">
-                {value} cluster choosen
+              <Link
+                href="javascript:void(0)"
+                underline="always"
+                color="primary"
+              >
+                {value} Cluster Choosen
               </Link>
             );
           },
@@ -72,7 +78,11 @@ export default function MasterSite(props) {
           accessor: "logo",
           Cell: ({ value }) => {
             return (
-              <Link href="#" underline="always">
+              <Link
+                href="javascript:void(0)"
+                underline="always"
+                color="primary"
+              >
                 View
               </Link>
             );
@@ -128,7 +138,7 @@ export default function MasterSite(props) {
   const handleClose = () => setOpenModal(false);
 
   const fetchData = async (data) => {
-    let response = await fetch("/api/master/site/list", {
+    let response = await fetch("/api/master/site/getlistmastersite", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
@@ -202,69 +212,47 @@ export default function MasterSite(props) {
   useEffect(() => {
     fetchData();
   }, []);
-  //sampai sini
 
   return (
     <DashboardLayout>
       <DashboardNavbar />
-      {/* tasklist */}
-      <MDBox pb={3}>
+
+      <MDBox mt={3}>
+      <MDBox
+          display="flex"
+          justifyContent="flex-end"
+          alignItems="flex-start"
+          mb={2}
+        >
+          <MDBox display="flex">
+            <MDBox>
+              <MDButton variant="gradient" color="primary" onClick={openModalAddOrEditOnAdd}>
+                <Icon>add</Icon>&nbsp; Add New Site
+              </MDButton>
+            </MDBox>
+          </MDBox>
+        </MDBox>
         <Card>
-          <MDBox p={3} lineHeight={1}>
+          <MDBox>
             <Grid container alignItems="center">
-              <Grid item xs={12} md={8}>
-                <MDBox mb={1}>
-                  <MDTypography variant="h5">Master Site List</MDTypography>
-                </MDBox>
-                <MDBox mb={2}>
-                  <MDTypography variant="body2" color="text">
-                    For site data maintenance{" "}
-                    {openModal ? "bukamodal" : "tutupModal"}
-                  </MDTypography>
-                </MDBox>
-              </Grid>
-              <Grid item xs={12} md={4} sx={{ textAlign: "right" }}>
-                <Grid container alignItems="right" spacing={1}>
-                  <Grid item xs={12} md={12}>
-                    <MDButton
-                      variant="gradient"
-                      color="primary"
-                      onClick={openModalAddOrEditOnAdd}
-                    >
-                      <Icon>add</Icon>&nbsp; Add New Site
-                    </MDButton>
-                  </Grid>
-                </Grid>
+              <Grid item xs={12}>
+                <DataTable
+                  title="Master Site List" description="For Site Data Maintenance"
+                  table={setSiteList()}
+                  canSearch
+                />
               </Grid>
             </Grid>
-          </MDBox>
-          <DataTable table={setSiteList()} canSearch />
+          </MDBox> 
         </Card>
-        <AddOrEditSite
-          isOpen={openModal}
-          params={modalParams}
-          onModalChanged={changeModalAddOrEdit}
-        />
       </MDBox>
+
+      <AddOrEditSite
+        isOpen={openModal}
+        params={modalParams}
+        onModalChanged={changeModalAddOrEdit}
+      />
+
     </DashboardLayout>
   );
-}
-
-export async function getStaticProps(context) {
-  const urlP = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetDropdownProject`;
-  const resProject = await fetch(urlP);
-  let listProject = await resProject.json();
-  const dataProject = listProject.result;
-  const resSite = await fetch(
-    `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetDropdownSite`
-  );
-  let listSite = await resSite.json();
-  const dataSite = listSite.result;
-  return {
-    props: {
-      dataProject,
-      dataSite,
-    },
-    revalidate: 60,
-  };
 }

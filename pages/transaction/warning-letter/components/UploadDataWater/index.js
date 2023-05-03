@@ -121,10 +121,7 @@ function UploadDataWater({ isOpen, onModalChanged, site }) {
   const [formValues, setformValues] = useState(initialValues);
 
   const getFormData = (values) => {
-    console.log("getFormData::", values);
   };
-  console.log("formValues::", formValues);
-  console.log("dataCluster----", dataCluster);
 
   const getProject = async (val) => {
     let response = await fetch("/api/transaction/water/dropdownproject", {
@@ -138,13 +135,11 @@ function UploadDataWater({ isOpen, onModalChanged, site }) {
     });
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    console.log("response----", response);
     if (response.error) {
       alertService.error({ title: "Error", text: response.error.message });
     } else {
       setDataProject(response.result);
     }
-    console.log("project------", dataProject);
   };
 
   const getPeriod = async (val) => {
@@ -159,13 +154,11 @@ function UploadDataWater({ isOpen, onModalChanged, site }) {
     });
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    console.log("response----", response);
     if (response.error) {
       alertService.error({ title: "Error", text: response.error.message });
     } else {
       setPeriod(response.result);
     }
-    console.log("period------", period);
   };
   useEffect(() => {
     if (site) {
@@ -176,7 +169,6 @@ function UploadDataWater({ isOpen, onModalChanged, site }) {
 
   useEffect(() => {
     const a = localStorage.getItem("site");
-    console.log("a=====", a);
     if (a == null || a == undefined) {
     }
   });
@@ -194,7 +186,7 @@ function UploadDataWater({ isOpen, onModalChanged, site }) {
     });
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    console.log("response----", response);
+
     if (response.error) {
       Swal.fire({
         title: "Error",
@@ -204,7 +196,6 @@ function UploadDataWater({ isOpen, onModalChanged, site }) {
     } else {
       setDataCluster(response.result);
     }
-    console.log("cluster------", dataCluster);
     setLoading(false);
   };
   const uploadExcel = async (values, actions) => {
@@ -228,7 +219,6 @@ function UploadDataWater({ isOpen, onModalChanged, site }) {
       clusterId: listCluster,
       waterReadingUploadDetailList: list,
     };
-    console.log("CompanyOfficer/CreateOrUpdateCompanyOfficer ", body);
 
     let response = await fetch("/api/transaction/water/upload", {
       method: "POST",
@@ -240,7 +230,6 @@ function UploadDataWater({ isOpen, onModalChanged, site }) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    console.log("response----", response);
     if (response.error) {
       alertService.error({ text: response.error.message, title: "Error" });
       setLoadingSubmit(false);
@@ -300,24 +289,17 @@ function UploadDataWater({ isOpen, onModalChanged, site }) {
         /* Get first worksheet */
         const wsname = wb.SheetNames[0];
         const ws = wb.Sheets[wsname];
-        console.log(rABS, wb);
         /* Convert array of arrays */
         const data = XLSX.utils.sheet_to_json(ws, { header: 2 });
-        console.log(ws);
-        console.log(data);
-        // console.log(data)
         /* Update state */
         setDataWater(data);
         setCols(make_cols(ws["!ref"]));
         // this.setState({ data: data, cols: make_cols(ws["!ref"]) });
-        console.log("datawater----", dataWater);
-        console.log("cols-----", cols);
       };
       if (rABS) reader.readAsBinaryString(file);
       else reader.readAsArrayBuffer(file);
     };
     const handleChangeFile = (e) => {
-      console.log("e------", e);
       const files = e.target.files;
       if (files && files[0]) handleFile(files[0]);
     };
@@ -470,8 +452,6 @@ function UploadDataWater({ isOpen, onModalChanged, site }) {
                           setFieldValue={setFieldValue}
                           accept={SheetJSFT}
                           onChange={(e, value) => {
-                            console.log("value------------", value);
-                            console.log("e------------", e);
                             handleChangeFile(e);
                             setFieldValue(fileUpload.name, e.target.value);
                           }}

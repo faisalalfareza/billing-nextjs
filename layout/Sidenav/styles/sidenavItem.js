@@ -78,7 +78,7 @@ function itemContent(theme, ownerState) {
   } = ownerState;
 
   const { white, dark } = palette;
-  const { size, fontWeightRegular, fontWeightLight } = typography;
+  const { size, fontWeightBold, fontWeightRegular, fontWeightLight } = typography;
   const { pxToRem } = functions;
 
   return {
@@ -97,13 +97,17 @@ function itemContent(theme, ownerState) {
         (active === "isParent" || !active)
           ? dark.main
           : white.main,
-      fontWeight: active ? fontWeightRegular : fontWeightLight,
+      // fontWeight: active ? fontWeightRegular : fontWeightLight,
+      fontWeight: active ? fontWeightBold : fontWeightLight,
       fontSize: size.sm,
       opacity: miniSidenav ? 0 : 1,
       transition: transitions.create(["opacity", "color"], {
         easing: transitions.easing.easeInOut,
         duration: transitions.duration.standard,
       }),
+
+      whiteSpace: "pre-wrap",
+      lineHeight: 1.2
     },
 
     "&::before": {

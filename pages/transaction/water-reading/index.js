@@ -11,26 +11,21 @@ import Icon from "@mui/material/Icon";
 // NextJS Material Dashboard 2 PRO layout
 import DashboardLayout from "/layout/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "/layout/Navbars/DashboardNavbar";
-import Footer from "/layout/Footer";
 import DataTable from "/layout/Tables/DataTable";
 import MDButton from "/components/MDButton";
-import MDInput from "/components/MDInput";
 import FormField from "/pagesComponents/FormField";
 import Autocomplete from "@mui/material/Autocomplete";
 import { useMaterialUIController } from "/context";
 import { useCookies } from "react-cookie";
-import * as React from "react";
+import { useEffect, useState, useRef } from "react";
 import { typeNormalization, downloadTempFile } from "/helpers/utils";
 import { alertService } from "/helpers";
 
 // Data
-import dataTableData from "/pagesComponents/applications/data-tables/data/dataTableData";
-import { useEffect, useState } from "react";
 import UploadDataWater from "./components/UploadDataWater";
 import WaterRowActions from "./components/WaterRowActions";
 import EditDataWater from "./components/EditDataWater";
 import SiteDropdown from "../../../pagesComponents/dropdown/Site";
-// import templateWaterReading from "../assets/template/template-water-reading.xlsx";
 
 export default function WaterReading(props) {
   const [controller] = useMaterialUIController();
@@ -49,6 +44,7 @@ export default function WaterReading(props) {
   const [isLoading, setLoading] = useState(false);
   const [modalParams, setModalParams] = useState(undefined);
   const [{ accessToken, encryptedAccessToken }] = useCookies();
+  const formikRef = useRef();
 
   useEffect(() => {
     let currentSite = JSON.parse(localStorage.getItem("site"));
@@ -90,15 +86,18 @@ export default function WaterReading(props) {
   };
 
   const getProject = async (val) => {
-    let response = await fetch("/api/transaction/water/dropdownproject", {
-      method: "POST",
-      body: JSON.stringify({
-        accessToken: accessToken,
-        params: {
-          SiteId: site?.siteId,
-        },
-      }),
-    });
+    let response = await fetch(
+      "/api/transaction/water/getdropdownprojectbysiteid",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          accessToken: accessToken,
+          params: {
+            SiteId: site?.siteId,
+          },
+        }),
+      }
+    );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
     if (response.error) {
@@ -109,6 +108,15 @@ export default function WaterReading(props) {
   };
   useEffect(() => {
     getProject();
+    setformValues((prevState) => ({
+      ...prevState,
+      project: null,
+      cluster: null,
+    }));
+    if (formikRef.current) {
+      formikRef.current.setFieldValue("project", null);
+      formikRef.current.setFieldValue("cluster", null);
+    }
   }, [site]);
   useEffect(() => {
     fetchData();
@@ -132,7 +140,7 @@ export default function WaterReading(props) {
         placeholder: "Type Cluster",
         type: "text",
         isRequired: true,
-        errorMsg: "CLuster is required.",
+        errorMsg: "Cluster is required.",
         defaultValue: "",
       },
     },
@@ -159,7 +167,7 @@ export default function WaterReading(props) {
   });
 
   const checkingSuccessInput = (value, error) => {
-    return value != undefined && value != "" && value.length > 0 && !error;
+    return value != undefined && value != "" && !error;
   };
 
   const columns = [
@@ -189,8 +197,9 @@ export default function WaterReading(props) {
   const [tasklist, setTasklist] = useState({ columns: columns, rows: [] });
 
   const fetchData = async (data) => {
+    setLoading(true);
     const { scheme, keywords, recordsPerPage, skipCount } = customerRequest;
-    let response = await fetch("/api/transaction/water/list", {
+    let response = await fetch("/api/transaction/water/getwaterreadinglist", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
@@ -200,6 +209,7 @@ export default function WaterReading(props) {
           ClusterId: formValues.cluster?.clusterId,
           MaxResultCount: recordsPerPage,
           SkipCount: skipCount,
+          Search: keywords
         },
       }),
     });
@@ -230,11 +240,7 @@ export default function WaterReading(props) {
         totalPages: Math.ceil(data.totalCount / customerRequest.recordsPerPage),
       }));
 
-      // setlistRow(list);
-      // return setTasklist({
-      //   columns: columns,
-      //   rows: list,
-      // });
+      setLoading(false);
     }
   };
 
@@ -246,20 +252,23 @@ export default function WaterReading(props) {
   };
 
   const handleExport = async () => {
-    let response = await fetch("/api/transaction/water/export", {
-      method: "POST",
-      body: JSON.stringify({
-        accessToken: accessToken,
-        params: {
-          maxResultCount: 1000,
-          skipCount: 0,
-          siteId: site?.siteId,
-          projectId: formValues.project?.projectId,
-          clusterId: formValues.cluster?.clusterId,
-          search: undefined,
-        },
-      }),
-    });
+    let response = await fetch(
+      "/api/transaction/water/exporttoexcelwaterreading",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          accessToken: accessToken,
+          params: {
+            maxResultCount: 1000,
+            skipCount: 0,
+            siteId: site?.siteId,
+            projectId: formValues.project?.projectId,
+            clusterId: formValues.cluster?.clusterId,
+            search: undefined,
+          },
+        }),
+      }
+    );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
@@ -271,13 +280,12 @@ export default function WaterReading(props) {
   };
 
   const onProjectChange = async (val) => {
-    setLoading(true);
-    let response = await fetch("/api/master/site/dropdowncluster", {
+    let response = await fetch("/api/master/site/getdropdownclusterbyproject", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
         params: {
-          ProjectId: val.projectId,
+          ProjectId: val?.projectId,
         },
       }),
     });
@@ -289,7 +297,6 @@ export default function WaterReading(props) {
     } else {
       setDataCluster(response.result);
     }
-    setLoading(false);
   };
 
   const openModalEdit = (record) => {
@@ -315,6 +322,7 @@ export default function WaterReading(props) {
   return (
     <DashboardLayout>
       <DashboardNavbar />
+
       <MDBox
         p={3}
         color="light"
@@ -323,26 +331,29 @@ export default function WaterReading(props) {
         borderRadius="lg"
         shadow="lg"
         opacity={1}
+        mt={2}
       >
-        <Grid container spacing={3}>
-          <Grid item xs={12} sm={12}>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
             <SiteDropdown onSelectSite={handleSite} site={site} />
           </Grid>
         </Grid>
       </MDBox>
-      <MDBox py={3}>
-        <Grid container spacing={3}>
+
+      <MDBox mt={2}>
+        <Grid container spacing={2}>
           <Grid item xs={12}>
             <Card>
               <MDBox p={3} lineHeight={1}>
-                <Grid container alignItems="center">
-                  <Grid item xs={12} md={8}>
-                    <MDBox mb={1}>
+                <Grid container alignItems="center" spacing={2}>
+                  <Grid item xs={12}>
+                    <MDBox>
                       <MDTypography variant="h5">Filter</MDTypography>
                     </MDBox>
                   </Grid>
                   <Grid item xs={12}>
                     <Formik
+                      innerRef={formikRef}
                       initialValues={initialValues}
                       validationSchema={validations}
                       onSubmit={fetchData}
@@ -357,10 +368,14 @@ export default function WaterReading(props) {
                         isSubmitting,
                         setFieldValue,
                         resetForm,
-                        /* and other goodies */
                       }) => {
                         setformValues(values);
                         getFormData(values);
+                        const isValifForm = () => (
+                          checkingSuccessInput(values.project, errors.project) &&
+                          checkingSuccessInput(values.cluster, errors.cluster)
+                        );
+                        
                         return (
                           <Form id={form.formId} autoComplete="off">
                             <MDBox>
@@ -370,13 +385,11 @@ export default function WaterReading(props) {
                                     // disableCloseOnSelect
                                     // includeInputInList={true}
                                     options={dataProject}
-                                    key={project.name}
+                                    id="project-cluster"
                                     value={values.project}
-                                    // getOptionSelected={(option, value) => {
-                                    //   return (
-                                    //     option.projectName === value.projectName
-                                    //   );
-                                    // }}
+                                    isOptionEqualToValue={(option, value) =>
+                                      option.projectId === value.projectId
+                                    }
                                     getOptionLabel={(option) =>
                                       values.project != {}
                                         ? option.projectCode +
@@ -396,12 +409,10 @@ export default function WaterReading(props) {
                                     noOptionsText="No results"
                                     renderInput={(params) => (
                                       <FormField
+                                        required={project.isRequired}
                                         {...params}
                                         type={project.type}
-                                        label={
-                                          project.label +
-                                          (project.isRequired ? " *" : "")
-                                        }
+                                        label={project.label}
                                         name={project.name}
                                         placeholder={project.placeholder}
                                         InputLabelProps={{ shrink: true }}
@@ -409,7 +420,7 @@ export default function WaterReading(props) {
                                           errors.project && touched.project
                                         }
                                         success={checkingSuccessInput(
-                                          project,
+                                          formValues.project,
                                           errors.project
                                         )}
                                       />
@@ -419,7 +430,10 @@ export default function WaterReading(props) {
                                 <Grid item xs={12} sm={6}>
                                   <Autocomplete
                                     // disableCloseOnSelect
-                                    key={cluster.name}
+                                    isOptionEqualToValue={(option, value) =>
+                                      option.clusterId === value.clusterId
+                                    }
+                                    id="cluster-water"
                                     options={dataCluster}
                                     value={values.cluster}
                                     getOptionLabel={(option) =>
@@ -437,12 +451,10 @@ export default function WaterReading(props) {
                                     }
                                     renderInput={(params) => (
                                       <FormField
+                                        required={cluster.isRequired}
                                         {...params}
                                         type={cluster.type}
-                                        label={
-                                          cluster.label +
-                                          (cluster.isRequired ? " *" : "")
-                                        }
+                                        label={cluster.label}
                                         name={cluster.name}
                                         placeholder={cluster.placeholder}
                                         InputLabelProps={{ shrink: true }}
@@ -450,28 +462,19 @@ export default function WaterReading(props) {
                                           errors.cluster && touched.cluster
                                         }
                                         success={checkingSuccessInput(
-                                          cluster,
+                                          formValues.cluster,
                                           errors.cluster
                                         )}
                                       />
                                     )}
                                   />
                                 </Grid>
-
                                 <Grid item xs={12}>
                                   <MDBox
                                     display="flex"
                                     flexDirection={{ xs: "column", sm: "row" }}
                                     justifyContent="flex-end"
                                   >
-                                    <MDButton
-                                      type="reset"
-                                      variant="outlined"
-                                      color="secondary"
-                                      onClick={resetForm}
-                                    >
-                                      Clear Filters
-                                    </MDButton>
                                     <MDBox
                                       ml={{ xs: 0, sm: 1 }}
                                       mt={{ xs: 1, sm: 0 }}
@@ -481,9 +484,16 @@ export default function WaterReading(props) {
                                         variant="gradient"
                                         color="primary"
                                         sx={{ height: "100%" }}
-                                        disabled={isSubmitting}
+                                        disabled={
+                                          isLoading ||
+                                          !isValifForm()
+                                        }
                                       >
-                                        Search
+                                        <Icon>search</Icon>&nbsp;{" "}
+                                        {isLoading ?
+                                          "Searching..." :
+                                          "Search"
+                                        }
                                       </MDButton>
                                     </MDBox>
                                   </MDBox>
@@ -501,77 +511,66 @@ export default function WaterReading(props) {
           </Grid>
         </Grid>
       </MDBox>
-      <MDBox pb={3}>
+
+      <MDBox mt={5}>
+        <MDBox
+          display="flex"
+          justifyContent="flex-end"
+          alignItems="flex-start"
+          mb={2}
+        >
+          <MDBox display="flex">
+            <MDBox>
+              <MDButton variant="outlined" color="primary"
+                disabled={customerResponse.rowData.length == 0}
+                onClick={handleExport}
+              >
+                <Icon>description</Icon>&nbsp;Export Excel
+              </MDButton>
+            </MDBox>
+            <MDBox ml={1}>
+              <MDButton variant="gradient" color="primary" onClick={handleOpenUpload}>
+                <Icon>add</Icon>&nbsp; Add New Water Reading
+              </MDButton>
+            </MDBox>
+          </MDBox>
+        </MDBox>
         <Card>
-          <MDBox p={3} lineHeight={1}>
+          <MDBox>
             <Grid container alignItems="center">
-              <Grid item xs={12} md={8}>
-                <MDBox mb={1}>
-                  <MDTypography variant="h5">Water Reading List</MDTypography>
-                </MDBox>
-                <MDBox mb={2}>
-                  <MDTypography variant="body2" color="text">
-                    Water Reading Data plugin.
-                  </MDTypography>
-                </MDBox>
-              </Grid>
-              <Grid item xs={12} md={4} sx={{ textAlign: "right" }}>
-                <Grid container alignItems="right" spacing={0}>
-                  <Grid item xs={12}>
-                    <MDBox
-                      display="flex"
-                      flexDirection={{ xs: "column", sm: "row" }}
-                      justifyContent="flex-end"
-                    >
-                      <MDButton
-                        variant="outlined"
-                        color="primary"
-                        disabled={customerResponse.rowData.length == 0}
-                        onClick={handleExport}
-                      >
-                        <Icon>add</Icon>&nbsp; Export Excel
-                      </MDButton>
-                      <MDBox ml={{ xs: 0, sm: 1 }} mt={{ xs: 1, sm: 0 }}>
-                        <MDButton
-                          variant="gradient"
-                          color="primary"
-                          onClick={handleOpenUpload}
-                        >
-                          <Icon>add</Icon>&nbsp; Add New
-                        </MDButton>
-                        <UploadDataWater
-                          site={site}
-                          isOpen={openUpload}
-                          onModalChanged={changeModalUpload}
-                        />
-                      </MDBox>
-                    </MDBox>
-                  </Grid>
-                </Grid>
+              <Grid item xs={12}>
+                <DataTable
+                  title="Water Reading List" description="Water Reading Data"
+                  table={setCustomerTaskList(customerResponse.rowData)}
+                  manualPagination={true}
+                  totalRows={customerResponse.totalRows}
+                  totalPages={customerResponse.totalPages}
+                  recordsPerPage={customerRequest.recordsPerPage}
+                  skipCount={customerRequest.skipCount}
+                  pageChangeHandler={skipCountChangeHandler}
+                  recordsPerPageChangeHandler={recordsPerPageChangeHandler}
+                  keywordsChangeHandler={keywordsChangeHandler}
+                  entriesPerPage={{ defaultValue: customerRequest.recordsPerPage }}
+                  canSearch pagination={{ variant: "gradient", color: "primary" }}
+                />
               </Grid>
             </Grid>
           </MDBox>
-          <DataTable
-            table={setCustomerTaskList(customerResponse.rowData)}
-            manualPagination={true}
-            totalRows={customerResponse.totalRows}
-            totalPages={customerResponse.totalPages}
-            recordsPerPage={customerRequest.recordsPerPage}
-            skipCount={customerRequest.skipCount}
-            pageChangeHandler={skipCountChangeHandler}
-            recordsPerPageChangeHandler={recordsPerPageChangeHandler}
-            keywordsChangeHandler={keywordsChangeHandler}
-            entriesPerPage={{ defaultValue: customerRequest.recordsPerPage }}
-            pagination={{ variant: "gradient", color: "primary" }}
-          />
         </Card>
-        <EditDataWater
-          site={site}
-          isOpen={openEdit}
-          params={modalParams}
-          onModalChanged={changeModalEdit}
-        />
       </MDBox>
+
+      <UploadDataWater
+        site={site}
+        isOpen={openUpload}
+        onModalChanged={changeModalUpload}
+      />
+      <EditDataWater
+        site={site}
+        isOpen={openEdit}
+        params={modalParams}
+        onModalChanged={changeModalEdit}
+      />
+      
     </DashboardLayout>
   );
 }

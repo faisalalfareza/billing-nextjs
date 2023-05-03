@@ -106,7 +106,7 @@ function collapseText(theme, ownerState) {
   const { typography, transitions, breakpoints, functions } = theme;
   const { miniSidenav, transparentSidenav, active } = ownerState;
 
-  const { size, fontWeightRegular, fontWeightLight } = typography;
+  const { size, fontWeightBold, fontWeightRegular, fontWeightLight } = typography;
   const { pxToRem } = functions;
 
   return {
@@ -117,14 +117,16 @@ function collapseText(theme, ownerState) {
       maxWidth: miniSidenav || (miniSidenav && transparentSidenav) ? 0 : "100%",
       marginLeft:
         miniSidenav || (miniSidenav && transparentSidenav) ? 0 : pxToRem(10),
-      transition: transitions.create(["opacity", "margin"], {
+        transition: transitions.create(["opacity", "margin"], {
         easing: transitions.easing.easeInOut,
         duration: transitions.duration.standard,
+        
       }),
     },
 
     "& span": {
-      fontWeight: active ? fontWeightRegular : fontWeightLight,
+      // fontWeight: active ? fontWeightRegular : fontWeightLight,
+      fontWeight: active ? fontWeightBold : fontWeightRegular,
       fontSize: size.sm,
       lineHeight: 0,
     },
