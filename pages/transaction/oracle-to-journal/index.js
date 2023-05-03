@@ -61,7 +61,7 @@ function OracleToJournal({ params }) {
                 placeholder: "Choose Start Date",
                 type: "date",
                 isRequired: true,
-                errorMsg: "Start Date is required.",
+                errorMsg: "Payment Start Date is required.",
                 defaultValue: "",
             },
             accountingDate: {
@@ -79,7 +79,7 @@ function OracleToJournal({ params }) {
                 placeholder: "Choose End Date",
                 type: "date",
                 isRequired: true,
-                errorMsg: "Start End is required.",
+                errorMsg: "Payment End Date is required.",
                 defaultValue: "",
             },
         }
@@ -94,16 +94,16 @@ function OracleToJournal({ params }) {
     } = schemaModels.formField;
 
     let schemeValidations = Yup.object().shape({
-        [periodMethod.name]: periodMethod.isRequired ? Yup.object().required(periodMethod.errorMsg) : Yup.object().notRequired(),
-        [paymentMethod.name]: paymentMethod.isRequired ? Yup.object().required(paymentMethod.errorMsg) : Yup.object().notRequired(),
+        [periodMethod.name]: periodMethod.isRequired ? Yup.object().required(periodMethod.errorMsg).nullable() : Yup.object().notRequired(),
+        [paymentMethod.name]: paymentMethod.isRequired ? Yup.object().required(paymentMethod.errorMsg).nullable() : Yup.object().notRequired(),
         [paymentStartDate.name]: paymentStartDate.isRequired
-        ? Yup.date().required(paymentStartDate.errorMsg)
+        ? Yup.date().required(paymentStartDate.errorMsg).nullable()
         : Yup.date().notRequired(),
         [accountingDate.name]: accountingDate.isRequired
-        ? Yup.date().required(accountingDate.errorMsg)
+        ? Yup.date().required(accountingDate.errorMsg).nullable()
         : Yup.date().notRequired(),
         [paymentEndDate.name]: paymentEndDate.isRequired
-        ? Yup.date().required(paymentEndDate.errorMsg)
+        ? Yup.date().required(paymentEndDate.errorMsg).nullable()
         : Yup.date().notRequired(),
     });
 
@@ -194,38 +194,50 @@ function OracleToJournal({ params }) {
     
     const generatePaymentJournal = async(values, actions) => 
     {
-        console.log(body);
-        // setLoadingPaymentJournal(true);
+        const body = {
+            siteId: site?.siteId,
+            period: formValues.periodMethod?.periodId,
+            paymentType: formValues.paymentMethod?.paymentType,
+            accountingDate: addDate(formValues.accountingDate),
+            bankPayment: bnkPayment,
+            paymentStartDate: addDate(formValues.paymentStartDate),
+            paymentEndDate: addDate(formValues.paymentEndDate),
+        };
 
-        // let response = await fetch("/api/transaction/oracletojournal/generatepaymentjournal", {
-        //     method: "POST",
-        //     body: JSON.stringify({
-        //         accessToken: accessToken,
-        //         params: body,
-        //     }),
-        // });
-        // if(!response.ok) throw new Error(`Error: ${response.status}`);
-        // response = typeNormalization(await response.json());
+        //console.log(formValues.paymentMethod);
+    
+        //console.log(body);
+        setLoadingPaymentJournal(true);
 
-        // if(response.error) alertService.error({ title: "Error", text: response.error.message});
-        // else{
-        //     if(response.success){
-        //         Swal.fire({
-        //             title: 'Payment Journal Generated',
-        //             html: `Payment Journal Successfully Generated`,
-        //             icon: "success",
-        //             timerProgressBar: true,
-        //             timer:  3000,
-        //         });
-        //     } 
-        // } 
-        // setLoadingPaymentJournal(false);
+        let response = await fetch("/api/transaction/oracletojournal/GeneratePaymentJournal", {
+            method: "POST",
+            body: JSON.stringify({
+                accessToken: accessToken,
+                params: body,
+            }),
+        });
+        if(!response.ok) throw new Error(`Error: ${response.status}`);
+        response = typeNormalization(await response.json());
+
+        if(response.error) alertService.error({ title: "Error", text: response.error.message});
+        else{
+            if(response.success){
+                Swal.fire({
+                    title: 'Payment Journal Generated',
+                    html: `Payment Journal Successfully Generated`,
+                    icon: "success",
+                    timerProgressBar: true,
+                    timer:  3000,
+                });
+            } 
+        } 
+        setLoadingPaymentJournal(false);
     };
 
     const getFormData = (values) => {};
 
     const addDate = (val) => {
-        return dayjs(val).add(0, "day");
+        return dayjs(val).add(1, "day");
     }
 
     const [ bnkPayment, setbnkPayment ] = useState(0);
@@ -239,16 +251,6 @@ function OracleToJournal({ params }) {
 
     const handlePeriod = (event, value) => setPeriod(value);
 
-    const body = {
-        siteId: site?.siteId,
-        period: values.periodMethod?.periodId,
-        paymentType: paymentMethod.value,
-        accountingDate: addDate(values.accountingDate),
-        bankPayment: bnkPayment,
-        paymentStartDate: addDate(values.paymentStartDate),
-        paymentEndDate: addDate(values.paymentEndDate),
-    };
-    
     return (
         <DashboardLayout>
             <DashboardNavbar/>
