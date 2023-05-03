@@ -166,6 +166,12 @@ export default function Invoice(props) {
       formikRef.current.setFieldValue("unitNo", null);
       formikRef.current.setFieldValue("nameF", "");
     }
+    setCustomerResponse((prevState) => ({
+      ...prevState,
+      rowData: [],
+      totalRows: undefined,
+      totalPages: undefined,
+    }));
     setCustomer(null);
     getProject();
     getPeriod();
