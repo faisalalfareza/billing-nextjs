@@ -19,6 +19,7 @@ import PropTypes from "prop-types";
 // @mui material components
 import Collapse from "@mui/material/Collapse";
 import ListItem from "@mui/material/ListItem";
+import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Icon from "@mui/material/Icon";
 
@@ -28,14 +29,17 @@ import MDBox from "/components/MDBox";
 // Custom styles for the SidenavItem
 import {
   item,
+  itemIconBox,
+  itemIcon,
   itemContent,
+  itemText,
   itemArrow,
 } from "/layout/Sidenav/styles/sidenavItem";
 
 // NextJS Material Dashboard 2 PRO contexts
 import { useMaterialUIController } from "/context";
 
-function SidenavItem({ color, name, active, nested, children, open, ...rest }) {
+function SidenavItem({ icon, color, name, active, nested, children, open, ...rest }) {
   const [controller] = useMaterialUIController();
   const { miniSidenav, transparentSidenav, whiteSidenav, darkMode } =
     controller;
@@ -69,7 +73,36 @@ function SidenavItem({ color, name, active, nested, children, open, ...rest }) {
             })
           }
         >
-          <ListItemText primary={name} />
+          <ListItemIcon
+            sx={(theme) =>
+              itemIconBox(theme, {
+                transparentSidenav,
+                whiteSidenav,
+                darkMode,
+              })
+            }
+          >
+            {typeof icon === "string" ? (
+              <Icon sx={(theme) => itemIcon(theme, { active })}>
+                {icon}
+              </Icon>
+            ) : (
+              icon
+            )}
+          </ListItemIcon>
+
+          <ListItemText
+            primary={name}
+            sx={(theme) =>
+              itemText(theme, {
+                miniSidenav,
+                transparentSidenav,
+                whiteSidenav,
+                active,
+              })
+            }
+          />
+
           {children && (
             <Icon
               component="i"
