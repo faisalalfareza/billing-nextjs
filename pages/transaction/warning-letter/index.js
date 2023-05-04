@@ -115,6 +115,7 @@ export default function WarningLetter(props) {
 
   useEffect(() => {
     getPeriode();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [site]); //fungsi untuk initial fields pada saat refresh page
 
   //dropdown project
@@ -460,6 +461,7 @@ export default function WarningLetter(props) {
   /* end load dataTableData */
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [customerRequest.skipCount, customerRequest.recordsPerPage]);
 
   /* start fungtions methode Datatable */

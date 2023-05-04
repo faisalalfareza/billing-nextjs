@@ -169,13 +169,8 @@ function UploadDataWater(props) {
       getProject();
       getPeriod();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
-
-  useEffect(() => {
-    const a = localStorage.getItem("site");
-    if (a == null || a == undefined) {
-    }
-  });
 
   const onProjectChange = async (val) => {
     let response = await fetch("/api/master/site/getdropdownclusterbyproject", {

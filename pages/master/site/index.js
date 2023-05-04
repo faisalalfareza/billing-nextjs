@@ -211,6 +211,7 @@ export default function MasterSite(props) {
   };
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

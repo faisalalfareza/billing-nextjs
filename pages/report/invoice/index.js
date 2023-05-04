@@ -46,6 +46,8 @@ export default function ReportInvoice(props) {
       formikRef.current.setFieldValue("period", null);
       formikRef.current.setFieldValue("cluster", []);
     }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [site]);
 
   const getPeriod = async (val) => {

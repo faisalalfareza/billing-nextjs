@@ -54,6 +54,8 @@ export default function WaterReading(props) {
       setSite(currentSite);
     }
     getProject();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const [customerRequest, setCustomerRequest] = useState({
@@ -123,9 +125,12 @@ export default function WaterReading(props) {
       totalRows: undefined,
       totalPages: undefined,
     }));
+    
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [site]);
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [customerRequest.skipCount, customerRequest.recordsPerPage]);
 
   const form = {

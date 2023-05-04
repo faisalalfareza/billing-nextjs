@@ -73,6 +73,8 @@ export default function Invoice(props) {
     }
     getProject();
     getPeriod();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const [customerRequest, setCustomerRequest] = useState({
@@ -175,9 +177,12 @@ export default function Invoice(props) {
     setCustomer(null);
     getProject();
     getPeriod();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [site]);
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [customerRequest.skipCount, customerRequest.recordsPerPage]);
 
   const initialValues = {

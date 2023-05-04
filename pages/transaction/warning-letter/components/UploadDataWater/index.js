@@ -165,6 +165,8 @@ function UploadDataWater({ isOpen, onModalChanged, site }) {
       getProject();
       getPeriod();
     }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   useEffect(() => {

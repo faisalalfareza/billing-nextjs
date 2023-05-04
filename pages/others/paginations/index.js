@@ -93,6 +93,7 @@ function Paginations() {
   };
   useEffect(() => {
     getCustomerListServerSide();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [skipCount, recordsPerPage, keywords]);
 
   const setCustomerTaskList = (rows) => {
@@ -273,7 +274,7 @@ function Paginations() {
             </MDBox>
           </Grid>
           <Grid item xs={12} md={4} sx={{ textAlign: "right" }}>
-            <Link href={"/other-pages/reprint-or"}>
+            <Link href={"/other-pages/reprint-or"} passHref>
               <MDButton variant="gradient" color="dark">
                 Billing App &nbsp; ꬹ &nbsp; Reprint Official Receipt
                 <Icon>arrow_right</Icon>

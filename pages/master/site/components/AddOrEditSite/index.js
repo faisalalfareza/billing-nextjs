@@ -28,10 +28,10 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
   const [user, setUser] = useState({});
 
   useEffect(() => {
-    if (site) {
-      getLastPeriodNo();
-    }
+    if (site) getLastPeriodNo();
     getProject();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   const getProject = async () => {

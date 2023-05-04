@@ -145,9 +145,8 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
     }));
   };
   useEffect(() => {
-    if (site) {
-      getLastPeriodNo();
-    }
+    if (site) getLastPeriodNo();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   const addDate = (val) => {
