@@ -18,10 +18,12 @@ import { typeNormalization } from "/helpers/utils";
 import { alertService } from "/helpers/alert.service";
 
 import FormField from "/pagesComponents/FormField";
+import DataTable from "/layout/Tables/DataTable";
 
 function DetailCancelPayment({ isOpen, params, onModalChanged }) {
   const [modalOpen, setModalOpen] = useState(true);
   const [{ accessToken }] = useCookies();
+  const [listDetail, setListDetail] = useState([]);
 
   const isCanceled = params?.canceled == "Yes";
 
@@ -72,7 +74,18 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
 
     if (response.error)
       alertService.error({ title: "Error", text: response.error.message });
-    else setDetailCancelPayment(response);
+    else {
+      setDetailCancelPayment(response);
+      const list = [];
+      const row = response.listInvoiceDetailCancelPayment.map((e, i) => {
+        list.push({
+          no: i + 1,
+          amount: e.amount,
+          invoiceNo: e.invoiceNo,
+        });
+      });
+      setListDetail(list);
+    }
 
     setLoadingDetailCancelPayment(false);
   };
@@ -156,6 +169,32 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
     setTimeout(() => onModalChanged(isChanged), 0);
   };
 
+  const setDetailList = () => {
+    return {
+      columns: [
+        { Header: "No", accessor: "no" },
+        { Header: "INVOICE NUMBER", accessor: "invoiceNo" },
+        {
+          Header: "AMOUNT",
+          accessor: "amount",
+          align: "right",
+          Cell: ({ value }) => {
+            return (
+              <NumericFormat
+                displayType="text"
+                value={value}
+                decimalSeparator=","
+                prefix="Rp "
+                thousandSeparator="."
+              />
+            );
+          },
+        },
+      ],
+      rows: listDetail,
+    };
+  };
+
   if (isOpen) {
     return (
       detailCancelPayment && (
@@ -206,7 +245,11 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
                           flexDirection="column"
                           lineHeight={1}
                         >
-                          <MDBox mb={1} py={1.5} style={{ borderBottom: "0.0625rem solid #f0f2f5" }}>
+                          <MDBox
+                            mb={1}
+                            py={1.5}
+                            style={{ borderBottom: "0.0625rem solid #f0f2f5" }}
+                          >
                             <MDTypography
                               variant="button"
                               fontWeight="medium"
@@ -458,13 +501,46 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
                         </MDBox>
                       </MDBox>
                     </Grid>
+                    <Grid item xs={12} sm={12} mt={5}>
+                      <MDBox
+                        component="li"
+                        display="flex"
+                        justifyContent="space-between"
+                        alignItems="flex-start"
+                        borderRadius="lg"
+                        pb={1}
+                      >
+                        <MDBox
+                          width="100%"
+                          display="flex"
+                          flexDirection="column"
+                          lineHeight={1}
+                        >
+                          <MDBox>
+                            <MDTypography
+                              variant="button"
+                              fontWeight="medium"
+                              textTransform="capitalize"
+                              ml={2}
+                            >
+                              Detail Information
+                            </MDTypography>
+                            <DataTable
+                              table={setDetailList()}
+                              entriesPerPage={{
+                                defaultValue: listDetail.length,
+                              }}
+                            />
+                          </MDBox>
+                        </MDBox>
+                      </MDBox>
+                    </Grid>
                     {!isCanceled && (
                       <Grid item xs={12} sm={12} mt={5}>
                         <FormField
                           type={remarks.type}
                           label={
-                            remarks.label +
-                            (remarks.isRequired ? " ⁽*⁾" : "")
+                            remarks.label + (remarks.isRequired ? " ⁽*⁾" : "")
                           }
                           name={remarks.name}
                           value={remarksV}
