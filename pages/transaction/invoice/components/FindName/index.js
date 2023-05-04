@@ -65,8 +65,8 @@ export default function FindName(props) {
       body: JSON.stringify({
         accessToken: accessToken,
         params: {
-          PsCode: values.psCode,
-          CustName: values.name,
+          PsCode: values.psCode == "" ? undefined : values.psCode,
+          CustName: values.name == "" ? undefined : values.name,
           SiteId: site,
           PeriodId: period,
         },

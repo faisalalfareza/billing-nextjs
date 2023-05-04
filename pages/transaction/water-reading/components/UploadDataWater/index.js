@@ -249,15 +249,23 @@ function UploadDataWater(props) {
       //   actions.resetForm();
       //   closeModal();
       // });
-
+      let title = "",
+        icon = "";
+      if (isFailed) {
+        title = "Upload Water Reading Failed";
+        icon = "error";
+      } else {
+        title = "Upload Water Reading Successfull";
+        icon = "success";
+      }
       Swal.fire({
-        title: "Upload Water Reading Successfull",
+        title: title,
         html:
           `${response.result.totalSukses} data has been successfully uploaded.` +
           (isFailed
             ? `<br><strong>${response.result.totalGagal} data failed to upload</strong>, <a href="${response.result.urlDataGagal}" download="error-upload-bulk-payment.xlsx"><u>download here to see.</u></a>`
             : ``),
-        icon: "success",
+        icon: icon,
         timerProgressBar: true,
         timer: !isFailed && 3000,
       }).then(() => {
