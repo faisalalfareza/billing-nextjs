@@ -48,6 +48,7 @@ export default function DetailBalance(props) {
 
   useEffect(() => {
     if (params != undefined) fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params]);
 
   const fetchData = async (data) => {

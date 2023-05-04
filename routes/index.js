@@ -298,6 +298,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
         //   route: "/report/water-reading",
         //   icon: <OpacityIcon fontSize="medium" />,
         // },
+
         // {
         //   name: "Report Collection",
         //   nameOnHeader: "Report Collection",

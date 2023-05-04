@@ -62,6 +62,7 @@ export default function BillingPayment(props) {
 
   useEffect(() => {
     customerRequest.keywords != "" && fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [customerRequest.skipCount, customerRequest.recordsPerPage]);
 
   const skipCountChangeHandler = (e) => {
@@ -117,6 +118,7 @@ export default function BillingPayment(props) {
   useEffect(() => {
     getPaymentMethod();
     getBank();
+
     let currentSite = JSON.parse(localStorage.getItem("site"));
     if (currentSite == null) {
       alertService.info({ title: "Info", text: "Please choose Site first" });
@@ -125,6 +127,8 @@ export default function BillingPayment(props) {
       let currentUser = JSON.parse(localStorage.getItem("informations"));
       setUser(currentUser);
     }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => {
     console.log("iscard---", isCard);
@@ -323,6 +327,7 @@ export default function BillingPayment(props) {
 
   useEffect(() => {
     totalChange();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [totalPay, charge]);
 
   useEffect(() => {
@@ -343,6 +348,8 @@ export default function BillingPayment(props) {
       }
     });
     setListInvoice(newState);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [totalPay]);
 
   const totalChange = () => {
@@ -355,6 +362,8 @@ export default function BillingPayment(props) {
     let n = Object.assign({}, totalFooter);
     n.payment = tp;
     setTotalFooter(n);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [listInvoice]);
 
   const handleDetail = () => {
