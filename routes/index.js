@@ -18,35 +18,37 @@
 */
 
 import React from "react";
-import Icon from "@mui/material/Icon";
 
-import DashboardIcon from "@mui/icons-material/Dashboard";
-import DnsIcon from "@mui/icons-material/Dns";
-import AddBusinessIcon from "@mui/icons-material/AddBusiness";
-import TodayIcon from "@mui/icons-material/Today";
-import CurrencyExchangeIcon from "@mui/icons-material/CurrencyExchange";
-import DomainIcon from "@mui/icons-material/Domain"; 
-import CreditCardIcon from "@mui/icons-material/CreditCard";
-import CreditScoreIcon from "@mui/icons-material/CreditScore";
-import RequestQuoteIcon from "@mui/icons-material/RequestQuote"; 
-import HolidayVillageIcon from "@mui/icons-material/HolidayVillage"; 
-import FiberManualRecordOutlinedIcon from "@mui/icons-material/FiberManualRecordOutlined";
+import AccountCircle from "@mui/icons-material/AccountCircle"; 
+import Logout from "@mui/icons-material/Logout";
 
-import ReceiptIcon from "@mui/icons-material/Receipt"; 
-import WaterDamageIcon from "@mui/icons-material/WaterDamage";
-import FeedIcon from "@mui/icons-material/Feed"; 
+import Dashboard from "@mui/icons-material/Dashboard";
+import Dns from "@mui/icons-material/Dns";
+import AddBusiness from "@mui/icons-material/AddBusiness";
+import CalendarToday from "@mui/icons-material/CalendarToday";
+import CurrencyExchange from "@mui/icons-material/CurrencyExchange";
+import HomeWork from "@mui/icons-material/HomeWork"; 
+import CreditCard from "@mui/icons-material/CreditCard";
+import CreditScore from "@mui/icons-material/CreditScore"; 
+import ListAlt from "@mui/icons-material/ListAlt";
+import FactCheck from "@mui/icons-material/FactCheck"; 
+import FiberManualRecordOutlined from "@mui/icons-material/FiberManualRecordOutlined";
+
+import MultipleStop from "@mui/icons-material/MultipleStop"; 
+import WaterDamage from "@mui/icons-material/WaterDamage";
+import Description from "@mui/icons-material/Description"; 
 import MarkEmailUnreadIcon from "@mui/icons-material/MarkEmailUnread"; 
-import AutoStoriesIcon from "@mui/icons-material/AutoStories";
+import Book from "@mui/icons-material/Book";
 
-import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
-import LocalAtmIcon from "@mui/icons-material/LocalAtm"; 
-import ReceiptLongIcon from "@mui/icons-material/ReceiptLong"; 
+import Payments from "@mui/icons-material/Payments";
+import AttachMoney from "@mui/icons-material/AttachMoney"; 
+import Receipt from "@mui/icons-material/Receipt"; 
 import MoneyOffIcon from "@mui/icons-material/MoneyOff"; 
-import DriveFolderUploadIcon from "@mui/icons-material/DriveFolderUpload";
+import AccountBalanceWallet from "@mui/icons-material/AccountBalanceWallet";
 
-import AssessmentIcon from "@mui/icons-material/Assessment";
-import LowPriorityIcon from "@mui/icons-material/LowPriority"; 
-import OpacityIcon from "@mui/icons-material/Opacity";
+import Source from "@mui/icons-material/Source"; 
+import Today from "@mui/icons-material/Today";
+import TableView from "@mui/icons-material/TableView";  
 
 import MDAvatar from "../components/MDAvatar";
 import profilePicture from "../assets/images/team-3.jpg";
@@ -60,12 +62,13 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
       name: informations ? capitalizeFirstLetter(informations['user']['userName']) : "Brooklyn Alice",
       key: "username",
       // icon: <MDAvatar src={profilePicture.src} size="sm" />,
-      icon: <MDAvatar src={profiles ? `data:image/png;base64, ${profiles}` : profilePicture.src} alt={informations ? capitalizeFirstLetter(informations['user']['name']) : "Brooklyn Alice"} size="sm" />,
+      icon: profiles ? <MDAvatar src={`data:image/png;base64, ${profiles}`} alt={informations ? capitalizeFirstLetter(informations['user']['name']) : "Brooklyn Alice"} size="sm" /> : <AccountCircle fontSize="medium" />,
       collapse: [
         {
           name: "Logout",
           key: "logout",
           route: "/authentication/sign-in",
+          icon: <Logout fontSize="medium" />,
           onClick: function () {
             return;
           },
@@ -81,7 +84,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
       key: "dashboards",
       route: "/dashboards",
       // permission: "Pages.Tenant.Dashboard",
-      icon: <DashboardIcon fontSize="medium" />,
+      icon: <Dashboard fontSize="medium" />,
       noCollapse: true,
     },
 
@@ -91,7 +94,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
       nameOnHeader: "Master",
       key: "master",
       // permission: "Pages.Tenants.GenerateNoSeriFP",
-      icon: <DnsIcon fontSize="medium" />,
+      icon: <Dns fontSize="medium" />,
       collapse: [
         {
           name: "Master Site",
@@ -99,7 +102,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           key: "site",
           route: "/master/site",
           // permission: "Pages.Tenants.GenerateNoSeriFP.Create",
-          icon: <AddBusinessIcon fontSize="medium" />,
+          icon: <AddBusiness fontSize="medium" />,
         },
         {
           name: "Master Period",
@@ -107,58 +110,58 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           key: "period",
           route: "/master/period",
           // permission: "Pages.Tenants.GenerateNoSeriFP.Create",
-          icon: <TodayIcon fontSize="medium" />,
+          icon: <CalendarToday fontSize="medium" />,
         },
 
-        // {
-        //   name: "Master Exchange Rate",
-        //   nameOnHeader: "Master Exchange Rate",
-        //   key: "exchange-rate",
-        //   route: "/master/exchange-rate",
-        //   icon: <CurrencyExchangeIcon fontSize="medium" />,
-        // },
-        // {
-        //   name: "Master Unit Data",
-        //   nameOnHeader: "Master Unit Data",
-        //   key: "unit-data",
-        //   route: "/master/unit-data",
-        //   icon: <DomainIcon fontSize="medium" />,
-        // },
-        // {
-        //   name: "Master Billing Item",
-        //   nameOnHeader: "Master Billing Item",
-        //   key: "billing-item",
-        //   route: "/master/billing-item",
-        //   icon: <CreditCardIcon fontSize="medium" />,
-        // },
-        // {
-        //   name: "Master Billing Item Rate",
-        //   nameOnHeader: "Master Billing Item Rate",
-        //   key: "billing-item-rate",
-        //   route: "/master/billing-item-rate",
-        //   icon: <CreditScoreIcon fontSize="medium" />,
-        // },
-        // {
-        //   name: "Master Mapping Template Invoice",
-        //   nameOnHeader: "Master Mapping Template Invoice",
-        //   key: "mapping-template-invoice",
-        //   route: "/master/mapping-template-invoice",
-        //   icon: <RequestQuoteIcon fontSize="medium" />,
-        // },
-        // {
-        //   name: "Master Unit Item",
-        //   nameOnHeader: "Master Unit Item",
-        //   key: "unit-item",
-        //   route: "/master/unit-item",
-        //   icon: <HolidayVillageIcon fontSize="medium" />,
-        // },
-        // {
-        //   name: "Master Oracle Mapping",
-        //   nameOnHeader: "Master Oracle Mapping",
-        //   key: "oracle-mapping",
-        //   route: "/master/oracle-mapping", 
-        //   icon: <FiberManualRecordOutlinedIcon fontSize="medium" />,
-        // },
+        {
+          name: "Master Exchange Rate",
+          nameOnHeader: "Master Exchange Rate",
+          key: "exchange-rate",
+          route: "/master/exchange-rate",
+          icon: <CurrencyExchange fontSize="medium" />,
+        },
+        {
+          name: "Master Unit Data",
+          nameOnHeader: "Master Unit Data",
+          key: "unit-data",
+          route: "/master/unit-data",
+          icon: <HomeWork fontSize="medium" />,
+        },
+        {
+          name: "Master Billing Item",
+          nameOnHeader: "Master Billing Item",
+          key: "billing-item",
+          route: "/master/billing-item",
+          icon: <CreditCard fontSize="medium" />,
+        },
+        {
+          name: "Master Billing Item Rate",
+          nameOnHeader: "Master Billing Item Rate",
+          key: "billing-item-rate",
+          route: "/master/billing-item-rate",
+          icon: <CreditScore fontSize="medium" />,
+        },
+        {
+          name: "Master Mapping Template Invoice",
+          nameOnHeader: "Master Mapping Template Invoice",
+          key: "mapping-template-invoice",
+          route: "/master/mapping-template-invoice",
+          icon: <ListAlt fontSize="medium" />,
+        },
+        {
+          name: "Master Unit Item",
+          nameOnHeader: "Master Unit Item",
+          key: "unit-item",
+          route: "/master/unit-item",
+          icon: <FactCheck fontSize="medium" />,
+        },
+        {
+          name: "Master Oracle Mapping",
+          nameOnHeader: "Master Oracle Mapping",
+          key: "oracle-mapping",
+          route: "/master/oracle-mapping", 
+          icon: <FiberManualRecordOutlined fontSize="medium" />,
+        },
       ],
     },
 
@@ -168,7 +171,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
       nameOnHeader: "Transaction",
       key: "transaction",
       // permission: "Pages.Tenants.GenerateNoSeriFP",
-      icon: <ReceiptIcon fontSize="medium" />,
+      icon: <MultipleStop fontSize="medium" />,
       collapse: [
         {
           name: "Water Reading",
@@ -176,7 +179,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           key: "water-reading",
           route: "/transaction/water-reading",
           // permission: "Pages.Tenants.GenerateNoSeriFP.Create",
-          icon: <WaterDamageIcon fontSize="medium" />,
+          icon: <WaterDamage fontSize="medium" />,
         },
         {
           name: "Invoice",
@@ -184,7 +187,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           key: "invoice",
           route: "/transaction/invoice",
           // permission: "Pages.Tenants.GenerateNoSeriFP.List",
-          icon: <FeedIcon fontSize="medium" />,
+          icon: <Description fontSize="medium" />,
         },
         {
           name: "Warning Letter",
@@ -200,7 +203,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           key: "oracle-to-journal",
           route: "/transaction/oracle-to-journal",
           // permission: "Pages.Tenants.GenerateNoSeriFP.Create",
-          icon: <AutoStoriesIcon fontSize="medium" />,
+          icon: <Book fontSize="medium" />,
         },
         
         // {
@@ -224,7 +227,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
       nameOnHeader: "Cashier System",
       key: "cashier",
       // permission: "Pages.Tenants.GenerateNoSeriFP",
-      icon: <PointOfSaleIcon fontSize="medium" />,
+      icon: <Payments fontSize="medium" />,
       collapse: [
         {
           name: "Billing Payment",
@@ -232,14 +235,14 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           key: "billing-payment",
           route: "/cashier/billing-payment",
           // permission: "Pages.Tenants.GenerateNoSeriFP.Create",
-          icon: <LocalAtmIcon fontSize="medium" />,
+          icon: <AttachMoney fontSize="medium" />,
         },
         {
           name: "Reprint OR",
           nameOnHeader: "Reprint Official Receipt",
           key: "reprint-or",
           route: "/cashier/reprint-or", 
-          icon: <ReceiptLongIcon fontSize="medium" />,
+          icon: <Receipt fontSize="medium" />,
         },
         {
           name: "Cancel Payment",
@@ -254,7 +257,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           key: "upload-bulk-payment",
           route: "/cashier/upload-bulk-payment",
           // permission: "Pages.Tenants.GenerateNoSeriFP.List",
-          icon: <DriveFolderUploadIcon fontSize="medium" />,
+          icon: <AccountBalanceWallet fontSize="medium" />,
         },
       ],
     },
@@ -265,7 +268,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
       nameOnHeader: "Report",
       key: "report",
       // permission: "Pages.Tenants.GenerateNoSeriFP",
-      icon: <AssessmentIcon fontSize="medium" />,
+      icon: <Source fontSize="medium" />,
       collapse: [
         {
           name: "Report Invoice",
@@ -273,7 +276,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           key: "invoice",
           route: "/report/invoice",
           // permission: "Pages.Tenants.GenerateNoSeriFP.List",
-          icon: <AssessmentIcon fontSize="medium" />,
+          icon: <Description fontSize="medium" />,
         },
         {
           name: "Daily Report",
@@ -281,23 +284,23 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           key: "daily",
           route: "/report/daily",
           // permission: "Pages.Tenants.GenerateNoSeriFP.Create",
-          icon: <LowPriorityIcon fontSize="medium" />,
+          icon: <Today fontSize="medium" />,
         },
 
-        // {
-        //   name: "Report Detail Statement",
-        //   nameOnHeader: "Report Detail Statement",
-        //   key: "detail-statement",
-        //   route: "/report/detail-statement",
-        //   icon: <ReceiptLongIcon fontSize="medium" />,
-        // },
-        // {
-        //   name: "Report Water Reading",
-        //   nameOnHeader: "Report Water Reading",
-        //   key: "water-reading",
-        //   route: "/report/water-reading",
-        //   icon: <OpacityIcon fontSize="medium" />,
-        // },
+        {
+          name: "Report Detail Statement",
+          nameOnHeader: "Report Detail Statement",
+          key: "detail-statement",
+          route: "/report/detail-statement",
+          icon: <TableView fontSize="medium" />,
+        },
+        {
+          name: "Report Water Reading",
+          nameOnHeader: "Report Water Reading",
+          key: "water-reading",
+          route: "/report/water-reading",
+          icon: <WaterDamage fontSize="medium" />,
+        },
 
         // {
         //   name: "Report Collection",
@@ -312,7 +315,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
         //   key: "customer-complaint",
         //   route: "/report/customer-complaint",
         //   permission: "Pages.Tenants.GenerateNoSeriFP.List",
-        // },
+        // },z
       ],
     },
   ];
