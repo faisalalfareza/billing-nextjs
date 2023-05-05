@@ -187,6 +187,7 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
                 }}
               >
                 <SidenavItem
+                  icon={icon}
                   color={color}
                   name={name}
                   active={key === itemName}

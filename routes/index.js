@@ -19,6 +19,9 @@
 
 import React from "react";
 
+import AccountCircle from "@mui/icons-material/AccountCircle"; 
+import Logout from "@mui/icons-material/Logout";
+
 import Dashboard from "@mui/icons-material/Dashboard";
 import Dns from "@mui/icons-material/Dns";
 import AddBusiness from "@mui/icons-material/AddBusiness";
@@ -46,7 +49,6 @@ import AccountBalanceWallet from "@mui/icons-material/AccountBalanceWallet";
 import Source from "@mui/icons-material/Source"; 
 import Today from "@mui/icons-material/Today";
 import TableView from "@mui/icons-material/TableView";  
-import Opacity from "@mui/icons-material/Opacity";
 
 import MDAvatar from "../components/MDAvatar";
 import profilePicture from "../assets/images/team-3.jpg";
@@ -60,12 +62,13 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
       name: informations ? capitalizeFirstLetter(informations['user']['userName']) : "Brooklyn Alice",
       key: "username",
       // icon: <MDAvatar src={profilePicture.src} size="sm" />,
-      icon: <MDAvatar src={profiles ? `data:image/png;base64, ${profiles}` : profilePicture.src} alt={informations ? capitalizeFirstLetter(informations['user']['name']) : "Brooklyn Alice"} size="sm" />,
+      icon: profiles ? <MDAvatar src={`data:image/png;base64, ${profiles}`} alt={informations ? capitalizeFirstLetter(informations['user']['name']) : "Brooklyn Alice"} size="sm" /> : <AccountCircle fontSize="medium" />,
       collapse: [
         {
           name: "Logout",
           key: "logout",
           route: "/authentication/sign-in",
+          icon: <Logout fontSize="medium" />,
           onClick: function () {
             return;
           },
