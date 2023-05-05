@@ -87,34 +87,6 @@ export default function BillingPayment(props) {
     }));
   };
 
-  const FormSchema = (hasNote) =>
-    Yup.object().shape({
-      // no more conditional schema, just recreating a schema every time hasNote changes
-      note: hasNote ? Yup.string().required() : Yup.string(),
-      cluster: Yup.string(),
-      paymentMethod: Yup.object().required("Payment Method is required."),
-      cardNumber: hasNote
-        ? Yup.string().required("Card Number is required.")
-        : Yup.string(),
-      amountPayment: Yup.string()
-        .required("Amount Payment is required.")
-        .typeError("Amount Payment is required."),
-      transactionDate: Yup.date()
-        .required("Transaction Date is required.")
-        .typeError("Transaction Date is required."),
-      bank: Yup.object()
-        .required("Bank is required.")
-        .typeError("Bank is required."),
-      remarks: Yup.string(),
-      charge: Yup.string(),
-    });
-  const [schema, setSchema] = useState(() => FormSchema(hasNote));
-
-  useEffect(() => {
-    // every time hasNote changes, recreate the schema and set it in the state
-    setSchema(FormSchema(hasNote));
-  }, [hasNote]);
-
   useEffect(() => {
     getPaymentMethod();
     getBank();
@@ -155,7 +127,9 @@ export default function BillingPayment(props) {
 
   let schemeValidations = Yup.object().shape({
     cluster: Yup.string(),
-    paymentMethod: Yup.object().required("Payment Method is required."),
+    paymentMethod: Yup.object()
+      .required("Payment Method is required.")
+      .typeError("Payment Method is required."),
     cardNumber: Yup.string().when(["paymentMethod"], {
       is: (paymentMethod) =>
         paymentMethod === { paymentName: "Credit Card", paymentType: 3 } ||
@@ -169,9 +143,7 @@ export default function BillingPayment(props) {
     transactionDate: Yup.date()
       .required("Transaction Date is required.")
       .typeError("Transaction Date is required."),
-    bank: Yup.object()
-      .required("Bank is required.")
-      .typeError("Bank is required."),
+    bank: Yup.object().nullable(),
     remarks: Yup.string(),
     charge: Yup.string(),
   });
@@ -181,7 +153,7 @@ export default function BillingPayment(props) {
 
   const initialValues = {
     cluster: detail?.clusterName,
-    paymentMethod: "",
+    paymentMethod: null,
     cardNumber: undefined,
     amountPayment: null,
     transactionDate: dayjs().format("YYYY-MM-DD"),
@@ -578,6 +550,13 @@ export default function BillingPayment(props) {
     setSite(siteVal);
     localStorage.setItem("site", JSON.stringify(siteVal));
   };
+
+  const keyPress = (e) => {
+    if (e.keyCode == 13) {
+      console.log("value", e.target.value);
+      fetchData();
+    }
+  };
   //sampai sini
 
   return (
@@ -620,6 +599,7 @@ export default function BillingPayment(props) {
                         keywords: e.target.value,
                       }));
                     }}
+                    onKeyDown={keyPress}
                     error={filterText == ""}
                     fullWidth
                   />
@@ -757,16 +737,39 @@ export default function BillingPayment(props) {
                             values,
                           }) => {
                             setformValues(values);
-                            const isValifForm = () =>
-                              checkingSuccessInput(
-                                values.paymentMethod,
-                                errors.paymentMethod
-                              ) &&
-                              checkingSuccessInput(
-                                values.amountPayment,
-                                errors.amountPayment
-                              ) &&
-                              checkingSuccessInput(values.bank, errors.bank);
+                            const isValifForm = () => {
+                              if (values.paymentMethod?.paymentType == 1) {
+                                return (
+                                  checkingSuccessInput(
+                                    values.paymentMethod,
+                                    errors.paymentMethod
+                                  ) &&
+                                  checkingSuccessInput(
+                                    values.amountPayment,
+                                    errors.amountPayment
+                                  )
+                                );
+                              } else {
+                                return (
+                                  checkingSuccessInput(
+                                    values.paymentMethod,
+                                    errors.paymentMethod
+                                  ) &&
+                                  checkingSuccessInput(
+                                    values.amountPayment,
+                                    errors.amountPayment
+                                  ) &&
+                                  checkingSuccessInput(
+                                    values.bank,
+                                    errors.bank
+                                  ) &&
+                                  checkingSuccessInput(
+                                    values.cardNumber,
+                                    errors.cardNumber
+                                  )
+                                );
+                              }
+                            };
                             return (
                               <Form
                                 id="payment-detail"
@@ -876,6 +879,10 @@ export default function BillingPayment(props) {
                                             {...params}
                                             type="text"
                                             label="Bank"
+                                            required={
+                                              formValues.paymentMethod
+                                                ?.paymentType != 1
+                                            }
                                             name="bank"
                                             placeholder="Choose Bank"
                                             InputLabelProps={{ shrink: true }}
@@ -893,6 +900,10 @@ export default function BillingPayment(props) {
                                         type="text"
                                         label="Card number"
                                         name="cardNumber"
+                                        required={
+                                          formValues.paymentMethod
+                                            ?.paymentType != 1
+                                        }
                                         placeholder="Type Card Number"
                                         error={
                                           errors.cardNumber &&
