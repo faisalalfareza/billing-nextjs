@@ -1,4 +1,4 @@
-import { useMemo, useEffect, useState } from "react";
+import { useMemo, useEffect, useState, useRef } from "react";
 
 // prop-types is a library for typechecking of props
 import PropTypes from "prop-types";
@@ -212,7 +212,46 @@ function DataTable({
     entriesEnd = pageSize * (pageIndex + 1);
   }
 
-  const isActions = (title || description) || (canEntriesPerPage && entriesPerPage) || canSearch;
+  const isActions =
+    title || description || (canEntriesPerPage && entriesPerPage) || canSearch;
+
+  const [width, setWidth] = useState();
+
+  // useRef allows us to "store" the div in a constant,
+  // and to access it via observedDiv.current
+  const observedDiv = useRef(null);
+
+  useEffect(
+    () => {
+      if (!observedDiv.current) {
+        // we do not initialize the observer unless the ref has
+        // been assigned
+        return;
+      }
+
+      // we also instantiate the resizeObserver and we pass
+      // the event handler to the constructor
+      const resizeObserver = new ResizeObserver(() => {
+        if (observedDiv.current.offsetWidth !== width) {
+          setWidth(observedDiv.current.offsetWidth);
+        }
+      });
+
+      // the code in useEffect will be executed when the component
+      // has mounted, so we are certain observedDiv.current will contain
+      // the div we want to observe
+      resizeObserver.observe(observedDiv.current);
+
+      // if useEffect returns a function, it is called right before the
+      // component unmounts, so it is the right place to stop observing
+      // the div
+      return function cleanup() {
+        resizeObserver.disconnect();
+      };
+    },
+    // only update the effect if the ref element changed
+    [observedDiv.current]
+  );
 
   return (
     <TableContainer sx={{ boxShadow: "none" }}>
@@ -222,21 +261,35 @@ function DataTable({
           justifyContent="space-between"
           alignItems="center"
           p={3}
-          sx={{ width: "100%" }}
+          sx={{
+            width: width,
+          }}
         >
           {(title || description) && (
             <MDBox>
-              {title && <MDBox><MDTypography variant="h5">{title}</MDTypography></MDBox>}
-              {description && <MDBox><MDTypography variant="button" color="text">{description}</MDTypography></MDBox>}
+              {title && (
+                <MDBox>
+                  <MDTypography variant="h5">{title}</MDTypography>
+                </MDBox>
+              )}
+              {description && (
+                <MDBox>
+                  <MDTypography variant="button" color="text">
+                    {description}
+                  </MDTypography>
+                </MDBox>
+              )}
             </MDBox>
           )}
-          {(!title && canEntriesPerPage && entriesPerPage) && (
+          {!title && canEntriesPerPage && entriesPerPage && (
             <MDBox display="flex" alignItems="center">
               <Autocomplete
                 disableClearable
                 value={pageSize.toString()}
                 options={entries}
-                onChange={(event, newValue) => setEntriesPerPage(parseInt(newValue, 10))}
+                onChange={(event, newValue) =>
+                  setEntriesPerPage(parseInt(newValue, 10))
+                }
                 // size="small"
                 sx={{ width: "5rem" }}
                 renderInput={(params) => <MDInput {...params} />}
@@ -278,7 +331,12 @@ function DataTable({
           )}
         </MDBox>
       ) : null}
-      <Table {...getTableProps()} sx={{marginTop: isActions ? 0 : 2}}>
+      <Table
+        {...getTableProps()}
+        sx={{ marginTop: isActions ? 0 : 2 }}
+        ref={observedDiv}
+        id="table-data"
+      >
         <MDBox component="thead">
           {headerGroups.map((headerGroup, key) => (
             <TableRow key={key} {...headerGroup.getHeaderGroupProps()}>
