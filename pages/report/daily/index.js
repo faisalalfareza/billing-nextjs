@@ -48,6 +48,8 @@ export default function ReportDaily(props) {
     }
     getProject();
     getPeriod();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [site]);
 
   const getPaymentMethod = async () => {
@@ -104,6 +106,8 @@ export default function ReportDaily(props) {
       setSite(currentSite);
     }
     getPaymentMethod();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   //dari sini

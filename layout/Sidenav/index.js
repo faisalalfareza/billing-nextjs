@@ -118,7 +118,7 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
   };
   // Render the all the collpases from the routes.js
   const renderCollapse = (collapses) => {
-    return collapses.map(({ name, collapse, route, href, key, onClick }) => {
+    return collapses.map(({ icon, name, collapse, route, href, key, onClick }) => {
       let returnValue;
 
       if (collapse) {
@@ -187,6 +187,7 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
                 }}
               >
                 <SidenavItem
+                  icon={icon}
                   color={color}
                   name={name}
                   active={key === itemName}
@@ -199,6 +200,7 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
             <Link href={route} key={key} sx={{ textDecoration: "none" }}>
               <a>
                 <SidenavItem
+                  icon={icon}
                   color={color}
                   name={name}
                   active={key === itemName}

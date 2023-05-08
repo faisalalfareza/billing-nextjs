@@ -54,6 +54,8 @@ export default function WaterReading(props) {
       setSite(currentSite);
     }
     getProject();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const [customerRequest, setCustomerRequest] = useState({
@@ -117,9 +119,18 @@ export default function WaterReading(props) {
       formikRef.current.setFieldValue("project", null);
       formikRef.current.setFieldValue("cluster", null);
     }
+    setCustomerResponse((prevState) => ({
+      ...prevState,
+      rowData: [],
+      totalRows: undefined,
+      totalPages: undefined,
+    }));
+    
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [site]);
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [customerRequest.skipCount, customerRequest.recordsPerPage]);
 
   const form = {
@@ -209,7 +220,7 @@ export default function WaterReading(props) {
           ClusterId: formValues.cluster?.clusterId,
           MaxResultCount: recordsPerPage,
           SkipCount: skipCount,
-          Search: keywords
+          Search: keywords,
         },
       }),
     });
@@ -371,11 +382,13 @@ export default function WaterReading(props) {
                       }) => {
                         setformValues(values);
                         getFormData(values);
-                        const isValifForm = () => (
-                          checkingSuccessInput(values.project, errors.project) &&
-                          checkingSuccessInput(values.cluster, errors.cluster)
-                        );
-                        
+                        const isValifForm = () =>
+                          checkingSuccessInput(
+                            values.project,
+                            errors.project
+                          ) &&
+                          checkingSuccessInput(values.cluster, errors.cluster);
+
                         return (
                           <Form id={form.formId} autoComplete="off">
                             <MDBox>
@@ -484,16 +497,10 @@ export default function WaterReading(props) {
                                         variant="gradient"
                                         color="primary"
                                         sx={{ height: "100%" }}
-                                        disabled={
-                                          isLoading ||
-                                          !isValifForm()
-                                        }
+                                        disabled={isLoading || !isValifForm()}
                                       >
                                         <Icon>search</Icon>&nbsp;{" "}
-                                        {isLoading ?
-                                          "Searching..." :
-                                          "Search"
-                                        }
+                                        {isLoading ? "Searching..." : "Search"}
                                       </MDButton>
                                     </MDBox>
                                   </MDBox>
@@ -521,7 +528,9 @@ export default function WaterReading(props) {
         >
           <MDBox display="flex">
             <MDBox>
-              <MDButton variant="outlined" color="primary"
+              <MDButton
+                variant="outlined"
+                color="primary"
                 disabled={customerResponse.rowData.length == 0}
                 onClick={handleExport}
               >
@@ -529,7 +538,11 @@ export default function WaterReading(props) {
               </MDButton>
             </MDBox>
             <MDBox ml={1}>
-              <MDButton variant="gradient" color="primary" onClick={handleOpenUpload}>
+              <MDButton
+                variant="gradient"
+                color="primary"
+                onClick={handleOpenUpload}
+              >
                 <Icon>add</Icon>&nbsp; Add New Water Reading
               </MDButton>
             </MDBox>
@@ -540,7 +553,8 @@ export default function WaterReading(props) {
             <Grid container alignItems="center">
               <Grid item xs={12}>
                 <DataTable
-                  title="Water Reading List" description="Water Reading Data"
+                  title="Water Reading List"
+                  description="Water Reading Data"
                   table={setCustomerTaskList(customerResponse.rowData)}
                   manualPagination={true}
                   totalRows={customerResponse.totalRows}
@@ -550,8 +564,11 @@ export default function WaterReading(props) {
                   pageChangeHandler={skipCountChangeHandler}
                   recordsPerPageChangeHandler={recordsPerPageChangeHandler}
                   keywordsChangeHandler={keywordsChangeHandler}
-                  entriesPerPage={{ defaultValue: customerRequest.recordsPerPage }}
-                  canSearch pagination={{ variant: "gradient", color: "primary" }}
+                  entriesPerPage={{
+                    defaultValue: customerRequest.recordsPerPage,
+                  }}
+                  canSearch
+                  pagination={{ variant: "gradient", color: "primary" }}
                 />
               </Grid>
             </Grid>
@@ -570,7 +587,6 @@ export default function WaterReading(props) {
         params={modalParams}
         onModalChanged={changeModalEdit}
       />
-      
     </DashboardLayout>
   );
 }

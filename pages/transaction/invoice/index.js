@@ -73,6 +73,8 @@ export default function Invoice(props) {
     }
     getProject();
     getPeriod();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const [customerRequest, setCustomerRequest] = useState({
@@ -164,14 +166,24 @@ export default function Invoice(props) {
       formikRef.current.setFieldValue("cluster", null);
       formikRef.current.setFieldValue("unitCode", null);
       formikRef.current.setFieldValue("unitNo", null);
+      formikRef.current.setFieldValue("nameF", "");
     }
+    setCustomerResponse((prevState) => ({
+      ...prevState,
+      rowData: [],
+      totalRows: undefined,
+      totalPages: undefined,
+    }));
+    setCustomer(null);
     getProject();
     getPeriod();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [site]);
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [customerRequest.skipCount, customerRequest.recordsPerPage]);
-
 
   const initialValues = {
     project: null,
@@ -198,7 +210,7 @@ export default function Invoice(props) {
   });
 
   const checkingSuccessInput = (value, error) => {
-    return value != undefined && value != "" && !error;
+    return value != undefined && value != "" && value != null && !error;
   };
 
   const swalWithBootstrapButtons = Swal.mixin({
@@ -243,7 +255,6 @@ export default function Invoice(props) {
       setIsCheck(isCheck.filter((item) => item !== +id));
     }
   };
-
 
   const columns = [
     {
@@ -393,7 +404,8 @@ export default function Invoice(props) {
             data.totalCount / customerRequest.recordsPerPage
           ),
         }));
-      } setLoading(false);
+      }
+      setLoading(false);
     }
   };
 
@@ -512,9 +524,14 @@ export default function Invoice(props) {
 
   const handlePSCode = (val) => {
     setCustomer(val);
+    if (formikRef.current) {
+      formikRef.current.setFieldValue("nameF", val.name);
+    }
   };
 
-  useEffect(() => {}, [customer]);
+  useEffect(() => {
+    console.log("cuss--", customer);
+  }, [customer]);
 
   const submitForm = async (values, actions) => {
     fetchData(values, actions);
@@ -667,9 +684,8 @@ export default function Invoice(props) {
                       }) => {
                         setformValues(values);
                         getFormData(values);
-                        const isValifForm = () => (
-                          checkingSuccessInput(values.period, errors.period)
-                        );
+                        const isValifForm = () =>
+                          checkingSuccessInput(values.period, errors.period);
 
                         return (
                           <Form id="invoice-filter" autoComplete="off">
@@ -725,8 +741,10 @@ export default function Invoice(props) {
                                       <FormField
                                         type="text"
                                         label="Name"
+                                        disabled
                                         name="nameF"
-                                        value={customer?.name}
+                                        id="namef-invoice"
+                                        value={formValues.nameF}
                                         placeholder="Type Name"
                                         InputLabelProps={{ shrink: true }}
                                         error={errors.nameF && touched.nameF}
@@ -934,16 +952,10 @@ export default function Invoice(props) {
                                         variant="gradient"
                                         color="primary"
                                         sx={{ height: "100%" }}
-                                        disabled={
-                                          isLoading ||
-                                          !isValifForm()
-                                        }
+                                        disabled={isLoading || !isValifForm()}
                                       >
                                         <Icon>search</Icon>&nbsp;{" "}
-                                        {isLoading ?
-                                          "Searching..." :
-                                          "Search"
-                                        }
+                                        {isLoading ? "Searching..." : "Search"}
                                       </MDButton>
                                     </MDBox>
                                   </MDBox>
@@ -971,39 +983,42 @@ export default function Invoice(props) {
         >
           <MDBox display="flex">
             <MDBox>
-              <MDButton variant="outlined" color="primary"
+              <MDButton
+                variant="outlined"
+                color="primary"
                 disabled={isCheck.length == 0 || isLoadingSend}
                 onClick={() => handleCommand(1)}
               >
                 <Icon>add</Icon>&nbsp;{" "}
-                {isLoadingSend && (command == 1) 
+                {isLoadingSend && command == 1
                   ? "Regenerating.."
-                  : "Re-Generate"
-                }
+                  : "Re-Generate"}
               </MDButton>
             </MDBox>
             <MDBox ml={1}>
-              <MDButton variant="outlined" color="primary"
+              <MDButton
+                variant="outlined"
+                color="primary"
                 disabled={isCheck.length == 0 || isLoadingSend}
                 onClick={() => handleCommand(2)}
               >
                 <Icon>email</Icon>&nbsp;{" "}
-                {isLoadingSend && (command == 2)
+                {isLoadingSend && command == 2
                   ? "Sending Email.."
-                  : "Send Email"
-                }
+                  : "Send Email"}
               </MDButton>
             </MDBox>
             <MDBox ml={1}>
-              <MDButton variant="outlined" color="primary"
+              <MDButton
+                variant="outlined"
+                color="primary"
                 disabled={isCheck.length == 0 || isLoadingSend}
                 onClick={() => handleCommand(3)}
               >
                 <WhatsAppIcon /> &nbsp;{" "}
-                {isLoadingSend && (command == 3)
+                {isLoadingSend && command == 3
                   ? "Sending Whatsapp.."
-                  : "Send Whatsapp"
-                }
+                  : "Send Whatsapp"}
               </MDButton>
             </MDBox>
           </MDBox>
@@ -1013,7 +1028,8 @@ export default function Invoice(props) {
             <Grid container alignItems="center">
               <Grid item xs={12}>
                 <DataTable
-                  title="Invoice List" description="Invoice Data"
+                  title="Invoice List"
+                  description="Invoice Data"
                   table={setCustomerTaskList(customerResponse.rowData)}
                   manualPagination={true}
                   totalRows={customerResponse.totalRows}
@@ -1023,8 +1039,11 @@ export default function Invoice(props) {
                   pageChangeHandler={skipCountChangeHandler}
                   recordsPerPageChangeHandler={recordsPerPageChangeHandler}
                   keywordsChangeHandler={keywordsChangeHandler}
-                  entriesPerPage={{ defaultValue: customerRequest.recordsPerPage }}
-                  canSearch pagination={{ variant: "gradient", color: "primary" }}
+                  entriesPerPage={{
+                    defaultValue: customerRequest.recordsPerPage,
+                  }}
+                  canSearch
+                  pagination={{ variant: "gradient", color: "primary" }}
                 />
               </Grid>
             </Grid>

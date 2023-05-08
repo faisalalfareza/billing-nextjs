@@ -24,7 +24,7 @@ function item(theme, ownerState) {
   const { rgba } = functions;
 
   return {
-    pl: 3,
+    // pl: 3,
     mt: 0.375,
     mb: 0.3,
     width: "100%",
@@ -66,6 +66,39 @@ function item(theme, ownerState) {
   };
 }
 
+function itemIconBox(theme, ownerState) {
+  const { palette, transitions, borders, functions } = theme;
+  const { transparentSidenav, whiteSidenav, darkMode } = ownerState;
+
+  const { white, dark } = palette;
+  const { borderRadius } = borders;
+  const { pxToRem } = functions;
+
+  return {
+    minWidth: pxToRem(32),
+    minHeight: pxToRem(32),
+    color:
+      (transparentSidenav && !darkMode) || whiteSidenav
+        ? dark.main
+        : white.main,
+    borderRadius: borderRadius.md,
+    display: "grid",
+    placeItems: "center",
+    transition: transitions.create("margin", {
+      easing: transitions.easing.easeInOut,
+      duration: transitions.duration.standard,
+    }),
+
+    "& svg, svg g": {
+      color: transparentSidenav || whiteSidenav ? dark.main : white.main,
+    },
+  };
+}
+
+const itemIcon = ({ palette: { white, gradients } }, { active }) => ({
+  color: active ? white.main : gradients.dark.state,
+});
+
 function itemContent(theme, ownerState) {
   const { palette, typography, transitions, functions } = theme;
   const {
@@ -86,8 +119,8 @@ function itemContent(theme, ownerState) {
     alignItems: "center",
     justifyContent: "space-between",
     width: "100%",
-    padding: `${pxToRem(12)} ${pxToRem(16)}`,
-    marginLeft: pxToRem(18),
+    padding: `${pxToRem(8)} ${pxToRem(16)}`, // padding: `${pxToRem(12)} ${pxToRem(16)}`,
+    marginLeft: pxToRem(10), // marginLeft: pxToRem(18),
     userSelect: "none",
     position: "relative",
 
@@ -110,23 +143,54 @@ function itemContent(theme, ownerState) {
       lineHeight: 1.2
     },
 
-    "&::before": {
-      content: `"${name[0]}"`,
-      color:
-        ((transparentSidenav && !darkMode) || whiteSidenav) &&
-        (active === "isParent" || !active)
-          ? dark.main
-          : white.main,
-      fontWeight: fontWeightRegular,
-      display: "flex",
-      alignItems: "center",
-      position: "absolute",
-      top: "50%",
-      transform: "translateY(-50%)",
-      left: pxToRem(-15),
-      opacity: 1,
-      borderRadius: "50%",
+    // "&::before": {
+    //   content: `"${name[0]}"`,
+    //   color:
+    //     ((transparentSidenav && !darkMode) || whiteSidenav) &&
+    //     (active === "isParent" || !active)
+    //       ? dark.main
+    //       : white.main,
+    //   fontWeight: fontWeightRegular,
+    //   display: "flex",
+    //   alignItems: "center",
+    //   position: "absolute",
+    //   top: "50%",
+    //   transform: "translateY(-50%)",
+    //   left: pxToRem(-15),
+    //   opacity: 1,
+    //   borderRadius: "50%",
+    //   fontSize: size.sm,
+    // },
+  };
+}
+
+function itemText(theme, ownerState) {
+  const { typography, transitions, breakpoints, functions } = theme;
+  const { miniSidenav, transparentSidenav, active } = ownerState;
+
+  const { size, fontWeightBold, fontWeightRegular, fontWeightLight } = typography;
+  const { pxToRem } = functions;
+
+  return {
+    marginLeft: pxToRem(10),
+
+    [breakpoints.up("xl")]: {
+      opacity: miniSidenav || (miniSidenav && transparentSidenav) ? 0 : 1,
+      maxWidth: miniSidenav || (miniSidenav && transparentSidenav) ? 0 : "100%",
+      marginLeft:
+        miniSidenav || (miniSidenav && transparentSidenav) ? 0 : pxToRem(10),
+        transition: transitions.create(["opacity", "margin"], {
+        easing: transitions.easing.easeInOut,
+        duration: transitions.duration.standard,
+        
+      }),
+    },
+
+    "& span": {
+      // fontWeight: active ? fontWeightRegular : fontWeightLight,
+      fontWeight: active ? fontWeightBold : fontWeightRegular,
       fontSize: size.sm,
+      lineHeight: 0,
     },
   };
 }
@@ -179,4 +243,11 @@ function itemArrow(theme, ownerState) {
   };
 }
 
-export { item, itemContent, itemArrow };
+export {
+  item,
+  itemIconBox,
+  itemIcon,
+  itemContent,
+  itemText,
+  itemArrow
+};

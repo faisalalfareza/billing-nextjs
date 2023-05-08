@@ -40,9 +40,12 @@ export default function MasterPeriod(props) {
     } else {
       setSite(currentSite);
     }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => {
     if (site != undefined) fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [site]);
 
   //dari sini

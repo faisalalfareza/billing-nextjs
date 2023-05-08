@@ -34,23 +34,25 @@ export default function SiteDropdown(props) {
   return (
     <Autocomplete
       options={dataSite}
-      key="site-dropdown"
+      id="site-dropdown"
       value={props.site}
-      getOptionLabel={(option) => option.siteName ? option.siteId + " - " + option.siteName : ""}
+      getOptionLabel={(option) =>
+        option.siteName ? option.siteId + " - " + option.siteName : ""
+      }
       onChange={(e, value) => handleSiteChange(value)}
       isOptionEqualToValue={(option, value) => option.siteId === value.siteId}
       noOptionsText="No results"
-      setCustomKey={(option) => option.siteId}
+      key={(option) => option.siteId}
       renderInput={(params) => (
         <TextField
           {...params}
           label="Site Name"
           variant="standard"
           sx={{
-            label: { color: '#FFFFFF' },
-            input: { color: '#FFFFFF' },
-            div: { borderBottom: '1px solid #FFFFFF' },
-            button: { color: '#FFFFFF' },
+            label: { color: "#FFFFFF" },
+            input: { color: "#FFFFFF" },
+            div: { borderBottom: "1px solid #FFFFFF" },
+            button: { color: "#FFFFFF" },
           }}
         />
       )}

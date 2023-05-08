@@ -162,7 +162,8 @@ function UploadBulkPayment() {
         const wsname = wb.SheetNames[0];
         const ws = wb.Sheets[wsname];
         const data = XLSX.utils.sheet_to_json(ws, { header: 2 });
-
+        console.log("data----", data);
+        console.log("data----", typeof data[0]["Transaction Date"]);
         let data_formated = [];
         for (const e of data) {
           const valueOfKeys = [
@@ -181,19 +182,12 @@ function UploadBulkPayment() {
 
             break;
           } else {
-            const date_splitted = valueOfKeys[4]?.split("/");
-            const date_formatted = new Date();
-            date_formatted.setUTCDate(date_splitted[0]);
-            date_formatted.setUTCMonth(parseInt(date_splitted[1]) - 1);
-            date_formatted.setUTCFullYear(date_splitted[2]);
-            date_formatted.setUTCHours(0, 0, 0, 0);
-
             data_formated.push({
               idClient: valueOfKeys[0],
               unitCode: valueOfKeys[1],
               unitNo: valueOfKeys[2],
               invoiceNumber: valueOfKeys[3],
-              transactionDate: date_formatted.toISOString(),
+              transactionDate: parseTanggal(valueOfKeys[4]),
               amount: valueOfKeys[5],
             });
           }
@@ -210,6 +204,47 @@ function UploadBulkPayment() {
     else reader.readAsArrayBuffer(file);
   };
 
+  const parseTanggal = (date) => {
+    if (typeof date == "number") {
+      return excelDateToJSDate(date);
+    } else {
+      const date_splitted = date?.split("/");
+      const date_formatted = new Date();
+      date_formatted.setUTCDate(date_splitted[0]);
+      date_formatted.setUTCMonth(parseInt(date_splitted[1]) - 1);
+      date_formatted.setUTCFullYear(date_splitted[2]);
+      date_formatted.setUTCHours(0, 0, 0, 0);
+
+      return date_formatted.toISOString();
+    }
+  };
+
+  const excelDateToJSDate = (serial) => {
+    console.log("serial---", serial);
+    var utc_days = Math.floor(serial - 25569);
+    var utc_value = utc_days * 86400;
+    var date_info = new Date(utc_value * 1000);
+
+    var fractional_day = serial - Math.floor(serial) + 0.0000001;
+
+    var total_seconds = Math.floor(86400 * fractional_day);
+
+    var seconds = total_seconds % 60;
+
+    total_seconds -= seconds;
+
+    var hours = Math.floor(total_seconds / (60 * 60));
+    var minutes = Math.floor(total_seconds / 60) % 60;
+
+    return new Date(
+      date_info.getFullYear(),
+      date_info.getMonth(),
+      date_info.getDate() + 1,
+      hours,
+      minutes,
+      seconds
+    ).toISOString();
+  };
   const checkingSuccessInput = (isRequired, value, error) => {
     return (
       (!isRequired && true) ||
@@ -238,9 +273,12 @@ function UploadBulkPayment() {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error)
-      alertService.error({ title: "Error", text: response.error.message });
-    else {
+    if (response.error) {
+      alertService.error({
+        title: "Error",
+        text: response.error.error.message,
+      });
+    } else {
       if (response.success) {
         const isFailed = response.result.totalGagal > 0;
 
@@ -304,8 +342,16 @@ function UploadBulkPayment() {
               <MDBox p={3} lineHeight={1}>
                 <Grid container alignItems="center" spacing={2}>
                   <Grid item xs={12} md={8} mb={2}>
-                    <MDBox><MDTypography variant="h5">Upload Bulk Payment</MDTypography></MDBox>
-                    <MDBox><MDTypography variant="button" color="text">To Upload Bulk Payments</MDTypography></MDBox>
+                    <MDBox>
+                      <MDTypography variant="h5">
+                        Upload Bulk Payment
+                      </MDTypography>
+                    </MDBox>
+                    <MDBox>
+                      <MDTypography variant="button" color="text">
+                        To Upload Bulk Payments
+                      </MDTypography>
+                    </MDBox>
                   </Grid>
                   <Grid item xs={12} md={4} sx={{ textAlign: "right" }}>
                     <MDButton
@@ -350,6 +396,9 @@ function UploadBulkPayment() {
                                     // value={values.paymentMethod}
                                     getOptionLabel={(option) =>
                                       option.paymentName
+                                    }
+                                    isOptionEqualToValue={(option, value) =>
+                                      option.paymentType === value.paymentType
                                     }
                                     onChange={(e, value) => {
                                       setFieldValue(paymentMethod.name, value);
