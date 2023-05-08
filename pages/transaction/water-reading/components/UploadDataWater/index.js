@@ -273,7 +273,6 @@ function UploadDataWater(props) {
         } else {
           actions.resetForm();
           setTimeout(() => {
-            document.getElementsByName(paymentMethod.name)[0].value = null;
             document.getElementsByName(fileUpload.name)[0].value = null;
           }, 0);
         }
