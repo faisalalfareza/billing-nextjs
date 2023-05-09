@@ -165,7 +165,7 @@ function OracleToJournal({ params }) {
     }, [site]);
 
     const getDropdownPaymentMethod = async () => { 
-        let response = await fetch("/api/cashier/bulk-payment/listPaymentMethod", {
+        let response = await fetch("/api/master/payment_type/getdropdownpaymenttype", {
           method: "POST",
           body: JSON.stringify({
             accessToken: accessToken
@@ -197,7 +197,7 @@ function OracleToJournal({ params }) {
         const body = {
             siteId: site?.siteId,
             period: formValues.periodMethod?.periodId,
-            paymentType: formValues.paymentMethod?.paymentType,
+            paymentType: formValues.paymentMethod?.paymentTypeId,
             accountingDate: addDate(formValues.accountingDate),
             bankPayment: bnkPayment,
             paymentStartDate: addDate(formValues.paymentStartDate),
@@ -384,7 +384,7 @@ function OracleToJournal({ params }) {
                                                                     options={paymentMethodList}
                                                                     key={paymentMethod.name}
                                                                     // value={values.paymentMethod}
-                                                                    getOptionLabel={(option) => option.paymentName}
+                                                                    getOptionLabel={(option) => option.paymentTypeName}
                                                                     onChange={(e, value) => {
                                                                     setFieldValue(paymentMethod.name, value);
                                                                     }}
