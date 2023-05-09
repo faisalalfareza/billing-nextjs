@@ -158,7 +158,7 @@ function OracleToJournal({ params }) {
     
         if (response.error) alertService.error({ title: "Error", text: response.error.message });
         else setPeriodMethodList(response.result);
-        console.log(periodMethodList);
+        console.log(response);
     };
 
     useEffect(() => {
@@ -381,16 +381,18 @@ function OracleToJournal({ params }) {
                                                         </Grid>
                                                         <Grid container spacing={3}>
                                                             <Grid item xs={6} sm={6}>
-                                                                <Autocomplete 
+                                                            <Autocomplete 
                                                                     style={{ paddingBottom: 20 }}
                                                                     options={paymentMethodList}
                                                                     key={paymentMethod.name}
-                                                                    // value={values.paymentMethod}
+                                                                    value={values.paymentMethod}
                                                                     getOptionLabel={(option) => option.paymentTypeName}
                                                                     onChange={(e, value) => {
-                                                                    setFieldValue(paymentMethod.name, value !== null 
-                                                                        ? value 
-                                                                        : initialValues[periodMethod.name]);
+                                                                        setFieldValue(paymentMethod.name, 
+                                                                            value !== null 
+                                                                            ? value 
+                                                                            : initialValues[paymentMethod.name]
+                                                                        );
                                                                     }}
                                                                     noOptionsText="No results"
                                                                     renderInput={(params) => (
@@ -405,7 +407,10 @@ function OracleToJournal({ params }) {
                                                                         placeholder={paymentMethod.placeholder}
                                                                         InputLabelProps={{ shrink: true }}
                                                                         error={errors.paymentMethod && touched.paymentMethod}
-                                                                        success={paymentMethod.isRequired && checkingSuccessInput(paymentMethod.isRequired, values.paymentMethod, errors.paymentMethod)}
+                                                                        success={
+                                                                            paymentMethod.isRequired && 
+                                                                            checkingSuccessInput(paymentMethod.isRequired, values.paymentMethod, errors.paymentMethod)
+                                                                        }
                                                                     /> 
                                                                     )}
                                                                 />
