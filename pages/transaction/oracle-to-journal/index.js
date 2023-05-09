@@ -176,7 +176,7 @@ function OracleToJournal({ params }) {
         response = typeNormalization(await response.json());
     
         if (response.error) alertService.error({ title: "Error", text: response.error.message });
-        else setPaymentMethodList(response);
+        else setPaymentMethodList(response.result);
         console.log(response);
       };
       useEffect(() => {
