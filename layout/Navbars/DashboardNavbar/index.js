@@ -194,13 +194,13 @@ function DashboardNavbar({ absolute, light, isMini }) {
           </IconButton>
         </MDBox>
         
-        {/* {isMini ? null : (
+        {isMini ? null : (
           <MDBox sx={(theme) => navbarRow(theme, { isMini })}>
-            <MDBox pr={1}>
+            {/* <MDBox pr={1}>
               <MDInput label="Search here" />
-            </MDBox>
+            </MDBox> */}
             <MDBox color={light ? "white" : "inherit"}>
-              <Link href="/authentication/sign-in/basic" passHref>
+              {/* <Link href="/authentication/sign-in/basic" passHref>
                 <IconButton sx={navbarIconButton} size="small" disableRipple>
                   <Icon sx={iconsStyle}>account_circle</Icon>
                 </IconButton>
@@ -224,7 +224,7 @@ function DashboardNavbar({ absolute, light, isMini }) {
                 onClick={handleConfiguratorOpen}
               >
                 <Icon sx={iconsStyle}>settings</Icon>
-              </IconButton>
+              </IconButton> */}
               <IconButton
                 size="small"
                 disableRipple
@@ -242,7 +242,7 @@ function DashboardNavbar({ absolute, light, isMini }) {
               {renderMenu()}
             </MDBox>
           </MDBox>
-        )} */}
+        )}
       </Toolbar>
     </AppBar>
   );

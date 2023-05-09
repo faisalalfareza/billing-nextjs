@@ -238,7 +238,6 @@ export default function ReportDaily(props) {
     localStorage.setItem("site", JSON.stringify(siteVal));
   };
 
-
   return (
     <DashboardLayout>
       <DashboardNavbar />
@@ -267,8 +266,14 @@ export default function ReportDaily(props) {
               <MDBox p={3} lineHeight={1}>
                 <Grid container alignItems="center" spacing={2}>
                   <Grid item xs={12} mb={2}>
-                    <MDBox><MDTypography variant="h5">Daily Report</MDTypography></MDBox>
-                    <MDBox><MDTypography variant="button" color="text">Generate Daily Reports</MDTypography></MDBox>
+                    <MDBox>
+                      <MDTypography variant="h5">Daily Report</MDTypography>
+                    </MDBox>
+                    <MDBox>
+                      <MDTypography variant="button" color="text">
+                        Generate Daily Reports
+                      </MDTypography>
+                    </MDBox>
                     {/* <MDBox mb={4}>
                       <MDTypography variant="body2" color="text">Generate Daily Reports</MDTypography>
                     </MDBox> */}
@@ -291,10 +296,17 @@ export default function ReportDaily(props) {
                         setformValues(values);
                         const isValifForm = () =>
                           checkingSuccessInput(values.period, errors.period) &&
-                          checkingSuccessInput(values.project, errors.project) &&
+                          checkingSuccessInput(
+                            values.project,
+                            errors.project
+                          ) &&
                           checkingSuccessInput(values.cluster, errors.cluster);
                         return (
-                          <Form id="payment-detail" autoComplete="off" fullWidth>
+                          <Form
+                            id="payment-detail"
+                            autoComplete="off"
+                            fullWidth
+                          >
                             <MDBox>
                               <Grid container spacing={3}>
                                 <Grid item xs={6} sm={6}>
@@ -326,7 +338,9 @@ export default function ReportDaily(props) {
                                         name="project"
                                         placeholder="Choose Project"
                                         InputLabelProps={{ shrink: true }}
-                                        error={errors.project && touched.project}
+                                        error={
+                                          errors.project && touched.project
+                                        }
                                         success={checkingSuccessInput(
                                           formValues.project,
                                           errors.project
@@ -364,12 +378,13 @@ export default function ReportDaily(props) {
                                       <FormField
                                         {...params}
                                         type="text"
-                                        required
-                                        label="Cluster"
+                                        label="Cluster *"
                                         name="cluster"
                                         placeholder="Choose Cluster"
                                         InputLabelProps={{ shrink: true }}
-                                        error={errors.cluster && touched.cluster}
+                                        error={
+                                          errors.cluster && touched.cluster
+                                        }
                                         success={checkingSuccessInput(
                                           formValues.cluster,
                                           errors.cluster
@@ -385,7 +400,9 @@ export default function ReportDaily(props) {
                                     name="period"
                                     value={formValues.period}
                                     component={Autocomplete}
-                                    getOptionLabel={(option) => option.periodName}
+                                    getOptionLabel={(option) =>
+                                      option.periodName
+                                    }
                                     isOptionEqualToValue={(option, value) =>
                                       option.periodId === value.periodId
                                     }
@@ -442,7 +459,9 @@ export default function ReportDaily(props) {
                                         label="Transaction End Date"
                                         name="endDate"
                                         placeholder="Type Transaction End Date"
-                                        error={errors.endDate && touched.endDate}
+                                        error={
+                                          errors.endDate && touched.endDate
+                                        }
                                         success={checkingSuccessInput(
                                           formValues.endDate,
                                           errors.endDate
@@ -539,16 +558,13 @@ export default function ReportDaily(props) {
                                       variant="gradient"
                                       color="primary"
                                       sx={{ height: "100%" }}
-                                      disabled={
-                                        isLoading ||
-                                        !isValifForm()
-                                      }
+                                      disabled={isLoading || !isValifForm()}
                                     >
-                                      <BorderAllIcon />&nbsp;{" "}
+                                      <BorderAllIcon />
+                                      &nbsp;{" "}
                                       {isLoading
                                         ? "Exporting to Excel.."
-                                        : "Export to Excel"
-                                      }
+                                        : "Export to Excel"}
                                     </MDButton>
                                   </MDBox>
                                 </Grid>

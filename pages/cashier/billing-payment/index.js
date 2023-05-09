@@ -198,7 +198,7 @@ export default function BillingPayment(props) {
       unitCode: detail.unitCode,
       unitNo: detail.unitNo,
       psCode: detail.psCode,
-      bankId: fields.bank.bankID,
+      bankId: fields.bank?.bankID,
       remarks: fields.remarks,
       listInvoicePayment: listInvoice,
     };
