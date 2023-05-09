@@ -24,6 +24,7 @@ import { useCookies } from "react-cookie";
 import { typeNormalization } from "/helpers/utils";
 import SiteDropdown from "../../../pagesComponents/dropdown/Site";
 import { alertService } from "/helpers";
+import { Block } from "notiflix/build/notiflix-block-aio";
 
 export default function MasterPeriod(props) {
   const [listSite, setListSite] = useState([]);
@@ -108,7 +109,10 @@ export default function MasterPeriod(props) {
   };
   const handleClose = () => setOpenModal(false);
 
+  const periodBlockLoadingName = "block-period";
   const fetchData = async (data) => {
+    Block.standard(`.${periodBlockLoadingName}`);
+
     let response = await fetch("/api/master/period/getlistmasterperiod", {
       method: "POST",
       body: JSON.stringify({
@@ -153,6 +157,8 @@ export default function MasterPeriod(props) {
       });
       setListSite(list);
     }
+
+    Block.remove(`.${periodBlockLoadingName}`);
   };
 
   const handleSite = (siteVal) => {
@@ -197,7 +203,7 @@ export default function MasterPeriod(props) {
             </MDBox>
           </MDBox>
         </MDBox>
-        <Card>
+        <Card className={periodBlockLoadingName}>
           <MDBox>
             <Grid container alignItems="center">
               <Grid item xs={12}>

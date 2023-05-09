@@ -22,6 +22,7 @@ import Icon from "@mui/material/Icon";
 import MDBadgeDot from "/components/MDBadgeDot";
 import { useCookies } from "react-cookie";
 import { typeNormalization } from "/helpers/utils";
+import { Block } from "notiflix/build/notiflix-block-aio";
 
 export default function MasterSite(props) {
   const { dataProject, dataSite } = props;
@@ -137,7 +138,10 @@ export default function MasterSite(props) {
   };
   const handleClose = () => setOpenModal(false);
 
+  const siteBlockLoadingName = "block-site";
   const fetchData = async (data) => {
+    Block.standard(`.${siteBlockLoadingName}`);
+
     let response = await fetch("/api/master/site/getlistmastersite", {
       method: "POST",
       body: JSON.stringify({
@@ -174,6 +178,7 @@ export default function MasterSite(props) {
       setListSite(list);
     }
 
+    Block.remove(`.${siteBlockLoadingName}`);
     // const url = `${publicRuntimeConfig.apiUrl}/api/services/app/MasterBilling/GetListMasterSite`;
     // axios
     //   .get(url, {
@@ -233,7 +238,7 @@ export default function MasterSite(props) {
             </MDBox>
           </MDBox>
         </MDBox>
-        <Card>
+        <Card className={siteBlockLoadingName}>
           <MDBox>
             <Grid container alignItems="center">
               <Grid item xs={12}>
