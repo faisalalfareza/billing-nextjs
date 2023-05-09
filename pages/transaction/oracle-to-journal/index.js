@@ -158,6 +158,7 @@ function OracleToJournal({ params }) {
     
         if (response.error) alertService.error({ title: "Error", text: response.error.message });
         else setPeriodMethodList(response.result);
+        console.log(periodMethodList);
     };
 
     useEffect(() => {
@@ -176,6 +177,7 @@ function OracleToJournal({ params }) {
     
         if (response.error) alertService.error({ title: "Error", text: response.error.message });
         else setPaymentMethodList(response);
+        console.log(response);
       };
       useEffect(() => {
         getDropdownPaymentMethod();
@@ -386,7 +388,9 @@ function OracleToJournal({ params }) {
                                                                     // value={values.paymentMethod}
                                                                     getOptionLabel={(option) => option.paymentTypeName}
                                                                     onChange={(e, value) => {
-                                                                    setFieldValue(paymentMethod.name, value);
+                                                                    setFieldValue(paymentMethod.name, value !== null 
+                                                                        ? value 
+                                                                        : initialValues[periodMethod.name]);
                                                                     }}
                                                                     noOptionsText="No results"
                                                                     renderInput={(params) => (
