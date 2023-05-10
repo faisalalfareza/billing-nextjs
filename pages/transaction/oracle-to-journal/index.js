@@ -24,6 +24,9 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import MDButton from "/components/MDButton";
 import { async, values } from "regenerator-runtime";
 import dayjs from "dayjs";
+import { resolve } from "path";
+
+import { downloadTempFile } from "/helpers/utils";
 
 
 function OracleToJournal({ params }) {
@@ -252,6 +255,28 @@ function OracleToJournal({ params }) {
     const [period, setPeriod] = useState([]);
 
     const handlePeriod = (event, value) => setPeriod(value);
+
+    const handleExportToExcel = async () => {
+        let response = await fetch(
+            "/api/transaction/oracletojournal/ExportToExcelJournalToOracle",
+            {
+                method: "POST",
+                body: JSON.stringify({
+                    accessToken: accessToken,
+                    params: body,
+                })
+            },
+        );
+
+        if(!response.ok) throw new Error(`Error: ${response.status}`);
+        response = typeNormalization(await response.json());
+
+        if(response.error)
+            alertService.error({ text: response.error.message, title: "Error"});
+        else {
+            downloadTempFile(response.result.uri);
+        }
+    }
 
     return (
         <DashboardLayout>
@@ -509,7 +534,8 @@ function OracleToJournal({ params }) {
                                                             <MDButton 
                                                                 style={{ marginRight : 20}}
                                                                 variant="outlined" 
-                                                                color="dark">
+                                                                color="dark"
+                                                                onClick = {handleExportToExcel}>
                                                                 <Icon>article_outlined</Icon>&nbsp; EXPORT TO EXCEL
                                                             </MDButton>
                                                             <MDButton
