@@ -33,28 +33,7 @@ function UploadDataWater(props) {
   const [dataWater, setDataWater] = useState([]);
   const [cols, setCols] = useState([]);
   const [period, setPeriod] = useState(null);
-  const SheetJSFT = [
-    "xlsx",
-    "xlsb",
-    "xlsm",
-    "xls",
-    "xml",
-    "csv",
-    "txt",
-    "ods",
-    "fods",
-    "uos",
-    "sylk",
-    "dif",
-    "dbf",
-    "prn",
-    "qpw",
-    "123",
-    "wb*",
-    "wq*",
-    "html",
-    "htm",
-  ]
+  const SheetJSFT = ["xlsx", "xlsb", "xlsm", "xls", "xml", "csv"]
     .map(function (x) {
       return "." + x;
     })

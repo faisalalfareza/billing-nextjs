@@ -94,7 +94,7 @@ export default function MasterSite(props) {
           Cell: ({ value }) => {
             return (
               <MDBadgeDot
-                color={value ? "success" : "danger"}
+                color={value ? "success" : "error"}
                 size="sm"
                 badgeContent={value ? "Active" : "Inactive"}
               />
@@ -219,7 +219,7 @@ export default function MasterSite(props) {
       <DashboardNavbar />
 
       <MDBox mt={3}>
-      <MDBox
+        <MDBox
           display="flex"
           justifyContent="flex-end"
           alignItems="flex-start"
@@ -227,7 +227,11 @@ export default function MasterSite(props) {
         >
           <MDBox display="flex">
             <MDBox>
-              <MDButton variant="gradient" color="primary" onClick={openModalAddOrEditOnAdd}>
+              <MDButton
+                variant="gradient"
+                color="primary"
+                onClick={openModalAddOrEditOnAdd}
+              >
                 <Icon>add</Icon>&nbsp; Add New Site
               </MDButton>
             </MDBox>
@@ -238,13 +242,14 @@ export default function MasterSite(props) {
             <Grid container alignItems="center">
               <Grid item xs={12}>
                 <DataTable
-                  title="Master Site List" description="For Site Data Maintenance"
+                  title="Master Site List"
+                  description="For Site Data Maintenance"
                   table={setSiteList()}
                   canSearch
                 />
               </Grid>
             </Grid>
-          </MDBox> 
+          </MDBox>
         </Card>
       </MDBox>
 
@@ -253,7 +258,6 @@ export default function MasterSite(props) {
         params={modalParams}
         onModalChanged={changeModalAddOrEdit}
       />
-
     </DashboardLayout>
   );
 }
