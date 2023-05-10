@@ -256,7 +256,17 @@ function OracleToJournal({ params }) {
 
     const handlePeriod = (event, value) => setPeriod(value);
 
-    const handleExportToExcel = async () => {
+    const handleExportToExcel = async (values, actions) => {
+        const body = {
+            siteId: site?.siteId,
+            period: formValues.periodMethod?.periodId,
+            paymentType: formValues.paymentMethod?.paymentTypeId,
+            accountingDate: addDate(formValues.accountingDate),
+            bankPayment: bnkPayment,
+            paymentStartDate: addDate(formValues.paymentStartDate),
+            paymentEndDate: addDate(formValues.paymentEndDate),
+        };
+
         let response = await fetch(
             "/api/transaction/oracletojournal/ExportToExcelJournalToOracle",
             {
@@ -270,12 +280,19 @@ function OracleToJournal({ params }) {
 
         if(!response.ok) throw new Error(`Error: ${response.status}`);
         response = typeNormalization(await response.json());
-
-        if(response.error)
-            alertService.error({ text: response.error.message, title: "Error"});
-        else {
-            downloadTempFile(response.result.uri);
+        if(response.error)  {
+            let err = response.error;
+            alertService.error({
+                title: "Error",
+                text: err.error.message,
+            });
+        } else {
+            let data = response.result.uri;
+            if(data != null) window.open(data, "_blank");
+            else
+                alertService.info({title: "No Data", text: "No data in this filter" });
         }
+        
     }
 
     return (
