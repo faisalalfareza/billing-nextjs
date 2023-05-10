@@ -4,6 +4,7 @@ import { Formik } from "formik";
 import * as Yup from "yup";
 
 import { Card, Grid, Icon, Radio } from "@mui/material";
+import { Block } from "notiflix/build/notiflix-block-aio";
 
 import MDBox from "/components/MDBox";
 import MDTypography from "/components/MDTypography";
@@ -64,6 +65,7 @@ function RePrintOR() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const customerBlockLoadingName = "block-customer";
   const [isLoadingCustomer, setLoadingCustomer] = useState(false);
   const [customerRequest, setCustomerRequest] = useState({
     scheme: site?.siteId,
@@ -101,7 +103,8 @@ function RePrintOR() {
   };
 
   const getCustomerList = async () => {
-    setLoadingCustomer(true);
+    Block.standard(`.${customerBlockLoadingName}`),
+      setLoadingCustomer(true);
 
     const { scheme, keywords, recordsPerPage, skipCount } = customerRequest;
     let response = await fetch("/api/cashier/reprintor/getcustomerlist", {
@@ -130,8 +133,8 @@ function RePrintOR() {
           response.totalCount / customerRequest.recordsPerPage
         ),
       }));
-    }
-    setLoadingCustomer(false);
+    } Block.remove(`.${customerBlockLoadingName}`),
+      setLoadingCustomer(false);
   };
 
   const setCustomerTaskList = (rows) => {
@@ -145,7 +148,15 @@ function RePrintOR() {
                 checked={row.original == selectedUnit}
                 name="radio-buttons"
                 value={row.original}
-                onChange={(changed) => setSelectedUnit(row.original)}
+                onChange={(changed) => {
+                  if (row.original != selectedUnit) {
+                    setOfficialReceiptData({
+                      rowData: [],
+                      totalRows: undefined,
+                      totalPages: undefined
+                    });
+                  } setSelectedUnit(row.original);
+                }}
               />
             );
           },
@@ -182,6 +193,7 @@ function RePrintOR() {
     getCustomerList();
   };
 
+  const orBlockLoadingName = "block-official-receipt";
   const [isLoadingOfficialReceipt, setLoadingOfficialReceipt] = useState(false);
   const [officialReceiptData, setOfficialReceiptData] = useState({
     rowData: [],
@@ -190,7 +202,8 @@ function RePrintOR() {
   });
 
   const getOfficialReceiptList = async (unitDataID) => {
-    setLoadingOfficialReceipt(true);
+    Block.standard(`.${orBlockLoadingName}`),
+      setLoadingOfficialReceipt(true);
 
     let response = await fetch(
       "/api/cashier/reprintor/getlistofficialreceipt",
@@ -220,8 +233,8 @@ function RePrintOR() {
           response.totalCount / customerRequest.recordsPerPage
         ),
       }));
-    }
-    setLoadingOfficialReceipt(false);
+    } Block.remove(`.${orBlockLoadingName}`),
+      setLoadingOfficialReceipt(false);
   };
   const setOfficialReceiptTaskList = (rows) => {
     return {
@@ -315,7 +328,7 @@ function RePrintOR() {
       <MDBox mt={2}>
         <Grid container spacing={2}>
           <Grid item xs={12}>
-            <Card>
+            <Card className={customerBlockLoadingName}>
               <MDBox px={3} pt={3} pb={2} lineHeight={1}>
                 <Grid container alignItems="center" spacing={2}>
                   <Grid item xs={12}>
@@ -460,7 +473,7 @@ function RePrintOR() {
 
           {officialReceiptData.rowData.length > 0 && (
             <Grid item xs={12}>
-              <Card>
+              <Card className={orBlockLoadingName}>
                 <MDBox>
                   <Grid container alignItems="center">
                     <Grid item xs={12}>

@@ -34,6 +34,7 @@ import FindName from "./components/FindName";
 import Swal from "sweetalert2";
 import Adjustment from "./components/Adjustment";
 import PuffLoader from "react-spinners/PuffLoader";
+import { Block } from "notiflix/build/notiflix-block-aio";
 
 export default function Invoice(props) {
   const [controller] = useMaterialUIController();
@@ -106,7 +107,10 @@ export default function Invoice(props) {
     }));
   };
 
+  const projectBlockLoadingName = "block-project";
   const getProject = async (val) => {
+    Block.dots(`.${projectBlockLoadingName}`);
+
     let response = await fetch(
       "/api/transaction/invoice/getdropdownprojectinvoice",
       {
@@ -122,14 +126,17 @@ export default function Invoice(props) {
     );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    if (response.error) {
-      alertService.error({ title: "Error", text: response.error.message });
-    } else {
-      setDataProject(response.result);
-    }
+    
+    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+    else setDataProject(response.result);
+
+    Block.remove(`.${projectBlockLoadingName}`);
   };
 
+  const periodBlockLoadingName = "block-period";
   const getPeriod = async (val) => {
+    Block.dots(`.${periodBlockLoadingName}`);
+
     let response = await fetch(
       "/api/transaction/invoice/getdropdownperiodbysiteid",
       {
@@ -144,11 +151,11 @@ export default function Invoice(props) {
     );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    if (response.error) {
-      alertService.error({ title: "Error", text: response.error.message });
-    } else {
-      setDataPeriod(response.result);
-    }
+    
+    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+    else setDataPeriod(response.result);
+
+    Block.remove(`.${periodBlockLoadingName}`);
   };
 
   useEffect(() => {
@@ -347,10 +354,13 @@ export default function Invoice(props) {
   ];
   const [tasklist, setTasklist] = useState({ columns: columns, rows: [] });
 
+  const invoiceBlockLoadingName = "block-inoice";
   const fetchData = async (values, actions) => {
     let field = values ? values : formValues;
     if (field?.period) {
-      setLoading(true);
+      Block.standard(`.${invoiceBlockLoadingName}`), 
+        setLoading(true);
+
       const { scheme, keywords, recordsPerPage, skipCount } = customerRequest;
       let response = await fetch("/api/transaction/invoice/getinvoicelist", {
         method: "POST",
@@ -372,8 +382,7 @@ export default function Invoice(props) {
       if (!response.ok) throw new Error(`Error: ${response.status}`);
       response = typeNormalization(await response.json());
 
-      if (response.error)
-        alertService.error({ title: "Error", text: response.error.message });
+      if (response.error) alertService.error({ title: "Error", text: response.error.message });
       else {
         let data = response.result;
         const list = [];
@@ -404,8 +413,8 @@ export default function Invoice(props) {
             data.totalCount / customerRequest.recordsPerPage
           ),
         }));
-      }
-      setLoading(false);
+      } Block.remove(`.${invoiceBlockLoadingName}`), 
+        setLoading(false);
     }
   };
 
@@ -439,7 +448,10 @@ export default function Invoice(props) {
     }
   };
 
+  const clusterBlockLoadingName = "block-cluster";
   const getCluster = async (val) => {
+    Block.dots(`.${clusterBlockLoadingName}`);
+
     let response = await fetch(
       "/api/transaction/invoice/getdropdownclusterinvoice",
       {
@@ -455,14 +467,17 @@ export default function Invoice(props) {
     );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    if (response.error) {
-      alertService.error({ title: "Error", text: response.error.message });
-    } else {
-      setDataCluster(response.result);
-    }
+
+    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+    else setDataCluster(response.result);
+
+    Block.remove(`.${clusterBlockLoadingName}`);
   };
 
+  const unitCodeBlockLoadingName = "block-unitCode";
   const getUnitCode = async (val) => {
+    Block.dots(`.${unitCodeBlockLoadingName}`);
+
     let response = await fetch(
       "/api/transaction/invoice/getdropdownunitcodebycluster",
       {
@@ -478,14 +493,17 @@ export default function Invoice(props) {
     );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    if (response.error) {
-      alertService.error({ title: "Error", text: response.error.message });
-    } else {
-      setDataUnitCode(response.result);
-    }
+    
+    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+    else setDataUnitCode(response.result);
+
+    Block.remove(`.${unitCodeBlockLoadingName}`);
   };
 
+  const unitNoBlockLoadingName = "block-unitNo";
   const getUnitNo = async (val) => {
+    Block.dots(`.${unitNoBlockLoadingName}`);
+
     let response = await fetch(
       "/api/transaction/invoice/getdropdownunitinvoice",
       {
@@ -501,11 +519,11 @@ export default function Invoice(props) {
     );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    if (response.error) {
-      alertService.error({ title: "Error", text: response.error.message });
-    } else {
-      setDataUnitNo(response.result);
-    }
+    
+    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+    else setDataUnitNo(response.result);
+    
+    Block.remove(`.${unitNoBlockLoadingName}`);
   };
 
   const handleSite = (siteVal) => {
@@ -731,6 +749,7 @@ export default function Invoice(props) {
                                           formValues.period,
                                           errors.period
                                         )}
+                                        className={periodBlockLoadingName}
                                       />
                                     )}
                                   />
@@ -817,6 +836,7 @@ export default function Invoice(props) {
                                           formValues.project,
                                           errors.project
                                         )}
+                                        className={projectBlockLoadingName}
                                       />
                                     )}
                                   />
@@ -859,6 +879,7 @@ export default function Invoice(props) {
                                           formValues.cluster,
                                           errors.cluster
                                         )}
+                                        className={clusterBlockLoadingName}
                                       />
                                     )}
                                   />
@@ -897,6 +918,7 @@ export default function Invoice(props) {
                                           formValues.unitCode,
                                           errors.unitCode
                                         )}
+                                        className={unitCodeBlockLoadingName}
                                       />
                                     )}
                                   />
@@ -933,6 +955,7 @@ export default function Invoice(props) {
                                           formValues.unitNo,
                                           errors.unitNo
                                         )}
+                                        className={unitNoBlockLoadingName}
                                       />
                                     )}
                                   />
@@ -1023,7 +1046,7 @@ export default function Invoice(props) {
             </MDBox>
           </MDBox>
         </MDBox>
-        <Card>
+        <Card className={invoiceBlockLoadingName}>
           <MDBox>
             <Grid container alignItems="center">
               <Grid item xs={12}>
