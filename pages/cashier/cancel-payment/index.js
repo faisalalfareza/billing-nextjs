@@ -492,7 +492,7 @@ function CancelPayment() {
                       ...prevState,
                       isOpen: !modalOpen.isOpen,
                     }));
-                    isChanged && getCancelPaymentList(selectedUnit.unitDataId);
+                    (isChanged === true) && getCancelPaymentList(selectedUnit.unitDataId);
                   }}
                 />
               )}
