@@ -103,7 +103,7 @@ function RePrintOR() {
   };
 
   const getCustomerList = async () => {
-    Block.standard(`.${customerBlockLoadingName}`),
+    Block.standard(`.${customerBlockLoadingName}`, `Searching for Customer`),
       setLoadingCustomer(true);
 
     const { scheme, keywords, recordsPerPage, skipCount } = customerRequest;
@@ -193,7 +193,8 @@ function RePrintOR() {
     getCustomerList();
   };
 
-  const orBlockLoadingName = "block-official-receipt";
+  const orBlockLoadingName = "block-official-receipt", 
+    reprintBlockLoadingName = "block-reprint-official-receipt";
   const [isLoadingOfficialReceipt, setLoadingOfficialReceipt] = useState(false);
   const [officialReceiptData, setOfficialReceiptData] = useState({
     rowData: [],
@@ -202,7 +203,7 @@ function RePrintOR() {
   });
 
   const getOfficialReceiptList = async (unitDataID) => {
-    Block.standard(`.${orBlockLoadingName}`),
+    Block.standard(`.${orBlockLoadingName}`, `Getting Official Receipt Data`),
       setLoadingOfficialReceipt(true);
 
     let response = await fetch(
@@ -261,9 +262,7 @@ function RePrintOR() {
                 variant="outlined"
                 color="info"
                 size="small"
-                onClick={(e) =>
-                  reprintOfficialReceipt(row.original.billingHeaderId)
-                }
+                onClick={(e) => reprintOfficialReceipt(row.original.billingHeaderId)}
                 disabled={isLoadingOfficialReceipt}
               >
                 <Icon>print</Icon>&nbsp; Re-Print
@@ -278,7 +277,8 @@ function RePrintOR() {
   };
 
   const reprintOfficialReceipt = async (billingHeaderId) => {
-    setLoadingOfficialReceipt(true);
+    Block.standard(`.${orBlockLoadingName}`, `Reprinting Official Receipt`),
+      setLoadingOfficialReceipt(true);
 
     const body = {
       SiteId: site?.siteId,
@@ -301,7 +301,8 @@ function RePrintOR() {
       alertService.error({ title: "Error", text: response.error.message });
     else window.open(response.result, "_blank");
 
-    setLoadingOfficialReceipt(false);
+    Block.remove(`.${orBlockLoadingName}`),
+      setLoadingOfficialReceipt(false);
   };
 
   return (

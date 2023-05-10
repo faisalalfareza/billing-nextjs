@@ -354,11 +354,11 @@ export default function Invoice(props) {
   ];
   const [tasklist, setTasklist] = useState({ columns: columns, rows: [] });
 
-  const invoiceBlockLoadingName = "block-inoice";
+  const invoiceBlockLoadingName = "block-invoice";
   const fetchData = async (values, actions) => {
     let field = values ? values : formValues;
     if (field?.period) {
-      Block.standard(`.${invoiceBlockLoadingName}`), 
+      Block.standard(`.${invoiceBlockLoadingName}`, `Getting Invoice Data`), 
         setLoading(true);
 
       const { scheme, keywords, recordsPerPage, skipCount } = customerRequest;

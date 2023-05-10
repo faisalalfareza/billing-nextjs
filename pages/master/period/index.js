@@ -111,7 +111,7 @@ export default function MasterPeriod(props) {
 
   const periodBlockLoadingName = "block-period";
   const fetchData = async (data) => {
-    Block.standard(`.${periodBlockLoadingName}`);
+    Block.standard(`.${periodBlockLoadingName}`, `Getting Period Data`);
 
     let response = await fetch("/api/master/period/getlistmasterperiod", {
       method: "POST",

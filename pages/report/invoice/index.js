@@ -119,7 +119,7 @@ export default function ReportInvoice(props) {
 
   const exportToExcelBlockLoadingName = "block-export-to-excel";
   const exportExcel = async (fields, actions) => {
-    Block.standard(`.${exportToExcelBlockLoadingName}`),
+    Block.standard(`.${exportToExcelBlockLoadingName}`, `Exporting Invoice Report to Excel`),
       setLoading(true);
 
     let listCluster = [];

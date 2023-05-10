@@ -16,6 +16,7 @@ import { useCookies } from "react-cookie";
 import { useEffect, useState, useRef } from "react";
 import { typeNormalization, downloadTempFile } from "/helpers/utils";
 import { alertService } from "/helpers";
+import { Block } from "notiflix/build/notiflix-block-aio";
 
 // Data
 import UploadDataUnitItem from "./components/UploadDataUnitItem";
@@ -131,8 +132,11 @@ export default function UnitItem(props) {
   ];
   const [tasklist, setTasklist] = useState({ columns: columns, rows: [] });
 
+  const unitItemBlockLoadingName = "block-unit-item";
   const fetchData = async (data) => {
-    setLoading(true);
+    Block.standard(`.${unitItemBlockLoadingName}`, `Getting Unit Item Data`), 
+      setLoading(true);
+
     const { scheme, keywords, recordsPerPage, skipCount } = customerRequest;
     let response = await fetch("/api/master/unititem/getlistmasterunititem", {
       method: "POST",
@@ -149,8 +153,7 @@ export default function UnitItem(props) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error)
-      alertService.error({ title: "Error", text: response.error.message });
+    if (response.error) alertService.error({ title: "Error", text: response.error.message });
     else {
       let data = response.result;
       const list = [];
@@ -172,9 +175,10 @@ export default function UnitItem(props) {
         totalRows: data.totalCount,
         totalPages: Math.ceil(data.totalCount / customerRequest.recordsPerPage),
       }));
-
-      setLoading(false);
     }
+
+    Block.remove(`.${unitItemBlockLoadingName}`),
+      setLoading(false);
   };
 
   const setCustomerTaskList = (list) => {
@@ -244,7 +248,7 @@ export default function UnitItem(props) {
             </MDBox>
           </MDBox>
         </MDBox>
-        <Card>
+        <Card className={unitItemBlockLoadingName}>
           <MDBox>
             <Grid container alignItems="center">
               <Grid item xs={12}>

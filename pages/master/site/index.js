@@ -140,7 +140,7 @@ export default function MasterSite(props) {
 
   const siteBlockLoadingName = "block-site";
   const fetchData = async (data) => {
-    Block.standard(`.${siteBlockLoadingName}`);
+    Block.standard(`.${siteBlockLoadingName}`, `Getting Site Data`);
 
     let response = await fetch("/api/master/site/getlistmastersite", {
       method: "POST",

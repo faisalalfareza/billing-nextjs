@@ -482,7 +482,7 @@ export default function WarningLetter(props) {
 
   const warningLetterBlockLoadingName = "block-warning-letter";
   const fetchData = async (data) => {
-    Block.standard(`.${warningLetterBlockLoadingName}`),
+    Block.standard(`.${warningLetterBlockLoadingName}`, `Getting Warning Letter Data`),
       setLoading(true);
 
     const { scheme, keywords, recordsPerPage, skipCount } = customerRequest;

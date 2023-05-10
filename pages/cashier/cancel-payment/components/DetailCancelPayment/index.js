@@ -57,7 +57,7 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
     useState(false);
   const [detailCancelPayment, setDetailCancelPayment] = useState();
   const getDetailCancelPayment = async () => {
-    Block.standard(`.${detailPaymentBlockLoadingName}`), 
+    Block.standard(`.${detailPaymentBlockLoadingName}`, `Getting ${isCanceled ? 'Canceled Payment' : 'Payment'} Detail`), 
       setLoadingDetailCancelPayment(true);
 
     const { billingHeaderId } = params;
@@ -123,7 +123,7 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
       focusConfirm: false,
     }).then(async (result) => {
       if (result.isConfirmed) {
-        Block.standard(`.${detailPaymentBlockLoadingName}`),
+        Block.standard(`.${detailPaymentBlockLoadingName}`, `Canceling Payment`),
           setLoadingCancelPayment(true);
 
         let response = await fetch(
@@ -170,7 +170,7 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
   const toggleModal = () => setModalOpen(true);
   const closeModal = (isChanged) => {
     setModalOpen(false);
-    setDetailCancelPayment({});
+    setTimeout(() => setDetailCancelPayment({}), 1500);
     setTimeout(() => onModalChanged(isChanged), 0);
   };
 

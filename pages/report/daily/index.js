@@ -159,7 +159,7 @@ export default function ReportDaily(props) {
 
   const exportToExcelBlockLoadingName = "block-export-to-excel";
   const exportExcel = async (fields, actions) => {
-    Block.standard(`.${exportToExcelBlockLoadingName}`),
+    Block.standard(`.${exportToExcelBlockLoadingName}`, `Exporting Daily Report to Excel`),
       setLoading(true);
 
     let listCluster = [];

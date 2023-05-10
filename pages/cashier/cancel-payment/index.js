@@ -105,7 +105,7 @@ function CancelPayment() {
   };
 
   const getCustomerList = async (data) => {
-    Block.standard(`.${customerBlockLoadingName}`),
+    Block.standard(`.${customerBlockLoadingName}`, `Searching for Customer`),
       setLoadingCustomer(true);
 
     const { scheme, keywords, recordsPerPage, skipCount } = customerRequest;
@@ -202,7 +202,7 @@ function CancelPayment() {
   });
 
   const getCancelPaymentList = async (unitDataID) => {
-    Block.standard(`.${cancelPaymentBlockLoadingName}`),
+    Block.standard(`.${cancelPaymentBlockLoadingName}`, `Getting Cancel Payment Data`),
       setLoadingCancelPayment(true);
 
     let response = await fetch(

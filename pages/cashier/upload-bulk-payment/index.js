@@ -265,7 +265,7 @@ function UploadBulkPayment() {
   const [isLoadingUploadBulkPayment, setLoadingUploadBulkPayment] =
     useState(false);
   const uploadBulkPayment = async (values, actions) => {
-    Block.standard(`.${uploadBulkPaymentBlockLoadingName}`),
+    Block.standard(`.${uploadBulkPaymentBlockLoadingName}`, `Uploading Bulk Payments`),
       setLoadingUploadBulkPayment(true);
 
     let response = await fetch("/api/cashier/bulk-payment/uploadBulkPayment", {

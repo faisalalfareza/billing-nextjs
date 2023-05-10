@@ -213,7 +213,7 @@ export default function WaterReading(props) {
 
   const waterReadingBlockLoadingName = "block-water-reading";
   const fetchData = async (data) => {
-    Block.standard(`.${waterReadingBlockLoadingName}`),
+    Block.standard(`.${waterReadingBlockLoadingName}`, `Getting Water Reading Data`),
       setLoading(true);
 
     const { scheme, keywords, recordsPerPage, skipCount } = customerRequest;
