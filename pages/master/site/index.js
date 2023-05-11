@@ -127,11 +127,6 @@ export default function MasterSite(props) {
     setOpenModal(!openModal);
   };
 
-  const changeModalAddOrEdit = () => {
-    setOpenModal(!openModal);
-    fetchData();
-  };
-
   const openModalAddOrEditOnAdd = () => {
     setModalParams(undefined);
     setOpenModal(!openModal);
@@ -258,11 +253,16 @@ export default function MasterSite(props) {
         </Card>
       </MDBox>
 
-      <AddOrEditSite
-        isOpen={openModal}
-        params={modalParams}
-        onModalChanged={changeModalAddOrEdit}
-      />
+      {openModal && (
+        <AddOrEditSite
+          isOpen={openModal}
+          params={modalParams}
+          onModalChanged={(isChanged) => {
+            setOpenModal(!openModal);
+            (isChanged === true) && fetchData();
+          }}
+        />
+      )}
     </DashboardLayout>
   );
 }

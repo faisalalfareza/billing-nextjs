@@ -98,11 +98,6 @@ export default function MasterPeriod(props) {
     setOpenModal(!openModal);
   };
 
-  const changeModalAddOrEdit = () => {
-    setOpenModal(!openModal);
-    fetchData();
-  };
-
   const openModalAddOrEditOnAdd = () => {
     setModalParams(undefined);
     setOpenModal(!openModal);
@@ -218,12 +213,17 @@ export default function MasterPeriod(props) {
         </Card>
       </MDBox>
 
-      <AddOrEditPeriod
-        site={site}
-        isOpen={openModal}
-        params={modalParams}
-        onModalChanged={changeModalAddOrEdit}
-      />
+      {openModal && (
+        <AddOrEditPeriod
+          site={site}
+          isOpen={openModal}
+          params={modalParams}
+          onModalChanged={(isChanged) => {
+            setOpenModal(!openModal);
+            (isChanged === true) && fetchData();
+          }}
+        />
+      )}
       
     </DashboardLayout>
   );
