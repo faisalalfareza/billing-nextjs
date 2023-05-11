@@ -316,7 +316,10 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
     };
 
     return (
-      <Modal isOpen={isOpen}>
+      <Modal 
+        isOpen={isOpen}
+        className={createPeriodBlockLoadingName}
+      >
         <Formik
           initialValues={initialValues}
           validationSchema={schemeValidations}
