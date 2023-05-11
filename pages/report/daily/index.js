@@ -69,7 +69,8 @@ export default function ReportDaily(props) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+    if (response.error)
+      alertService.error({ title: "Error", text: response.error.message });
     else setDataPaymentMethod(response.result);
 
     Block.remove(`.${paymentMethodBlockLoadingName}`);
@@ -94,7 +95,8 @@ export default function ReportDaily(props) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+    if (response.error)
+      alertService.error({ title: "Error", text: response.error.message });
     else setDataPeriod(response.result);
 
     Block.remove(`.${periodBlockLoadingName}`);
@@ -159,7 +161,10 @@ export default function ReportDaily(props) {
 
   const exportToExcelBlockLoadingName = "block-export-to-excel";
   const exportExcel = async (fields, actions) => {
-    Block.standard(`.${exportToExcelBlockLoadingName}`, `Exporting Daily Report to Excel`),
+    Block.standard(
+      `.${exportToExcelBlockLoadingName}`,
+      `Exporting Daily Report to Excel`
+    ),
       setLoading(true);
 
     let listCluster = [];
@@ -189,16 +194,17 @@ export default function ReportDaily(props) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+    if (response.error)
+      alertService.error({ title: "Error", text: response.error.message });
     else {
       let data = response.result.uri;
       if (data != null) window.open(data, "_blank");
-      else alertService.info({ title: "No Data", text: "No data in this filter" });
+      else
+        alertService.info({ title: "No Data", text: "No data in this filter" });
     }
 
     actions.setSubmitting(false);
-    Block.remove(`.${exportToExcelBlockLoadingName}`),
-      setLoading(false);
+    Block.remove(`.${exportToExcelBlockLoadingName}`), setLoading(false);
   };
 
   const clusterBlockLoadingName = "block-project";
@@ -217,8 +223,9 @@ export default function ReportDaily(props) {
     });
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    
-    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+
+    if (response.error)
+      alertService.error({ title: "Error", text: response.error.message });
     else setDataCluster(response.result);
 
     Block.remove(`.${clusterBlockLoadingName}`);
@@ -242,8 +249,9 @@ export default function ReportDaily(props) {
     );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    
-    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+
+    if (response.error)
+      alertService.error({ title: "Error", text: response.error.message });
     else setDataProject(response.result);
 
     Block.remove(`.${projectBlockLoadingName}`);
@@ -395,8 +403,7 @@ export default function ReportDaily(props) {
                                       <FormField
                                         {...params}
                                         type="text"
-                                        required
-                                        label="Cluster"
+                                        label="Cluster *"
                                         name="cluster"
                                         placeholder="Choose Cluster"
                                         InputLabelProps={{ shrink: true }}
@@ -525,7 +532,9 @@ export default function ReportDaily(props) {
                                           formValues.paymentMethod,
                                           errors.paymentMethod
                                         )}
-                                        className={paymentMethodBlockLoadingName}
+                                        className={
+                                          paymentMethodBlockLoadingName
+                                        }
                                       />
                                     )}
                                   />
