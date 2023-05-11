@@ -68,7 +68,7 @@ function UploadDataWater(props) {
       },
       cluster: {
         name: "cluster",
-        label: "Cluster",
+        label: "Cluster *",
         placeholder: "Choose Cluster",
         type: "text",
         isRequired: false,
@@ -257,8 +257,10 @@ function UploadDataWater(props) {
         }
         setDataWater([]);
         setLoading(false);
-        // actions.resetForm();
-        // closeModal();
+        if (!isFailed) {
+          actions.resetForm();
+          closeModal();
+        }
       });
     }
   };
@@ -276,9 +278,7 @@ function UploadDataWater(props) {
       [project.name]: project.isRequired
         ? Yup.object().required(project.errorMsg).typeError(project.errorMsg)
         : Yup.object().notRequired(),
-      [cluster.name]: cluster.isRequired
-        ? Yup.array().min(1).required(cluster.errorMsg)
-        : Yup.array().notRequired(),
+      [cluster.name]: Yup.array().min(1).required(cluster.errorMsg),
       [fileUpload.name]: fileUpload.isRequired
         ? Yup.mixed().required(fileUpload.errorMsg)
         : Yup.mixed().notRequired(),
