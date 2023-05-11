@@ -109,7 +109,7 @@ export default function UnitItem(props) {
           <MDBadgeDot
             color={value ? "success" : "error"}
             size="sm"
-            badgeContent={value ? "Active" : "Inactive"}
+            badgeContent={value ? "Yes" : "No"}
           />
         );
       },
@@ -134,7 +134,7 @@ export default function UnitItem(props) {
 
   const unitItemBlockLoadingName = "block-unit-item";
   const fetchData = async (data) => {
-    Block.standard(`.${unitItemBlockLoadingName}`, `Getting Unit Item Data`), 
+    Block.standard(`.${unitItemBlockLoadingName}`, `Getting Unit Item Data`),
       setLoading(true);
 
     const { scheme, keywords, recordsPerPage, skipCount } = customerRequest;
@@ -153,7 +153,8 @@ export default function UnitItem(props) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+    if (response.error)
+      alertService.error({ title: "Error", text: response.error.message });
     else {
       let data = response.result;
       const list = [];
@@ -177,8 +178,7 @@ export default function UnitItem(props) {
       }));
     }
 
-    Block.remove(`.${unitItemBlockLoadingName}`),
-      setLoading(false);
+    Block.remove(`.${unitItemBlockLoadingName}`), setLoading(false);
   };
 
   const setCustomerTaskList = (list) => {
