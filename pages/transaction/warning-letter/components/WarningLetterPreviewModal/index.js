@@ -22,7 +22,7 @@ function WarningLetterPreviewModal({ isOpen, params, onModalChanged }) {
 
   const openModal = () => setModalOpen(true);
   const toggleModal = () => setModalOpen(true);
-  const closeModal = (isChanged) => {
+  const closeModal = (isChanged = false) => {
     setModalOpen(false);
     setTimeout(() => onModalChanged(isChanged), 0);
   };
@@ -39,7 +39,6 @@ function WarningLetterPreviewModal({ isOpen, params, onModalChanged }) {
   );
 
 if(isOpen){
-console.log('---is open---', isOpen, ' datanya ->', params);
   const {location} = params
   const {spDate} = params
   const {refNo} = params

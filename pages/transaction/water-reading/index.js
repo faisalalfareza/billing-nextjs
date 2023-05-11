@@ -324,16 +324,6 @@ export default function WaterReading(props) {
     setOpenEdit(true);
   };
 
-  const changeModalUpload = () => {
-    setOpenUpload(!openUpload);
-    fetchData();
-  };
-
-  const changeModalEdit = () => {
-    setOpenEdit(false);
-    fetchData();
-  };
-
   const handleSite = (siteVal) => {
     setSite(siteVal);
     localStorage.setItem("site", JSON.stringify(siteVal));
@@ -587,17 +577,27 @@ export default function WaterReading(props) {
         </Card>
       </MDBox>
 
-      <UploadDataWater
-        site={site}
-        isOpen={openUpload}
-        onModalChanged={changeModalUpload}
-      />
-      <EditDataWater
-        site={site}
-        isOpen={openEdit}
-        params={modalParams}
-        onModalChanged={changeModalEdit}
-      />
+      {openUpload && (
+        <UploadDataWater
+          site={site}
+          isOpen={openUpload}
+          onModalChanged={(isChanged) => {
+            setOpenUpload(!openUpload);
+            (isChanged === true) && fetchData();
+          }}
+        />
+      )}
+      {openEdit && (
+        <EditDataWater
+          site={site}
+          isOpen={openEdit}
+          params={modalParams}
+          onModalChanged={(isChanged) => {
+            setOpenEdit(!openEdit);
+            (isChanged === true) && fetchData();
+          }}
+        />
+      )}
     </DashboardLayout>
   );
 }

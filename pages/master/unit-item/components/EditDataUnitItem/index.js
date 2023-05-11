@@ -97,12 +97,12 @@ function EditDataUnitItem({ isOpen, params, onModalChanged, site }) {
     }
 
     Block.remove(`.${detailUnitItemBlockLoadingName}`),
-      setLoading(true);
+      setLoading(false);
   };
 
   const openModal = () => setModalOpen(true);
   const toggleModal = () => setModalOpen(true);
-  const closeModal = (isChanged) => {
+  const closeModal = (isChanged = false) => {
     setModalOpen(false);
     setTimeout(() => onModalChanged(isChanged), 0);
   };

@@ -26,7 +26,7 @@ import * as React from "react";
 import { typeNormalization, downloadTempFile } from "/helpers/utils";
 import { alertService } from "/helpers";
 import Swal from "sweetalert2";
-import PuffLoader from "react-spinners/PuffLoader";
+// import PuffLoader from "react-spinners/PuffLoader";
 import { Block } from "notiflix/build/notiflix-block-aio";
 
 // Data
@@ -36,7 +36,8 @@ import { useEffect, useState } from "react";
 import EditDataWater from "./components/EditDataWater"; */
 import SiteDropdown from "../../../pagesComponents/dropdown/Site";
 import { async } from "regenerator-runtime";
-import WarningLetterPreviewModal from "./WarningLetterPreviewModal";
+import WarningLetterPreviewModal from "./components/WarningLetterPreviewModal";
+import { FormatColorResetTwoTone } from "@mui/icons-material";
 
 export default function WarningLetter(props) {
   const [isLoading, setLoading] = useState(false);
@@ -420,49 +421,6 @@ export default function WarningLetter(props) {
   }
   /* end form builder  */
 
-  /* start export excel */
-  const handleExport = async () => {
-    let response = await fetch(
-      "/api/transaction/warningletter/ExportToExcelWarningLetter",
-      {
-        method: "POST",
-        body: JSON.stringify({
-          accessToken: accessToken,
-          params: {
-            maxResultCount: 1000,
-            skipCount: 0,
-            siteId: site?.siteId,
-            projectId: formValues.project?.projectId,
-            clusterId: formValues.cluster?.clusterId,
-            cluster: formValues.cluster?.clusterCode,
-            unitCode: formValues.unitCode?.unitCode,
-            unitNo: formValues.unitNo?.unitNo,
-            invoiceName: formValues.invoiceName?.invoiceName,
-            search: undefined,
-            sp: formValues.sp?.sp,
-            /* "projectId": 0,
-  "clusterId": 0,
-  "cluster": "string",
-  "unitCode": "string",
-  "unitNo": "string",
-  "invoiceName": "string",
-  "search": "string",
-  "sp": 0 */
-          },
-        }),
-      }
-    );
-    if (!response.ok) throw new Error(`Error: ${response.status}`);
-    response = typeNormalization(await response.json());
-
-    if (response.error)
-      alertService.error({ text: response.error.message, title: "Error" });
-    else {
-      downloadTempFile(response.result.uri);
-    }
-  };
-  /* end export excel */
-
   /* start load dataTableData */
   const handlerPriview = async (data) => {
   };
@@ -543,6 +501,52 @@ export default function WarningLetter(props) {
     } Block.remove(`.${warningLetterBlockLoadingName}`),
       setLoading(false);
   };
+
+  /* start export excel */
+  const handleExport = async () => {
+    Block.standard(`.${warningLetterBlockLoadingName}`, `Exporting Warning Letter to Excel`);
+
+    let response = await fetch(
+      "/api/transaction/warningletter/ExportToExcelWarningLetter",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          accessToken: accessToken,
+          params: {
+            maxResultCount: 1000,
+            skipCount: 0,
+            siteId: site?.siteId,
+            projectId: formValues.project?.projectId,
+            clusterId: formValues.cluster?.clusterId,
+            cluster: formValues.cluster?.clusterCode,
+            unitCode: formValues.unitCode?.unitCode,
+            unitNo: formValues.unitNo?.unitNo,
+            invoiceName: formValues.invoiceName?.invoiceName,
+            search: undefined,
+            sp: formValues.sp?.sp,
+            /* 
+              "projectId": 0,
+              "clusterId": 0,
+              "cluster": "string",
+              "unitCode": "string",
+              "unitNo": "string",
+              "invoiceName": "string",
+              "search": "string",
+              "sp": 0 
+            */
+          },
+        }),
+      }
+    );
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
+
+    if (response.error) alertService.error({ text: response.error.message, title: "Error" });
+    else downloadTempFile(response.result.uri);
+
+    Block.remove(`.${warningLetterBlockLoadingName}`);
+  };
+  /* end export excel */
 
   const [isCheckAll, setIsCheckAll] = useState(false);
   const [isCheck, setIsCheck] = useState([]);
@@ -707,7 +711,9 @@ export default function WarningLetter(props) {
   };
 
   const gotoSendEmail = async (e) => {
-    setLoadingSend(true);
+    Block.standard(`.${warningLetterBlockLoadingName}`, `Sending Email Warning Letter`),
+      setLoadingSend(true);
+
     let response = await fetch(
       "/api/transaction/warningletter/SendEmailWarningLetter",
       {
@@ -720,8 +726,8 @@ export default function WarningLetter(props) {
     );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    if (response.error)
-      alertService.error({ title: "Error", text: response.error.message });
+    
+    if (response.error) alertService.error({ title: "Error", text: response.error.message });
     else {
       let data = response.result;
       Swal.fire({
@@ -735,10 +741,12 @@ export default function WarningLetter(props) {
       }).then((result) => {
         if (result.isConfirmed) {
           fetchData();
-          setLoadingSend(false);
         }
       });
     }
+
+    Block.remove(`.${warningLetterBlockLoadingName}`),
+      setLoadingSend(false);
   };
   /* end send email */
 
@@ -763,7 +771,7 @@ export default function WarningLetter(props) {
         </Grid>
       </MDBox>
 
-      <PuffLoader
+      {/* <PuffLoader
         cssOverride={override}
         size={250}
         color={"#10569E"}
@@ -771,7 +779,7 @@ export default function WarningLetter(props) {
         speedMultiplier={1}
         aria-label="Loading Spinner"
         data-testid="loader"
-      />
+      /> */}
 
       <MDBox mt={2}>
         <Grid container spacing={2}>
@@ -1173,17 +1181,18 @@ export default function WarningLetter(props) {
         </Card>
       </MDBox>
 
-      <WarningLetterPreviewModal
-        isOpen={openModal.isOpen}
-        params={openModal.params}
-        onModalChanged={(isChanged) => {
-          setOpenModal((prevState) => ({
-            ...prevState,
-            isOpen: !openModal.isOpen,
-          }));
-        }}
-      />
-      
+      {openModal.isOpen && (
+        <WarningLetterPreviewModal
+          isOpen={openModal.isOpen}
+          params={openModal.params}
+          onModalChanged={(isChanged) => {
+            setOpenModal((prevState) => ({
+              ...prevState,
+              isOpen: !openModal.isOpen,
+            }));
+          }}
+        />
+      )}
     </DashboardLayout>
   );
 }

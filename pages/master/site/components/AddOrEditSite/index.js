@@ -148,7 +148,7 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
     Block.remove(`.${createSiteBlockLoadingName}`),
       actions.setSubmitting(false);
   };
-  const closeModal = (isChanged) => {
+  const closeModal = (isChanged = false) => {
     setTimeout(() => onModalChanged(isChanged), 0);
   };
 

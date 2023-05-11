@@ -282,7 +282,7 @@ export default function UnitItem(props) {
           isOpen={openEdit}
           params={modalParams}
           onModalChanged={(isChanged) => {
-            setOpenEdit(false);
+            setOpenEdit(!openEdit);
             (isChanged === true) && fetchData();
           }}
         />

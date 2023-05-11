@@ -200,8 +200,8 @@ function UploadDataUnitItem(props) {
         }
         setDataUnitItem([]);
         
-        // actions.resetForm();
-        // closeModal();
+        if (!isFailed) 
+          closeModal(true);
       });
     }
 
@@ -211,7 +211,7 @@ function UploadDataUnitItem(props) {
 
   const openModal = () => setModalOpen(true);
   const toggleModal = () => setModalOpen(true);
-  const closeModal = (isChanged) => {
+  const closeModal = (isChanged = false) => {
     setModalOpen(false);
     setTimeout(() => setDataUnitItem([]), 1500);
     setTimeout(() => onModalChanged(isChanged), 0);

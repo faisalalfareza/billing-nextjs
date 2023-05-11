@@ -16,6 +16,7 @@ import MDBox from "/components/MDBox";
 import MDTypography from "/components/MDTypography";
 import MDButton from "/components/MDButton";
 import FormField from "/pagesComponents/FormField";
+import { Block } from "notiflix/build/notiflix-block-aio";
 
 // Data
 import { useCookies } from "react-cookie";
@@ -60,7 +61,11 @@ function EditDataWater({ isOpen, params, onModalChanged, site }) {
 
   const getFormData = (values) => {};
 
+  const detailWaterReadingBlockLoadingName = "block-detail-water-reading";
   const updateWater = async (values, actions) => {
+    Block.standard(`.${detailWaterReadingBlockLoadingName}`, `Updating Water Reading`),
+      setLoadingSubmit(true);
+
     const body = {
       waterReadingId: params.waterReadingId,
       currentRead: +values.current,
@@ -82,12 +87,8 @@ function EditDataWater({ isOpen, params, onModalChanged, site }) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error) {
-      alertService.error({ text: response.error.message, title: "Error" });
-      setLoadingSubmit(false);
-      actions.resetForm();
-      closeModal();
-    } else {
+    if (response.error) alertService.error({ text: response.error.message, title: "Error" });
+    else {
       Swal.fire({
         title: "Water Reading Updated",
         text:
@@ -100,18 +101,20 @@ function EditDataWater({ isOpen, params, onModalChanged, site }) {
           " has been successfully updated.",
         icon: "success",
       }).then((result) => {
-        setLoadingSubmit(false);
         actions.resetForm();
-        closeModal();
+        closeModal(true);
       });
     }
+
+    Block.remove(`.${detailWaterReadingBlockLoadingName}`),
+      setLoadingSubmit(false);
   };
 
   const openModal = () => setModalOpen(true);
   const toggleModal = () => setModalOpen(true);
-  const closeModal = () => {
+  const closeModal = (isChanged = false) => {
     setModalOpen(false);
-    setTimeout(() => onModalChanged(), 0);
+    setTimeout(() => onModalChanged(isChanged), 0);
   };
 
   useEffect(() => {
@@ -153,6 +156,7 @@ function EditDataWater({ isOpen, params, onModalChanged, site }) {
         toggle={toggleModal}
         onOpened={openModal}
         onClosed={closeModal}
+        className={detailWaterReadingBlockLoadingName}
       >
         <Formik
           initialValues={initialValues}
