@@ -15,16 +15,19 @@ import { Radio, Grid } from "@mui/material";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import FormField from "/pagesComponents/FormField";
 import NumberInput from "/pagesComponents/dropdown/NumberInput";
+import { Block } from "notiflix/build/notiflix-block-aio";
 
 export default function Adjustment(props) {
   const { isOpen, params, close, handlePSCode } = props;
   const [modal, setModal] = useState(isOpen);
   const [isLoading, setLoading] = useState(false);
   const [{ accessToken, encryptedAccessToken }] = useCookies();
-  console.log(props);
 
+  const adjustInvoiceBlockLoadingName = "block-adjust-invoice";
   const adjustData = async (values, actions) => {
-    setLoading(true);
+    Block.standard(`.${adjustInvoiceBlockLoadingName}`, `Adjusting & Regenerating Invoice`),
+      setLoading(true);
+
     let response = await fetch(
       "/api/transaction/invoice/changeadjustmentinvoice",
       {
@@ -41,16 +44,17 @@ export default function Adjustment(props) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error)
-      alertService.error({ title: "Error", text: response.error.message });
+    if (response.error) alertService.error({ title: "Error", text: response.error.message });
     else {
       alertService.success({
         title: "Adjustment Succesfull",
         text: "The adjustment for this invoice has been successfully saved",
       });
-      setLoading(false);
       close();
     }
+
+    Block.remove(`.${adjustInvoiceBlockLoadingName}`),
+      setLoading(false);
   };
   const toggle = () => setModal(!modal);
 
@@ -76,7 +80,6 @@ export default function Adjustment(props) {
   });
 
   const submitForm = async (values, actions) => {
-    console.log("valadj------", values);
     adjustData(values, actions);
   };
 
@@ -93,6 +96,7 @@ export default function Adjustment(props) {
       backdrop="false"
       keyboard="true"
       size="xl"
+      className={adjustInvoiceBlockLoadingName}
     >
       <ModalHeader toggle={toggle} close={closeBtn}>
         <MDBox mb={1}>
@@ -117,13 +121,6 @@ export default function Adjustment(props) {
               }) => {
                 setformValues(values);
                 const isValifForm = () => {
-                  console.log(
-                    "valif",
-                    checkingSuccessInput(
-                      values.adjustmentNominal,
-                      errors.adjustmentNominal
-                    )
-                  );
                   return checkingSuccessInput(
                     values.adjustmentNominal,
                     errors.adjustmentNominal
@@ -182,7 +179,6 @@ export default function Adjustment(props) {
                             placeholder="Type Adjustment Nominal"
                             value={formValues.adjustmentNominal}
                             onValueChange={(val) => {
-                              console.log("val-------", val);
                               setFieldValue(
                                 "adjustmentNominal",
                                 val.floatValue

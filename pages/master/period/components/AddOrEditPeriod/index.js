@@ -160,7 +160,7 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
 
   const createPeriodBlockLoadingName = "block-create-period";
   const createPeriod = async (values, actions) => {
-    setLoadingSubmit(false);
+    setLoadingSubmit(true);
 
     const body = {
       siteId: site.siteId,
@@ -201,7 +201,6 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
           timerProgressBar: true,
           timer: 3000,
         }).then(() => {
-          setLoadingSubmit(false);
           actions.resetForm();
           closeModal(true);
         });
@@ -240,7 +239,6 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
           timerProgressBar: true,
           timer: 3000,
         }).then((result) => {
-          setLoadingSubmit(false);
           actions.resetForm();
           closeModal(true);
         });
@@ -248,7 +246,7 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
     }
 
     Block.remove(`.${createPeriodBlockLoadingName}`),
-      actions.setSubmitting(false);
+      actions.setSubmitting(false), setLoadingSubmit(false);
   };
   const closeModal = (isChanged) => {
     setNo(undefined), setformValues({});

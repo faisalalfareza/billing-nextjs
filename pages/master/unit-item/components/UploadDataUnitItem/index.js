@@ -18,6 +18,7 @@ import MDBox from "/components/MDBox";
 import MDTypography from "/components/MDTypography";
 import MDButton from "/components/MDButton";
 import FormField from "/pagesComponents/FormField";
+import { Block } from "notiflix/build/notiflix-block-aio";
 
 // Data
 import { typeNormalization, getExtension } from "/helpers/utils";
@@ -95,10 +96,12 @@ function UploadDataUnitItem(props) {
   const [formValues, setformValues] = useState(initialValues);
 
   const getFormData = (values) => {
-    console.log("val----", values);
   };
 
+  const templateInvoiceBlockLoadingName = "block-template-invoice";
   const getTemplateInvoice = async (val) => {
+    Block.dots(`.${templateInvoiceBlockLoadingName}`);
+
     let response = await fetch(
       "/api/master/unititem/getdropdownmastertemplate",
       {
@@ -110,11 +113,11 @@ function UploadDataUnitItem(props) {
     );
     if (!response.ok) throw new Error(`{Error}: ${response.status}`);
     response = typeNormalization(await response.json());
-    if (response.error) {
-      alertService.error({ title: "Error", text: response.error.message });
-    } else {
-      setDataTemplateInvoice(response.result);
-    }
+   
+    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+    else setDataTemplateInvoice(response.result);
+
+    Block.remove(`.${templateInvoiceBlockLoadingName}`);
   };
 
   useEffect(() => {
@@ -124,10 +127,12 @@ function UploadDataUnitItem(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
+  const uploadExcelUnitItemBlockLoadingName = "block-upload-excel-unit-item";
   const uploadExcel = async (values, actions) => {
-    setLoading(true);
+    Block.standard(`.${uploadExcelUnitItemBlockLoadingName}`, `Uploading Unit Item`),
+      setLoading(true);
+
     const list = [];
-    console.log("data---", dataUnitItem);
     dataUnitItem.map((e) => {
       list.push({
         unitNo: e.UnitNo,
@@ -194,19 +199,22 @@ function UploadDataUnitItem(props) {
           }, 0);
         }
         setDataUnitItem([]);
-        setLoading(false);
-        // actions.resetForm();
-        // closeModal();
+        
+        if (!isFailed) 
+          closeModal(true);
       });
     }
+
+    Block.remove(`.${uploadExcelUnitItemBlockLoadingName}`),
+      setLoading(false);
   };
 
   const openModal = () => setModalOpen(true);
   const toggleModal = () => setModalOpen(true);
-  const closeModal = () => {
+  const closeModal = (isChanged = false) => {
     setModalOpen(false);
-    setDataUnitItem([]);
-    setTimeout(() => onModalChanged(), 0);
+    setTimeout(() => setDataUnitItem([]), 1500);
+    setTimeout(() => onModalChanged(isChanged), 0);
   };
 
   const handleShow = () => {
@@ -236,6 +244,8 @@ function UploadDataUnitItem(props) {
       // await sleep(1000);
       uploadExcel(values, actions);
     };
+
+    const uploadedListBlockLoadingName = "block-uploaded-list";
     const handleFile = (file, isPassed, message) => {
       /* Boilerplate to set up FileReader */
       const reader = new FileReader();
@@ -244,7 +254,6 @@ function UploadDataUnitItem(props) {
         /* Parse data */
         const bstr = e.target.result;
         const wb = XLSX.read(bstr, { type: rABS ? "binary" : "array" });
-        console.log("wb----", wb);
         if (parseInt(wb.Strings.Count) > 5) {
           /* Get first worksheet */
           const wsname = wb.SheetNames[0];
@@ -254,7 +263,6 @@ function UploadDataUnitItem(props) {
           /* Update state */
 
           setCols(make_cols(ws["!ref"]));
-          console.log("e----", data);
           // this.setState({ data: data, cols: make_cols(ws["!ref"]) });
           for (const e of data) {
             const valueOfKeys = [
@@ -268,16 +276,16 @@ function UploadDataUnitItem(props) {
             // Validation Step 3: Cell empty
             if (valueOfKeys.indexOf(undefined) != -1) {
               message.failed += "some cells are still empty or not filled";
-              Notify.failure(message.failed);
+              Notify.failure(message.failed), Block.remove(`.${uploadedListBlockLoadingName}`);
 
               return false;
             }
           }
           setDataUnitItem(data);
-          data.length > 0 && Notify.success(message.success);
+          if (dataUnitItem.length > 0) Notify.success(message.success), Block.remove(`.${uploadedListBlockLoadingName}`);
         } else {
           message.failed += "file is still empty or not filled";
-          Notify.failure(message.failed);
+          Notify.failure(message.failed), Block.remove(`.${uploadedListBlockLoadingName}`);
         }
       };
       if (rABS) reader.readAsBinaryString(file);
@@ -297,6 +305,8 @@ function UploadDataUnitItem(props) {
             success: "Upload Unit Item Successfully",
           };
 
+        Block.dots(`.${uploadedListBlockLoadingName}`);
+
         // Validation Step 1: File size & type
         if (uploadaOptions.fileType.indexOf(getExtension(file.name)) == -1) {
           message.failed +=
@@ -311,7 +321,7 @@ function UploadDataUnitItem(props) {
           isPassed[0] = true;
         }
 
-        if (!isPassed[0]) Notify.failure(message.failed);
+        if (!isPassed[0]) Notify.failure(message.failed), Block.remove(`.${uploadedListBlockLoadingName}`);
         else handleFile(file, isPassed, message);
       }
     };
@@ -324,6 +334,7 @@ function UploadDataUnitItem(props) {
         toggle={toggleModal}
         onOpened={openModal}
         onClosed={closeModal}
+        className={uploadExcelUnitItemBlockLoadingName}
       >
         <MDBox py={3} px={6} lineHeight={1}>
           <Grid container alignItems="center" spacing={3}>
@@ -387,6 +398,7 @@ function UploadDataUnitItem(props) {
                             handleChangeFile(e);
                             setFieldValue(fileUpload.name, e.target.value);
                           }}
+                          className={uploadedListBlockLoadingName}
                         />
                         {dataUnitItem.length > 0 && (
                           <MDTypography variant="body">
@@ -430,6 +442,7 @@ function UploadDataUnitItem(props) {
                                 formValues.templateInvoice,
                                 errors.templateInvoice
                               )}
+                              className={templateInvoiceBlockLoadingName}
                             />
                           )}
                         />

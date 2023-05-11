@@ -33,7 +33,7 @@ import fileCheck from "/assets/images/file-check.svg";
 import FindName from "./components/FindName";
 import Swal from "sweetalert2";
 import Adjustment from "./components/Adjustment";
-import PuffLoader from "react-spinners/PuffLoader";
+// import PuffLoader from "react-spinners/PuffLoader";
 import { Block } from "notiflix/build/notiflix-block-aio";
 
 export default function Invoice(props) {
@@ -587,27 +587,34 @@ export default function Invoice(props) {
   };
 
   const processCommand = async (val) => {
-    setLoadingSend(true);
     let url = "",
       text = "",
-      title = "";
+      title = "",
+      processMessage = "";
     switch (val) {
       case 1:
         url = "/api/transaction/invoice/regenerateinvoicebyinvoiceidlist";
         title = "Re-Generate Succesfull";
         text = "Re-generate for this invoice has been successfull";
+        processMessage = "Regenerating Invoices";
         break;
       case 2:
         url = "/api/transaction/invoice/sendemailinvoicebyinvoiceheaderid";
         title = "Email has been sent";
         text = "Email has been sent successfully";
+        processMessage = "Sending Email Invoices";
         break;
       case 3:
         url = "/api/transaction/invoice/sendwainvoice";
         title = "Whatsapp has been sent";
         text = "Whatsapp has been sent successfully";
+        processMessage = "Sending WhatsApp Invoices";
         break;
     }
+
+    Block.standard(`.${invoiceBlockLoadingName}`, processMessage), 
+        setLoadingSend(true);
+
     let response = await fetch(url, {
       method: "POST",
       body: JSON.stringify({
@@ -618,15 +625,11 @@ export default function Invoice(props) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error)
-      alertService.error({ text: response.error.message, title: "Error" });
-    else {
-      alertService.success({
-        text: text,
-        title: title,
-      });
-    }
-    setLoadingSend(false);
+    if (response.error) alertService.error({ text: response.error.message, title: "Error" });
+    else alertService.success({ text: text, title: title });
+
+    Block.remove(`.${invoiceBlockLoadingName}`), 
+      setLoadingSend(false);
   };
 
   const override = {
@@ -660,7 +663,7 @@ export default function Invoice(props) {
         </Grid>
       </MDBox>
 
-      <PuffLoader
+      {/* <PuffLoader
         cssOverride={override}
         size={250}
         color={"#10569E"}
@@ -668,7 +671,7 @@ export default function Invoice(props) {
         speedMultiplier={1}
         aria-label="Loading Spinner"
         data-testid="loader"
-      />
+      /> */}
 
       <MDBox mt={2}>
         <Grid container spacing={2}>
@@ -784,19 +787,6 @@ export default function Invoice(props) {
                                       </MDButton>
                                     </Grid>
                                   </Grid>
-                                  <FindName
-                                    isOpen={openFind}
-                                    close={handleFind}
-                                    site={site?.siteId}
-                                    period={period?.periodId}
-                                    handlePSCode={handlePSCode}
-                                  />
-                                  <Adjustment
-                                    isOpen={openAdjust}
-                                    close={handleAdjust}
-                                    params={modalParams}
-                                    handlePSCode={handlePSCode}
-                                  />
                                 </Grid>
                                 <Grid item xs={12} sm={6}>
                                   <Field
@@ -1073,6 +1063,24 @@ export default function Invoice(props) {
           </MDBox>
         </Card>
       </MDBox>
+
+      {openFind && (
+        <FindName
+          isOpen={openFind}
+          close={handleFind}
+          site={site?.siteId}
+          period={period?.periodId}
+          handlePSCode={handlePSCode}
+        />
+      )}
+      {openAdjust && (
+        <Adjustment
+          isOpen={openAdjust}
+          close={handleAdjust}
+          params={modalParams}
+          handlePSCode={handlePSCode}
+        />
+      )}
     </DashboardLayout>
   );
 }
