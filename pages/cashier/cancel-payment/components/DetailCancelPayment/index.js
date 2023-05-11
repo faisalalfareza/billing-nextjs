@@ -160,7 +160,7 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
             });
         }
 
-        Block.standard(`.${detailPaymentBlockLoadingName}`), 
+        Block.remove(`.${detailPaymentBlockLoadingName}`), 
           setLoadingCancelPayment(false);
       }
     });
