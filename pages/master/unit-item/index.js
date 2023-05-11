@@ -193,16 +193,6 @@ export default function UnitItem(props) {
     setOpenEdit(true);
   };
 
-  const changeModalUpload = () => {
-    setOpenUpload(!openUpload);
-    fetchData();
-  };
-
-  const changeModalEdit = () => {
-    setOpenEdit(false);
-    fetchData();
-  };
-
   const handleSite = (siteVal) => {
     setSite(siteVal);
     localStorage.setItem("site", JSON.stringify(siteVal));
@@ -276,17 +266,27 @@ export default function UnitItem(props) {
         </Card>
       </MDBox>
 
-      <UploadDataUnitItem
-        site={site}
-        isOpen={openUpload}
-        onModalChanged={changeModalUpload}
-      />
-      <EditDataUnitItem
-        site={site}
-        isOpen={openEdit}
-        params={modalParams}
-        onModalChanged={changeModalEdit}
-      />
+      {openUpload && (
+        <UploadDataUnitItem
+          site={site}
+          isOpen={openUpload}
+          onModalChanged={(isChanged) => {
+            setOpenUpload(!openUpload);
+            (isChanged === true) && fetchData();
+          }}
+        />
+      )}
+      {openEdit && (
+        <EditDataUnitItem
+          site={site}
+          isOpen={openEdit}
+          params={modalParams}
+          onModalChanged={(isChanged) => {
+            setOpenEdit(false);
+            (isChanged === true) && fetchData();
+          }}
+        />
+      )}
     </DashboardLayout>
   );
 }

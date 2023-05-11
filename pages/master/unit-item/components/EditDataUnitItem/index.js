@@ -18,6 +18,7 @@ import MDTypography from "/components/MDTypography";
 import MDButton from "/components/MDButton";
 import FormField from "/pagesComponents/FormField";
 import DataTable from "/layout/Tables/DataTable";
+import { Block } from "notiflix/build/notiflix-block-aio";
 
 // Data
 import { useCookies } from "react-cookie";
@@ -35,7 +36,6 @@ function EditDataUnitItem({ isOpen, params, onModalChanged, site }) {
   const [dataBank, setDataBank] = useState([]);
   const formikRef = useRef();
 
-  console.log("params----", params);
   const initialValues = {
     unitCode: params ? params.prevRead : undefined,
     unitNo: params ? params.currentRead : undefined,
@@ -49,7 +49,11 @@ function EditDataUnitItem({ isOpen, params, onModalChanged, site }) {
 
   const getFormData = (values) => {};
 
+  const detailUnitItemBlockLoadingName = "block-detail-unit-item";
   const updateUnitItem = async (values, actions) => {
+    Block.standard(`.${detailUnitItemBlockLoadingName}`, `Updating Unit Item`),
+      setLoading(true);
+
     const body = {
       unitItemHeaderId: params.unitItemHeaderId,
       unitDataId: params.unitDataId,
@@ -61,7 +65,6 @@ function EditDataUnitItem({ isOpen, params, onModalChanged, site }) {
       isPenalty: values.isPenalty,
       itemDetail: listItem,
     };
-    console.log("body----", body);
 
     let response = await fetch(
       "/api/master/unititem/prosesupdatemasterunititem",
@@ -76,15 +79,8 @@ function EditDataUnitItem({ isOpen, params, onModalChanged, site }) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error) {
-      alertService.error({
-        text: response.error.error.message,
-        title: "Error",
-      });
-      setLoading(false);
-      actions.resetForm();
-      closeModal();
-    } else {
+    if (response.error) alertService.error({ title: "Error", text: response.error.error.message });
+    else {
       Swal.fire({
         title: "Unit Item Updated",
         text:
@@ -95,18 +91,20 @@ function EditDataUnitItem({ isOpen, params, onModalChanged, site }) {
           " has been successfully updated.",
         icon: "success",
       }).then((result) => {
-        setLoading(false);
         actions.resetForm();
-        closeModal();
+        closeModal(true);
       });
     }
+
+    Block.remove(`.${detailUnitItemBlockLoadingName}`),
+      setLoading(true);
   };
 
   const openModal = () => setModalOpen(true);
   const toggleModal = () => setModalOpen(true);
-  const closeModal = () => {
+  const closeModal = (isChanged) => {
     setModalOpen(false);
-    setTimeout(() => onModalChanged(), 0);
+    setTimeout(() => onModalChanged(isChanged), 0);
   };
 
   useEffect(() => {
@@ -122,7 +120,9 @@ function EditDataUnitItem({ isOpen, params, onModalChanged, site }) {
   }, []);
 
   const getDetail = async (data) => {
-    setLoadingShow(true);
+    Block.standard(`.${detailUnitItemBlockLoadingName}`, `Getting Unit Item Detail`),
+      setLoadingShow(true);
+
     let response = await fetch("/api/master/unititem/getdetailmasterunititem", {
       method: "POST",
       body: JSON.stringify({
@@ -135,11 +135,8 @@ function EditDataUnitItem({ isOpen, params, onModalChanged, site }) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error) {
-      const error = response.error;
-      setLoadingShow(false);
-      alertService.error({ title: "Error", text: response.error.message });
-    } else {
+    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+    else {
       const result = response.result.itemDetail;
       let res = response.result;
       let list = [];
@@ -173,11 +170,16 @@ function EditDataUnitItem({ isOpen, params, onModalChanged, site }) {
         formikRef.current.setFieldValue("templateInvoice", template);
         formikRef.current.setFieldValue("isPenalty", res.isPenalty);
       }
-      setLoadingShow(false);
     }
+
+    Block.remove(`.${detailUnitItemBlockLoadingName}`),
+      setLoadingShow(false);
   };
 
+  const bankBlockLoadingName = "block-bank";
   const getBank = async () => {
+    Block.dots(`.${bankBlockLoadingName}`);
+
     let response = await fetch("/api/cashier/billing/getdropdownbank", {
       method: "POST",
       body: JSON.stringify({
@@ -187,15 +189,16 @@ function EditDataUnitItem({ isOpen, params, onModalChanged, site }) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error) {
-      setLoading(false);
-      alertService.error({ title: "Error", text: response.error.message });
-    } else {
-      setDataBank(response.result);
-    }
+    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+    else setDataBank(response.result);
+
+    Block.remove(`.${bankBlockLoadingName}`);
   };
 
+  const templateInvoiceBlockLoadingName = "block-template-invoice";
   const getTemplateInvoice = async (val) => {
+    Block.dots(`.${templateInvoiceBlockLoadingName}`);
+
     let response = await fetch(
       "/api/master/unititem/getdropdownmastertemplate",
       {
@@ -207,11 +210,11 @@ function EditDataUnitItem({ isOpen, params, onModalChanged, site }) {
     );
     if (!response.ok) throw new Error(`{Error}: ${response.status}`);
     response = typeNormalization(await response.json());
-    if (response.error) {
-      alertService.error({ title: "Error", text: response.error.message });
-    } else {
-      setDataTemplateInvoice(response.result);
-    }
+    
+    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+    else setDataTemplateInvoice(response.result);
+
+    Block.remove(`.${templateInvoiceBlockLoadingName}`);
   };
 
   const setInvoiceList = () => {
@@ -230,7 +233,6 @@ function EditDataUnitItem({ isOpen, params, onModalChanged, site }) {
                 inputProps={{
                   style: { textAlign: "right" },
                   onBlur: (e) => {
-                    console.log("foo bar", e.target.value);
                     rateChange(e.target.value, row.index);
                   },
                 }}
@@ -290,6 +292,7 @@ function EditDataUnitItem({ isOpen, params, onModalChanged, site }) {
         toggle={toggleModal}
         onOpened={openModal}
         onClosed={closeModal}
+        className={detailUnitItemBlockLoadingName}
       >
         <MDBox pb={3} pt={6} px={6} lineHeight={1}>
           <Grid container alignItems="center" spacing={3}>
@@ -400,6 +403,7 @@ function EditDataUnitItem({ isOpen, params, onModalChanged, site }) {
                                 formValues.templateInvoice,
                                 errors.templateInvoice
                               )}
+                              className={templateInvoiceBlockLoadingName}
                             />
                           )}
                         />
@@ -446,6 +450,7 @@ function EditDataUnitItem({ isOpen, params, onModalChanged, site }) {
                                 formValues.bank,
                                 errors.bank
                               )}
+                              className={bankBlockLoadingName}
                             />
                           )}
                         />
