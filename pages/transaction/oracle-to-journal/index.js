@@ -27,7 +27,7 @@ import dayjs from "dayjs";
 import { resolve } from "path";
 
 import { downloadTempFile } from "/helpers/utils";
-
+import DataTable from "/layout/Tables/DataTable";
 
 function OracleToJournal({ params }) {
     const [{ accessToken, encryptedAccessToken }] = useCookies();
@@ -295,6 +295,171 @@ function OracleToJournal({ params }) {
         
     }
 
+    const [customerResponse, setCustomerResponse] = useState({
+        rowData: [],
+        totalRows: undefined,
+        totalPages: undefined,
+    });
+
+    const [listDataJournal, setlistDataJournal] = useState([]);
+
+    const [customerRequest, setCustomerRequest] = useState({
+        schme: site?.siteId,
+        recordsPerPage: 10,
+        skipCount: 1,
+    })
+
+    const searchData = async (data) => {
+        const { skipCount, recordsPerPage } = customerRequest;
+        const body = {
+            siteId: site?.siteId,
+            period: formValues.periodMethod?.periodId,
+            paymentType: formValues.paymentMethod?.paymentTypeId,
+            accountingDate: addDate(formValues.accountingDate),
+            bankPayment: bnkPayment,
+            paymentStartDate: addDate(formValues.paymentStartDate),
+            paymentEndDate: addDate(formValues.paymentEndDate),
+            skipCount : skipCount,
+            maxResultCount : recordsPerPage
+        };
+
+        let response = await fetch(
+            "/api/transaction/oracletojournal/FetchJournalOracleList",
+            {
+                method: "POST",
+                body: JSON.stringify({
+                    accessToken: accessToken,
+                    params: body,
+                })
+            },
+        );
+
+        if(!response.ok) throw new Error(`Error: ${response.status}`);
+        response = typeNormalization(await response.json());
+
+        console.log(response.result);
+
+        if(response.error)  {
+            let err = response.error;
+            alertService.error({
+                title: "Error",
+                text: err.error.message,
+            });
+        } else {
+            let data = response.result;
+            
+            const list = [];
+            data.items.map((e, i) => {
+                list.push({
+                    no: i + 1,
+                    journalid: e.journalHeaderId,
+                    project: e.projectId,
+                    cluster: e.clusterId,
+                    journaldate: e.journalDate,
+                    oracledesc: e.oracleDesc,
+                    accountingdate: e.accountingDate,
+                    periodname: e.periodName,
+                    coa1: e.coA1,
+                    coa2: e.coA2,
+                    coa3: e.coA3,
+                    coa4: e.coA4,
+                    coa5: e.coA5,
+                    coa6: e.coA6,
+                    coa7: e.coA7,
+                    debit: e.debit,
+                    kredit: e.kredit,
+                    istransfered: e.isTransfered,
+                    groupId: e.groupId
+                });
+            });
+            console.log(list);
+            // setlistDataJournal(list);
+            // console.log(list);
+            // console.log(list);
+            setCustomerResponse((prevState) => ({
+                ...prevState,
+                rowData: list,
+                totalRows: data.totalCount,
+                totalPages: Math.ceil(data.totalCount / customerRequest.recordsPerPage),
+            }));
+            // console.log(customerResponse);
+        }
+    };
+
+    useEffect(() => {
+        setCustomerResponse((prevState) => ({
+            ...prevState,
+            rowData: [],
+            totalRows: undefined,
+            totalPages: undefined,
+        }));
+    }, [site]);
+    useEffect(() => {
+        searchData();
+    }, [customerRequest.skipCount, customerRequest.recordsPerPage]);
+
+    const setCustomerTaskList = (list) => {
+        return {
+            columns: columns,
+            rows: list,
+        };
+    };
+
+    const skipCountChangeHandler = (e) => {
+        customerRequest.skipCount = e;
+        setCustomerRequest((prevState) => ({
+            ...prevState,
+            skipCount: e,
+        }));
+    };
+
+    const recordsPerPageChangeHandler = (e) => {
+        customerRequest.recordsPerPage = e;
+        setCustomerRequest({
+          ...prevState,
+          recordsPerPage: e,
+        });
+      };
+    
+    const columns = [
+        {Header: "no", accessor: "no", width: "5%"},
+        {Header: "journalid", accessor: "journalid", width: "10%"},
+        {Header: "project", accessor: "project", width: "15%"},
+        {Header: "cluster", accessor: "cluster", width: "15%"},
+        {Header: "journaldate", accessor: "journaldate", width: "15%"},
+        {Header: "periodname", accessor: "periodname", width: "20%"},
+        {Header: "oracledesc", accessor: "oracledesc", width: "25%"},
+        {Header: "accountingdate", accessor: "accountingdate", width: "15%"},
+        {Header: "coa1", accessor: "coa1", width: "10%"},
+        {Header: "coa2", accessor: "coa2", width: "10%"},
+        {Header: "coa3", accessor: "coa3", width: "10%"},
+        {Header: "coa4", accessor: "coa4", width: "10%"},
+        {Header: "coa5", accessor: "coa5", width: "10%"},
+        {Header: "coa6", accessor: "coa6", width: "10%"},
+        {Header: "coa7", accessor: "coa7", width: "10%"},
+        {Header: "debit", accessor: "debit", width: "10%"},
+        {Header: "kredit", accessor: "kredit", width: "10%"},
+        {Header: "istransfered", accessor: "istransfered", width: "10%"},
+        {Header: "groupid", accessor: "groupid", width: "10%"},
+        {
+            Header: "action",
+            accessor: "action",
+            align: "center",
+            sorted: true,
+            // Cell: ({ value }) => {
+            //   return (
+            //     <WaterRowActions
+            //       record={value}
+            //       openModalonEdit={openModalEdit}
+            //       onDeleted={fetchData}
+            //     />
+            //   );
+            // },
+        },
+    ];
+
+    const [tasklist, setTasklist] = useState({ columns: columns, rows: [] });
+
     return (
         <DashboardLayout>
             <DashboardNavbar/>
@@ -536,7 +701,8 @@ function OracleToJournal({ params }) {
                                                             <MDButton 
                                                                 style={{ marginRight : 20}}
                                                                 variant="outlined" 
-                                                                color="dark">
+                                                                color="dark"
+                                                                onClick={searchData}>
                                                                 <Icon>search_outlined</Icon>&nbsp; search
                                                             </MDButton>
                                                             <MDButton 
@@ -575,6 +741,28 @@ function OracleToJournal({ params }) {
                             </MDBox>
                             
                         </Card>
+                    </Grid>
+                </Grid>
+            </MDBox>
+            <MDBox>
+                <Grid container alignItems="center">
+                    <Grid item xs={12}>
+                        <DataTable 
+                            title="Oracle To Journal"
+                            description="Generated Journal for transfer to Oracle"
+                            table={setCustomerTaskList(customerResponse.rowData)}
+                            manualPagination={true}
+                            totalRows={customerResponse.totalRows}
+                            totalPages={customerResponse.totalPages}
+                            recordsPerPage={customerResponse.recordsPerPage}
+                            skipCount={customerRequest.skipCount}
+                            pageChangeHandler={skipCountChangeHandler}
+                            recordsPerPageChangeHandler={recordsPerPageChangeHandler}
+                            entriesPerPage={{ 
+                                defaultValue: customerRequest.recordsPerPage,
+                            }}
+                            pagination={{ variant: "gradient", color: "primary" }}
+                        />
                     </Grid>
                 </Grid>
             </MDBox>
