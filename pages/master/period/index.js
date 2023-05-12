@@ -35,21 +35,15 @@ export default function MasterPeriod(props) {
   const [{ accessToken, encryptedAccessToken }] = useCookies();
 
   useEffect(() => {
-    let currentSite = JSON.parse(localStorage.getItem("site"));
-    if (currentSite == null) {
-      alertService.info({ title: "Info", text: "Please choose Site first" });
-    } else {
-      setSite(currentSite);
-    }
-
+    let currentSite = typeNormalization(localStorage.getItem("site"));
+    if (currentSite == null) alertService.info({ title: "Info", text: "Please choose Site first" });
+    else setSite(currentSite);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => {
-    if (site != undefined) fetchData();
+    site && fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [site]);
-
-  //dari sini
 
   const setSiteList = () => {
     return {
@@ -83,7 +77,6 @@ export default function MasterPeriod(props) {
               <PeriodRowActions
                 record={value}
                 openModalonEdit={openModalAddOrEditOnEdit}
-                onDeleted={fetchData}
               />
             );
           },
@@ -102,10 +95,9 @@ export default function MasterPeriod(props) {
     setModalParams(undefined);
     setOpenModal(!openModal);
   };
-  const handleClose = () => setOpenModal(false);
 
   const periodBlockLoadingName = "block-period";
-  const fetchData = async (data) => {
+  const fetchData = async () => {
     Block.standard(`.${periodBlockLoadingName}`, `Getting Period Data`);
 
     let response = await fetch("/api/master/period/getlistmasterperiod", {
@@ -160,7 +152,6 @@ export default function MasterPeriod(props) {
     setSite(siteVal);
     localStorage.setItem("site", JSON.stringify(siteVal));
   };
-  //sampai sini
 
   return (
     <DashboardLayout>
@@ -224,7 +215,6 @@ export default function MasterPeriod(props) {
           }}
         />
       )}
-      
     </DashboardLayout>
   );
 }

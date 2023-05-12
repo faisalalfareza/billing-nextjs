@@ -381,6 +381,7 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
                               errors.periodNumber
                             )}
                             InputLabelProps={{ shrink: true }}
+                            className={periodNoBlockLoadingName}
                           />
                         </Grid>
                         <Grid item xs={12} sm={12}>

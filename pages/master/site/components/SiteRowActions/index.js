@@ -7,29 +7,24 @@ import axios from "axios";
 import Icon from "@mui/material/Icon";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
-import Divider from "@mui/material/Divider";
 
 import getConfig from "next/config";
 
 import MDBox from "/components/MDBox";
-import MDTypography from "/components/MDTypography";
 import MDButton from "/components/MDButton";
 
 const { publicRuntimeConfig } = getConfig();
 
 function SiteRowActions({ record, openModalonEdit, onDeleted }) {
   const [{ accessToken, encryptedAccessToken }] = useCookies();
-  const [menu, setMenu] = useState(false);
+  let [menu, setMenu] = useState(null);
+  const open = Boolean(menu);
 
   const openMenu = (event) => setMenu(event.currentTarget);
-  const closeMenu = () => setMenu(false);
+  const closeMenu = () => { setMenu(null), menu = null; }
 
-  // EDIT - COMPANY OFFICER
-  const editSite = () => {
-    setTimeout(() => openModalonEdit(record), 0);
-  };
+  const handleEdit = () => { closeMenu(), setTimeout(() => openModalonEdit(record), 0) };
 
-  // DELETE - COMPANY OFFICER
   const confirmDelete = () => {
     Swal.fire({
       title: "Delete Company Site",
@@ -49,7 +44,7 @@ function SiteRowActions({ record, openModalonEdit, onDeleted }) {
       }
     });
   };
-  const deleteSite = async (record) => {
+  const handleDelete = async (record) => {
     const url = `${publicRuntimeConfig.apiUrl}/api/services/app/Site/DeleteSite`;
     const config = {
       headers: { Authorization: "Bearer " + accessToken },
@@ -76,33 +71,32 @@ function SiteRowActions({ record, openModalonEdit, onDeleted }) {
     });
   };
 
-  const actionsChild = () => {
-    if (record.isActive) return <MenuItem onClick={editSite}>Edit</MenuItem>;
-  };
-
   return (
     <MDBox display="flex" alignItems="center">
       <MDButton
-        variant={menu ? "contained" : "outlined"}
+        variant={open ? "contained" : "outlined"}
         color="dark"
         size="small"
         onClick={openMenu}
         aria-haspopup="true"
+        aria-expanded={open ? 'true' : undefined}
       >
         Actions&nbsp;
         <Icon>keyboard_arrow_down</Icon>
       </MDButton>
-      <Menu
-        anchorEl={menu}
-        anchorReference={null}
-        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-        // transformOrigin={{ vertical: "top", horizontal: "left" }}
-        open={Boolean(menu)}
-        onClose={closeMenu}
-        keepMounted
-      >
-        {/* <MenuItem onClick={editSite}>Edit</MenuItem> */}
-      </Menu>
+      {open && (
+        <Menu
+          anchorEl={menu}
+          // anchorReference={null}
+          anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+          transformOrigin={{ vertical: "top", horizontal: "left" }}
+          open={open}
+          onClose={closeMenu}
+          // keepMounted
+        >
+          {/* <MenuItem onClick={handleEdit}>Edit</MenuItem> */}
+        </Menu>
+      )}
     </MDBox>
   );
 }
