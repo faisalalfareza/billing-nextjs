@@ -26,7 +26,9 @@ import { typeNormalization } from "/helpers/utils";
 import { alertService } from "/helpers";
 import NumberInput from "/pagesComponents/dropdown/NumberInput";
 
-function EditDataUnitItem({ isOpen, params, onModalChanged, site }) {
+function EditDataUnitItem(props) {
+  const { isOpen, params, onModalChanged, site, listBank, listTemplate } =
+    props;
   const [modalOpen, setModalOpen] = useState(true);
   const [{ accessToken, encryptedAccessToken }] = useCookies();
   const [isLoading, setLoading] = useState(false);
@@ -34,6 +36,8 @@ function EditDataUnitItem({ isOpen, params, onModalChanged, site }) {
   const [isLoadingShow, setLoadingShow] = useState(false);
   const [dataTemplateInvoice, setDataTemplateInvoice] = useState([]);
   const [dataBank, setDataBank] = useState([]);
+  const [bankEdit, setBankEdit] = useState(null);
+  const [templateEdit, setTemplateEdit] = useState(null);
   const formikRef = useRef();
 
   const initialValues = {
@@ -47,7 +51,9 @@ function EditDataUnitItem({ isOpen, params, onModalChanged, site }) {
 
   const [formValues, setformValues] = useState(initialValues);
 
-  const getFormData = (values) => {};
+  const getFormData = (values) => {
+    console.log("formval----", formValues);
+  };
 
   const detailUnitItemBlockLoadingName = "block-detail-unit-item";
   const updateUnitItem = async (values, actions) => {
@@ -79,7 +85,11 @@ function EditDataUnitItem({ isOpen, params, onModalChanged, site }) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error) alertService.error({ title: "Error", text: response.error.error.message });
+    if (response.error)
+      alertService.error({
+        title: "Error",
+        text: response.error.error.message,
+      });
     else {
       Swal.fire({
         title: "Unit Item Updated",
@@ -96,8 +106,7 @@ function EditDataUnitItem({ isOpen, params, onModalChanged, site }) {
       });
     }
 
-    Block.remove(`.${detailUnitItemBlockLoadingName}`),
-      setLoading(false);
+    Block.remove(`.${detailUnitItemBlockLoadingName}`), setLoading(false);
   };
 
   const openModal = () => setModalOpen(true);
@@ -108,9 +117,9 @@ function EditDataUnitItem({ isOpen, params, onModalChanged, site }) {
   };
 
   useEffect(() => {
+    getBank();
+    getTemplateInvoice();
     if (params) {
-      getBank();
-      getTemplateInvoice();
       getDetail();
     }
   }, [params]);
@@ -120,7 +129,10 @@ function EditDataUnitItem({ isOpen, params, onModalChanged, site }) {
   }, []);
 
   const getDetail = async (data) => {
-    Block.standard(`.${detailUnitItemBlockLoadingName}`, `Getting Unit Item Detail`),
+    Block.standard(
+      `.${detailUnitItemBlockLoadingName}`,
+      `Getting Unit Item Detail`
+    ),
       setLoadingShow(true);
 
     let response = await fetch("/api/master/unititem/getdetailmasterunititem", {
@@ -135,7 +147,8 @@ function EditDataUnitItem({ isOpen, params, onModalChanged, site }) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+    if (response.error)
+      alertService.error({ title: "Error", text: response.error.message });
     else {
       const result = response.result.itemDetail;
       let res = response.result;
@@ -148,21 +161,23 @@ function EditDataUnitItem({ isOpen, params, onModalChanged, site }) {
           rate: e.rate,
         });
       });
+      let bank = listBank.find((e) => e.bankID == res.bankId);
+      let template = listTemplate.find(
+        (e) => e.templateInvoiceHeaderId == res.templateInvoiceHeaderId
+      );
       setListItem(list);
       setformValues((prevState) => ({
         ...prevState,
         unitCode: res.unitCode,
         unitNo: res.unitNo,
-        bank: res.bankId,
+        bank: bank,
         vaNo: res.vaNo,
-        templateInvoice: res.templateInvoiceHeaderId,
+        templateInvoice: template,
         isPenalty: res.isPenalty,
       }));
+      setBankEdit(bank);
+      setTemplateEdit(template);
       if (formikRef.current) {
-        let bank = dataBank.find((e) => e.bankID == res.bankId);
-        let template = dataTemplateInvoice.find(
-          (e) => e.templateInvoiceHeaderId == res.templateInvoiceHeaderId
-        );
         formikRef.current.setFieldValue("unitCode", res.unitCode);
         formikRef.current.setFieldValue("unitNo", res.unitNo);
         formikRef.current.setFieldValue("bank", bank);
@@ -172,8 +187,7 @@ function EditDataUnitItem({ isOpen, params, onModalChanged, site }) {
       }
     }
 
-    Block.remove(`.${detailUnitItemBlockLoadingName}`),
-      setLoadingShow(false);
+    Block.remove(`.${detailUnitItemBlockLoadingName}`), setLoadingShow(false);
   };
 
   const bankBlockLoadingName = "block-bank";
@@ -189,7 +203,8 @@ function EditDataUnitItem({ isOpen, params, onModalChanged, site }) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+    if (response.error)
+      alertService.error({ title: "Error", text: response.error.message });
     else setDataBank(response.result);
 
     Block.remove(`.${bankBlockLoadingName}`);
@@ -205,13 +220,15 @@ function EditDataUnitItem({ isOpen, params, onModalChanged, site }) {
         method: "POST",
         body: JSON.stringify({
           accessToken: accessToken,
+          params: { SiteID: site?.siteId },
         }),
       }
     );
     if (!response.ok) throw new Error(`{Error}: ${response.status}`);
     response = typeNormalization(await response.json());
-    
-    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+
+    if (response.error)
+      alertService.error({ title: "Error", text: response.error.message });
     else setDataTemplateInvoice(response.result);
 
     Block.remove(`.${templateInvoiceBlockLoadingName}`);
@@ -371,12 +388,11 @@ function EditDataUnitItem({ isOpen, params, onModalChanged, site }) {
                           name="templateInvoice"
                           key="templateInvoice"
                           isOptionEqualToValue={(option, value) => {
-                            if (value)
-                              option.templateInvoiceHeaderId ===
-                                value.templateInvoiceHeaderId;
+                            option.templateInvoiceHeaderId ===
+                              value.templateInvoiceHeaderId;
                           }}
-                          value={formValues.templateInvoice}
-                          options={dataTemplateInvoice}
+                          value={templateEdit}
+                          options={listTemplate}
                           getOptionLabel={(option) => option.templateName}
                           onChange={(e, value) => {
                             setFieldValue(
@@ -385,6 +401,7 @@ function EditDataUnitItem({ isOpen, params, onModalChanged, site }) {
                                 ? value
                                 : initialValues["templateInvoice"]
                             );
+                            setTemplateEdit(value);
                           }}
                           renderInput={(params) => (
                             <FormField
@@ -425,17 +442,18 @@ function EditDataUnitItem({ isOpen, params, onModalChanged, site }) {
                         <Autocomplete
                           name="bank"
                           key="bank"
-                          value={formValues.bank}
+                          value={bankEdit}
                           isOptionEqualToValue={(option, value) => {
-                            if (value) option.bankID === value.bankID;
+                            option.bankID === value.bankID;
                           }}
-                          options={dataBank}
+                          options={listBank}
                           getOptionLabel={(option) => option.bankName}
                           onChange={(e, value) => {
                             setFieldValue(
                               "bank",
                               value !== null ? value : initialValues["bank"]
                             );
+                            setBankEdit(value);
                           }}
                           renderInput={(params) => (
                             <FormField
