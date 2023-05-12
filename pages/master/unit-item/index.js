@@ -40,6 +40,8 @@ export default function UnitItem(props) {
   const [modalParams, setModalParams] = useState(undefined);
   const [{ accessToken, encryptedAccessToken }] = useCookies();
   const formikRef = useRef();
+  const [dataTemplateInvoice, setDataTemplateInvoice] = useState([]);
+  const [dataBank, setDataBank] = useState([]);
 
   useEffect(() => {
     let currentSite = JSON.parse(localStorage.getItem("site"));
@@ -48,6 +50,7 @@ export default function UnitItem(props) {
     } else {
       setSite(currentSite);
     }
+    getBank();
   }, []);
 
   const [customerRequest, setCustomerRequest] = useState({
@@ -87,6 +90,7 @@ export default function UnitItem(props) {
       totalPages: undefined,
     }));
     fetchData();
+    getTemplateInvoice();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [site]);
   useEffect(() => {
@@ -198,6 +202,40 @@ export default function UnitItem(props) {
     localStorage.setItem("site", JSON.stringify(siteVal));
   };
 
+  const getBank = async () => {
+    let response = await fetch("/api/cashier/billing/getdropdownbank", {
+      method: "POST",
+      body: JSON.stringify({
+        accessToken: accessToken,
+      }),
+    });
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
+
+    if (response.error)
+      alertService.error({ title: "Error", text: response.error.message });
+    else setDataBank(response.result);
+  };
+
+  const getTemplateInvoice = async (val) => {
+    let response = await fetch(
+      "/api/master/unititem/getdropdownmastertemplate",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          accessToken: accessToken,
+          params: { SiteID: site?.siteId },
+        }),
+      }
+    );
+    if (!response.ok) throw new Error(`{Error}: ${response.status}`);
+    response = typeNormalization(await response.json());
+
+    if (response.error)
+      alertService.error({ title: "Error", text: response.error.message });
+    else setDataTemplateInvoice(response.result);
+  };
+
   return (
     <DashboardLayout>
       <DashboardNavbar />
@@ -272,18 +310,20 @@ export default function UnitItem(props) {
           isOpen={openUpload}
           onModalChanged={(isChanged) => {
             setOpenUpload(!openUpload);
-            (isChanged === true) && fetchData();
+            isChanged === true && fetchData();
           }}
         />
       )}
       {openEdit && (
         <EditDataUnitItem
+          listBank={dataBank}
+          listTemplate={dataTemplateInvoice}
           site={site}
           isOpen={openEdit}
           params={modalParams}
           onModalChanged={(isChanged) => {
             setOpenEdit(!openEdit);
-            (isChanged === true) && fetchData();
+            isChanged === true && fetchData();
           }}
         />
       )}
