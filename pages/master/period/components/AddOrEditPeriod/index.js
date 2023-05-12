@@ -248,7 +248,7 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
     Block.remove(`.${createPeriodBlockLoadingName}`),
       actions.setSubmitting(false), setLoadingSubmit(false);
   };
-  const closeModal = (isChanged) => {
+  const closeModal = (isChanged = false) => {
     setNo(undefined), setformValues({});
     setTimeout(() => onModalChanged(isChanged), 0);
   };
@@ -316,7 +316,10 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
     };
 
     return (
-      <Modal isOpen={isOpen}>
+      <Modal 
+        isOpen={isOpen}
+        className={createPeriodBlockLoadingName}
+      >
         <Formik
           initialValues={initialValues}
           validationSchema={schemeValidations}

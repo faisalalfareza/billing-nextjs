@@ -168,7 +168,7 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
 
   const openModal = () => setModalOpen(true);
   const toggleModal = () => setModalOpen(true);
-  const closeModal = (isChanged) => {
+  const closeModal = (isChanged = false) => {
     setModalOpen(false);
     setTimeout(() => setDetailCancelPayment({}), 1500);
     setTimeout(() => onModalChanged(isChanged), 0);
