@@ -30,6 +30,9 @@ import sidenavLogoLabel from "/layout/Sidenav/styles/sidenav";
 
 function Sidenav({ color, brand, brandName, routes, ...rest }) {
   const [{ accessToken, encryptedAccessToken }] = useCookies();
+  
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => { setHydrated(true) }, []);
 
   const [openCollapse, setOpenCollapse] = useState(false);
   const [openNestedCollapse, setOpenNestedCollapse] = useState(false);
@@ -169,10 +172,10 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
                       key: "application",
                       value: localStorage.getItem("application"),
                     },
-                    {
-                      key: "profilePicture",
-                      value: localStorage.getItem("profilePicture"),
-                    },
+                    // {
+                    //   key: "profilePicture",
+                    //   value: localStorage.getItem("profilePicture"),
+                    // },
                   ];
                   localStorage.clear();
                   cached.forEach((c) => localStorage.setItem(c.key, c.value));
@@ -253,6 +256,9 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
       onClick,
     } = e;
     let returnValue;
+
+    if ((key === "username") && !hydrated)
+      return returnValue;
 
     if (type === "collapse") {
       if (href) {

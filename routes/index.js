@@ -61,17 +61,12 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
       // name: "Brooklyn Alice",
       name: informations
         ? capitalizeFirstLetter(informations["user"]["userName"])
-        : "Brooklyn Alice",
+        : "~",
       key: "username",
       // icon: <MDAvatar src={profilePicture.src} size="sm" />,
       icon: profiles ? (
         <MDAvatar
           src={`data:image/png;base64, ${profiles}`}
-          alt={
-            informations
-              ? capitalizeFirstLetter(informations["user"]["name"])
-              : "Brooklyn Alice"
-          }
           size="sm"
         />
       ) : (
