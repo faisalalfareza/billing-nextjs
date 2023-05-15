@@ -388,8 +388,9 @@ function EditDataUnitItem(props) {
                           name="templateInvoice"
                           key="templateInvoice"
                           isOptionEqualToValue={(option, value) => {
-                            option.templateInvoiceHeaderId ===
-                              value.templateInvoiceHeaderId;
+                            if (value)
+                              option.templateInvoiceHeaderId ===
+                                value.templateInvoiceHeaderId;
                           }}
                           value={templateEdit}
                           options={listTemplate}
@@ -444,7 +445,7 @@ function EditDataUnitItem(props) {
                           key="bank"
                           value={bankEdit}
                           isOptionEqualToValue={(option, value) => {
-                            option.bankID === value.bankID;
+                            if (value) option.bankID === value.bankID;
                           }}
                           options={listBank}
                           getOptionLabel={(option) => option.bankName}
