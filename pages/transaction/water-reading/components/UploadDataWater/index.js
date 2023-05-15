@@ -18,6 +18,7 @@ import MDBox from "/components/MDBox";
 import MDTypography from "/components/MDTypography";
 import MDButton from "/components/MDButton";
 import FormField from "/pagesComponents/FormField";
+import { Block } from "notiflix/build/notiflix-block-aio";
 
 // Data
 import { typeNormalization } from "/helpers/utils";
@@ -33,28 +34,7 @@ function UploadDataWater(props) {
   const [dataWater, setDataWater] = useState([]);
   const [cols, setCols] = useState([]);
   const [period, setPeriod] = useState(null);
-  const SheetJSFT = [
-    "xlsx",
-    "xlsb",
-    "xlsm",
-    "xls",
-    "xml",
-    "csv",
-    "txt",
-    "ods",
-    "fods",
-    "uos",
-    "sylk",
-    "dif",
-    "dbf",
-    "prn",
-    "qpw",
-    "123",
-    "wb*",
-    "wq*",
-    "html",
-    "htm",
-  ]
+  const SheetJSFT = ["xlsx", "xlsb", "xlsm", "xls", "xml", "csv"]
     .map(function (x) {
       return "." + x;
     })
@@ -89,7 +69,7 @@ function UploadDataWater(props) {
       },
       cluster: {
         name: "cluster",
-        label: "Cluster",
+        label: "Cluster *",
         placeholder: "Choose Cluster",
         type: "text",
         isRequired: false,
@@ -121,10 +101,12 @@ function UploadDataWater(props) {
   const [formValues, setformValues] = useState(initialValues);
 
   const getFormData = (values) => {
-    console.log("val----", values);
   };
 
+  const projectBlockLoadingName = "block-project";
   const getProject = async (val) => {
+    Block.dots(`.${projectBlockLoadingName}`);
+
     let response = await fetch(
       "/api/transaction/water/getdropdownprojectbysiteid",
       {
@@ -139,11 +121,11 @@ function UploadDataWater(props) {
     );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    if (response.error) {
-      alertService.error({ title: "Error", text: response.error.message });
-    } else {
-      setDataProject(response.result);
-    }
+    
+    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+    else setDataProject(response.result);
+
+    Block.remove(`.${projectBlockLoadingName}`);
   };
 
   const getPeriod = async (val) => {
@@ -158,11 +140,9 @@ function UploadDataWater(props) {
     });
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    if (response.error) {
-      alertService.error({ title: "Error", text: response.error.message });
-    } else {
-      setPeriod(response.result);
-    }
+    
+    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+    else setPeriod(response.result);
   };
   useEffect(() => {
     if (site) {
@@ -172,7 +152,10 @@ function UploadDataWater(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
+  const clusterBlockLoadingName = "block-cluster";
   const onProjectChange = async (val) => {
+    Block.dots(`.${clusterBlockLoadingName}`);
+
     let response = await fetch("/api/master/site/getdropdownclusterbyproject", {
       method: "POST",
       body: JSON.stringify({
@@ -191,12 +174,16 @@ function UploadDataWater(props) {
         text: response.error.message,
         icon: "error",
       });
-    } else {
-      setDataCluster(response.result);
-    }
+    } else setDataCluster(response.result);
+
+    Block.remove(`.${clusterBlockLoadingName}`);
   };
+
+  const uploadExcelWaterReadingBlockLoadingName = "block-upload-excel-water-reading";
   const uploadExcel = async (values, actions) => {
-    setLoading(true);
+    Block.standard(`.${uploadExcelWaterReadingBlockLoadingName}`, `Uploading Water Reading`),
+      setLoading(true);
+
     let listCluster = [];
     formValues.cluster.map((e) => {
       listCluster.push(e.clusterId);
@@ -231,9 +218,8 @@ function UploadDataWater(props) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error) {
-      alertService.error({ text: response.error.message, title: "Error" });
-    } else {
+    if (response.error) alertService.error({ text: response.error.message, title: "Error" });
+    else {
       const isFailed = response.result.totalGagal > 0;
       // Swal.fire({
       //   title: "Uploading success",
@@ -277,19 +263,22 @@ function UploadDataWater(props) {
           }, 0);
         }
         setDataWater([]);
-        setLoading(false);
-        // actions.resetForm();
-        // closeModal();
+
+        if (!isFailed) 
+          closeModal(true);
       });
     }
+
+    Block.remove(`.${uploadExcelWaterReadingBlockLoadingName}`),
+      setLoading(false);
   };
 
   const openModal = () => setModalOpen(true);
   const toggleModal = () => setModalOpen(true);
-  const closeModal = () => {
+  const closeModal = (isChanged = false) => {
     setModalOpen(false);
-    setDataWater([]);
-    setTimeout(() => onModalChanged(), 0);
+    setTimeout(() => setDataWater([]), 1500);
+    setTimeout(() => onModalChanged(isChanged), 0);
   };
 
   if (isOpen) {
@@ -297,9 +286,7 @@ function UploadDataWater(props) {
       [project.name]: project.isRequired
         ? Yup.object().required(project.errorMsg).typeError(project.errorMsg)
         : Yup.object().notRequired(),
-      [cluster.name]: cluster.isRequired
-        ? Yup.array().min(1).required(cluster.errorMsg)
-        : Yup.array().notRequired(),
+      [cluster.name]: Yup.array().min(1).required(cluster.errorMsg),
       [fileUpload.name]: fileUpload.isRequired
         ? Yup.mixed().required(fileUpload.errorMsg)
         : Yup.mixed().notRequired(),
@@ -316,6 +303,8 @@ function UploadDataWater(props) {
       // await sleep(1000);
       uploadExcel(values, actions);
     };
+
+    const uploadedListBlockLoadingName = "block-uploaded-list";
     const handleFile = (file /*:File*/) => {
       /* Boilerplate to set up FileReader */
       const reader = new FileReader();
@@ -333,13 +322,19 @@ function UploadDataWater(props) {
         setDataWater(data);
         setCols(make_cols(ws["!ref"]));
         // this.setState({ data: data, cols: make_cols(ws["!ref"]) });
+
+        Block.remove(`.${uploadedListBlockLoadingName}`);
       };
       if (rABS) reader.readAsBinaryString(file);
       else reader.readAsArrayBuffer(file);
     };
     const handleChangeFile = (e) => {
       const files = e.target.files;
-      if (files && files[0]) handleFile(files[0]);
+      if (files && files[0]) {
+        Block.dots(`.${uploadedListBlockLoadingName}`);
+
+        handleFile(files[0]);
+      }
     };
 
     return (
@@ -350,6 +345,7 @@ function UploadDataWater(props) {
         toggle={toggleModal}
         onOpened={openModal}
         onClosed={closeModal}
+        className={uploadExcelWaterReadingBlockLoadingName}
       >
         <Formik
           initialValues={initialValues}
@@ -433,6 +429,7 @@ function UploadDataWater(props) {
                                 formValues.project,
                                 errors.project
                               )}
+                              className={projectBlockLoadingName}
                             />
                           )}
                         />
@@ -473,6 +470,7 @@ function UploadDataWater(props) {
                                 formValues.cluster,
                                 errors.cluster
                               )}
+                              className={clusterBlockLoadingName}
                             />
                           )}
                         />
@@ -497,6 +495,7 @@ function UploadDataWater(props) {
                             handleChangeFile(e);
                             setFieldValue(fileUpload.name, e.target.value);
                           }}
+                          className={uploadedListBlockLoadingName}
                         />
                         {dataWater.length > 0 && (
                           <MDTypography variant="body">

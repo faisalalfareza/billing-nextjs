@@ -24,6 +24,7 @@ import { useCookies } from "react-cookie";
 import { typeNormalization } from "/helpers/utils";
 import SiteDropdown from "../../../pagesComponents/dropdown/Site";
 import { alertService } from "/helpers";
+import { Block } from "notiflix/build/notiflix-block-aio";
 
 export default function MasterPeriod(props) {
   const [listSite, setListSite] = useState([]);
@@ -34,21 +35,15 @@ export default function MasterPeriod(props) {
   const [{ accessToken, encryptedAccessToken }] = useCookies();
 
   useEffect(() => {
-    let currentSite = JSON.parse(localStorage.getItem("site"));
-    if (currentSite == null) {
-      alertService.info({ title: "Info", text: "Please choose Site first" });
-    } else {
-      setSite(currentSite);
-    }
-
+    let currentSite = typeNormalization(localStorage.getItem("site"));
+    if (currentSite == null) alertService.info({ title: "Info", text: "Please choose Site first" });
+    else setSite(currentSite);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => {
-    if (site != undefined) fetchData();
+    site && fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [site]);
-
-  //dari sini
 
   const setSiteList = () => {
     return {
@@ -82,7 +77,6 @@ export default function MasterPeriod(props) {
               <PeriodRowActions
                 record={value}
                 openModalonEdit={openModalAddOrEditOnEdit}
-                onDeleted={fetchData}
               />
             );
           },
@@ -97,18 +91,15 @@ export default function MasterPeriod(props) {
     setOpenModal(!openModal);
   };
 
-  const changeModalAddOrEdit = () => {
-    setOpenModal(!openModal);
-    fetchData();
-  };
-
   const openModalAddOrEditOnAdd = () => {
     setModalParams(undefined);
     setOpenModal(!openModal);
   };
-  const handleClose = () => setOpenModal(false);
 
-  const fetchData = async (data) => {
+  const periodBlockLoadingName = "block-period";
+  const fetchData = async () => {
+    Block.standard(`.${periodBlockLoadingName}`, `Getting Period Data`);
+
     let response = await fetch("/api/master/period/getlistmasterperiod", {
       method: "POST",
       body: JSON.stringify({
@@ -153,13 +144,14 @@ export default function MasterPeriod(props) {
       });
       setListSite(list);
     }
+
+    Block.remove(`.${periodBlockLoadingName}`);
   };
 
   const handleSite = (siteVal) => {
     setSite(siteVal);
     localStorage.setItem("site", JSON.stringify(siteVal));
   };
-  //sampai sini
 
   return (
     <DashboardLayout>
@@ -197,7 +189,7 @@ export default function MasterPeriod(props) {
             </MDBox>
           </MDBox>
         </MDBox>
-        <Card>
+        <Card className={periodBlockLoadingName}>
           <MDBox>
             <Grid container alignItems="center">
               <Grid item xs={12}>
@@ -212,13 +204,17 @@ export default function MasterPeriod(props) {
         </Card>
       </MDBox>
 
-      <AddOrEditPeriod
-        site={site}
-        isOpen={openModal}
-        params={modalParams}
-        onModalChanged={changeModalAddOrEdit}
-      />
-      
+      {openModal && (
+        <AddOrEditPeriod
+          site={site}
+          isOpen={openModal}
+          params={modalParams}
+          onModalChanged={(isChanged) => {
+            setOpenModal(!openModal);
+            (isChanged === true) && fetchData();
+          }}
+        />
+      )}
     </DashboardLayout>
   );
 }

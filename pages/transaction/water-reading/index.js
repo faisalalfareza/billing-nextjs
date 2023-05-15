@@ -26,6 +26,7 @@ import UploadDataWater from "./components/UploadDataWater";
 import WaterRowActions from "./components/WaterRowActions";
 import EditDataWater from "./components/EditDataWater";
 import SiteDropdown from "../../../pagesComponents/dropdown/Site";
+import { Block } from "notiflix/build/notiflix-block-aio";
 
 export default function WaterReading(props) {
   const [controller] = useMaterialUIController();
@@ -87,7 +88,10 @@ export default function WaterReading(props) {
     }));
   };
 
+  const projectBlockLoadingName = "block-project";
   const getProject = async (val) => {
+    Block.dots(`.${projectBlockLoadingName}`);
+
     let response = await fetch(
       "/api/transaction/water/getdropdownprojectbysiteid",
       {
@@ -102,11 +106,11 @@ export default function WaterReading(props) {
     );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    if (response.error) {
-      alertService.error({ title: "Error", text: response.error.message });
-    } else {
-      setDataProject(response.result);
-    }
+    
+    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+    else setDataProject(response.result);
+
+    Block.remove(`.${projectBlockLoadingName}`);
   };
   useEffect(() => {
     getProject();
@@ -207,8 +211,11 @@ export default function WaterReading(props) {
   ];
   const [tasklist, setTasklist] = useState({ columns: columns, rows: [] });
 
+  const waterReadingBlockLoadingName = "block-water-reading";
   const fetchData = async (data) => {
-    setLoading(true);
+    Block.standard(`.${waterReadingBlockLoadingName}`, `Getting Water Reading Data`),
+      setLoading(true);
+
     const { scheme, keywords, recordsPerPage, skipCount } = customerRequest;
     let response = await fetch("/api/transaction/water/getwaterreadinglist", {
       method: "POST",
@@ -227,8 +234,7 @@ export default function WaterReading(props) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error)
-      alertService.error({ title: "Error", text: response.error.message });
+    if (response.error) alertService.error({ title: "Error", text: response.error.message });
     else {
       let data = response.result;
       const list = [];
@@ -250,9 +256,10 @@ export default function WaterReading(props) {
         totalRows: data.totalCount,
         totalPages: Math.ceil(data.totalCount / customerRequest.recordsPerPage),
       }));
-
-      setLoading(false);
     }
+
+    Block.remove(`.${waterReadingBlockLoadingName}`),
+      setLoading(false);
   };
 
   const setCustomerTaskList = (list) => {
@@ -290,7 +297,10 @@ export default function WaterReading(props) {
     }
   };
 
+  const clusterBlockLoadingName = "block-cluster";
   const onProjectChange = async (val) => {
+    Block.dots(`.${clusterBlockLoadingName}`);
+
     let response = await fetch("/api/master/site/getdropdownclusterbyproject", {
       method: "POST",
       body: JSON.stringify({
@@ -303,26 +313,15 @@ export default function WaterReading(props) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error) {
-      alertService.error({ title: "Error", text: response.error.message });
-    } else {
-      setDataCluster(response.result);
-    }
+    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+    else setDataCluster(response.result);
+
+    Block.remove(`.${clusterBlockLoadingName}`);
   };
 
   const openModalEdit = (record) => {
     setModalParams(record);
     setOpenEdit(true);
-  };
-
-  const changeModalUpload = () => {
-    setOpenUpload(!openUpload);
-    fetchData();
-  };
-
-  const changeModalEdit = () => {
-    setOpenEdit(false);
-    fetchData();
   };
 
   const handleSite = (siteVal) => {
@@ -436,6 +435,7 @@ export default function WaterReading(props) {
                                           formValues.project,
                                           errors.project
                                         )}
+                                        className={projectBlockLoadingName}
                                       />
                                     )}
                                   />
@@ -478,6 +478,7 @@ export default function WaterReading(props) {
                                           formValues.cluster,
                                           errors.cluster
                                         )}
+                                        className={clusterBlockLoadingName}
                                       />
                                     )}
                                   />
@@ -548,7 +549,7 @@ export default function WaterReading(props) {
             </MDBox>
           </MDBox>
         </MDBox>
-        <Card>
+        <Card className={waterReadingBlockLoadingName}>
           <MDBox>
             <Grid container alignItems="center">
               <Grid item xs={12}>
@@ -576,17 +577,27 @@ export default function WaterReading(props) {
         </Card>
       </MDBox>
 
-      <UploadDataWater
-        site={site}
-        isOpen={openUpload}
-        onModalChanged={changeModalUpload}
-      />
-      <EditDataWater
-        site={site}
-        isOpen={openEdit}
-        params={modalParams}
-        onModalChanged={changeModalEdit}
-      />
+      {openUpload && (
+        <UploadDataWater
+          site={site}
+          isOpen={openUpload}
+          onModalChanged={(isChanged) => {
+            setOpenUpload(!openUpload);
+            (isChanged === true) && fetchData();
+          }}
+        />
+      )}
+      {openEdit && (
+        <EditDataWater
+          site={site}
+          isOpen={openEdit}
+          params={modalParams}
+          onModalChanged={(isChanged) => {
+            setOpenEdit(!openEdit);
+            (isChanged === true) && fetchData();
+          }}
+        />
+      )}
     </DashboardLayout>
   );
 }

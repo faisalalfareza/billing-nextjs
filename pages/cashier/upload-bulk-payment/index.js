@@ -7,6 +7,7 @@ import * as XLSX from "xlsx";
 import * as Helpers from "/helpers";
 
 import { Card, Grid, Icon, Autocomplete } from "@mui/material";
+import { Block } from "notiflix/build/notiflix-block-aio";
 
 import MDBox from "/components/MDBox";
 import MDTypography from "/components/MDTypography";
@@ -85,8 +86,11 @@ function UploadBulkPayment() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const paymentMethodBlockLoadingName = "block-payment-method";
   const [paymentMethodList, setPaymentMethodList] = useState([]);
   const getDropdownPaymentMethod = async () => {
+    Block.dots(`.${paymentMethodBlockLoadingName}`);
+
     let response = await fetch(
       "/api/cashier/bulk-payment/getdropdownpaymentmethod",
       {
@@ -102,12 +106,15 @@ function UploadBulkPayment() {
     if (response.error)
       alertService.error({ title: "Error", text: response.error.message });
     else setPaymentMethodList(response);
+
+    Block.remove(`.${paymentMethodBlockLoadingName}`);
   };
   useEffect(() => {
     getDropdownPaymentMethod();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [site]);
 
+  const uploadedListBlockLoadingName = "block-uploaded-list";
   const [uploadedList, setUploadedList] = useState([]);
   const uploadaOptions = {
     fileType: ["xlsx", "xls"],
@@ -129,6 +136,8 @@ function UploadBulkPayment() {
           success: "Upload Bulk Payment Successfully",
         };
 
+      Block.dots(`.${uploadedListBlockLoadingName}`);
+      
       // Validation Step 1: File size & type
       if (uploadaOptions.fileType.indexOf(getExtension(file.name)) == -1) {
         message.failed +=
@@ -143,7 +152,7 @@ function UploadBulkPayment() {
         isPassed[0] = true;
       }
 
-      if (!isPassed[0]) Notify.failure(message.failed);
+      if (!isPassed[0]) Notify.failure(message.failed), Block.remove(`.${uploadedListBlockLoadingName}`);
       else onFileUpload(file, isPassed, message);
     }
   };
@@ -162,8 +171,7 @@ function UploadBulkPayment() {
         const wsname = wb.SheetNames[0];
         const ws = wb.Sheets[wsname];
         const data = XLSX.utils.sheet_to_json(ws, { header: 2 });
-        console.log("data----", data);
-        console.log("data----", typeof data[0]["Transaction Date"]);
+
         let data_formated = [];
         for (const e of data) {
           const valueOfKeys = [
@@ -177,7 +185,7 @@ function UploadBulkPayment() {
           // Validation Step 3: Cell empty
           if (valueOfKeys.indexOf(undefined) != -1) {
             message.failed += "some cells are still empty or not filled";
-            Notify.failure(message.failed);
+            Notify.failure(message.failed), Block.remove(`.${uploadedListBlockLoadingName}`);
             data_formated = [];
 
             break;
@@ -193,10 +201,10 @@ function UploadBulkPayment() {
           }
         }
         setUploadedList(data_formated);
-        uploadedList.length > 0 && Notify.success(message.success);
+        if (uploadedList.length > 0) Notify.success(message.success), Block.remove(`.${uploadedListBlockLoadingName}`);
       } else {
         message.failed += "file is still empty or not filled";
-        Notify.failure(message.failed);
+        Notify.failure(message.failed), Block.remove(`.${uploadedListBlockLoadingName}`);
       }
     };
 
@@ -220,7 +228,6 @@ function UploadBulkPayment() {
   };
 
   const excelDateToJSDate = (serial) => {
-    console.log("serial---", serial);
     var utc_days = Math.floor(serial - 25569);
     var utc_value = utc_days * 86400;
     var date_info = new Date(utc_value * 1000);
@@ -254,10 +261,12 @@ function UploadBulkPayment() {
   const handleUploadBulkPaymentSubmit = (values, actions) =>
     uploadBulkPayment(values, actions);
 
+  const uploadBulkPaymentBlockLoadingName = "block-upload-bulk-payment";
   const [isLoadingUploadBulkPayment, setLoadingUploadBulkPayment] =
     useState(false);
   const uploadBulkPayment = async (values, actions) => {
-    setLoadingUploadBulkPayment(true);
+    Block.standard(`.${uploadBulkPaymentBlockLoadingName}`, `Uploading Bulk Payments`),
+      setLoadingUploadBulkPayment(true);
 
     let response = await fetch("/api/cashier/bulk-payment/uploadBulkPayment", {
       method: "POST",
@@ -281,7 +290,7 @@ function UploadBulkPayment() {
     } else {
       if (response.success) {
         const isFailed = response.result.totalGagal > 0;
-
+        Block.standard(`.${uploadBulkPaymentBlockLoadingName}`)
         Swal.fire({
           title: "Upload Bulk Payment Successfull",
           html:
@@ -310,8 +319,8 @@ function UploadBulkPayment() {
           setUploadedList([]);
         });
       }
-    }
-    setLoadingUploadBulkPayment(false);
+    } Block.remove(`.${uploadBulkPaymentBlockLoadingName}`),
+      setLoadingUploadBulkPayment(false);
   };
 
   return (
@@ -338,7 +347,7 @@ function UploadBulkPayment() {
       <MDBox mt={2}>
         <Grid container spacing={2}>
           <Grid item xs={12}>
-            <Card>
+            <Card className={uploadBulkPaymentBlockLoadingName}>
               <MDBox p={3} lineHeight={1}>
                 <Grid container alignItems="center" spacing={2}>
                   <Grid item xs={12} md={8} mb={2}>
@@ -425,6 +434,7 @@ function UploadBulkPayment() {
                                             errors.paymentMethod
                                           )
                                         }
+                                        className={paymentMethodBlockLoadingName}
                                       />
                                     )}
                                   />
@@ -456,6 +466,7 @@ function UploadBulkPayment() {
                                       );
                                       onFileChange(e.target.files);
                                     }}
+                                    className={uploadedListBlockLoadingName}
                                   />
                                   {/* <MDTypography variant="caption" color="error" fontWeight="regular">*Only file .xls/.xlsx and maximum file size 2mb</MDTypography> */}
                                 </Grid>

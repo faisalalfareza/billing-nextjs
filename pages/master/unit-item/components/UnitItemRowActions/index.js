@@ -7,8 +7,7 @@ import MenuItem from "@mui/material/MenuItem";
 
 import MDBox from "/components/MDBox";
 import MDButton from "/components/MDButton";
-
-function PeriodRowActions({ record, openModalonEdit, onDeleted }) {
+function UnitItemRowActions({ record, openModalonEdit, onDeleted }) {
   let [menu, setMenu] = useState(null);
   const open = Boolean(menu);
 
@@ -47,16 +46,16 @@ function PeriodRowActions({ record, openModalonEdit, onDeleted }) {
   );
 }
 
-// Setting default value for the props of PeriodRowActions
-PeriodRowActions.defaultProps = {
-  record: undefined
+// Setting default value for the props of UnitItemRowActions
+UnitItemRowActions.defaultProps = {
+  record: undefined,
 };
 
-// Typechecking props for the PeriodRowActions
-PeriodRowActions.propTypes = {
+// Typechecking props for the UnitItemRowActions
+UnitItemRowActions.propTypes = {
   record: PropTypes.any.isRequired,
   openModalonEdit: PropTypes.func,
   onDeleted: PropTypes.func,
 };
 
-export default PeriodRowActions;
+export default UnitItemRowActions;

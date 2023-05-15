@@ -22,6 +22,7 @@ import Icon from "@mui/material/Icon";
 import MDBadgeDot from "/components/MDBadgeDot";
 import { useCookies } from "react-cookie";
 import { typeNormalization } from "/helpers/utils";
+import { Block } from "notiflix/build/notiflix-block-aio";
 
 export default function MasterSite(props) {
   const { dataProject, dataSite } = props;
@@ -94,7 +95,7 @@ export default function MasterSite(props) {
           Cell: ({ value }) => {
             return (
               <MDBadgeDot
-                color={value ? "success" : "danger"}
+                color={value ? "success" : "error"}
                 size="sm"
                 badgeContent={value ? "Active" : "Inactive"}
               />
@@ -126,18 +127,16 @@ export default function MasterSite(props) {
     setOpenModal(!openModal);
   };
 
-  const changeModalAddOrEdit = () => {
-    setOpenModal(!openModal);
-    fetchData();
-  };
-
   const openModalAddOrEditOnAdd = () => {
     setModalParams(undefined);
     setOpenModal(!openModal);
   };
   const handleClose = () => setOpenModal(false);
 
+  const siteBlockLoadingName = "block-site";
   const fetchData = async (data) => {
+    Block.standard(`.${siteBlockLoadingName}`, `Getting Site Data`);
+
     let response = await fetch("/api/master/site/getlistmastersite", {
       method: "POST",
       body: JSON.stringify({
@@ -174,6 +173,7 @@ export default function MasterSite(props) {
       setListSite(list);
     }
 
+    Block.remove(`.${siteBlockLoadingName}`);
     // const url = `${publicRuntimeConfig.apiUrl}/api/services/app/MasterBilling/GetListMasterSite`;
     // axios
     //   .get(url, {
@@ -219,7 +219,7 @@ export default function MasterSite(props) {
       <DashboardNavbar />
 
       <MDBox mt={3}>
-      <MDBox
+        <MDBox
           display="flex"
           justifyContent="flex-end"
           alignItems="flex-start"
@@ -227,33 +227,42 @@ export default function MasterSite(props) {
         >
           <MDBox display="flex">
             <MDBox>
-              <MDButton variant="gradient" color="primary" onClick={openModalAddOrEditOnAdd}>
+              <MDButton
+                variant="gradient"
+                color="primary"
+                onClick={openModalAddOrEditOnAdd}
+              >
                 <Icon>add</Icon>&nbsp; Add New Site
               </MDButton>
             </MDBox>
           </MDBox>
         </MDBox>
-        <Card>
+        <Card className={siteBlockLoadingName}>
           <MDBox>
             <Grid container alignItems="center">
               <Grid item xs={12}>
                 <DataTable
-                  title="Master Site List" description="For Site Data Maintenance"
+                  title="Master Site List"
+                  description="For Site Data Maintenance"
                   table={setSiteList()}
                   canSearch
                 />
               </Grid>
             </Grid>
-          </MDBox> 
+          </MDBox>
         </Card>
       </MDBox>
 
-      <AddOrEditSite
-        isOpen={openModal}
-        params={modalParams}
-        onModalChanged={changeModalAddOrEdit}
-      />
-
+      {openModal && (
+        <AddOrEditSite
+          isOpen={openModal}
+          params={modalParams}
+          onModalChanged={(isChanged) => {
+            setOpenModal(!openModal);
+            (isChanged === true) && fetchData();
+          }}
+        />
+      )}
     </DashboardLayout>
   );
 }

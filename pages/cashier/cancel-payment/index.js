@@ -5,6 +5,7 @@ import * as Yup from "yup";
 import Swal from "sweetalert2";
 
 import { Card, Grid, Icon, Radio } from "@mui/material";
+import { Block } from "notiflix/build/notiflix-block-aio";
 
 import MDBox from "/components/MDBox";
 import MDTypography from "/components/MDTypography";
@@ -66,6 +67,7 @@ function CancelPayment() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const customerBlockLoadingName = "block-customer";
   const [isLoadingCustomer, setLoadingCustomer] = useState(false);
   const [customerRequest, setCustomerRequest] = useState({
     scheme: site?.siteId,
@@ -103,7 +105,8 @@ function CancelPayment() {
   };
 
   const getCustomerList = async (data) => {
-    setLoadingCustomer(true);
+    Block.standard(`.${customerBlockLoadingName}`, `Searching for Customer`),
+      setLoadingCustomer(true);
 
     const { scheme, keywords, recordsPerPage, skipCount } = customerRequest;
     let response = await fetch("/api/cashier/cancel-payment/getcustomerlist", {
@@ -131,8 +134,8 @@ function CancelPayment() {
           response.totalCount / customerRequest.recordsPerPage
         ),
       }));
-    }
-    setLoadingCustomer(false);
+    } Block.remove(`.${customerBlockLoadingName}`),
+      setLoadingCustomer(false);
   };
   const setCustomerTaskList = (rows) => {
     return {
@@ -145,7 +148,15 @@ function CancelPayment() {
                 checked={row.original == selectedUnit}
                 name="radio-buttons"
                 value={row.original}
-                onChange={(changed) => setSelectedUnit(row.original)}
+                onChange={(changed) => {
+                  if (row.original != selectedUnit) {
+                    setCancelPaymentData({
+                      rowData: [],
+                      totalRows: undefined,
+                      totalPages: undefined
+                    });
+                  } setSelectedUnit(row.original);
+                }}
               />
             );
           },
@@ -182,6 +193,7 @@ function CancelPayment() {
     getCustomerList();
   };
 
+  const cancelPaymentBlockLoadingName = "block-cancel-payment";
   const [isLoadingCancelPayment, setLoadingCancelPayment] = useState(false);
   const [cancelPaymentData, setCancelPaymentData] = useState({
     rowData: [],
@@ -190,7 +202,8 @@ function CancelPayment() {
   });
 
   const getCancelPaymentList = async (unitDataID) => {
-    setLoadingCancelPayment(true);
+    Block.standard(`.${cancelPaymentBlockLoadingName}`, `Getting Cancel Payment Data`),
+      setLoadingCancelPayment(true);
 
     let response = await fetch(
       "/api/cashier/cancel-payment/getlistcancelpayment",
@@ -219,8 +232,8 @@ function CancelPayment() {
           response.totalCount / customerRequest.recordsPerPage
         ),
       }));
-    }
-    setLoadingCancelPayment(false);
+    } Block.remove(`.${cancelPaymentBlockLoadingName}`),
+      setLoadingCancelPayment(false);
   };
   const setCancelPaymentTaskList = (rows) => {
     return {
@@ -310,7 +323,7 @@ function CancelPayment() {
       <MDBox mt={2}>
         <Grid container spacing={2}>
           <Grid item xs={12}>
-            <Card>
+            <Card className={customerBlockLoadingName}>
               <MDBox px={3} pt={3} pb={2} lineHeight={1}>
                 <Grid container alignItems="center" spacing={2}>
                   <Grid item xs={12}>
@@ -456,7 +469,7 @@ function CancelPayment() {
 
           {cancelPaymentData.rowData.length > 0 && (
             <Grid item xs={12}>
-              <Card>
+              <Card className={cancelPaymentBlockLoadingName}>
                 <MDBox>
                   <Grid container alignItems="center">
                     <Grid item xs={12}>
@@ -479,7 +492,7 @@ function CancelPayment() {
                       ...prevState,
                       isOpen: !modalOpen.isOpen,
                     }));
-                    isChanged && getCancelPaymentList(selectedUnit.unitDataId);
+                    (isChanged === true) && getCancelPaymentList(selectedUnit.unitDataId);
                   }}
                 />
               )}

@@ -20,6 +20,7 @@ import FormField from "/pagesComponents/FormField";
 // Data
 import { useCookies } from "react-cookie";
 import { typeNormalization } from "/helpers/utils";
+import { Block } from "notiflix/build/notiflix-block-aio";
 
 function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
   const [{ accessToken, encryptedAccessToken }] = useCookies();
@@ -34,7 +35,10 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
+  const projectBlockLoadingName = "block-project";
   const getProject = async () => {
+    Block.dots(`.${projectBlockLoadingName}`);
+
     let response = await fetch("/api/master/site/getdropdownproject", {
       method: "POST",
       body: JSON.stringify({
@@ -50,12 +54,15 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
         text: response.error.message,
         icon: "error",
       });
-    } else {
-      setDataProject(response.result);
-    }
+    } else setDataProject(response.result);
+
+    Block.remove(`.${projectBlockLoadingName}`);
   };
 
+  const clusterBlockLoadingName = "block-cluster";
   const onProjectChange = async (val) => {
+    Block.dots(`.${clusterBlockLoadingName}`);
+
     let response = await fetch("/api/master/site/getdropdownclusterbyproject", {
       method: "POST",
       body: JSON.stringify({
@@ -74,12 +81,15 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
         text: response.error.message,
         icon: "error",
       });
-    } else {
-      setDataCluster(response.result);
-    }
+    } else setDataCluster(response.result);
+
+    Block.remove(`.${clusterBlockLoadingName}`);
   };
 
+  const createSiteBlockLoadingName = "block-create-site";
   const createSite = async (fields, actions) => {
+    Block.standard(`.${createSiteBlockLoadingName}`, `Creating Site`);
+
     let listCluster = [];
     fields.cluster.map((e) => {
       listCluster.push({ clusterId: e.clusterId });
@@ -131,13 +141,15 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
         timer: 3000,
       }).then(() => {
         actions.resetForm();
-        closeModal();
+        closeModal(true);
       });
     }
-    actions.setSubmitting(false);
+
+    Block.remove(`.${createSiteBlockLoadingName}`),
+      actions.setSubmitting(false);
   };
-  const closeModal = () => {
-    setTimeout(() => onModalChanged(), 0);
+  const closeModal = (isChanged = false) => {
+    setTimeout(() => onModalChanged(isChanged), 0);
   };
 
   if (isOpen) {
@@ -179,7 +191,10 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
     };
 
     return (
-      <Modal isOpen={isOpen}>
+      <Modal 
+        isOpen={isOpen}
+        className={createSiteBlockLoadingName}
+      >
         <Formik
           initialValues={initialValues}
           validationSchema={schemeValidations}
@@ -347,6 +362,7 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
                                 errors.project
                               )}
                               InputLabelProps={{ shrink: true }}
+                              className={projectBlockLoadingName}
                             />
                           )}
                         />
@@ -385,6 +401,7 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
                                 errors.cluster
                               )}
                               InputLabelProps={{ shrink: true }}
+                              className={clusterBlockLoadingName}
                             />
                           )}
                         />

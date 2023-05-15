@@ -26,7 +26,8 @@ import * as React from "react";
 import { typeNormalization, downloadTempFile } from "/helpers/utils";
 import { alertService } from "/helpers";
 import Swal from "sweetalert2";
-import PuffLoader from "react-spinners/PuffLoader";
+// import PuffLoader from "react-spinners/PuffLoader";
+import { Block } from "notiflix/build/notiflix-block-aio";
 
 // Data
 import dataTableData from "/pagesComponents/applications/data-tables/data/dataTableData";
@@ -35,7 +36,8 @@ import { useEffect, useState } from "react";
 import EditDataWater from "./components/EditDataWater"; */
 import SiteDropdown from "../../../pagesComponents/dropdown/Site";
 import { async } from "regenerator-runtime";
-import WarningLetterPreviewModal from "./WarningLetterPreviewModal";
+import WarningLetterPreviewModal from "./components/WarningLetterPreviewModal";
+import { FormatColorResetTwoTone } from "@mui/icons-material";
 
 export default function WarningLetter(props) {
   const [isLoading, setLoading] = useState(false);
@@ -90,8 +92,10 @@ export default function WarningLetter(props) {
   const [dataInvoiceName, setDataInvoiceName] = useState([]);
   const [dataTxtSearch, setTxtSearch] = useState([]);
 
-  /* start dropdown periode, project, cluster, unitCode */
+  const periodBlockLoadingName = "block-period";
   const getPeriode = async (data) => {
+    Block.dots(`.${periodBlockLoadingName}`);
+
     let response = await fetch(
       "/api/transaction/warningletter/dropdownperiod",
       {
@@ -106,11 +110,11 @@ export default function WarningLetter(props) {
     );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    if (response.error) {
-      alertService.error({ title: "Error", text: response.error.message });
-    } else {
-      setDataPeriode(response.result);
-    }
+   
+    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+    else setDataPeriode(response.result);
+
+    Block.remove(`.${periodBlockLoadingName}`);
   };
 
   useEffect(() => {
@@ -118,8 +122,10 @@ export default function WarningLetter(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [site]); //fungsi untuk initial fields pada saat refresh page
 
-  //dropdown project
+  const projectBlockLoadingName = "block-project";
   const onPeriodeChange = async (val) => {
+    Block.dots(`.${projectBlockLoadingName}`);
+
     let resProject = await fetch(
       "/api/transaction/warningletter/dropdownproject",
       {
@@ -135,17 +141,18 @@ export default function WarningLetter(props) {
     if (!resProject.ok) throw new Error(`Error: ${resProject.status}`);
     resProject = typeNormalization(await resProject.json());
 
-    if (resProject.error) {
-      alertService.error({ title: "Error", text: resProject.error.message });
-    } else {
-      setDataProject(resProject.result);
-    }
-    onUnitCode(val.periodId);
+    if (resProject.error) alertService.error({ title: "Error", text: resProject.error.message });
+    else setDataProject(resProject.result);
+
+    Block.remove(`.${projectBlockLoadingName}`), 
+      onUnitCode(val.periodId);
   };
 
-  //dropdown cluster
+  const clusterBlockLoadingName = "block-cluster";
   const onProjectChange = async (val) => {
-    setLoading(true);
+    Block.dots(`.${clusterBlockLoadingName}`), 
+      setLoading(true);
+
     let response = await fetch(
       "/api/transaction/warningletter/GetDropdownClusterByProject",
       {
@@ -160,16 +167,18 @@ export default function WarningLetter(props) {
     );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    if (response.error) {
-      alertService.error({ title: "Error", text: response.error.message });
-    } else {
-      setDataCluster(response.result);
-    }
-    setLoading(false);
+    
+    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+    else setDataCluster(response.result);
+
+    Block.remove(`.${clusterBlockLoadingName}`), 
+      setLoading(false);
   };
 
-  // dropdown unitcode
+  const unitCodeBlockLoadingName = "block-unitCode";
   async function onUnitCode(periodeId) {
+    Block.dots(`.${unitCodeBlockLoadingName}`);
+
     let response = await fetch(
       "/api/transaction/warningletter/dropdownunitcode",
       {
@@ -186,17 +195,17 @@ export default function WarningLetter(props) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error) {
-      alertService.error({ title: "Error", text: response.error.message });
-    } else {
-      setDataUnitCode(response.result);
-    }
+    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+    else setDataUnitCode(response.result);
 
-    onUnitNo(periodeId);
+    Block.remove(`.${unitCodeBlockLoadingName}`), 
+      onUnitNo(periodeId);
   }
 
-  // dropdown unitno
+  const unitNoBlockLoadingName = "block-unitNo";
   async function onUnitNo(periodeId) {
+    Block.dots(`.${unitNoBlockLoadingName}`);
+
     let response = await fetch(
       "/api/transaction/warningletter/dropdownunitno",
       {
@@ -213,16 +222,17 @@ export default function WarningLetter(props) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error) {
-      alertService.error({ title: "Error", text: response.error.message });
-    } else {
-      setDataUnitNo(response.result);
-    }
-    onSP(periodeId);
+    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+    else setDataUnitNo(response.result);
+
+    Block.remove(`.${unitNoBlockLoadingName}`), 
+      onSP(periodeId);
   }
 
-  // dropdown SP
+  const spBlockLoadingName = "block-sp";
   async function onSP(periodeId) {
+    Block.dots(`.${spBlockLoadingName}`);
+
     let response = await fetch("/api/transaction/warningletter/dropdownsp", {
       method: "POST",
       body: JSON.stringify({
@@ -236,16 +246,17 @@ export default function WarningLetter(props) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error) {
-      alertService.error({ title: "Error", text: response.error.message });
-    } else {
-      setDataSP(response.result);
-    }
-    onInvoiceName(periodeId);
+    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+    else setDataSP(response.result);
+
+    Block.remove(`.${spBlockLoadingName}`), 
+      onInvoiceName(periodeId);
   }
 
-  // dropdown InvoiceName
+  const invoiceBlockLoadingName = "block-invoice";
   async function onInvoiceName(periodeId) {
+    Block.dots(`.${invoiceBlockLoadingName}`);
+
     let response = await fetch(
       "/api/transaction/warningletter/dropdowninvoicename",
       {
@@ -262,13 +273,11 @@ export default function WarningLetter(props) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error) {
-      alertService.error({ title: "Error", text: response.error.message });
-    } else {
-      setDataInvoiceName(response.result);
-    }
+    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+    else setDataInvoiceName(response.result);
+
+    Block.remove(`.${invoiceBlockLoadingName}`);
   }
-  /* end dropdown periode, project, cluster, unitCode */
 
   /* start form builder  */
   const form = {
@@ -412,49 +421,6 @@ export default function WarningLetter(props) {
   }
   /* end form builder  */
 
-  /* start export excel */
-  const handleExport = async () => {
-    let response = await fetch(
-      "/api/transaction/warningletter/ExportToExcelWarningLetter",
-      {
-        method: "POST",
-        body: JSON.stringify({
-          accessToken: accessToken,
-          params: {
-            maxResultCount: 1000,
-            skipCount: 0,
-            siteId: site?.siteId,
-            projectId: formValues.project?.projectId,
-            clusterId: formValues.cluster?.clusterId,
-            cluster: formValues.cluster?.clusterCode,
-            unitCode: formValues.unitCode?.unitCode,
-            unitNo: formValues.unitNo?.unitNo,
-            invoiceName: formValues.invoiceName?.invoiceName,
-            search: undefined,
-            sp: formValues.sp?.sp,
-            /* "projectId": 0,
-  "clusterId": 0,
-  "cluster": "string",
-  "unitCode": "string",
-  "unitNo": "string",
-  "invoiceName": "string",
-  "search": "string",
-  "sp": 0 */
-          },
-        }),
-      }
-    );
-    if (!response.ok) throw new Error(`Error: ${response.status}`);
-    response = typeNormalization(await response.json());
-
-    if (response.error)
-      alertService.error({ text: response.error.message, title: "Error" });
-    else {
-      downloadTempFile(response.result.uri);
-    }
-  };
-  /* end export excel */
-
   /* start load dataTableData */
   const handlerPriview = async (data) => {
   };
@@ -472,8 +438,11 @@ export default function WarningLetter(props) {
   });
   const handleOpenUpload = () => setOpenUpload(true);
 
+  const warningLetterBlockLoadingName = "block-warning-letter";
   const fetchData = async (data) => {
-    setLoading(true);
+    Block.standard(`.${warningLetterBlockLoadingName}`, `Getting Warning Letter Data`),
+      setLoading(true);
+
     const { scheme, keywords, recordsPerPage, skipCount } = customerRequest;
     let response = await fetch("/api/transaction/warningletter/list", {
       method: "POST",
@@ -494,8 +463,7 @@ export default function WarningLetter(props) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error)
-      alertService.error({ title: "Error", text: response.error.message });
+    if (response.error) alertService.error({ title: "Error", text: response.error.message });
     else {
       let data = response.result;
       const list = [];
@@ -530,8 +498,55 @@ export default function WarningLetter(props) {
       //   columns: columns,
       //   rows: list,
       // });
-    } setLoading(false);
+    } Block.remove(`.${warningLetterBlockLoadingName}`),
+      setLoading(false);
   };
+
+  /* start export excel */
+  const handleExport = async () => {
+    Block.standard(`.${warningLetterBlockLoadingName}`, `Exporting Warning Letter to Excel`);
+
+    let response = await fetch(
+      "/api/transaction/warningletter/ExportToExcelWarningLetter",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          accessToken: accessToken,
+          params: {
+            maxResultCount: 1000,
+            skipCount: 0,
+            siteId: site?.siteId,
+            projectId: formValues.project?.projectId,
+            clusterId: formValues.cluster?.clusterId,
+            cluster: formValues.cluster?.clusterCode,
+            unitCode: formValues.unitCode?.unitCode,
+            unitNo: formValues.unitNo?.unitNo,
+            invoiceName: formValues.invoiceName?.invoiceName,
+            search: undefined,
+            sp: formValues.sp?.sp,
+            /* 
+              "projectId": 0,
+              "clusterId": 0,
+              "cluster": "string",
+              "unitCode": "string",
+              "unitNo": "string",
+              "invoiceName": "string",
+              "search": "string",
+              "sp": 0 
+            */
+          },
+        }),
+      }
+    );
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
+
+    if (response.error) alertService.error({ text: response.error.message, title: "Error" });
+    else downloadTempFile(response.result.uri);
+
+    Block.remove(`.${warningLetterBlockLoadingName}`);
+  };
+  /* end export excel */
 
   const [isCheckAll, setIsCheckAll] = useState(false);
   const [isCheck, setIsCheck] = useState([]);
@@ -696,7 +711,9 @@ export default function WarningLetter(props) {
   };
 
   const gotoSendEmail = async (e) => {
-    setLoadingSend(true);
+    Block.standard(`.${warningLetterBlockLoadingName}`, `Sending Email Warning Letter`),
+      setLoadingSend(true);
+
     let response = await fetch(
       "/api/transaction/warningletter/SendEmailWarningLetter",
       {
@@ -709,8 +726,8 @@ export default function WarningLetter(props) {
     );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    if (response.error)
-      alertService.error({ title: "Error", text: response.error.message });
+    
+    if (response.error) alertService.error({ title: "Error", text: response.error.message });
     else {
       let data = response.result;
       Swal.fire({
@@ -724,10 +741,12 @@ export default function WarningLetter(props) {
       }).then((result) => {
         if (result.isConfirmed) {
           fetchData();
-          setLoadingSend(false);
         }
       });
     }
+
+    Block.remove(`.${warningLetterBlockLoadingName}`),
+      setLoadingSend(false);
   };
   /* end send email */
 
@@ -752,7 +771,7 @@ export default function WarningLetter(props) {
         </Grid>
       </MDBox>
 
-      <PuffLoader
+      {/* <PuffLoader
         cssOverride={override}
         size={250}
         color={"#10569E"}
@@ -760,7 +779,7 @@ export default function WarningLetter(props) {
         speedMultiplier={1}
         aria-label="Loading Spinner"
         data-testid="loader"
-      />
+      /> */}
 
       <MDBox mt={2}>
         <Grid container spacing={2}>
@@ -833,6 +852,7 @@ export default function WarningLetter(props) {
                                           periode,
                                           errors.periode
                                         )}
+                                        className={periodBlockLoadingName}
                                       />
                                     )}
                                   />
@@ -874,6 +894,7 @@ export default function WarningLetter(props) {
                                           project,
                                           errors.project
                                         )}
+                                        className={projectBlockLoadingName}
                                       />
                                     )}
                                   />
@@ -910,6 +931,7 @@ export default function WarningLetter(props) {
                                           cluster,
                                           errors.cluster
                                         )}
+                                        className={clusterBlockLoadingName}
                                       />
                                     )}
                                   />
@@ -950,6 +972,7 @@ export default function WarningLetter(props) {
                                           unitCode,
                                           errors.unitCode
                                         )}
+                                        className={unitCodeBlockLoadingName}
                                       />
                                     )}
                                   />
@@ -988,6 +1011,7 @@ export default function WarningLetter(props) {
                                         )}
                                       />
                                     )}
+                                    className={unitNoBlockLoadingName}
                                   />
                                 </Grid>
                                 <Grid item xs={12} sm={6}>
@@ -1023,6 +1047,7 @@ export default function WarningLetter(props) {
                                           sp,
                                           errors.sp
                                         )}
+                                        className={spBlockLoadingName}
                                       />
                                     )}
                                   />
@@ -1062,6 +1087,7 @@ export default function WarningLetter(props) {
                                           invoiceName,
                                           errors.invoiceName
                                         )}
+                                        className={invoiceBlockLoadingName}
                                       />
                                     )}
                                   />
@@ -1131,7 +1157,7 @@ export default function WarningLetter(props) {
             </MDBox>
           </MDBox>
         </MDBox>
-        <Card>
+        <Card className={warningLetterBlockLoadingName}>
           <MDBox>
             <Grid container alignItems="center">
               <Grid item xs={12}>
@@ -1155,17 +1181,18 @@ export default function WarningLetter(props) {
         </Card>
       </MDBox>
 
-      <WarningLetterPreviewModal
-        isOpen={openModal.isOpen}
-        params={openModal.params}
-        onModalChanged={(isChanged) => {
-          setOpenModal((prevState) => ({
-            ...prevState,
-            isOpen: !openModal.isOpen,
-          }));
-        }}
-      />
-      
+      {openModal.isOpen && (
+        <WarningLetterPreviewModal
+          isOpen={openModal.isOpen}
+          params={openModal.params}
+          onModalChanged={(isChanged) => {
+            setOpenModal((prevState) => ({
+              ...prevState,
+              isOpen: !openModal.isOpen,
+            }));
+          }}
+        />
+      )}
     </DashboardLayout>
   );
 }

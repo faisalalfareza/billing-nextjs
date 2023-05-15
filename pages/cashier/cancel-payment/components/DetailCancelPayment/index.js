@@ -8,6 +8,7 @@ import { NumericFormat } from "react-number-format";
 import PropTypes from "prop-types";
 
 import { Grid, Table, TableBody, TableCell, TableRow } from "@mui/material";
+import { Block } from "notiflix/build/notiflix-block-aio";
 
 import MDBox from "/components/MDBox";
 import MDTypography from "/components/MDTypography";
@@ -51,11 +52,13 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
     [remarks.name]: remarks.defaultValue,
   };
 
+  const detailPaymentBlockLoadingName = "block-detail-payment";
   const [isLoadingDetailCancelPayment, setLoadingDetailCancelPayment] =
     useState(false);
   const [detailCancelPayment, setDetailCancelPayment] = useState();
   const getDetailCancelPayment = async () => {
-    setLoadingDetailCancelPayment(true);
+    Block.standard(`.${detailPaymentBlockLoadingName}`, `Getting ${isCanceled ? 'Canceled Payment' : 'Payment'} Detail`), 
+      setLoadingDetailCancelPayment(true);
 
     const { billingHeaderId } = params;
     let response = await fetch(
@@ -72,8 +75,7 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error)
-      alertService.error({ title: "Error", text: response.error.message });
+    if (response.error) alertService.error({ title: "Error", text: response.error.message });
     else {
       setDetailCancelPayment(response);
       const list = [];
@@ -87,7 +89,8 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
       setListDetail(list);
     }
 
-    setLoadingDetailCancelPayment(false);
+    Block.remove(`.${detailPaymentBlockLoadingName}`), 
+      setLoadingDetailCancelPayment(false);
   };
   useEffect(() => {
     getDetailCancelPayment();
@@ -120,7 +123,8 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
       focusConfirm: false,
     }).then(async (result) => {
       if (result.isConfirmed) {
-        setLoadingCancelPayment(true);
+        Block.standard(`.${detailPaymentBlockLoadingName}`, `Canceling Payment`),
+          setLoadingCancelPayment(true);
 
         let response = await fetch(
           "/api/cashier/cancel-payment/cancelpayment",
@@ -138,8 +142,7 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
         if (!response.ok) throw new Error(`Error: ${response.status}`);
         response = typeNormalization(await response.json());
 
-        if (response.error)
-          alertService.error({ title: "Error", text: response.error.message });
+        if (response.error) alertService.error({ title: "Error", text: response.error.message });
         else {
           response &&
             Swal.fire({
@@ -156,16 +159,18 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
               closeModal(true);
             });
         }
-        setLoadingCancelPayment(false);
+
+        Block.remove(`.${detailPaymentBlockLoadingName}`), 
+          setLoadingCancelPayment(false);
       }
     });
   };
 
   const openModal = () => setModalOpen(true);
   const toggleModal = () => setModalOpen(true);
-  const closeModal = (isChanged) => {
+  const closeModal = (isChanged = false) => {
     setModalOpen(false);
-    setDetailCancelPayment({});
+    setTimeout(() => setDetailCancelPayment({}), 1500);
     setTimeout(() => onModalChanged(isChanged), 0);
   };
 
@@ -204,6 +209,7 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
           toggle={toggleModal}
           onOpened={openModal}
           onClosed={closeModal}
+          className={detailPaymentBlockLoadingName}
         >
           <Formik
             initialValues={schemeInitialValues}
@@ -536,7 +542,7 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
                       </MDBox>
                     </Grid>
                     {!isCanceled && (
-                      <Grid item xs={12} sm={12} mt={5}>
+                      <Grid item xs={12} sm={12} mt={2}>
                         <FormField
                           type={remarks.type}
                           label={

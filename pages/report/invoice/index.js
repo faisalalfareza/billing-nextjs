@@ -16,6 +16,7 @@ import Icon from "@mui/material/Icon";
 import { useCookies } from "react-cookie";
 import SiteDropdown from "/pagesComponents/dropdown/Site";
 import BorderAllIcon from "@mui/icons-material/BorderAll";
+import { Block } from "notiflix/build/notiflix-block-aio";
 
 export default function ReportInvoice(props) {
   let typeDummy = [
@@ -50,7 +51,10 @@ export default function ReportInvoice(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [site]);
 
+  const periodBlockLoadingName = "block-period";
   const getPeriod = async (val) => {
+    Block.dots(`.${periodBlockLoadingName}`);
+
     let response = await fetch(
       "/api/transaction/invoice/getdropdownperiodbysiteid",
       {
@@ -67,9 +71,9 @@ export default function ReportInvoice(props) {
     response = typeNormalization(await response.json());
     if (response.error) {
       alertService.error({ title: "Error", text: response.error.message });
-    } else {
-      setDataPeriod(response.result);
-    }
+    } else setDataPeriod(response.result);
+
+    Block.remove(`.${periodBlockLoadingName}`);
   };
 
   useEffect(() => {
@@ -113,8 +117,11 @@ export default function ReportInvoice(props) {
     return value != undefined && value != "" && !error;
   };
 
+  const exportToExcelBlockLoadingName = "block-export-to-excel";
   const exportExcel = async (fields, actions) => {
-    setLoading(true);
+    Block.standard(`.${exportToExcelBlockLoadingName}`, `Exporting Invoice Report to Excel`),
+      setLoading(true);
+
     let listCluster = [];
     if (fields.cluster != null)
       fields.cluster.map((e) => {
@@ -138,6 +145,7 @@ export default function ReportInvoice(props) {
     });
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
+    
     if (response.error) {
       let err = response.error;
       alertService.error({
@@ -147,14 +155,18 @@ export default function ReportInvoice(props) {
     } else {
       let data = response.result.uri;
       if (data != null) window.open(data, "_blank");
-      else
-        alertService.info({ title: "No Data", text: "No data in this filter" });
+      else alertService.info({ title: "No Data", text: "No data in this filter" });
     }
+
     actions.setSubmitting(false);
-    setLoading(false);
+    Block.remove(`.${exportToExcelBlockLoadingName}`),
+      setLoading(false);
   };
 
+  const clusterBlockLoadingName = "block-cluster";
   const getCluster = async (val) => {
+    Block.dots(`.${clusterBlockLoadingName}`);
+
     let response = await fetch(
       "/api/transaction/invoice/getdropdownclusterinvoice",
       {
@@ -172,12 +184,15 @@ export default function ReportInvoice(props) {
     response = typeNormalization(await response.json());
     if (response.error) {
       alertService.error({ title: "Error", text: response.error.message });
-    } else {
-      setDataCluster(response.result);
-    }
+    } else setDataCluster(response.result);
+
+    Block.remove(`.${clusterBlockLoadingName}`);
   };
 
+  const projectBlockLoadingName = "block-project";
   const getProject = async (val) => {
+    Block.dots(`.${projectBlockLoadingName}`);
+
     let response = await fetch(
       "/api/transaction/invoice/getdropdownprojectinvoice",
       {
@@ -195,9 +210,9 @@ export default function ReportInvoice(props) {
     response = typeNormalization(await response.json());
     if (response.error) {
       alertService.error({ title: "Error", text: response.error.message });
-    } else {
-      setDataProject(response.result);
-    }
+    } else setDataProject(response.result);
+
+    Block.remove(`.${projectBlockLoadingName}`);
   };
 
   const handleSite = (siteVal) => {
@@ -229,7 +244,7 @@ export default function ReportInvoice(props) {
       <MDBox mt={2}>
         <Grid container spacing={2}>
           <Grid item xs={12}>
-            <Card>
+            <Card className={exportToExcelBlockLoadingName}>
               <MDBox p={3} lineHeight={1}>
                 <Grid container alignItems="center" spacing={2}>
                   <Grid item xs={12} mb={2}>
@@ -294,6 +309,7 @@ export default function ReportInvoice(props) {
                                           formValues.period,
                                           errors.period
                                         )}
+                                        className={periodBlockLoadingName}
                                       />
                                     )}
                                   />
@@ -368,6 +384,7 @@ export default function ReportInvoice(props) {
                                           formValues.project,
                                           errors.project
                                         )}
+                                        className={projectBlockLoadingName}
                                       />
                                     )}
                                   />
@@ -410,6 +427,7 @@ export default function ReportInvoice(props) {
                                           formValues.cluster,
                                           errors.cluster
                                         )}
+                                        className={clusterBlockLoadingName}
                                       />
                                     )}
                                   />

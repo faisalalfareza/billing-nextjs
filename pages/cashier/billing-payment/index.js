@@ -520,7 +520,11 @@ export default function BillingPayment(props) {
     if (response.error) {
       const error = response.error;
       setLoadingShow(false);
-      alertService.error({ title: "Error", text: response.error.message });
+      alertService.info({
+        title: "Info",
+        text: error.error.message,
+      });
+      cancel();
     } else {
       const result = response.result.listInvoicePayment;
       result.map((e) => {

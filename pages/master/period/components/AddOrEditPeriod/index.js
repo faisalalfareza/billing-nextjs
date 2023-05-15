@@ -32,6 +32,7 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
 import { typeNormalization } from "/helpers/utils";
 import { alertService } from "/helpers";
+import { Block } from "notiflix/build/notiflix-block-aio";
 
 function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
   const [{ accessToken, encryptedAccessToken }] = useCookies();
@@ -124,8 +125,10 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
 
   const getFormData = (values) => {};
 
+  const periodNoBlockLoadingName = "block-period-no";
   const getLastPeriodNo = async (val) => {
-    // setLoading(true);
+    Block.dots(`.${periodNoBlockLoadingName}`); // setLoading(true);
+
     let response = await fetch("/api/master/period/getlastperiodno", {
       method: "POST",
       body: JSON.stringify({
@@ -143,6 +146,8 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
       ...prevState,
       periodNumber: response.result,
     }));
+
+    Block.remove(`.${periodNoBlockLoadingName}`);
   };
   useEffect(() => {
     if (site) getLastPeriodNo();
@@ -152,9 +157,11 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
   const addDate = (val) => {
     return dayjs(val).add(1, "day");
   };
+
+  const createPeriodBlockLoadingName = "block-create-period";
   const createPeriod = async (values, actions) => {
-    setLoadingSubmit(false);
-    console.log("values----", values);
+    setLoadingSubmit(true);
+
     const body = {
       siteId: site.siteId,
       periodMonth: addDate(values.periodName),
@@ -167,6 +174,8 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
     };
 
     if (!params) {
+      Block.standard(`.${createPeriodBlockLoadingName}`, `Creating Period`);
+
       let response = await fetch("/api/master/period/createmasterperiod", {
         method: "POST",
         body: JSON.stringify({
@@ -192,12 +201,13 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
           timerProgressBar: true,
           timer: 3000,
         }).then(() => {
-          setLoadingSubmit(false);
           actions.resetForm();
-          closeModal();
+          closeModal(true);
         });
       }
     } else {
+      Block.standard(`.${createPeriodBlockLoadingName}`, `Updating Period`);
+
       body.periodID = params.periodId;
 
       let response = await fetch(
@@ -229,17 +239,18 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
           timerProgressBar: true,
           timer: 3000,
         }).then((result) => {
-          setLoadingSubmit(false);
           actions.resetForm();
-          closeModal();
+          closeModal(true);
         });
       }
     }
+
+    Block.remove(`.${createPeriodBlockLoadingName}`),
+      actions.setSubmitting(false), setLoadingSubmit(false);
   };
-  const closeModal = () => {
-    setNo(undefined);
-    setformValues({});
-    setTimeout(() => onModalChanged(), 0);
+  const closeModal = (isChanged = false) => {
+    setNo(undefined), setformValues({});
+    setTimeout(() => onModalChanged(isChanged), 0);
   };
 
   if (params) {
@@ -305,7 +316,10 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
     };
 
     return (
-      <Modal isOpen={isOpen}>
+      <Modal 
+        isOpen={isOpen}
+        className={createPeriodBlockLoadingName}
+      >
         <Formik
           initialValues={initialValues}
           validationSchema={schemeValidations}
@@ -367,6 +381,7 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
                               errors.periodNumber
                             )}
                             InputLabelProps={{ shrink: true }}
+                            className={periodNoBlockLoadingName}
                           />
                         </Grid>
                         <Grid item xs={12} sm={12}>

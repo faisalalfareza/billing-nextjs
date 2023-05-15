@@ -14,6 +14,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { Radio, Grid } from "@mui/material";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import FormField from "/pagesComponents/FormField";
+import { Block } from "notiflix/build/notiflix-block-aio";
 
 export default function FindName(props) {
   const { isOpen, site, period, close, handlePSCode } = props;
@@ -58,8 +59,11 @@ export default function FindName(props) {
     // fetchData();
   }, []);
 
+  const searchPSCodeBlockLoadingName = "block-search-PSCode";
   const fetchData = async (values, actions) => {
-    setLoading(true);
+    Block.standard(`.${searchPSCodeBlockLoadingName}`, `Searching Customer Name`),
+      setLoading(true);
+
     let response = await fetch("/api/transaction/invoice/getsearchpscode", {
       method: "POST",
       body: JSON.stringify({
@@ -75,8 +79,7 @@ export default function FindName(props) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error)
-      alertService.error({ title: "Error", text: response.error.message });
+    if (response.error) alertService.error({ title: "Error", text: response.error.message });
     else {
       const list = [];
       const row = response.result.map((e, i) => {
@@ -87,8 +90,10 @@ export default function FindName(props) {
         });
       });
       setListDetail(list);
-      setLoading(false);
     }
+
+    Block.remove(`.${searchPSCodeBlockLoadingName}`),
+      setLoading(false);
   };
   const toggle = () => setModal(!modal);
 
@@ -130,6 +135,7 @@ export default function FindName(props) {
       backdrop="false"
       keyboard="true"
       size="xl"
+      className={searchPSCodeBlockLoadingName}
     >
       <ModalHeader toggle={toggle} close={closeBtn}>
         <MDBox mb={1}>

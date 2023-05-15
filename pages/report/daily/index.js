@@ -16,6 +16,7 @@ import { useCookies } from "react-cookie";
 import SiteDropdown from "/pagesComponents/dropdown/Site";
 import BorderAllIcon from "@mui/icons-material/BorderAll";
 import * as dayjs from "dayjs";
+import { Block } from "notiflix/build/notiflix-block-aio";
 
 export default function ReportDaily(props) {
   let typeDummy = [
@@ -52,7 +53,10 @@ export default function ReportDaily(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [site]);
 
+  const paymentMethodBlockLoadingName = "block-payment-method";
   const getPaymentMethod = async () => {
+    Block.dots(`.${paymentMethodBlockLoadingName}`);
+
     let response = await fetch(
       "/api/cashier/billing/getdropdownpaymentmethod",
       {
@@ -65,14 +69,17 @@ export default function ReportDaily(props) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error) {
+    if (response.error)
       alertService.error({ title: "Error", text: response.error.message });
-    } else {
-      setDataPaymentMethod(response.result);
-    }
+    else setDataPaymentMethod(response.result);
+
+    Block.remove(`.${paymentMethodBlockLoadingName}`);
   };
 
+  const periodBlockLoadingName = "block-period";
   const getPeriod = async (val) => {
+    Block.dots(`.${periodBlockLoadingName}`);
+
     let response = await fetch(
       "/api/transaction/invoice/getdropdownperiodbysiteid",
       {
@@ -87,11 +94,12 @@ export default function ReportDaily(props) {
     );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    if (response.error) {
+
+    if (response.error)
       alertService.error({ title: "Error", text: response.error.message });
-    } else {
-      setDataPeriod(response.result);
-    }
+    else setDataPeriod(response.result);
+
+    Block.remove(`.${periodBlockLoadingName}`);
   };
 
   const addDate = (val) => {
@@ -151,8 +159,14 @@ export default function ReportDaily(props) {
     return value != undefined && value != "" && !error;
   };
 
+  const exportToExcelBlockLoadingName = "block-export-to-excel";
   const exportExcel = async (fields, actions) => {
-    setLoading(true);
+    Block.standard(
+      `.${exportToExcelBlockLoadingName}`,
+      `Exporting Daily Report to Excel`
+    ),
+      setLoading(true);
+
     let listCluster = [];
     if (fields.cluster != null)
       fields.cluster.map((e) => {
@@ -179,19 +193,24 @@ export default function ReportDaily(props) {
     });
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    if (response.error) {
+
+    if (response.error)
       alertService.error({ title: "Error", text: response.error.message });
-    } else {
+    else {
       let data = response.result.uri;
       if (data != null) window.open(data, "_blank");
       else
         alertService.info({ title: "No Data", text: "No data in this filter" });
     }
+
     actions.setSubmitting(false);
-    setLoading(false);
+    Block.remove(`.${exportToExcelBlockLoadingName}`), setLoading(false);
   };
 
+  const clusterBlockLoadingName = "block-project";
   const getCluster = async (val) => {
+    Block.dots(`.${clusterBlockLoadingName}`);
+
     let response = await fetch("/api/master/site/getdropdownclusterbyproject", {
       method: "POST",
       body: JSON.stringify({
@@ -204,14 +223,18 @@ export default function ReportDaily(props) {
     });
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    if (response.error) {
+
+    if (response.error)
       alertService.error({ title: "Error", text: response.error.message });
-    } else {
-      setDataCluster(response.result);
-    }
+    else setDataCluster(response.result);
+
+    Block.remove(`.${clusterBlockLoadingName}`);
   };
 
+  const projectBlockLoadingName = "block-project";
   const getProject = async (val) => {
+    Block.dots(`.${projectBlockLoadingName}`);
+
     let response = await fetch(
       "/api/transaction/water/getdropdownprojectbysiteid",
       {
@@ -226,11 +249,12 @@ export default function ReportDaily(props) {
     );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    if (response.error) {
+
+    if (response.error)
       alertService.error({ title: "Error", text: response.error.message });
-    } else {
-      setDataProject(response.result);
-    }
+    else setDataProject(response.result);
+
+    Block.remove(`.${projectBlockLoadingName}`);
   };
 
   const handleSite = (siteVal) => {
@@ -262,7 +286,7 @@ export default function ReportDaily(props) {
       <MDBox mt={2}>
         <Grid container spacing={2}>
           <Grid item xs={12}>
-            <Card>
+            <Card className={exportToExcelBlockLoadingName}>
               <MDBox p={3} lineHeight={1}>
                 <Grid container alignItems="center" spacing={2}>
                   <Grid item xs={12} mb={2}>
@@ -345,6 +369,7 @@ export default function ReportDaily(props) {
                                           formValues.project,
                                           errors.project
                                         )}
+                                        className={projectBlockLoadingName}
                                       />
                                     )}
                                   />
@@ -389,6 +414,7 @@ export default function ReportDaily(props) {
                                           formValues.cluster,
                                           errors.cluster
                                         )}
+                                        className={clusterBlockLoadingName}
                                       />
                                     )}
                                   />
@@ -428,6 +454,7 @@ export default function ReportDaily(props) {
                                           formValues.period,
                                           errors.period
                                         )}
+                                        className={periodBlockLoadingName}
                                       />
                                     )}
                                   />
@@ -505,6 +532,9 @@ export default function ReportDaily(props) {
                                           formValues.paymentMethod,
                                           errors.paymentMethod
                                         )}
+                                        className={
+                                          paymentMethodBlockLoadingName
+                                        }
                                       />
                                     )}
                                   />

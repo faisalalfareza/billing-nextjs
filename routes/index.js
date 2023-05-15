@@ -19,7 +19,7 @@
 
 import React from "react";
 
-import AccountCircle from "@mui/icons-material/AccountCircle"; 
+import AccountCircle from "@mui/icons-material/AccountCircle";
 import Logout from "@mui/icons-material/Logout";
 
 import Dashboard from "@mui/icons-material/Dashboard";
@@ -27,28 +27,28 @@ import Dns from "@mui/icons-material/Dns";
 import AddBusiness from "@mui/icons-material/AddBusiness";
 import CalendarToday from "@mui/icons-material/CalendarToday";
 import CurrencyExchange from "@mui/icons-material/CurrencyExchange";
-import HomeWork from "@mui/icons-material/HomeWork"; 
+import HomeWork from "@mui/icons-material/HomeWork";
 import CreditCard from "@mui/icons-material/CreditCard";
-import CreditScore from "@mui/icons-material/CreditScore"; 
+import CreditScore from "@mui/icons-material/CreditScore";
 import ListAlt from "@mui/icons-material/ListAlt";
-import FactCheck from "@mui/icons-material/FactCheck"; 
+import FactCheck from "@mui/icons-material/FactCheck";
 import FiberManualRecordOutlined from "@mui/icons-material/FiberManualRecordOutlined";
 
-import MultipleStop from "@mui/icons-material/MultipleStop"; 
+import MultipleStop from "@mui/icons-material/MultipleStop";
 import WaterDamage from "@mui/icons-material/WaterDamage";
-import Description from "@mui/icons-material/Description"; 
-import MarkEmailUnreadIcon from "@mui/icons-material/MarkEmailUnread"; 
+import Description from "@mui/icons-material/Description";
+import MarkEmailUnreadIcon from "@mui/icons-material/MarkEmailUnread";
 import Book from "@mui/icons-material/Book";
 
 import Payments from "@mui/icons-material/Payments";
-import AttachMoney from "@mui/icons-material/AttachMoney"; 
-import Receipt from "@mui/icons-material/Receipt"; 
-import MoneyOffIcon from "@mui/icons-material/MoneyOff"; 
+import AttachMoney from "@mui/icons-material/AttachMoney";
+import Receipt from "@mui/icons-material/Receipt";
+import MoneyOffIcon from "@mui/icons-material/MoneyOff";
 import AccountBalanceWallet from "@mui/icons-material/AccountBalanceWallet";
 
-import Source from "@mui/icons-material/Source"; 
+import Source from "@mui/icons-material/Source";
 import Today from "@mui/icons-material/Today";
-import TableView from "@mui/icons-material/TableView";  
+import TableView from "@mui/icons-material/TableView";
 
 import MDAvatar from "../components/MDAvatar";
 import profilePicture from "../assets/images/team-3.jpg";
@@ -59,10 +59,19 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
     {
       type: "collapse",
       // name: "Brooklyn Alice",
-      name: informations ? capitalizeFirstLetter(informations['user']['userName']) : "Brooklyn Alice",
+      name: informations
+        ? capitalizeFirstLetter(informations["user"]["userName"])
+        : "~",
       key: "username",
       // icon: <MDAvatar src={profilePicture.src} size="sm" />,
-      icon: profiles ? <MDAvatar src={`data:image/png;base64, ${profiles}`} alt={informations ? capitalizeFirstLetter(informations['user']['name']) : "Brooklyn Alice"} size="sm" /> : <AccountCircle fontSize="medium" />,
+      icon: profiles ? (
+        <MDAvatar
+          src={`data:image/png;base64, ${profiles}`}
+          size="sm"
+        />
+      ) : (
+        <AccountCircle fontSize="medium" />
+      ),
       collapse: [
         {
           name: "Logout",
@@ -148,18 +157,18 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
         //   route: "/master/mapping-template-invoice",
         //   icon: <ListAlt fontSize="medium" />,
         // },
-        // {
-        //   name: "Master Unit Item",
-        //   nameOnHeader: "Master Unit Item",
-        //   key: "unit-item",
-        //   route: "/master/unit-item",
-        //   icon: <FactCheck fontSize="medium" />,
-        // },
+        {
+          name: "Master Unit Item",
+          nameOnHeader: "Master Unit Item",
+          key: "unit-item",
+          route: "/master/unit-item",
+          icon: <FactCheck fontSize="medium" />,
+        },
         // {
         //   name: "Master Oracle Mapping",
         //   nameOnHeader: "Master Oracle Mapping",
         //   key: "oracle-mapping",
-        //   route: "/master/oracle-mapping", 
+        //   route: "/master/oracle-mapping",
         //   icon: <FiberManualRecordOutlined fontSize="medium" />,
         // },
       ],
@@ -205,7 +214,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           // permission: "Pages.Tenants.GenerateNoSeriFP.Create",
           icon: <Book fontSize="medium" />,
         },
-        
+
         // {
         //   name: "Billing Collection",
         //   nameOnHeader: "Billing Collection",
@@ -241,14 +250,14 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           name: "Reprint OR",
           nameOnHeader: "Reprint Official Receipt",
           key: "reprint-or",
-          route: "/cashier/reprint-or", 
+          route: "/cashier/reprint-or",
           icon: <Receipt fontSize="medium" />,
         },
         {
           name: "Cancel Payment",
           nameOnHeader: "Cancel Payment",
           key: "cancel-payment",
-          route: "/cashier/cancel-payment", 
+          route: "/cashier/cancel-payment",
           icon: <MoneyOffIcon fontSize="medium" />,
         },
         {
