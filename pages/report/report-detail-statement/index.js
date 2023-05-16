@@ -5,7 +5,7 @@ import DashboardNavbar from "/layout/Navbars/DashboardNavbar";
 import dashboardImage from "/assets/images/coming-soon.svg";
 import Image from "next/image";
 
-function DetailStatement(props) {
+function ReportDetailStatement() {
   return (
     <DashboardLayout>
       <DashboardNavbar />
@@ -26,4 +26,4 @@ function DetailStatement(props) {
   );
 }
 
-export default DetailStatement;
+export default ReportDetailStatement;

@@ -374,7 +374,7 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
             <Icon sx={{ fontWeight: "bold" }}>close</Icon>
           </MDTypography>
         </MDBox>
-        <Link href="/">
+        <Link href="/dashboards">
           <a>
             <MDBox display="flex" alignItems="center">
               {brand && brand.src ? (
