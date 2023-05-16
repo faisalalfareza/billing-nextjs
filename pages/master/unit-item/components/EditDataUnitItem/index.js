@@ -42,12 +42,17 @@ function EditDataUnitItem(props) {
   const [templateInvoiceHeaderId, setTemplateInvoiceHeaderId] = useState(null);
   const formikRef = useRef();
 
+  let bankE = listBank.find((e) => e.bankName == params.bank);
+  let templateE = listTemplate.find(
+    (e) => e.templateName == params.templateInvoice
+  );
+
   const initialValues = {
-    unitCode: params ? params.prevRead : undefined,
-    unitNo: params ? params.currentRead : undefined,
-    templateInvoice: params ? params.currentRead : null,
-    bank: params ? params.currentRead : null,
-    vaNo: params ? params.currentRead : undefined,
+    unitCode: params ? params.unitCode : undefined,
+    unitNo: params ? params.unitNo : undefined,
+    templateInvoice: params ? templateE : null,
+    bank: params ? bankE : null,
+    vaNo: params ? params.vaNo : undefined,
     isPenalty: params ? params.isPenalty : false,
   };
 
