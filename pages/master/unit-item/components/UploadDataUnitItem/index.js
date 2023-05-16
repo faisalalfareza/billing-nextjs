@@ -285,6 +285,7 @@ function UploadDataUnitItem(props) {
             }
           }
           setDataUnitItem(data);
+          Block.remove(`.${uploadedListBlockLoadingName}`);
           if (dataUnitItem.length > 0)
             Notify.success(message.success),
               Block.remove(`.${uploadedListBlockLoadingName}`);
