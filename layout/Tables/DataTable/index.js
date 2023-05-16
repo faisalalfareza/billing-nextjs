@@ -232,7 +232,7 @@ function DataTable({
       // we also instantiate the resizeObserver and we pass
       // the event handler to the constructor
       const resizeObserver = new ResizeObserver(() => {
-        if (observedDiv.current.offsetWidth !== width) {
+        if (observedDiv.current && (observedDiv.current.offsetWidth !== width)) {
           setWidth(observedDiv.current.offsetWidth);
         }
       });

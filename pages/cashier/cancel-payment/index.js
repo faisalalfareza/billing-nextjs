@@ -54,7 +54,7 @@ function CancelPayment() {
     [customerName.name]: customerName.defaultValue,
   };
   useEffect(() => {
-    document.getElementsByName(customerName.name)[0].focus();
+    document.getElementsByName(customerName.name)[0]?.focus();
 
     let currentSite = typeNormalization(localStorage.getItem("site"));
     if (currentSite == null) {
@@ -66,6 +66,8 @@ function CancelPayment() {
     } else setSite(currentSite);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const [isExpandedFilter, setExpandFilter] = useState(true);
 
   const customerBlockLoadingName = "block-customer";
   const [isLoadingCustomer, setLoadingCustomer] = useState(false);
@@ -221,8 +223,7 @@ function CancelPayment() {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error)
-      alertService.error({ title: "Error", text: response.error.message });
+    if (response.error) alertService.error({ title: "Error", text: response.error.message });
     else {
       setCancelPaymentData((prevState) => ({
         ...prevState,
@@ -232,6 +233,7 @@ function CancelPayment() {
           response.totalCount / customerRequest.recordsPerPage
         ),
       }));
+      setExpandFilter(response.totalCount > 0 ? false : true);
     } Block.remove(`.${cancelPaymentBlockLoadingName}`),
       setLoadingCancelPayment(false);
   };
@@ -326,12 +328,29 @@ function CancelPayment() {
             <Card className={customerBlockLoadingName}>
               <MDBox px={3} pt={3} pb={2} lineHeight={1}>
                 <Grid container alignItems="center" spacing={2}>
-                  <Grid item xs={12}>
+                  <Grid item xs={12} sm={11}>
                     <MDBox>
                       <MDTypography variant="h5">Filter</MDTypography>
                     </MDBox>
                   </Grid>
-                  <Grid item xs={12}>
+                  <Grid item xs={12} sm={1}>
+                    <MDBox display="flex" justifyContent="flex-end">
+                      <a onClick={() => setExpandFilter(!isExpandedFilter)} style={{ cursor: "pointer" }}>
+                        <MDTypography
+                          variant="button"
+                          color="text"
+                          sx={{ lineHeight: 0 }}
+                        >
+                          {
+                            isExpandedFilter 
+                              ? <Icon fontSize="small">expand_less</Icon>
+                              : <Icon fontSize="small">expand_more</Icon>
+                          }
+                        </MDTypography>
+                      </a>
+                    </MDBox>
+                  </Grid>
+                  <Grid item xs={12} style={{ display: isExpandedFilter ? "initial" : "none" }}>
                     <Formik
                       initialValues={schemeInitialValues}
                       validationSchema={schemeValidations}
@@ -414,8 +433,8 @@ function CancelPayment() {
                   </Grid>
                 </Grid>
               </MDBox>
-              {customerResponse.rowData.length > 0 && (
-                <MDBox>
+              {(customerResponse.rowData.length > 0) && (
+                <MDBox style={{ display: isExpandedFilter ? "initial" : "none" }}>
                   <Grid container alignItems="center">
                     <Grid item xs={12}>
                       <MDBox pl={3}>
