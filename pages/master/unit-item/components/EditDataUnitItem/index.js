@@ -38,6 +38,8 @@ function EditDataUnitItem(props) {
   const [dataBank, setDataBank] = useState([]);
   const [bankEdit, setBankEdit] = useState(null);
   const [templateEdit, setTemplateEdit] = useState(null);
+  const [unitItemHeaderId, setUnitItemHeaderId] = useState(null);
+  const [templateInvoiceHeaderId, setTemplateInvoiceHeaderId] = useState(null);
   const formikRef = useRef();
 
   const initialValues = {
@@ -128,6 +130,10 @@ function EditDataUnitItem(props) {
     getTemplateInvoice();
   }, []);
 
+  useEffect(() => {
+    getListItem();
+  }, [templateInvoiceHeaderId]);
+
   const getDetail = async (data) => {
     Block.standard(
       `.${detailUnitItemBlockLoadingName}`,
@@ -150,22 +156,13 @@ function EditDataUnitItem(props) {
     if (response.error)
       alertService.error({ title: "Error", text: response.error.message });
     else {
-      const result = response.result.itemDetail;
       let res = response.result;
-      let list = [];
-      result.map((e, i) => {
-        list.push({
-          no: i + 1,
-          itemName: e.itemName,
-          itemRateName: e.itemRateName,
-          rate: e.rate,
-        });
-      });
       let bank = listBank.find((e) => e.bankID == res.bankId);
       let template = listTemplate.find(
         (e) => e.templateInvoiceHeaderId == res.templateInvoiceHeaderId
       );
-      setListItem(list);
+      setUnitItemHeaderId(res.unitItemHeaderId);
+      setTemplateInvoiceHeaderId(res.templateInvoiceHeaderId);
       setformValues((prevState) => ({
         ...prevState,
         unitCode: res.unitCode,
@@ -188,6 +185,45 @@ function EditDataUnitItem(props) {
     }
 
     Block.remove(`.${detailUnitItemBlockLoadingName}`), setLoadingShow(false);
+  };
+
+  const listItemBlockLoadingName = "block-list-unit-item";
+  const getListItem = async (data) => {
+    Block.standard(`.${listItemBlockLoadingName}`, `Getting List Item Detail`),
+      setLoadingShow(true);
+
+    let response = await fetch("/api/master/unititem/getdetaillistmsunititem", {
+      method: "POST",
+      body: JSON.stringify({
+        accessToken: accessToken,
+        params: {
+          unitItemHeaderId: unitItemHeaderId,
+          templateInvoiceHeaderId: templateInvoiceHeaderId,
+        },
+      }),
+    });
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
+
+    if (response.error)
+      alertService.error({ title: "Error", text: response.error.message });
+    else {
+      const result = response.result;
+      let list = [];
+      result.map((e, i) => {
+        list.push({
+          no: i + 1,
+          itemName: e.itemName,
+          itemRateName: e.itemRateName,
+          rate: e.rate,
+          unitItemDetailId: e.unitItemDetailId,
+          templateInvoiceDetailId: e.templateInvoiceDetailId,
+        });
+      });
+      setListItem(list);
+    }
+
+    Block.remove(`.${listItemBlockLoadingName}`), setLoadingShow(false);
   };
 
   const bankBlockLoadingName = "block-bank";
@@ -388,8 +424,9 @@ function EditDataUnitItem(props) {
                           name="templateInvoice"
                           key="templateInvoice"
                           isOptionEqualToValue={(option, value) => {
-                            option.templateInvoiceHeaderId ===
-                              value.templateInvoiceHeaderId;
+                            if (value)
+                              option.templateInvoiceHeaderId ===
+                                value.templateInvoiceHeaderId;
                           }}
                           value={templateEdit}
                           options={listTemplate}
@@ -402,6 +439,9 @@ function EditDataUnitItem(props) {
                                 : initialValues["templateInvoice"]
                             );
                             setTemplateEdit(value);
+                            setTemplateInvoiceHeaderId(
+                              value.templateInvoiceHeaderId
+                            );
                           }}
                           renderInput={(params) => (
                             <FormField
@@ -444,7 +484,7 @@ function EditDataUnitItem(props) {
                           key="bank"
                           value={bankEdit}
                           isOptionEqualToValue={(option, value) => {
-                            option.bankID === value.bankID;
+                            if (value) option.bankID === value.bankID;
                           }}
                           options={listBank}
                           getOptionLabel={(option) => option.bankName}
@@ -477,7 +517,7 @@ function EditDataUnitItem(props) {
                         <FormField
                           InputLabelProps={{ shrink: true }}
                           required
-                          type="number"
+                          type="text"
                           label="Virtual Account Number"
                           name="vaNo"
                           value={formValues.vaNo}
@@ -513,6 +553,7 @@ function EditDataUnitItem(props) {
                       </Grid>
                       <Grid item xs={12}>
                         <MDBox
+                          className={listItemBlockLoadingName}
                           color="dark"
                           bgColor="white"
                           borderRadius="lg"
