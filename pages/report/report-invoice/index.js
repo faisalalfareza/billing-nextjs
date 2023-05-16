@@ -18,7 +18,7 @@ import SiteDropdown from "/pagesComponents/dropdown/Site";
 import BorderAllIcon from "@mui/icons-material/BorderAll";
 import { Block } from "notiflix/build/notiflix-block-aio";
 
-export default function ReportInvoice(props) {
+function ReportInvoice() {
   let typeDummy = [
     {
       id: 1,
@@ -472,3 +472,5 @@ export default function ReportInvoice(props) {
     </DashboardLayout>
   );
 }
+
+export default ReportInvoice;

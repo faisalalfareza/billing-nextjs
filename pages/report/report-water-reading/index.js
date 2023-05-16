@@ -5,7 +5,7 @@ import DashboardNavbar from "/layout/Navbars/DashboardNavbar";
 import dashboardImage from "/assets/images/coming-soon.svg";
 import Image from "next/image";
 
-function ReportWaterReading(props) {
+function ReportWaterReading() {
   return (
     <DashboardLayout>
       <DashboardNavbar />

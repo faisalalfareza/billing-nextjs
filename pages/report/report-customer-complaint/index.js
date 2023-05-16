@@ -5,7 +5,7 @@ import DashboardNavbar from "/layout/Navbars/DashboardNavbar";
 import dashboardImage from "/assets/images/coming-soon.svg";
 import Image from "next/image";
 
-function ReportCollection(props) {
+function ReportCustomerComplaint() {
   return (
     <DashboardLayout>
       <DashboardNavbar />
@@ -26,4 +26,4 @@ function ReportCollection(props) {
   );
 }
 
-export default ReportCollection;
+export default ReportCustomerComplaint;

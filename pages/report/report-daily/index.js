@@ -18,7 +18,7 @@ import BorderAllIcon from "@mui/icons-material/BorderAll";
 import * as dayjs from "dayjs";
 import { Block } from "notiflix/build/notiflix-block-aio";
 
-export default function ReportDaily(props) {
+function ReportDaily() {
   let typeDummy = [
     {
       id: 1,
@@ -614,3 +614,5 @@ export default function ReportDaily(props) {
     </DashboardLayout>
   );
 }
+
+export default ReportDaily;
