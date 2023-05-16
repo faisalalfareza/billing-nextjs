@@ -233,7 +233,14 @@ function CancelPayment() {
           response.totalCount / customerRequest.recordsPerPage
         ),
       }));
-      setExpandFilter(response.totalCount > 0 ? false : true);
+      if (response.totalCount > 0) setExpandFilter(false);
+      else {
+        Swal.fire({
+          title: "There is no payment billing for this unit.",
+          icon: "info",
+        });
+        setExpandFilter(true);
+      }
     } Block.remove(`.${cancelPaymentBlockLoadingName}`),
       setLoadingCancelPayment(false);
   };

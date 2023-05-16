@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useCookies } from "react-cookie";
 import { Formik } from "formik";
 import * as Yup from "yup";
+import Swal from "sweetalert2";
 
 import { Card, Grid, Icon, Radio } from "@mui/material";
 import { Block } from "notiflix/build/notiflix-block-aio";
@@ -236,7 +237,14 @@ function RePrintOR() {
           response.totalCount / customerRequest.recordsPerPage
         ),
       }));
-      setExpandFilter(response.totalCount > 0 ? false : true);
+      if (response.totalCount > 0) setExpandFilter(false);
+      else {
+        Swal.fire({
+          title: "There is no payment billing for this unit.",
+          icon: "info",
+        });
+        setExpandFilter(true);
+      }
     } Block.remove(`.${orBlockLoadingName}`),
       setLoadingOfficialReceipt(false);
   };
