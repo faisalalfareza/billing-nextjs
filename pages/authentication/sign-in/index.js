@@ -131,23 +131,30 @@ function SignIn(props) {
         });
       } else {
         console.error("ERROR => ", error.message);
-        Swal.fire({
-          icon: "error",
-          title: error.message,
-          showConfirmButton: loginAttempt > 0 ? true : false,
-          showCancelButton: true,
-          focusConfirm: true,
-          confirmButtonText: `Try Again (${loginAttempt})`,
-          cancelButtonText: "OK",
-          footer:
-            "<p style='text-align: center;line-height: 1;font-size: small;'>" +
-            "This may be due to an incorrect username/email or password. Please check it again, and also make sure the device is connected to the internet without interruption." +
-            "</p>",
-        }).then(
-          (result) =>
-            result.isConfirmed &&
-            handleSigninSubmit().then(() => (loginAttempt -= 1))
-        );
+        if (error.message.includes("connect EHOSTUNREACH")) {
+          Swal.fire({
+            icon: "error",
+            title: "Make sure the device is connected to the internet without interruption.",
+            showConfirmButton: loginAttempt > 0 ? true : false,
+            showCancelButton: true,
+            focusConfirm: true,
+            confirmButtonText: `Try Again (${loginAttempt})`,
+            cancelButtonText: "OK",
+            // footer:
+            //   "<p style='text-align: center;line-height: 1;font-size: small;'>" +
+            //   "This may be due to an incorrect username/email or password. Please check it again, and also make sure the device is connected to the internet without interruption." +
+            //   "</p>",
+          }).then(
+            (result) =>
+              result.isConfirmed &&
+              handleSigninSubmit().then(() => (loginAttempt -= 1))
+          );
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Incorrect username/email or password. Please check it again.",
+          });
+        }
       }
 
       // console.error("ERROR CONFIG => ", error.config);

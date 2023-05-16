@@ -201,10 +201,13 @@ function UploadBulkPayment() {
           }
         }
         setUploadedList(data_formated);
-        if (uploadedList.length > 0) Notify.success(message.success), Block.remove(`.${uploadedListBlockLoadingName}`);
+        if ((data_formated.length > 0) (uploadedList.length > 0))
+          Notify.success(message.success), 
+            Block.remove(`.${uploadedListBlockLoadingName}`);
       } else {
         message.failed += "file is still empty or not filled";
-        Notify.failure(message.failed), Block.remove(`.${uploadedListBlockLoadingName}`);
+        Notify.failure(message.failed), 
+          Block.remove(`.${uploadedListBlockLoadingName}`);
       }
     };
 
