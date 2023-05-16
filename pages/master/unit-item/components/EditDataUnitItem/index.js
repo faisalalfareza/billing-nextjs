@@ -136,7 +136,7 @@ function EditDataUnitItem(props) {
   }, []);
 
   useEffect(() => {
-    getListItem();
+    if (templateInvoiceHeaderId != null) getListItem();
   }, [templateInvoiceHeaderId]);
 
   const getDetail = async (data) => {
@@ -214,6 +214,7 @@ function EditDataUnitItem(props) {
       alertService.error({ title: "Error", text: response.error.message });
     else {
       const result = response.result;
+      console.log("result---", result);
       let list = [];
       result.map((e, i) => {
         list.push({
