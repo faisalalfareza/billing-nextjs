@@ -204,7 +204,7 @@ function UploadDataUnitItem(props) {
         }
         setDataUnitItem([]);
 
-        if (!isFailed) closeModal(true);
+        closeModal(true);
       });
     }
 
