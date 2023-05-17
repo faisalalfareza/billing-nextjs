@@ -189,7 +189,8 @@ function UploadBulkPayment() {
             data_formated = [];
 
             break;
-          } else {
+          } 
+          else {
             data_formated.push({
               idClient: valueOfKeys[0],
               unitCode: valueOfKeys[1],
@@ -200,8 +201,8 @@ function UploadBulkPayment() {
             });
           }
         }
-        setUploadedList(data_formated);
-        if ((data_formated.length > 0) (uploadedList.length > 0))
+        setUploadedList(data_formated), uploadedList = data_formated;
+        if ((data_formated.length > 0) && (uploadedList.length > 0)) 
           Notify.success(message.success), 
             Block.remove(`.${uploadedListBlockLoadingName}`);
       } else {
