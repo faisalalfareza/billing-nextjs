@@ -25,6 +25,7 @@ import { useCookies } from "react-cookie";
 import { typeNormalization } from "/helpers/utils";
 import { alertService } from "/helpers";
 import NumberInput from "/pagesComponents/dropdown/NumberInput";
+import DetailTemplate from "../detail-template";
 
 function EditDataUnitItem(props) {
   const { isOpen, params, onModalChanged, site, listBank, listTemplate } =
@@ -41,6 +42,7 @@ function EditDataUnitItem(props) {
   const [unitItemHeaderId, setUnitItemHeaderId] = useState(null);
   const [templateInvoiceHeaderId, setTemplateInvoiceHeaderId] = useState(null);
   const formikRef = useRef();
+  const [openDetail, setOpenDetail] = useState(false);
 
   let bankE = listBank.find((e) => e.bankName == params.bank);
   let templateE = listTemplate.find(
@@ -315,8 +317,8 @@ function EditDataUnitItem(props) {
     setListItem(newData);
   };
 
-  const handleShow = () => {
-    window.open(formValues.templateInvoice.urltemplate, "_blank");
+  const handleDetail = () => {
+    setOpenDetail(!openDetail);
   };
 
   if (isOpen) {
@@ -470,6 +472,14 @@ function EditDataUnitItem(props) {
                             />
                           )}
                         />
+                        <DetailTemplate
+                          isOpen={openDetail}
+                          params={formValues.templateInvoice?.urltemplate}
+                          templateName={
+                            formValues.templateInvoice?.templateName
+                          }
+                          close={handleDetail}
+                        />
                       </Grid>
                       <Grid item xs={12} md={3}>
                         <MDButton
@@ -477,8 +487,7 @@ function EditDataUnitItem(props) {
                           color="primary"
                           disabled={formValues.templateInvoice == null}
                           onClick={() => {
-                            // handleDetail();
-                            handleShow();
+                            handleDetail();
                           }}
                         >
                           VIEW INVOICE
