@@ -22,12 +22,13 @@ export default function DetailTemplate(props) {
   });
 
   useEffect(() => {
-    fetch(params).then((r) => {
-      r.text().then((d) => {
-        setHtmlData(d);
-        console.log(d);
-      });
-    });
+    // fetch(params).then((r) => {
+    //   r.text().then((d) => {
+    //     setHtmlData(d);
+    //     console.log(d);
+    //   });
+    // });
+    getContent();
   }, [params]);
   const toggle = () => setModal(!modal);
 
@@ -36,6 +37,25 @@ export default function DetailTemplate(props) {
       <CloseIcon />
     </IconButton>
   );
+
+  const getContent = async (data) => {
+    let response = await fetch("/api/master/unititem/geturlcontent", {
+      method: "POST",
+      body: JSON.stringify({
+        accessToken: accessToken,
+        urlFile: params,
+      }),
+    });
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
+
+    if (response.error)
+      alertService.error({ title: "Error", text: response.error.message });
+    else {
+      const result = response.result;
+      setHtmlData(result);
+    }
+  };
 
   return (
     <Modal
