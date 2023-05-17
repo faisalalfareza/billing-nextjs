@@ -293,18 +293,18 @@ export default function Invoice(props) {
         );
       },
     },
-    { Header: "no", accessor: "no", width: "5%" },
-    { Header: "period", accessor: "period", width: "25%" },
-    { Header: "project", accessor: "project", width: "25%" },
-    { Header: "cluster", accessor: "cluster" },
-    { Header: "unitCode", accessor: "unitCode", width: "7%" },
-    { Header: "unitNo", accessor: "unitNo" },
-    { Header: "id client", accessor: "psCode" },
-    { Header: "name", accessor: "name" },
-    { Header: "invoice no", accessor: "invoiceNo" },
-    { Header: "invoice name", accessor: "invoiceName" },
+    { Header: "No", accessor: "no", width: "5%" },
+    { Header: "Period", accessor: "period", width: "25%" },
+    { Header: "Project", accessor: "project", width: "25%" },
+    { Header: "Cluster", accessor: "cluster" },
+    { Header: "Unit Code", accessor: "unitCode", width: "7%", customWidth: "60px" },
+    { Header: "Unit No", accessor: "unitNo", customWidth: "60px" },
+    { Header: "ID Client", accessor: "psCode" },
+    { Header: "Name", accessor: "name" },
+    { Header: "Invoice No", accessor: "invoiceNo" },
+    { Header: "Invoice Name", accessor: "invoiceName" },
     {
-      Header: "total tunggakan",
+      Header: "Total Tunggakan",
       accessor: "totalTunggakan",
       align: "right",
       Cell: ({ value }) => {
@@ -320,7 +320,7 @@ export default function Invoice(props) {
       },
     },
     {
-      Header: "preview tunggakan",
+      Header: "Preview Tunggakan",
       accessor: "invoiceHeaderId",
       align: "center",
       Cell: ({ value }) => {
@@ -337,7 +337,7 @@ export default function Invoice(props) {
       },
     },
     {
-      Header: "action",
+      Header: "Action",
       accessor: "action",
       align: "center",
       Cell: ({ value }) => {
@@ -1039,7 +1039,7 @@ export default function Invoice(props) {
         <Card className={invoiceBlockLoadingName}>
           <MDBox>
             <Grid container alignItems="center">
-              <Grid item xs={12}>
+              <Grid item xs={12} mb={1}>
                 <DataTable
                   title="Invoice List"
                   description="Invoice Data"

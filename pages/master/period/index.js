@@ -192,7 +192,7 @@ export default function MasterPeriod(props) {
         <Card className={periodBlockLoadingName}>
           <MDBox>
             <Grid container alignItems="center">
-              <Grid item xs={12}>
+              <Grid item xs={12} mb={1}>
                 <DataTable
                   title="Master Period List" description="For Period Data Maintenance"
                   table={setSiteList()}

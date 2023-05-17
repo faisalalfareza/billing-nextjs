@@ -505,7 +505,7 @@ function RePrintOR() {
               <Card className={orBlockLoadingName}>
                 <MDBox>
                   <Grid container alignItems="center">
-                    <Grid item xs={12}>
+                    <Grid item xs={12} mb={1}>
                       <DataTable
                         title="Reprint Official Receipt List" description="Official Receipt Data"
                         table={setOfficialReceiptTaskList(officialReceiptData.rowData)}
