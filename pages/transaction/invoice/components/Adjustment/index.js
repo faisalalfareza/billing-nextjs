@@ -235,7 +235,7 @@ export default function Adjustment(props) {
                                     }
                                   >
                                     {isLoading
-                                      ? "Saving..."
+                                      ? "Saving.."
                                       : "SAVE & REGENERATE INVOICE"}
                                   </MDButton>
                                 </MDBox>

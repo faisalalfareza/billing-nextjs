@@ -975,7 +975,7 @@ export default function Invoice(props) {
                                         disabled={isLoading || !isValifForm()}
                                       >
                                         <Icon>search</Icon>&nbsp;{" "}
-                                        {isLoading ? "Searching..." : "Search"}
+                                        {isLoading ? "Searching.." : "Search"}
                                       </MDButton>
                                     </MDBox>
                                   </MDBox>

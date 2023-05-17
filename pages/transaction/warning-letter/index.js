@@ -1111,7 +1111,7 @@ export default function WarningLetter(props) {
                                       >
                                         <Icon>search</Icon>&nbsp;{" "}
                                         {isLoading ?
-                                          "Searching..." :
+                                          "Searching.." :
                                           "Search"
                                         }
                                       </MDButton>
