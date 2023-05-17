@@ -207,6 +207,14 @@ function RePrintOR() {
   };
   const handleCustomerSubmit = async (e) => {
     e != undefined && e.preventDefault();
+
+    setOfficialReceiptData({
+      rowData: [],
+      totalRows: undefined,
+      totalPages: undefined,
+    }),
+      setSelectedUnit();
+
     getCustomerList();
   };
 
@@ -251,14 +259,11 @@ function RePrintOR() {
           response.totalCount / customerRequest.recordsPerPage
         ),
       }));
-      if (response.totalCount > 0) setExpandFilter(false);
-      else {
+      response.totalCount == 0 &&
         Swal.fire({
           title: "There is no payment billing for this unit.",
           icon: "info",
         });
-        setExpandFilter(true);
-      }
     }
     Block.remove(`.${orBlockLoadingName}`), setLoadingOfficialReceipt(false);
   };
@@ -539,7 +544,7 @@ function RePrintOR() {
               <Card className={orBlockLoadingName}>
                 <MDBox>
                   <Grid container alignItems="center">
-                    <Grid item xs={12}>
+                    <Grid item xs={12} mb={1}>
                       <DataTable
                         title="Reprint Official Receipt List"
                         description="Official Receipt Data"

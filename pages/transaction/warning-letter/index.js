@@ -598,16 +598,16 @@ export default function WarningLetter(props) {
         );
       },
     },
-    { Header: "no", accessor: "no", width: "5%" },
-    { Header: "period", accessor: "period", width: "10%" },
-    { Header: "project", accessor: "project", width: "10%" },
-    { Header: "cluster", accessor: "cluster" },
-    { Header: "invoice number", accessor: "invoicenumber" },
-    { Header: "unitcode", accessor: "unitcode", width: "7%" },
-    { Header: "unitno", accessor: "unitno" },
-    { Header: "sp", accessor: "sp" },
+    { Header: "No", accessor: "no", width: "5%" },
+    { Header: "Period", accessor: "period", width: "10%" },
+    { Header: "Project", accessor: "project", width: "10%" },
+    { Header: "Cluster", accessor: "cluster" },
+    { Header: "Invoice Number", accessor: "invoicenumber" },
+    { Header: "Unit Code", accessor: "unitcode", width: "7%" },
+    { Header: "Unit No", accessor: "unitno" },
+    { Header: "SP", accessor: "sp" },
     {
-      Header: "preview",
+      Header: "Preview",
       accessor: "preview",
       align: "center",
       Cell: ({ row }) => {
@@ -621,8 +621,8 @@ export default function WarningLetter(props) {
         );
       },
     },
-    { Header: "email address", accessor: "email", width: "15%" },
-    { Header: "send email date", accessor: "sendemaildate", width: "35%" },
+    { Header: "Email Address", accessor: "email", width: "15%" },
+    { Header: "Send Email Date", accessor: "sendemaildate", width: "35%" },
   ];
 
   //const [openModalPrev, setOpenPreview] = useState(false);
@@ -1160,7 +1160,7 @@ export default function WarningLetter(props) {
         <Card className={warningLetterBlockLoadingName}>
           <MDBox>
             <Grid container alignItems="center">
-              <Grid item xs={12}>
+              <Grid item xs={12} mb={1}>
                 <DataTable
                   title="Warning Letter List" description="Warning Letter Data"
                   table={setCustomerTaskList(customerResponse.rowData)}

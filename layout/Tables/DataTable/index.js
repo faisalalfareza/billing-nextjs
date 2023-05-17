@@ -346,7 +346,8 @@ function DataTable({
                   {...column.getHeaderProps(
                     isSorted && column.getSortByToggleProps()
                   )}
-                  width={column.width ? column.width : "auto"}
+                  // width="auto"
+                  // width={column.width ? column.width : "auto"}
                   align={column.align ? column.align : "left"}
                   sorted={setSortedValue(column)}
                 >
@@ -364,6 +365,7 @@ function DataTable({
                 {row.cells.map((cell) => (
                   <DataTableBodyCell
                     key={key}
+                    width={cell.column.customWidth ? cell.column.customWidth : "max-content"}
                     noBorder={noEndBorder && rows.length - 1 === key}
                     align={cell.column.align ? cell.column.align : "left"}
                     {...cell.getCellProps()}

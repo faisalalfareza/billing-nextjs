@@ -186,15 +186,15 @@ export default function WaterReading(props) {
   };
 
   const columns = [
-    { Header: "no", accessor: "no", width: "5%" },
-    { Header: "project", accessor: "project", width: "25%" },
-    { Header: "cluster", accessor: "cluster" },
-    { Header: "unitcode", accessor: "unitcode", width: "7%" },
-    { Header: "unitno", accessor: "unitno" },
-    { Header: "prev read", accessor: "prev" },
-    { Header: "current read", accessor: "curr" },
+    { Header: "No", accessor: "no", width: "5%" },
+    { Header: "Project", accessor: "project", width: "25%" },
+    { Header: "Cluster", accessor: "cluster" },
+    { Header: "Unit Code", accessor: "unitcode", width: "7%" },
+    { Header: "Unit No", accessor: "unitno" },
+    { Header: "Prev Read", accessor: "prev" },
+    { Header: "Current Read", accessor: "curr" },
     {
-      Header: "action",
+      Header: "Action",
       accessor: "action",
       align: "center",
       sorted: true,
@@ -552,7 +552,7 @@ export default function WaterReading(props) {
         <Card className={waterReadingBlockLoadingName}>
           <MDBox>
             <Grid container alignItems="center">
-              <Grid item xs={12}>
+              <Grid item xs={12} mb={1}>
                 <DataTable
                   title="Water Reading List"
                   description="Water Reading Data"

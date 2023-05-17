@@ -206,6 +206,14 @@ function CancelPayment() {
   };
   const handleCustomerSubmit = async (e) => {
     e != undefined && e.preventDefault();
+
+    setCancelPaymentData({
+      rowData: [],
+      totalRows: undefined,
+      totalPages: undefined,
+    }),
+      setSelectedUnit();
+
     getCustomerList();
   };
 
@@ -251,14 +259,11 @@ function CancelPayment() {
           response.totalCount / customerRequest.recordsPerPage
         ),
       }));
-      if (response.totalCount > 0) setExpandFilter(false);
-      else {
+      response.totalCount == 0 &&
         Swal.fire({
           title: "There is no payment billing for this unit.",
           icon: "info",
         });
-        setExpandFilter(true);
-      }
     }
     Block.remove(`.${cancelPaymentBlockLoadingName}`),
       setLoadingCancelPayment(false);
@@ -291,7 +296,7 @@ function CancelPayment() {
             );
           },
         },
-        { Header: "Remarks", accessor: "remarks" },
+        { Header: "Remarks", accessor: "remarks", customWidth: "200px" },
         { Header: "Canceled", accessor: "canceled" },
         {
           Header: "Actions",
@@ -533,7 +538,7 @@ function CancelPayment() {
               <Card className={cancelPaymentBlockLoadingName}>
                 <MDBox>
                   <Grid container alignItems="center">
-                    <Grid item xs={12}>
+                    <Grid item xs={12} mb={1}>
                       <DataTable
                         title="Cancel Payment List"
                         description="Cancel Payment Data"

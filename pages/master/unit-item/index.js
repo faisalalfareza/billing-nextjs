@@ -99,12 +99,12 @@ export default function UnitItem(props) {
   }, [customerRequest.skipCount, customerRequest.recordsPerPage]);
 
   const columns = [
-    { Header: "no", accessor: "no", width: "5%" },
-    { Header: "unitcode", accessor: "unitcode", width: "7%" },
-    { Header: "unitno", accessor: "unitno" },
-    { Header: "TEMPLATE INVOICE", accessor: "templateInvoice" },
-    { Header: "bank", accessor: "bank" },
-    { Header: "VIRTUAL ACCOUNT NUMBER", accessor: "vaNo", width: "25%" },
+    { Header: "No", accessor: "no", width: "5%" },
+    { Header: "Unit Code", accessor: "unitcode", width: "7%" },
+    { Header: "Unit No", accessor: "unitno" },
+    { Header: "Template Invoice", accessor: "templateInvoice" },
+    { Header: "Bank", accessor: "bank" },
+    { Header: "Virtual Account Number", accessor: "vaNo", width: "25%", customWidth: "200px" },
     {
       Header: "Penalty",
       accessor: "isPenalty",
@@ -279,7 +279,7 @@ export default function UnitItem(props) {
         <Card className={unitItemBlockLoadingName}>
           <MDBox>
             <Grid container alignItems="center">
-              <Grid item xs={12}>
+              <Grid item xs={12} mb={1}>
                 <DataTable
                   title="Master Unit Item List"
                   description="For Unit Item maintenance"
