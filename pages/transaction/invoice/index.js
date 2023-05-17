@@ -126,8 +126,9 @@ export default function Invoice(props) {
     );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    
-    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+
+    if (response.error)
+      alertService.error({ title: "Error", text: response.error.message });
     else setDataProject(response.result);
 
     Block.remove(`.${projectBlockLoadingName}`);
@@ -151,8 +152,9 @@ export default function Invoice(props) {
     );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    
-    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+
+    if (response.error)
+      alertService.error({ title: "Error", text: response.error.message });
     else setDataPeriod(response.result);
 
     Block.remove(`.${periodBlockLoadingName}`);
@@ -358,7 +360,7 @@ export default function Invoice(props) {
   const fetchData = async (values, actions) => {
     let field = values ? values : formValues;
     if (field?.period) {
-      Block.standard(`.${invoiceBlockLoadingName}`, `Getting Invoice Data`), 
+      Block.standard(`.${invoiceBlockLoadingName}`, `Getting Invoice Data`),
         setLoading(true);
 
       const { scheme, keywords, recordsPerPage, skipCount } = customerRequest;
@@ -382,7 +384,8 @@ export default function Invoice(props) {
       if (!response.ok) throw new Error(`Error: ${response.status}`);
       response = typeNormalization(await response.json());
 
-      if (response.error) alertService.error({ title: "Error", text: response.error.message });
+      if (response.error)
+        alertService.error({ title: "Error", text: response.error.message });
       else {
         let data = response.result;
         const list = [];
@@ -413,8 +416,8 @@ export default function Invoice(props) {
             data.totalCount / customerRequest.recordsPerPage
           ),
         }));
-      } Block.remove(`.${invoiceBlockLoadingName}`), 
-        setLoading(false);
+      }
+      Block.remove(`.${invoiceBlockLoadingName}`), setLoading(false);
     }
   };
 
@@ -468,7 +471,8 @@ export default function Invoice(props) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+    if (response.error)
+      alertService.error({ title: "Error", text: response.error.message });
     else setDataCluster(response.result);
 
     Block.remove(`.${clusterBlockLoadingName}`);
@@ -493,8 +497,9 @@ export default function Invoice(props) {
     );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    
-    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+
+    if (response.error)
+      alertService.error({ title: "Error", text: response.error.message });
     else setDataUnitCode(response.result);
 
     Block.remove(`.${unitCodeBlockLoadingName}`);
@@ -519,10 +524,11 @@ export default function Invoice(props) {
     );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    
-    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+
+    if (response.error)
+      alertService.error({ title: "Error", text: response.error.message });
     else setDataUnitNo(response.result);
-    
+
     Block.remove(`.${unitNoBlockLoadingName}`);
   };
 
@@ -612,8 +618,8 @@ export default function Invoice(props) {
         break;
     }
 
-    Block.standard(`.${invoiceBlockLoadingName}`, processMessage), 
-        setLoadingSend(true);
+    Block.standard(`.${invoiceBlockLoadingName}`, processMessage),
+      setLoadingSend(true);
 
     let response = await fetch(url, {
       method: "POST",
@@ -625,11 +631,12 @@ export default function Invoice(props) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error) alertService.error({ text: response.error.message, title: "Error" });
+    if (response.error)
+      alertService.error({ text: response.error.message, title: "Error" });
     else alertService.success({ text: text, title: title });
 
-    Block.remove(`.${invoiceBlockLoadingName}`), 
-      setLoadingSend(false);
+    Block.remove(`.${invoiceBlockLoadingName}`), setLoadingSend(false);
+    fetchData();
   };
 
   const override = {
