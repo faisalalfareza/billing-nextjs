@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { NumericFormat } from "react-number-format";
 import { Formik } from "formik";
 import * as Yup from "yup";
@@ -29,6 +29,19 @@ function CancelPayment() {
     setSite(siteVal);
     localStorage.setItem("site", JSON.stringify(siteVal));
   };
+  const formikRef = useRef();
+
+  useEffect(() => {
+    setCustomerResponse((prevState) => ({
+      ...prevState,
+      rowData: [],
+      totalRows: undefined,
+      totalPages: undefined,
+    }));
+    if (formikRef.current) {
+      formikRef.current.setFieldValue("customerName", "");
+    }
+  }, [site]);
 
   const schemeModels = {
     formId: "reprint-or-form",
@@ -136,8 +149,8 @@ function CancelPayment() {
           response.totalCount / customerRequest.recordsPerPage
         ),
       }));
-    } Block.remove(`.${customerBlockLoadingName}`),
-      setLoadingCustomer(false);
+    }
+    Block.remove(`.${customerBlockLoadingName}`), setLoadingCustomer(false);
   };
   const setCustomerTaskList = (rows) => {
     return {
@@ -155,9 +168,10 @@ function CancelPayment() {
                     setCancelPaymentData({
                       rowData: [],
                       totalRows: undefined,
-                      totalPages: undefined
+                      totalPages: undefined,
                     });
-                  } setSelectedUnit(row.original);
+                  }
+                  setSelectedUnit(row.original);
                 }}
               />
             );
@@ -204,7 +218,10 @@ function CancelPayment() {
   });
 
   const getCancelPaymentList = async (unitDataID) => {
-    Block.standard(`.${cancelPaymentBlockLoadingName}`, `Getting Cancel Payment Data`),
+    Block.standard(
+      `.${cancelPaymentBlockLoadingName}`,
+      `Getting Cancel Payment Data`
+    ),
       setLoadingCancelPayment(true);
 
     let response = await fetch(
@@ -223,7 +240,8 @@ function CancelPayment() {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+    if (response.error)
+      alertService.error({ title: "Error", text: response.error.message });
     else {
       setCancelPaymentData((prevState) => ({
         ...prevState,
@@ -241,7 +259,8 @@ function CancelPayment() {
         });
         setExpandFilter(true);
       }
-    } Block.remove(`.${cancelPaymentBlockLoadingName}`),
+    }
+    Block.remove(`.${cancelPaymentBlockLoadingName}`),
       setLoadingCancelPayment(false);
   };
   const setCancelPaymentTaskList = (rows) => {
@@ -342,25 +361,33 @@ function CancelPayment() {
                   </Grid>
                   <Grid item xs={12} sm={1}>
                     <MDBox display="flex" justifyContent="flex-end">
-                      <a onClick={() => setExpandFilter(!isExpandedFilter)} style={{ cursor: "pointer" }}>
+                      <a
+                        onClick={() => setExpandFilter(!isExpandedFilter)}
+                        style={{ cursor: "pointer" }}
+                      >
                         <MDTypography
                           variant="button"
                           color="text"
                           sx={{ lineHeight: 0 }}
                         >
-                          {
-                            isExpandedFilter 
-                              ? <Icon fontSize="small">expand_less</Icon>
-                              : <Icon fontSize="small">expand_more</Icon>
-                          }
+                          {isExpandedFilter ? (
+                            <Icon fontSize="small">expand_less</Icon>
+                          ) : (
+                            <Icon fontSize="small">expand_more</Icon>
+                          )}
                         </MDTypography>
                       </a>
                     </MDBox>
                   </Grid>
-                  <Grid item xs={12} style={{ display: isExpandedFilter ? "initial" : "none" }}>
+                  <Grid
+                    item
+                    xs={12}
+                    style={{ display: isExpandedFilter ? "initial" : "none" }}
+                  >
                     <Formik
                       initialValues={schemeInitialValues}
                       validationSchema={schemeValidations}
+                      innerRef={formikRef}
                     >
                       {({ values, errors, touched }) => {
                         let { customerName: customerNameV } = values;
@@ -440,8 +467,10 @@ function CancelPayment() {
                   </Grid>
                 </Grid>
               </MDBox>
-              {(customerResponse.rowData.length > 0) && (
-                <MDBox style={{ display: isExpandedFilter ? "initial" : "none" }}>
+              {customerResponse.rowData.length > 0 && (
+                <MDBox
+                  style={{ display: isExpandedFilter ? "initial" : "none" }}
+                >
                   <Grid container alignItems="center">
                     <Grid item xs={12}>
                       <MDBox pl={3}>
@@ -457,9 +486,13 @@ function CancelPayment() {
                         recordsPerPage={customerRequest.recordsPerPage}
                         skipCount={customerRequest.skipCount}
                         pageChangeHandler={skipCountChangeHandler}
-                        recordsPerPageChangeHandler={recordsPerPageChangeHandler}
+                        recordsPerPageChangeHandler={
+                          recordsPerPageChangeHandler
+                        }
                         keywordsChangeHandler={keywordsChangeHandler}
-                        entriesPerPage={{ defaultValue: customerRequest.recordsPerPage }}
+                        entriesPerPage={{
+                          defaultValue: customerRequest.recordsPerPage,
+                        }}
                         pagination={{ variant: "gradient", color: "primary" }}
                       />
                       <MDBox p={3} pt={0}>
@@ -475,7 +508,9 @@ function CancelPayment() {
                                 variant="gradient"
                                 color="primary"
                                 sx={{ height: "100%" }}
-                                onClick={() => getCancelPaymentList(selectedUnit.unitDataId)}
+                                onClick={() =>
+                                  getCancelPaymentList(selectedUnit.unitDataId)
+                                }
                                 disabled={!selectedUnit}
                               >
                                 {isLoadingCancelPayment
@@ -500,9 +535,13 @@ function CancelPayment() {
                   <Grid container alignItems="center">
                     <Grid item xs={12}>
                       <DataTable
-                        title="Cancel Payment List" description="Cancel Payment Data"
-                        table={setCancelPaymentTaskList(cancelPaymentData.rowData)}
-                        canSearch pagination={{ variant: "gradient", color: "primary" }}
+                        title="Cancel Payment List"
+                        description="Cancel Payment Data"
+                        table={setCancelPaymentTaskList(
+                          cancelPaymentData.rowData
+                        )}
+                        canSearch
+                        pagination={{ variant: "gradient", color: "primary" }}
                       />
                     </Grid>
                   </Grid>
@@ -518,7 +557,8 @@ function CancelPayment() {
                       ...prevState,
                       isOpen: !modalOpen.isOpen,
                     }));
-                    (isChanged === true) && getCancelPaymentList(selectedUnit.unitDataId);
+                    isChanged === true &&
+                      getCancelPaymentList(selectedUnit.unitDataId);
                   }}
                 />
               )}

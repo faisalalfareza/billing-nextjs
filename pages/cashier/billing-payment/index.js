@@ -53,6 +53,16 @@ export default function BillingPayment(props) {
     totalPages: undefined,
   });
 
+  useEffect(() => {
+    setCustomerResponse((prevState) => ({
+      ...prevState,
+      rowData: [],
+      totalRows: undefined,
+      totalPages: undefined,
+    }));
+    setFilterText("");
+  }, [site]);
+
   const [customerRequest, setCustomerRequest] = useState({
     scheme: site?.siteId,
     keywords: "",

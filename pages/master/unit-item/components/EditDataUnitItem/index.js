@@ -139,6 +139,7 @@ function EditDataUnitItem(props) {
 
   useEffect(() => {
     if (templateInvoiceHeaderId != null) getListItem();
+    else setListItem([]);
   }, [templateInvoiceHeaderId]);
 
   const getDetail = async (data) => {
@@ -442,13 +443,11 @@ function EditDataUnitItem(props) {
                           onChange={(e, value) => {
                             setFieldValue(
                               "templateInvoice",
-                              value !== null
-                                ? value
-                                : initialValues["templateInvoice"]
+                              value !== null ? value : null
                             );
-                            setTemplateEdit(value);
+                            setTemplateEdit(value ? value : null);
                             setTemplateInvoiceHeaderId(
-                              value.templateInvoiceHeaderId
+                              value ? value.templateInvoiceHeaderId : null
                             );
                           }}
                           renderInput={(params) => (
