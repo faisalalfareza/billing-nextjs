@@ -193,6 +193,13 @@ function RePrintOR() {
   };
   const handleCustomerSubmit = async (e) => {
     e != undefined && e.preventDefault();
+
+    setOfficialReceiptData({
+      rowData: [],
+      totalRows: undefined,
+      totalPages: undefined
+    }), setSelectedUnit();
+
     getCustomerList();
   };
 
@@ -237,14 +244,10 @@ function RePrintOR() {
           response.totalCount / customerRequest.recordsPerPage
         ),
       }));
-      if (response.totalCount > 0) setExpandFilter(false);
-      else {
-        Swal.fire({
-          title: "There is no payment billing for this unit.",
-          icon: "info",
-        });
-        setExpandFilter(true);
-      }
+      (response.totalCount == 0) && Swal.fire({
+        title: "There is no payment billing for this unit.",
+        icon: "info",
+      });
     } Block.remove(`.${orBlockLoadingName}`),
       setLoadingOfficialReceipt(false);
   };
