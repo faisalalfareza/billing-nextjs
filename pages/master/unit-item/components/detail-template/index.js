@@ -14,11 +14,21 @@ import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 
 export default function DetailTemplate(props) {
-  const { isOpen, params, close } = props;
+  const { isOpen, params, close, templateName } = props;
   const [modal, setModal] = useState(isOpen);
   const [{ accessToken, encryptedAccessToken }] = useCookies();
+  const [htmlData, setHtmlData] = useState({
+    content: { "mycustom-html": "<p>demo</p>" },
+  });
 
-  useEffect(() => {}, [params]);
+  useEffect(() => {
+    fetch(params).then((r) => {
+      r.text().then((d) => {
+        setHtmlData(d);
+        console.log(d);
+      });
+    });
+  }, [params]);
   const toggle = () => setModal(!modal);
 
   const closeBtn = (
@@ -38,12 +48,17 @@ export default function DetailTemplate(props) {
     >
       <ModalHeader toggle={toggle} close={closeBtn}>
         <MDBox mb={1}>
-          <MDTypography variant="h5">View Detail Template</MDTypography>
+          <MDTypography variant="h5">
+            View Detail Template `{templateName}`
+          </MDTypography>
         </MDBox>
       </ModalHeader>
       <ModalBody>
-        {params}
-        <iframe src={params} />
+        <MDBox
+          dangerouslySetInnerHTML={{
+            __html: htmlData,
+          }}
+        />
       </ModalBody>
       <ModalFooter>
         <MDButton variant="outlined" color="secondary" onClick={close}>

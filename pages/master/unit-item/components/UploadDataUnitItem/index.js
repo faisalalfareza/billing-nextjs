@@ -219,10 +219,6 @@ function UploadDataUnitItem(props) {
     setTimeout(() => onModalChanged(isChanged), 0);
   };
 
-  const handleShow = () => {
-    window.open(formValues.templateInvoice.urltemplate, "_blank");
-  };
-
   if (isOpen) {
     let schemeValidations = Yup.object().shape({
       [templateInvoice.name]: templateInvoice.isRequired
@@ -458,6 +454,9 @@ function UploadDataUnitItem(props) {
                         <DetailTemplate
                           isOpen={openDetail}
                           params={formValues.templateInvoice?.urltemplate}
+                          templateName={
+                            formValues.templateInvoice?.templateName
+                          }
                           close={handleDetail}
                         />
                       </Grid>
@@ -468,7 +467,6 @@ function UploadDataUnitItem(props) {
                           disabled={formValues.templateInvoice == null}
                           onClick={() => {
                             handleDetail();
-                            // handleShow();
                           }}
                         >
                           VIEW INVOICE
