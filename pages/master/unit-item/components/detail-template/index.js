@@ -14,11 +14,22 @@ import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 
 export default function DetailTemplate(props) {
-  const { isOpen, params, close } = props;
+  const { isOpen, params, close, templateName } = props;
   const [modal, setModal] = useState(isOpen);
   const [{ accessToken, encryptedAccessToken }] = useCookies();
+  const [htmlData, setHtmlData] = useState({
+    content: { "mycustom-html": "<p>demo</p>" },
+  });
 
-  useEffect(() => {}, [params]);
+  useEffect(() => {
+    // fetch(params).then((r) => {
+    //   r.text().then((d) => {
+    //     setHtmlData(d);
+    //     console.log(d);
+    //   });
+    // });
+    getContent();
+  }, [params]);
   const toggle = () => setModal(!modal);
 
   const closeBtn = (
@@ -26,6 +37,25 @@ export default function DetailTemplate(props) {
       <CloseIcon />
     </IconButton>
   );
+
+  const getContent = async (data) => {
+    let response = await fetch("/api/master/unititem/geturlcontent", {
+      method: "POST",
+      body: JSON.stringify({
+        accessToken: accessToken,
+        urlFile: params,
+      }),
+    });
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
+
+    if (response.error)
+      alertService.error({ title: "Error", text: response.error.message });
+    else {
+      const result = response.result;
+      setHtmlData(result);
+    }
+  };
 
   return (
     <Modal
@@ -38,12 +68,17 @@ export default function DetailTemplate(props) {
     >
       <ModalHeader toggle={toggle} close={closeBtn}>
         <MDBox mb={1}>
-          <MDTypography variant="h5">View Detail Template</MDTypography>
+          <MDTypography variant="h5">
+            View Detail Template `{templateName}`
+          </MDTypography>
         </MDBox>
       </ModalHeader>
       <ModalBody>
-        {params}
-        <iframe src={params} />
+        <MDBox
+          dangerouslySetInnerHTML={{
+            __html: htmlData,
+          }}
+        />
       </ModalBody>
       <ModalFooter>
         <MDButton variant="outlined" color="secondary" onClick={close}>

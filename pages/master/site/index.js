@@ -42,7 +42,7 @@ export default function MasterSite(props) {
     return {
       columns: [
         { Header: "No", accessor: "no" },
-        { Header: "Site ID", accessor: "siteId" },
+        { Header: "Site ID", accessor: "siteId", customWidth: "50px" },
         { Header: "Site Name", accessor: "siteName" },
         {
           Header: "Project",
@@ -240,7 +240,7 @@ export default function MasterSite(props) {
         <Card className={siteBlockLoadingName}>
           <MDBox>
             <Grid container alignItems="center">
-              <Grid item xs={12}>
+              <Grid item xs={12} mb={1}>
                 <DataTable
                   title="Master Site List"
                   description="For Site Data Maintenance"

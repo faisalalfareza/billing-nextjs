@@ -95,8 +95,7 @@ function UploadDataUnitItem(props) {
 
   const [formValues, setformValues] = useState(initialValues);
 
-  const getFormData = (values) => {
-  };
+  const getFormData = (values) => {};
 
   const templateInvoiceBlockLoadingName = "block-template-invoice";
   const getTemplateInvoice = async (val) => {
@@ -108,13 +107,15 @@ function UploadDataUnitItem(props) {
         method: "POST",
         body: JSON.stringify({
           accessToken: accessToken,
+          params: { SiteID: site?.siteId },
         }),
       }
     );
     if (!response.ok) throw new Error(`{Error}: ${response.status}`);
     response = typeNormalization(await response.json());
-   
-    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+
+    if (response.error)
+      alertService.error({ title: "Error", text: response.error.message });
     else setDataTemplateInvoice(response.result);
 
     Block.remove(`.${templateInvoiceBlockLoadingName}`);
@@ -129,7 +130,10 @@ function UploadDataUnitItem(props) {
 
   const uploadExcelUnitItemBlockLoadingName = "block-upload-excel-unit-item";
   const uploadExcel = async (values, actions) => {
-    Block.standard(`.${uploadExcelUnitItemBlockLoadingName}`, `Uploading Unit Item`),
+    Block.standard(
+      `.${uploadExcelUnitItemBlockLoadingName}`,
+      `Uploading Unit Item`
+    ),
       setLoading(true);
 
     const list = [];
@@ -199,14 +203,12 @@ function UploadDataUnitItem(props) {
           }, 0);
         }
         setDataUnitItem([]);
-        
-        if (!isFailed) 
-          closeModal(true);
+
+        closeModal(true);
       });
     }
 
-    Block.remove(`.${uploadExcelUnitItemBlockLoadingName}`),
-      setLoading(false);
+    Block.remove(`.${uploadExcelUnitItemBlockLoadingName}`), setLoading(false);
   };
 
   const openModal = () => setModalOpen(true);
@@ -215,10 +217,6 @@ function UploadDataUnitItem(props) {
     setModalOpen(false);
     setTimeout(() => setDataUnitItem([]), 1500);
     setTimeout(() => onModalChanged(isChanged), 0);
-  };
-
-  const handleShow = () => {
-    window.open(formValues.templateInvoice.urltemplate, "_blank");
   };
 
   if (isOpen) {
@@ -276,16 +274,21 @@ function UploadDataUnitItem(props) {
             // Validation Step 3: Cell empty
             if (valueOfKeys.indexOf(undefined) != -1) {
               message.failed += "some cells are still empty or not filled";
-              Notify.failure(message.failed), Block.remove(`.${uploadedListBlockLoadingName}`);
+              Notify.failure(message.failed),
+                Block.remove(`.${uploadedListBlockLoadingName}`);
 
               return false;
             }
           }
           setDataUnitItem(data);
-          if (dataUnitItem.length > 0) Notify.success(message.success), Block.remove(`.${uploadedListBlockLoadingName}`);
+          Block.remove(`.${uploadedListBlockLoadingName}`);
+          if (dataUnitItem.length > 0)
+            Notify.success(message.success),
+              Block.remove(`.${uploadedListBlockLoadingName}`);
         } else {
           message.failed += "file is still empty or not filled";
-          Notify.failure(message.failed), Block.remove(`.${uploadedListBlockLoadingName}`);
+          Notify.failure(message.failed),
+            Block.remove(`.${uploadedListBlockLoadingName}`);
         }
       };
       if (rABS) reader.readAsBinaryString(file);
@@ -321,7 +324,9 @@ function UploadDataUnitItem(props) {
           isPassed[0] = true;
         }
 
-        if (!isPassed[0]) Notify.failure(message.failed), Block.remove(`.${uploadedListBlockLoadingName}`);
+        if (!isPassed[0])
+          Notify.failure(message.failed),
+            Block.remove(`.${uploadedListBlockLoadingName}`);
         else handleFile(file, isPassed, message);
       }
     };
@@ -449,6 +454,9 @@ function UploadDataUnitItem(props) {
                         <DetailTemplate
                           isOpen={openDetail}
                           params={formValues.templateInvoice?.urltemplate}
+                          templateName={
+                            formValues.templateInvoice?.templateName
+                          }
                           close={handleDetail}
                         />
                       </Grid>
@@ -458,8 +466,7 @@ function UploadDataUnitItem(props) {
                           color="primary"
                           disabled={formValues.templateInvoice == null}
                           onClick={() => {
-                            // handleDetail();
-                            handleShow();
+                            handleDetail();
                           }}
                         >
                           VIEW INVOICE
@@ -489,7 +496,7 @@ function UploadDataUnitItem(props) {
                         sx={{ height: "100%" }}
                         disabled={!isValifForm() || isLoading}
                       >
-                        {isLoading ? "Saving..." : "Save"}
+                        {isLoading ? "Saving.." : "Save"}
                       </MDButton>
                     </MDBox>
                   </MDBox>

@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useCookies } from "react-cookie";
 import { Formik } from "formik";
 import * as Yup from "yup";
+import Swal from "sweetalert2";
 
 import { Card, Grid, Icon, Radio } from "@mui/material";
 import { Block } from "notiflix/build/notiflix-block-aio";
@@ -28,6 +29,19 @@ function RePrintOR() {
     setSite(siteVal);
     localStorage.setItem("site", JSON.stringify(siteVal));
   };
+  const formikRef = useRef();
+
+  useEffect(() => {
+    setCustomerResponse((prevState) => ({
+      ...prevState,
+      rowData: [],
+      totalRows: undefined,
+      totalPages: undefined,
+    }));
+    if (formikRef.current) {
+      formikRef.current.setFieldValue("customerName", "");
+    }
+  }, [site]);
 
   const schemeModels = {
     formId: "reprint-or-form",
@@ -64,6 +78,8 @@ function RePrintOR() {
     } else setSite(currentSite);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const [isExpandedFilter, setExpandFilter] = useState(true);
 
   const customerBlockLoadingName = "block-customer";
   const [isLoadingCustomer, setLoadingCustomer] = useState(false);
@@ -133,8 +149,8 @@ function RePrintOR() {
           response.totalCount / customerRequest.recordsPerPage
         ),
       }));
-    } Block.remove(`.${customerBlockLoadingName}`),
-      setLoadingCustomer(false);
+    }
+    Block.remove(`.${customerBlockLoadingName}`), setLoadingCustomer(false);
   };
 
   const setCustomerTaskList = (rows) => {
@@ -153,9 +169,10 @@ function RePrintOR() {
                     setOfficialReceiptData({
                       rowData: [],
                       totalRows: undefined,
-                      totalPages: undefined
+                      totalPages: undefined,
                     });
-                  } setSelectedUnit(row.original);
+                  }
+                  setSelectedUnit(row.original);
                 }}
               />
             );
@@ -190,10 +207,18 @@ function RePrintOR() {
   };
   const handleCustomerSubmit = async (e) => {
     e != undefined && e.preventDefault();
+
+    setOfficialReceiptData({
+      rowData: [],
+      totalRows: undefined,
+      totalPages: undefined,
+    }),
+      setSelectedUnit();
+
     getCustomerList();
   };
 
-  const orBlockLoadingName = "block-official-receipt", 
+  const orBlockLoadingName = "block-official-receipt",
     reprintBlockLoadingName = "block-reprint-official-receipt";
   const [isLoadingOfficialReceipt, setLoadingOfficialReceipt] = useState(false);
   const [officialReceiptData, setOfficialReceiptData] = useState({
@@ -234,8 +259,13 @@ function RePrintOR() {
           response.totalCount / customerRequest.recordsPerPage
         ),
       }));
-    } Block.remove(`.${orBlockLoadingName}`),
-      setLoadingOfficialReceipt(false);
+      response.totalCount == 0 &&
+        Swal.fire({
+          title: "There is no payment billing for this unit.",
+          icon: "info",
+        });
+    }
+    Block.remove(`.${orBlockLoadingName}`), setLoadingOfficialReceipt(false);
   };
   const setOfficialReceiptTaskList = (rows) => {
     return {
@@ -262,7 +292,9 @@ function RePrintOR() {
                 variant="outlined"
                 color="info"
                 size="small"
-                onClick={(e) => reprintOfficialReceipt(row.original.billingHeaderId)}
+                onClick={(e) =>
+                  reprintOfficialReceipt(row.original.billingHeaderId)
+                }
                 disabled={isLoadingOfficialReceipt}
               >
                 <Icon>print</Icon>&nbsp; Re-Print
@@ -301,8 +333,7 @@ function RePrintOR() {
       alertService.error({ title: "Error", text: response.error.message });
     else window.open(response.result, "_blank");
 
-    Block.remove(`.${orBlockLoadingName}`),
-      setLoadingOfficialReceipt(false);
+    Block.remove(`.${orBlockLoadingName}`), setLoadingOfficialReceipt(false);
   };
 
   return (
@@ -332,13 +363,38 @@ function RePrintOR() {
             <Card className={customerBlockLoadingName}>
               <MDBox px={3} pt={3} pb={2} lineHeight={1}>
                 <Grid container alignItems="center" spacing={2}>
-                  <Grid item xs={12}>
+                  <Grid item xs={12} sm={11}>
                     <MDBox>
                       <MDTypography variant="h5">Filter</MDTypography>
                     </MDBox>
                   </Grid>
-                  <Grid item xs={12}>
+                  <Grid item xs={12} sm={1}>
+                    <MDBox display="flex" justifyContent="flex-end">
+                      <a
+                        onClick={() => setExpandFilter(!isExpandedFilter)}
+                        style={{ cursor: "pointer" }}
+                      >
+                        <MDTypography
+                          variant="button"
+                          color="text"
+                          sx={{ lineHeight: 0 }}
+                        >
+                          {isExpandedFilter ? (
+                            <Icon fontSize="small">expand_less</Icon>
+                          ) : (
+                            <Icon fontSize="small">expand_more</Icon>
+                          )}
+                        </MDTypography>
+                      </a>
+                    </MDBox>
+                  </Grid>
+                  <Grid
+                    item
+                    xs={12}
+                    style={{ display: isExpandedFilter ? "initial" : "none" }}
+                  >
                     <Formik
+                      innerRef={formikRef}
                       initialValues={schemeInitialValues}
                       validationSchema={schemeValidations}
                     >
@@ -366,7 +422,9 @@ function RePrintOR() {
                                   name={customerName.name}
                                   value={customerNameV}
                                   placeholder={customerName.placeholder}
-                                  error={errors.customerName && touched.customerName}
+                                  error={
+                                    errors.customerName && touched.customerName
+                                  }
                                   success={
                                     customerName.isRequired &&
                                     checkingSuccessInput(
@@ -405,8 +463,7 @@ function RePrintOR() {
                                       <Icon>search</Icon>&nbsp;{" "}
                                       {isLoadingCustomer
                                         ? "Searching.."
-                                        : "Search"
-                                      }
+                                        : "Search"}
                                     </MDButton>
                                   </MDBox>
                                 </MDBox>
@@ -420,7 +477,9 @@ function RePrintOR() {
                 </Grid>
               </MDBox>
               {customerResponse.rowData.length > 0 && (
-                <MDBox>
+                <MDBox
+                  style={{ display: isExpandedFilter ? "initial" : "none" }}
+                >
                   <Grid container alignItems="center">
                     <Grid item xs={12}>
                       <MDBox pl={3}>
@@ -436,9 +495,13 @@ function RePrintOR() {
                         recordsPerPage={customerRequest.recordsPerPage}
                         skipCount={customerRequest.skipCount}
                         pageChangeHandler={skipCountChangeHandler}
-                        recordsPerPageChangeHandler={recordsPerPageChangeHandler}
+                        recordsPerPageChangeHandler={
+                          recordsPerPageChangeHandler
+                        }
                         keywordsChangeHandler={keywordsChangeHandler}
-                        entriesPerPage={{ defaultValue: customerRequest.recordsPerPage }}
+                        entriesPerPage={{
+                          defaultValue: customerRequest.recordsPerPage,
+                        }}
                         pagination={{ variant: "gradient", color: "primary" }}
                       />
                       <MDBox p={3} pt={0}>
@@ -454,7 +517,11 @@ function RePrintOR() {
                                 variant="gradient"
                                 color="primary"
                                 sx={{ height: "100%" }}
-                                onClick={() => getOfficialReceiptList(selectedUnit.unitDataId)}
+                                onClick={() =>
+                                  getOfficialReceiptList(
+                                    selectedUnit.unitDataId
+                                  )
+                                }
                                 disabled={!selectedUnit}
                               >
                                 {isLoadingOfficialReceipt
@@ -477,11 +544,15 @@ function RePrintOR() {
               <Card className={orBlockLoadingName}>
                 <MDBox>
                   <Grid container alignItems="center">
-                    <Grid item xs={12}>
+                    <Grid item xs={12} mb={1}>
                       <DataTable
-                        title="Reprint Official Receipt List" description="Official Receipt Data"
-                        table={setOfficialReceiptTaskList(officialReceiptData.rowData)}
-                        canSearch pagination={{ variant: "gradient", color: "primary" }}
+                        title="Reprint Official Receipt List"
+                        description="Official Receipt Data"
+                        table={setOfficialReceiptTaskList(
+                          officialReceiptData.rowData
+                        )}
+                        canSearch
+                        pagination={{ variant: "gradient", color: "primary" }}
                       />
                     </Grid>
                   </Grid>

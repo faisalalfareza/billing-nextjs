@@ -50,7 +50,7 @@ function Breadcrumbs({ icon, title, route, light }) {
           },
         }}
       >
-        <Link href="/">
+        <Link href="/dashboards">
           <a>
             <MDTypography
               component="span"

@@ -535,7 +535,7 @@ function UploadDataWater(props) {
                         sx={{ height: "100%" }}
                         disabled={!isValifForm() || isLoading}
                       >
-                        {isLoading ? "Saving..." : "Save"}
+                        {isLoading ? "Saving.." : "Save"}
                       </MDButton>
                     </MDBox>
                   </MDBox>

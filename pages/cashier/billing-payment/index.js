@@ -53,6 +53,16 @@ export default function BillingPayment(props) {
     totalPages: undefined,
   });
 
+  useEffect(() => {
+    setCustomerResponse((prevState) => ({
+      ...prevState,
+      rowData: [],
+      totalRows: undefined,
+      totalPages: undefined,
+    }));
+    setFilterText("");
+  }, [site]);
+
   const [customerRequest, setCustomerRequest] = useState({
     scheme: site?.siteId,
     keywords: "",
@@ -621,7 +631,7 @@ export default function BillingPayment(props) {
                       }}
                     >
                       <Icon>search</Icon>&nbsp;{" "}
-                      {isLoadingSearch ? "Searching..." : "Search"}
+                      {isLoadingSearch ? "Searching.." : "Search"}
                     </MDButton>
                   </Grid>
                 </Grid>
@@ -1102,7 +1112,7 @@ export default function BillingPayment(props) {
                                         sx={{ height: "100%" }}
                                         disabled={!isValifForm() || isLoading}
                                       >
-                                        {isLoading ? "Saving..." : "Save"}
+                                        {isLoading ? "Saving.." : "Save"}
                                       </MDButton>
                                     </MDBox>
                                   </MDBox>

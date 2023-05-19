@@ -25,6 +25,7 @@ import { useCookies } from "react-cookie";
 import { typeNormalization } from "/helpers/utils";
 import { alertService } from "/helpers";
 import NumberInput from "/pagesComponents/dropdown/NumberInput";
+import DetailTemplate from "../detail-template";
 
 function EditDataUnitItem(props) {
   const { isOpen, params, onModalChanged, site, listBank, listTemplate } =
@@ -38,14 +39,22 @@ function EditDataUnitItem(props) {
   const [dataBank, setDataBank] = useState([]);
   const [bankEdit, setBankEdit] = useState(null);
   const [templateEdit, setTemplateEdit] = useState(null);
+  const [unitItemHeaderId, setUnitItemHeaderId] = useState(null);
+  const [templateInvoiceHeaderId, setTemplateInvoiceHeaderId] = useState(null);
   const formikRef = useRef();
+  const [openDetail, setOpenDetail] = useState(false);
+
+  let bankE = listBank.find((e) => e.bankName == params.bank);
+  let templateE = listTemplate.find(
+    (e) => e.templateName == params.templateInvoice
+  );
 
   const initialValues = {
-    unitCode: params ? params.prevRead : undefined,
-    unitNo: params ? params.currentRead : undefined,
-    templateInvoice: params ? params.currentRead : null,
-    bank: params ? params.currentRead : null,
-    vaNo: params ? params.currentRead : undefined,
+    unitCode: params ? params.unitCode : undefined,
+    unitNo: params ? params.unitNo : undefined,
+    templateInvoice: params ? templateE : null,
+    bank: params ? bankE : null,
+    vaNo: params ? params.vaNo : undefined,
     isPenalty: params ? params.isPenalty : false,
   };
 
@@ -128,6 +137,11 @@ function EditDataUnitItem(props) {
     getTemplateInvoice();
   }, []);
 
+  useEffect(() => {
+    if (templateInvoiceHeaderId != null) getListItem();
+    else setListItem([]);
+  }, [templateInvoiceHeaderId]);
+
   const getDetail = async (data) => {
     Block.standard(
       `.${detailUnitItemBlockLoadingName}`,
@@ -150,22 +164,13 @@ function EditDataUnitItem(props) {
     if (response.error)
       alertService.error({ title: "Error", text: response.error.message });
     else {
-      const result = response.result.itemDetail;
       let res = response.result;
-      let list = [];
-      result.map((e, i) => {
-        list.push({
-          no: i + 1,
-          itemName: e.itemName,
-          itemRateName: e.itemRateName,
-          rate: e.rate,
-        });
-      });
       let bank = listBank.find((e) => e.bankID == res.bankId);
       let template = listTemplate.find(
         (e) => e.templateInvoiceHeaderId == res.templateInvoiceHeaderId
       );
-      setListItem(list);
+      setUnitItemHeaderId(res.unitItemHeaderId);
+      setTemplateInvoiceHeaderId(res.templateInvoiceHeaderId);
       setformValues((prevState) => ({
         ...prevState,
         unitCode: res.unitCode,
@@ -188,6 +193,46 @@ function EditDataUnitItem(props) {
     }
 
     Block.remove(`.${detailUnitItemBlockLoadingName}`), setLoadingShow(false);
+  };
+
+  const listItemBlockLoadingName = "block-list-unit-item";
+  const getListItem = async (data) => {
+    Block.standard(`.${listItemBlockLoadingName}`, `Getting List Item Detail`),
+      setLoadingShow(true);
+
+    let response = await fetch("/api/master/unititem/getdetaillistmsunititem", {
+      method: "POST",
+      body: JSON.stringify({
+        accessToken: accessToken,
+        params: {
+          unitItemHeaderId: unitItemHeaderId,
+          templateInvoiceHeaderId: templateInvoiceHeaderId,
+        },
+      }),
+    });
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
+
+    if (response.error)
+      alertService.error({ title: "Error", text: response.error.message });
+    else {
+      const result = response.result;
+      console.log("result---", result);
+      let list = [];
+      result.map((e, i) => {
+        list.push({
+          no: i + 1,
+          itemName: e.itemName,
+          itemRateName: e.itemRateName,
+          rate: e.rate,
+          unitItemDetailId: e.unitItemDetailId,
+          templateInvoiceDetailId: e.templateInvoiceDetailId,
+        });
+      });
+      setListItem(list);
+    }
+
+    Block.remove(`.${listItemBlockLoadingName}`), setLoadingShow(false);
   };
 
   const bankBlockLoadingName = "block-bank";
@@ -273,8 +318,8 @@ function EditDataUnitItem(props) {
     setListItem(newData);
   };
 
-  const handleShow = () => {
-    window.open(formValues.templateInvoice.urltemplate, "_blank");
+  const handleDetail = () => {
+    setOpenDetail(!openDetail);
   };
 
   if (isOpen) {
@@ -388,8 +433,9 @@ function EditDataUnitItem(props) {
                           name="templateInvoice"
                           key="templateInvoice"
                           isOptionEqualToValue={(option, value) => {
-                            option.templateInvoiceHeaderId ===
-                              value.templateInvoiceHeaderId;
+                            if (value)
+                              option.templateInvoiceHeaderId ===
+                                value.templateInvoiceHeaderId;
                           }}
                           value={templateEdit}
                           options={listTemplate}
@@ -397,11 +443,12 @@ function EditDataUnitItem(props) {
                           onChange={(e, value) => {
                             setFieldValue(
                               "templateInvoice",
-                              value !== null
-                                ? value
-                                : initialValues["templateInvoice"]
+                              value !== null ? value : null
                             );
-                            setTemplateEdit(value);
+                            setTemplateEdit(value ? value : null);
+                            setTemplateInvoiceHeaderId(
+                              value ? value.templateInvoiceHeaderId : null
+                            );
                           }}
                           renderInput={(params) => (
                             <FormField
@@ -424,6 +471,14 @@ function EditDataUnitItem(props) {
                             />
                           )}
                         />
+                        <DetailTemplate
+                          isOpen={openDetail}
+                          params={formValues.templateInvoice?.urltemplate}
+                          templateName={
+                            formValues.templateInvoice?.templateName
+                          }
+                          close={handleDetail}
+                        />
                       </Grid>
                       <Grid item xs={12} md={3}>
                         <MDButton
@@ -431,8 +486,7 @@ function EditDataUnitItem(props) {
                           color="primary"
                           disabled={formValues.templateInvoice == null}
                           onClick={() => {
-                            // handleDetail();
-                            handleShow();
+                            handleDetail();
                           }}
                         >
                           VIEW INVOICE
@@ -444,7 +498,7 @@ function EditDataUnitItem(props) {
                           key="bank"
                           value={bankEdit}
                           isOptionEqualToValue={(option, value) => {
-                            option.bankID === value.bankID;
+                            if (value) option.bankID === value.bankID;
                           }}
                           options={listBank}
                           getOptionLabel={(option) => option.bankName}
@@ -477,7 +531,7 @@ function EditDataUnitItem(props) {
                         <FormField
                           InputLabelProps={{ shrink: true }}
                           required
-                          type="number"
+                          type="text"
                           label="Virtual Account Number"
                           name="vaNo"
                           value={formValues.vaNo}
@@ -513,6 +567,7 @@ function EditDataUnitItem(props) {
                       </Grid>
                       <Grid item xs={12}>
                         <MDBox
+                          className={listItemBlockLoadingName}
                           color="dark"
                           bgColor="white"
                           borderRadius="lg"

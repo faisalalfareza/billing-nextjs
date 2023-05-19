@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { NumericFormat } from "react-number-format";
 import { Formik } from "formik";
 import * as Yup from "yup";
@@ -29,6 +29,19 @@ function CancelPayment() {
     setSite(siteVal);
     localStorage.setItem("site", JSON.stringify(siteVal));
   };
+  const formikRef = useRef();
+
+  useEffect(() => {
+    setCustomerResponse((prevState) => ({
+      ...prevState,
+      rowData: [],
+      totalRows: undefined,
+      totalPages: undefined,
+    }));
+    if (formikRef.current) {
+      formikRef.current.setFieldValue("customerName", "");
+    }
+  }, [site]);
 
   const schemeModels = {
     formId: "reprint-or-form",
@@ -54,7 +67,7 @@ function CancelPayment() {
     [customerName.name]: customerName.defaultValue,
   };
   useEffect(() => {
-    document.getElementsByName(customerName.name)[0].focus();
+    document.getElementsByName(customerName.name)[0]?.focus();
 
     let currentSite = typeNormalization(localStorage.getItem("site"));
     if (currentSite == null) {
@@ -66,6 +79,8 @@ function CancelPayment() {
     } else setSite(currentSite);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const [isExpandedFilter, setExpandFilter] = useState(true);
 
   const customerBlockLoadingName = "block-customer";
   const [isLoadingCustomer, setLoadingCustomer] = useState(false);
@@ -134,8 +149,8 @@ function CancelPayment() {
           response.totalCount / customerRequest.recordsPerPage
         ),
       }));
-    } Block.remove(`.${customerBlockLoadingName}`),
-      setLoadingCustomer(false);
+    }
+    Block.remove(`.${customerBlockLoadingName}`), setLoadingCustomer(false);
   };
   const setCustomerTaskList = (rows) => {
     return {
@@ -153,9 +168,10 @@ function CancelPayment() {
                     setCancelPaymentData({
                       rowData: [],
                       totalRows: undefined,
-                      totalPages: undefined
+                      totalPages: undefined,
                     });
-                  } setSelectedUnit(row.original);
+                  }
+                  setSelectedUnit(row.original);
                 }}
               />
             );
@@ -190,6 +206,14 @@ function CancelPayment() {
   };
   const handleCustomerSubmit = async (e) => {
     e != undefined && e.preventDefault();
+
+    setCancelPaymentData({
+      rowData: [],
+      totalRows: undefined,
+      totalPages: undefined,
+    }),
+      setSelectedUnit();
+
     getCustomerList();
   };
 
@@ -202,7 +226,10 @@ function CancelPayment() {
   });
 
   const getCancelPaymentList = async (unitDataID) => {
-    Block.standard(`.${cancelPaymentBlockLoadingName}`, `Getting Cancel Payment Data`),
+    Block.standard(
+      `.${cancelPaymentBlockLoadingName}`,
+      `Getting Cancel Payment Data`
+    ),
       setLoadingCancelPayment(true);
 
     let response = await fetch(
@@ -232,7 +259,13 @@ function CancelPayment() {
           response.totalCount / customerRequest.recordsPerPage
         ),
       }));
-    } Block.remove(`.${cancelPaymentBlockLoadingName}`),
+      response.totalCount == 0 &&
+        Swal.fire({
+          title: "There is no payment billing for this unit.",
+          icon: "info",
+        });
+    }
+    Block.remove(`.${cancelPaymentBlockLoadingName}`),
       setLoadingCancelPayment(false);
   };
   const setCancelPaymentTaskList = (rows) => {
@@ -263,7 +296,7 @@ function CancelPayment() {
             );
           },
         },
-        { Header: "Remarks", accessor: "remarks" },
+        { Header: "Remarks", accessor: "remarks", customWidth: "200px" },
         { Header: "Canceled", accessor: "canceled" },
         {
           Header: "Actions",
@@ -326,15 +359,40 @@ function CancelPayment() {
             <Card className={customerBlockLoadingName}>
               <MDBox px={3} pt={3} pb={2} lineHeight={1}>
                 <Grid container alignItems="center" spacing={2}>
-                  <Grid item xs={12}>
+                  <Grid item xs={12} sm={11}>
                     <MDBox>
                       <MDTypography variant="h5">Filter</MDTypography>
                     </MDBox>
                   </Grid>
-                  <Grid item xs={12}>
+                  <Grid item xs={12} sm={1}>
+                    <MDBox display="flex" justifyContent="flex-end">
+                      <a
+                        onClick={() => setExpandFilter(!isExpandedFilter)}
+                        style={{ cursor: "pointer" }}
+                      >
+                        <MDTypography
+                          variant="button"
+                          color="text"
+                          sx={{ lineHeight: 0 }}
+                        >
+                          {isExpandedFilter ? (
+                            <Icon fontSize="small">expand_less</Icon>
+                          ) : (
+                            <Icon fontSize="small">expand_more</Icon>
+                          )}
+                        </MDTypography>
+                      </a>
+                    </MDBox>
+                  </Grid>
+                  <Grid
+                    item
+                    xs={12}
+                    style={{ display: isExpandedFilter ? "initial" : "none" }}
+                  >
                     <Formik
                       initialValues={schemeInitialValues}
                       validationSchema={schemeValidations}
+                      innerRef={formikRef}
                     >
                       {({ values, errors, touched }) => {
                         let { customerName: customerNameV } = values;
@@ -415,7 +473,9 @@ function CancelPayment() {
                 </Grid>
               </MDBox>
               {customerResponse.rowData.length > 0 && (
-                <MDBox>
+                <MDBox
+                  style={{ display: isExpandedFilter ? "initial" : "none" }}
+                >
                   <Grid container alignItems="center">
                     <Grid item xs={12}>
                       <MDBox pl={3}>
@@ -431,9 +491,13 @@ function CancelPayment() {
                         recordsPerPage={customerRequest.recordsPerPage}
                         skipCount={customerRequest.skipCount}
                         pageChangeHandler={skipCountChangeHandler}
-                        recordsPerPageChangeHandler={recordsPerPageChangeHandler}
+                        recordsPerPageChangeHandler={
+                          recordsPerPageChangeHandler
+                        }
                         keywordsChangeHandler={keywordsChangeHandler}
-                        entriesPerPage={{ defaultValue: customerRequest.recordsPerPage }}
+                        entriesPerPage={{
+                          defaultValue: customerRequest.recordsPerPage,
+                        }}
                         pagination={{ variant: "gradient", color: "primary" }}
                       />
                       <MDBox p={3} pt={0}>
@@ -449,7 +513,9 @@ function CancelPayment() {
                                 variant="gradient"
                                 color="primary"
                                 sx={{ height: "100%" }}
-                                onClick={() => getCancelPaymentList(selectedUnit.unitDataId)}
+                                onClick={() =>
+                                  getCancelPaymentList(selectedUnit.unitDataId)
+                                }
                                 disabled={!selectedUnit}
                               >
                                 {isLoadingCancelPayment
@@ -472,11 +538,15 @@ function CancelPayment() {
               <Card className={cancelPaymentBlockLoadingName}>
                 <MDBox>
                   <Grid container alignItems="center">
-                    <Grid item xs={12}>
+                    <Grid item xs={12} mb={1}>
                       <DataTable
-                        title="Cancel Payment List" description="Cancel Payment Data"
-                        table={setCancelPaymentTaskList(cancelPaymentData.rowData)}
-                        canSearch pagination={{ variant: "gradient", color: "primary" }}
+                        title="Cancel Payment List"
+                        description="Cancel Payment Data"
+                        table={setCancelPaymentTaskList(
+                          cancelPaymentData.rowData
+                        )}
+                        canSearch
+                        pagination={{ variant: "gradient", color: "primary" }}
                       />
                     </Grid>
                   </Grid>
@@ -492,7 +562,8 @@ function CancelPayment() {
                       ...prevState,
                       isOpen: !modalOpen.isOpen,
                     }));
-                    (isChanged === true) && getCancelPaymentList(selectedUnit.unitDataId);
+                    isChanged === true &&
+                      getCancelPaymentList(selectedUnit.unitDataId);
                   }}
                 />
               )}
