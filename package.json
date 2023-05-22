@@ -70,6 +70,7 @@
     "react-hook-form": "^7.38.0",
     "react-images-viewer": "1.7.1",
     "react-number-format": "^5.1.4",
+    "react-pdf": "^6.2.2",
     "react-quill": "^2.0.0",
     "react-spinners": "^0.13.8",
     "react-table": "7.7.0",

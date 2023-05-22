@@ -211,6 +211,8 @@ export default function WaterReading(props) {
   ];
   const [tasklist, setTasklist] = useState({ columns: columns, rows: [] });
 
+  const [isExpandedFilter, setExpandFilter] = useState(true);
+
   const waterReadingBlockLoadingName = "block-water-reading";
   const fetchData = async (data) => {
     Block.standard(`.${waterReadingBlockLoadingName}`, `Getting Water Reading Data`),
@@ -237,6 +239,7 @@ export default function WaterReading(props) {
     if (response.error) alertService.error({ title: "Error", text: response.error.message });
     else {
       let data = response.result;
+
       const list = [];
       data.items.map((e, i) => {
         list.push({
@@ -256,6 +259,11 @@ export default function WaterReading(props) {
         totalRows: data.totalCount,
         totalPages: Math.ceil(data.totalCount / customerRequest.recordsPerPage),
       }));
+      setTimeout(() => {
+        const element = document.createElement("a");
+        element.href = "#water-reading";
+        element.click();
+      }, 0);
     }
 
     Block.remove(`.${waterReadingBlockLoadingName}`),
@@ -356,12 +364,32 @@ export default function WaterReading(props) {
             <Card>
               <MDBox p={3} lineHeight={1}>
                 <Grid container alignItems="center" spacing={2}>
-                  <Grid item xs={12}>
+                  <Grid item xs={12} sm={11}>
                     <MDBox>
                       <MDTypography variant="h5">Filter</MDTypography>
                     </MDBox>
                   </Grid>
-                  <Grid item xs={12}>
+                  <Grid item xs={12} sm={1}>
+                    <MDBox display="flex" justifyContent="flex-end">
+                      <a
+                        onClick={() => setExpandFilter(!isExpandedFilter)}
+                        style={{ cursor: "pointer" }}
+                      >
+                        <MDTypography
+                          variant="button"
+                          color="text"
+                          sx={{ lineHeight: 0 }}
+                        >
+                          {isExpandedFilter ? (
+                            <Icon fontSize="small">expand_less</Icon>
+                          ) : (
+                            <Icon fontSize="small">expand_more</Icon>
+                          )}
+                        </MDTypography>
+                      </a>
+                    </MDBox>
+                  </Grid>
+                  <Grid item xs={12} style={{ display: isExpandedFilter ? "initial" : "none" }}>
                     <Formik
                       innerRef={formikRef}
                       initialValues={initialValues}
@@ -520,7 +548,7 @@ export default function WaterReading(props) {
         </Grid>
       </MDBox>
 
-      <MDBox mt={5}>
+      <MDBox mt={5} id="water-reading">
         <MDBox
           display="flex"
           justifyContent="flex-end"

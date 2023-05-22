@@ -197,11 +197,13 @@ async function getDetailListMsUnitItem(res: any, body: any) {
 async function getUrlContent(res: any, body: any) {
   const { accessToken, params, urlFile } = body;
   const url = urlFile.replace(/\\/g, "/");
+
   const config = {
     headers: {
       Authorization: "Bearer " + accessToken,
       "Access-Control-Allow-Origin": "*",
     },
+    params: params,
   };
 
   axios
@@ -213,7 +215,7 @@ async function getUrlContent(res: any, body: any) {
     )
     .catch((error) =>
       res.send({
-        error: error,
+        error: error.response.data,
       })
     );
 }

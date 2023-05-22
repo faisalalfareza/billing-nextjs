@@ -12,14 +12,19 @@ import { NumericFormat } from "react-number-format";
 import Icon from "@mui/material/Icon";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
+import { Document, Page, pdfjs } from "react-pdf";
 
 export default function DetailTemplate(props) {
   const { isOpen, params, close, templateName } = props;
   const [modal, setModal] = useState(isOpen);
   const [{ accessToken, encryptedAccessToken }] = useCookies();
-  const [htmlData, setHtmlData] = useState({
-    content: { "mycustom-html": "<p>demo</p>" },
-  });
+  const [htmlData, setHtmlData] = useState(null);
+  const [numPages, setNumPages] = useState(null);
+  const [pageNumber, setPageNumber] = useState(1);
+
+  const onDocumentLoadSuccess = (numPages) => {
+    setNumPages(numPages);
+  };
 
   useEffect(() => {
     // fetch(params).then((r) => {
@@ -28,7 +33,9 @@ export default function DetailTemplate(props) {
     //     console.log(d);
     //   });
     // });
-    getContent();
+    if (params) {
+      getContent();
+    }
   }, [params]);
   const toggle = () => setModal(!modal);
 
@@ -56,7 +63,6 @@ export default function DetailTemplate(props) {
       setHtmlData(result);
     }
   };
-
   return (
     <Modal
       isOpen={modal}
