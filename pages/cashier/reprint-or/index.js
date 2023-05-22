@@ -259,11 +259,16 @@ function RePrintOR() {
           response.totalCount / customerRequest.recordsPerPage
         ),
       }));
-      response.totalCount == 0 &&
-        Swal.fire({
-          title: "There is no payment billing for this unit.",
-          icon: "info",
-        });
+      setTimeout(() => {
+        const element = document.createElement("a");
+        element.href = "#official-receipt";
+        element.click();
+      }, 0);
+
+      (response.totalCount == 0) && Swal.fire({
+        title: "There is no payment billing for this unit.",
+        icon: "info",
+      });
     }
     Block.remove(`.${orBlockLoadingName}`), setLoadingOfficialReceipt(false);
   };
@@ -540,7 +545,7 @@ function RePrintOR() {
           </Grid>
 
           {officialReceiptData.rowData.length > 0 && (
-            <Grid item xs={12}>
+            <Grid item xs={12} id="official-receipt">
               <Card className={orBlockLoadingName}>
                 <MDBox>
                   <Grid container alignItems="center">
