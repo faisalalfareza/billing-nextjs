@@ -473,7 +473,9 @@ function EditDataUnitItem(props) {
                         />
                         <DetailTemplate
                           isOpen={openDetail}
-                          params={formValues.templateInvoice?.urltemplate}
+                          params={
+                            formValues.templateInvoice?.templateInvoiceHeaderId
+                          }
                           templateName={
                             formValues.templateInvoice?.templateName
                           }

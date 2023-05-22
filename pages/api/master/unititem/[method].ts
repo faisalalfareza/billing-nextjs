@@ -195,25 +195,26 @@ async function getDetailListMsUnitItem(res: any, body: any) {
 }
 
 async function getUrlContent(res: any, body: any) {
-  const { accessToken, params, urlFile } = body;
-  const url = urlFile.replace(/\\/g, "/");
+  const { accessToken, params } = body;
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/MasterBilling/ProsesGenerateTemplateDemo`;
   const config = {
     headers: {
       Authorization: "Bearer " + accessToken,
       "Access-Control-Allow-Origin": "*",
     },
+    params: params,
   };
 
   axios
-    .get(url, config)
-    .then((response) =>
+    .post(url, params, config)
+    .then((response) => {
       res.send({
-        result: response.data,
-      })
-    )
-    .catch((error) =>
+        result: response.data.result,
+      });
+    })
+    .catch((error) => {
       res.send({
-        error: error,
-      })
-    );
+        error: error.response.data,
+      });
+    });
 }

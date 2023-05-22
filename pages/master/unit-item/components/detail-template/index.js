@@ -12,14 +12,23 @@ import { NumericFormat } from "react-number-format";
 import Icon from "@mui/material/Icon";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
+import { Document, Page, pdfjs } from "react-pdf";
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  "pdfjs-dist/build/pdf.worker.min.js",
+  import.meta.url
+).toString();
 
 export default function DetailTemplate(props) {
   const { isOpen, params, close, templateName } = props;
   const [modal, setModal] = useState(isOpen);
   const [{ accessToken, encryptedAccessToken }] = useCookies();
-  const [htmlData, setHtmlData] = useState({
-    content: { "mycustom-html": "<p>demo</p>" },
-  });
+  const [htmlData, setHtmlData] = useState(null);
+  const [numPages, setNumPages] = useState(null);
+  const [pageNumber, setPageNumber] = useState(1);
+
+  const onDocumentLoadSuccess = (numPages) => {
+    setNumPages(numPages);
+  };
 
   useEffect(() => {
     // fetch(params).then((r) => {
@@ -28,7 +37,9 @@ export default function DetailTemplate(props) {
     //     console.log(d);
     //   });
     // });
-    getContent();
+    if (params) {
+      getContent();
+    }
   }, [params]);
   const toggle = () => setModal(!modal);
 
@@ -43,7 +54,9 @@ export default function DetailTemplate(props) {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
-        urlFile: params,
+        params: {
+          templateInvoiceheaderID: params,
+        },
       }),
     });
     if (!response.ok) throw new Error(`Error: ${response.status}`);
@@ -55,6 +68,12 @@ export default function DetailTemplate(props) {
       const result = response.result;
       setHtmlData(result);
     }
+  };
+
+  const options = {
+    cMapUrl: "cmaps/",
+    cMapPacked: true,
+    standardFontDataUrl: "standard_fonts/",
   };
 
   return (
@@ -74,11 +93,13 @@ export default function DetailTemplate(props) {
         </MDBox>
       </ModalHeader>
       <ModalBody>
-        <MDBox
-          dangerouslySetInnerHTML={{
-            __html: htmlData,
-          }}
-        />
+        <Document
+          file={htmlData}
+          onLoadSuccess={onDocumentLoadSuccess}
+          options={options}
+        >
+          <Page pageNumber={pageNumber} />
+        </Document>
       </ModalBody>
       <ModalFooter>
         <MDButton variant="outlined" color="secondary" onClick={close}>
