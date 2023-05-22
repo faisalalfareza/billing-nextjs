@@ -259,11 +259,16 @@ function CancelPayment() {
           response.totalCount / customerRequest.recordsPerPage
         ),
       }));
-      response.totalCount == 0 &&
-        Swal.fire({
-          title: "There is no payment billing for this unit.",
-          icon: "info",
-        });
+      setTimeout(() => {
+        const element = document.createElement("a");
+        element.href = "#cancel-payment";
+        element.click();
+      }, 0);
+
+      (response.totalCount == 0) && Swal.fire({
+        title: "There is no payment billing for this unit.",
+        icon: "info",
+      });
     }
     Block.remove(`.${cancelPaymentBlockLoadingName}`),
       setLoadingCancelPayment(false);
@@ -534,7 +539,7 @@ function CancelPayment() {
           </Grid>
 
           {cancelPaymentData.rowData.length > 0 && (
-            <Grid item xs={12}>
+            <Grid item xs={12} id="cancel-payment">
               <Card className={cancelPaymentBlockLoadingName}>
                 <MDBox>
                   <Grid container alignItems="center">

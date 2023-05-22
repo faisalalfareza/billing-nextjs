@@ -438,6 +438,8 @@ export default function WarningLetter(props) {
   });
   const handleOpenUpload = () => setOpenUpload(true);
 
+  const [isExpandedFilter, setExpandFilter] = useState(true);
+
   const warningLetterBlockLoadingName = "block-warning-letter";
   const fetchData = async (data) => {
     Block.standard(`.${warningLetterBlockLoadingName}`, `Getting Warning Letter Data`),
@@ -466,6 +468,7 @@ export default function WarningLetter(props) {
     if (response.error) alertService.error({ title: "Error", text: response.error.message });
     else {
       let data = response.result;
+
       const list = [];
       data.items.map((e, i) => {
         list.push({
@@ -492,12 +495,11 @@ export default function WarningLetter(props) {
         totalRows: data.totalCount,
         totalPages: Math.ceil(data.totalCount / customerRequest.recordsPerPage),
       }));
-
-      // setlistRow(list);
-      // return setTasklist({
-      //   columns: columns,
-      //   rows: list,
-      // });
+      setTimeout(() => {
+        const element = document.createElement("a");
+        element.href = "#warning-letter";
+        element.click();
+      }, 0);
     } Block.remove(`.${warningLetterBlockLoadingName}`),
       setLoading(false);
   };
@@ -787,12 +789,32 @@ export default function WarningLetter(props) {
             <Card>
               <MDBox p={3} lineHeight={1}>
                 <Grid container alignItems="center" spacing={2}>
-                  <Grid item xs={12}>
+                  <Grid item xs={12} sm={11}>
                     <MDBox>
                       <MDTypography variant="h5">Filter</MDTypography>
                     </MDBox>
                   </Grid>
-                  <Grid item xs={12}>
+                  <Grid item xs={12} sm={1}>
+                    <MDBox display="flex" justifyContent="flex-end">
+                      <a
+                        onClick={() => setExpandFilter(!isExpandedFilter)}
+                        style={{ cursor: "pointer" }}
+                      >
+                        <MDTypography
+                          variant="button"
+                          color="text"
+                          sx={{ lineHeight: 0 }}
+                        >
+                          {isExpandedFilter ? (
+                            <Icon fontSize="small">expand_less</Icon>
+                          ) : (
+                            <Icon fontSize="small">expand_more</Icon>
+                          )}
+                        </MDTypography>
+                      </a>
+                    </MDBox>
+                  </Grid>
+                  <Grid item xs={12} style={{ display: isExpandedFilter ? "initial" : "none" }}>
                     <Formik
                       initialValues={initialValues}
                       validationSchema={validations}
@@ -1132,7 +1154,7 @@ export default function WarningLetter(props) {
         </Grid>
       </MDBox>
 
-      <MDBox mt={5}>
+      <MDBox mt={5} id="warning-letter">
         <MDBox
           display="flex"
           justifyContent="flex-end"
