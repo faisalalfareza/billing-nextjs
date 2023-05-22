@@ -453,9 +453,7 @@ function UploadDataUnitItem(props) {
                         />
                         <DetailTemplate
                           isOpen={openDetail}
-                          params={
-                            formValues.templateInvoice?.templateInvoiceHeaderId
-                          }
+                          params={formValues.templateInvoice?.urltemplate}
                           templateName={
                             formValues.templateInvoice?.templateName
                           }

@@ -13,10 +13,6 @@ import Icon from "@mui/material/Icon";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import { Document, Page, pdfjs } from "react-pdf";
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  "pdfjs-dist/build/pdf.worker.min.js",
-  import.meta.url
-).toString();
 
 export default function DetailTemplate(props) {
   const { isOpen, params, close, templateName } = props;
@@ -54,9 +50,7 @@ export default function DetailTemplate(props) {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
-        params: {
-          templateInvoiceheaderID: params,
-        },
+        urlFile: params,
       }),
     });
     if (!response.ok) throw new Error(`Error: ${response.status}`);
@@ -69,13 +63,6 @@ export default function DetailTemplate(props) {
       setHtmlData(result);
     }
   };
-
-  const options = {
-    cMapUrl: "cmaps/",
-    cMapPacked: true,
-    standardFontDataUrl: "standard_fonts/",
-  };
-
   return (
     <Modal
       isOpen={modal}
@@ -93,13 +80,11 @@ export default function DetailTemplate(props) {
         </MDBox>
       </ModalHeader>
       <ModalBody>
-        <Document
-          file={htmlData}
-          onLoadSuccess={onDocumentLoadSuccess}
-          options={options}
-        >
-          <Page pageNumber={pageNumber} />
-        </Document>
+        <MDBox
+          dangerouslySetInnerHTML={{
+            __html: htmlData,
+          }}
+        />
       </ModalBody>
       <ModalFooter>
         <MDButton variant="outlined" color="secondary" onClick={close}>
