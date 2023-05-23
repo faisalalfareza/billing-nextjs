@@ -11,6 +11,7 @@ import Router from "next/router";
 
 import bgImage from "/assets/images/illustrations/bg-1.jpg";
 
+import { Grid } from "@mui/material";
 import MDBox from "/components/MDBox";
 import MDTypography from "/components/MDTypography";
 import MDButton from "/components/MDButton";
@@ -316,123 +317,137 @@ function SignIn(props) {
       formDescription=""
       illustration={bgImage}
     >
-      <Formik
-        initialValues={schemeInitialValues}
-        validationSchema={schemeValidations}
-      >
-        {({ values, errors, touched }) => {
-          let {
-            userNameOrEmailAddress: userNameOrEmailAddressV,
-            password: passwordV,
-          } = values;
-          const isValifForm = () =>
-            checkingSuccessInput(
-              userNameOrEmailAddress.isRequired,
-              userNameOrEmailAddressV,
-              errors.userNameOrEmailAddress
-            ) &&
-            checkingSuccessInput(
-              password.isRequired,
-              passwordV,
-              errors.password
-            );
+      <Grid container alignItems="center" rowSpacing={1}>
+        <Grid item xs={12} mt={2}>
+          <MDBox>
+            <MDTypography variant="h5">Sign In</MDTypography>
+          </MDBox>
+        </Grid>
+        <Grid item xs={12}>
+          <Formik
+            initialValues={schemeInitialValues}
+            validationSchema={schemeValidations}
+          >
+            {({ values, errors, touched }) => {
+              let {
+                userNameOrEmailAddress: userNameOrEmailAddressV,
+                password: passwordV,
+              } = values;
+              const isValifForm = () =>
+                checkingSuccessInput(
+                  userNameOrEmailAddress.isRequired,
+                  userNameOrEmailAddressV,
+                  errors.userNameOrEmailAddress
+                ) &&
+                checkingSuccessInput(
+                  password.isRequired,
+                  passwordV,
+                  errors.password
+                );
 
-          return (
-            <MDBox
-              component="form"
-              role="form"
-              onSubmit={(e) => handleSigninSubmit(e)}
-            >
-              <MDTypography variant="h5">Sign In</MDTypography>
-              <MDBox mb={2}>
-                <FormField
-                  type={userNameOrEmailAddress.type}
-                  required={userNameOrEmailAddress.isRequired}
-                  label={userNameOrEmailAddress.label}
-                  name={userNameOrEmailAddress.name}
-                  value={userNameOrEmailAddressV}
-                  placeholder={userNameOrEmailAddress.placeholder}
-                  error={
-                    errors.userNameOrEmailAddress &&
-                    touched.userNameOrEmailAddress
-                  }
-                  success={
-                    userNameOrEmailAddress.isRequired &&
-                    checkingSuccessInput(
-                      userNameOrEmailAddress.isRequired,
-                      userNameOrEmailAddressV,
-                      errors.userNameOrEmailAddress
-                    )
-                  }
-                  onKeyUp={(e) => setUserNameOrEmailAddress(e.target.value)}
-                />
-              </MDBox>
-              <MDBox mb={2}>
-                <FormField
-                  type={password.type}
-                  required={password.isRequired}
-                  label={password.label}
-                  name={password.name}
-                  value={passwordV}
-                  placeholder={password.placeholder}
-                  error={errors.password && touched.password}
-                  success={
-                    password.isRequired &&
-                    checkingSuccessInput(
-                      password.isRequired,
-                      passwordV,
-                      errors.password
-                    )
-                  }
-                  inputProps={{ autoComplete: "" }}
-                  onKeyUp={(e) => setPassword(e.target.value)}
-                />
-              </MDBox>
-              <MDBox display="flex" alignItems="center" ml={-1}>
-                <Switch checked={rememberMe} onChange={handleSetRememberMe} />
-                <MDTypography
-                  variant="button"
-                  fontWeight="regular"
-                  color="text"
-                  onClick={handleSetRememberMe}
-                  sx={{ cursor: "pointer", userSelect: "none", ml: -1 }}
+              return (
+                <MDBox
+                  component="form"
+                  role="form"
+                  onSubmit={(e) => handleSigninSubmit(e)}
                 >
-                  &nbsp;&nbsp;Remember me
-                </MDTypography>
-              </MDBox>
-              <MDBox mt={4} mb={1}>
-                <MDButton
-                  type="submit"
-                  variant="gradient"
-                  color="primary"
-                  size="large"
-                  fullWidth
-                  disabled={!isValifForm() || isLoadingAuthentication}
-                >
-                  {isLoadingAuthentication ? "Signing.." : "Sign In"}
-                </MDButton>
-              </MDBox>
-              <MDBox mt={3} textAlign="center" lineHeight="1">
-                {/* <MDTypography variant="button" color="text" lineHeight="1">
-                  Don&apos;t remember your password yet?{" "}
-                  <Link href="/authentication/reset-password">
-                    <a>
-                      <MDTypography
-                        variant="button"
-                        color="dark"
-                        fontWeight="medium"
-                        textGradient
-                      >
-                        Forgot Password
+                  <Grid container>
+                    <Grid item xs={12}>
+                      <FormField
+                        type={userNameOrEmailAddress.type}
+                        required={userNameOrEmailAddress.isRequired}
+                        label={userNameOrEmailAddress.label}
+                        name={userNameOrEmailAddress.name}
+                        value={userNameOrEmailAddressV}
+                        placeholder={userNameOrEmailAddress.placeholder}
+                        error={
+                          errors.userNameOrEmailAddress &&
+                          touched.userNameOrEmailAddress
+                        }
+                        success={
+                          userNameOrEmailAddress.isRequired &&
+                          checkingSuccessInput(
+                            userNameOrEmailAddress.isRequired,
+                            userNameOrEmailAddressV,
+                            errors.userNameOrEmailAddress
+                          )
+                        }
+                        onKeyUp={(e) => setUserNameOrEmailAddress(e.target.value)}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <FormField
+                        type={password.type}
+                        required={password.isRequired}
+                        label={password.label}
+                        name={password.name}
+                        value={passwordV}
+                        placeholder={password.placeholder}
+                        error={errors.password && touched.password}
+                        success={
+                          password.isRequired &&
+                          checkingSuccessInput(
+                            password.isRequired,
+                            passwordV,
+                            errors.password
+                          )
+                        }
+                        inputProps={{ autoComplete: "" }}
+                        onKeyUp={(e) => setPassword(e.target.value)}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <MDBox display="flex" alignItems="center" ml={-1}>
+                        <Switch checked={rememberMe} onChange={handleSetRememberMe} />
+                        <MDTypography
+                          variant="button"
+                          fontWeight="regular"
+                          color="text"
+                          onClick={handleSetRememberMe}
+                          sx={{ cursor: "pointer", userSelect: "none", ml: -1 }}
+                        >
+                          &nbsp;&nbsp;Remember me
+                        </MDTypography>
+                      </MDBox>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <MDBox mt={2}>
+                        <MDButton
+                          type="submit"
+                          variant="gradient"
+                          color="primary"
+                          size="large"
+                          fullWidth
+                          disabled={!isValifForm() || isLoadingAuthentication}
+                        >
+                          {isLoadingAuthentication ? "Signing.." : "Sign In"}
+                        </MDButton>
+                      </MDBox>
+                    </Grid>
+                    {/* <MDBox mt={3} textAlign="center" lineHeight="1">
+                      <MDTypography variant="button" color="text" lineHeight="1">
+                        Don&apos;t remember your password yet?{" "}
+                        <Link href="/authentication/reset-password">
+                          <a>
+                            <MDTypography
+                              variant="button"
+                              color="dark"
+                              fontWeight="medium"
+                              textGradient
+                            >
+                              Forgot Password
+                            </MDTypography>
+                          </a>
+                        </Link>
                       </MDTypography>
-                    </a>
-                  </Link>
-                </MDTypography> */}
-              </MDBox>
-            </MDBox>
-          );
-        }}
-      </Formik>
+                    </MDBox> */}
+                  </Grid>
+                </MDBox>
+              );
+            }}
+          </Formik>
+        </Grid>
+      </Grid>
     </IllustrationLayout>
   );
 }
