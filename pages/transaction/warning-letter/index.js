@@ -26,7 +26,6 @@ import * as React from "react";
 import { typeNormalization, downloadTempFile } from "/helpers/utils";
 import { alertService } from "/helpers";
 import Swal from "sweetalert2";
-// import PuffLoader from "react-spinners/PuffLoader";
 import { Block } from "notiflix/build/notiflix-block-aio";
 
 // Data
@@ -772,16 +771,6 @@ export default function WarningLetter(props) {
           </Grid>
         </Grid>
       </MDBox>
-
-      {/* <PuffLoader
-        cssOverride={override}
-        size={250}
-        color={"#10569E"}
-        loading={isLoadingSend}
-        speedMultiplier={1}
-        aria-label="Loading Spinner"
-        data-testid="loader"
-      /> */}
 
       <MDBox mt={2}>
         <Grid container spacing={2}>

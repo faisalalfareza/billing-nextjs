@@ -33,7 +33,6 @@ import fileCheck from "/assets/images/file-check.svg";
 import FindName from "./components/FindName";
 import Swal from "sweetalert2";
 import Adjustment from "./components/Adjustment";
-// import PuffLoader from "react-spinners/PuffLoader";
 import { Block } from "notiflix/build/notiflix-block-aio";
 
 export default function Invoice(props) {
@@ -677,16 +676,6 @@ export default function Invoice(props) {
           </Grid>
         </Grid>
       </MDBox>
-
-      {/* <PuffLoader
-        cssOverride={override}
-        size={250}
-        color={"#10569E"}
-        loading={isLoadingSend}
-        speedMultiplier={1}
-        aria-label="Loading Spinner"
-        data-testid="loader"
-      /> */}
 
       <MDBox mt={2}>
         <Grid container spacing={2}>

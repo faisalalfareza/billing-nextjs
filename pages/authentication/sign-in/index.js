@@ -305,9 +305,9 @@ function SignIn(props) {
 
     if (response.error) setLoadingAuthentication(false);
     else {
-      const { profilePicture } = response.result;
+      const { profileUrl } = response.result;
 
-      localStorage.setItem("profilePicture", profilePicture);
+      localStorage.setItem("profilePicture", profileUrl);
     }
   }
 
