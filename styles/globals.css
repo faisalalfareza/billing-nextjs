@@ -68,4 +68,6 @@ body {
     ),
     url("/bg-login.svg");
   background-size: cover;
+  background-attachment: fixed;
+  background-position: center;
 }
