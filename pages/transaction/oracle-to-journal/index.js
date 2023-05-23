@@ -17,6 +17,7 @@ import DashboardNavbar from "/layout/Navbars/DashboardNavbar";
 
 import FormField from "/pagesComponents/FormField";
 import SiteDropdown from "../../../pagesComponents/dropdown/Site";
+import { NumericFormat } from "react-number-format";
 
 import Radio from '@mui/material/Radio';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -340,10 +341,9 @@ function OracleToJournal({ params }) {
         console.log(response.result);
 
         if(response.error)  {
-            let err = response.error;
             alertService.error({
                 title: "Error",
-                text: err.error.message,
+                text: response.error.message,
             });
         } else {
             let data = response.result;
@@ -395,7 +395,7 @@ function OracleToJournal({ params }) {
         }));
     }, [site]);
     useEffect(() => {
-        searchData();
+        //searchData();
     }, [customerRequest.skipCount, customerRequest.recordsPerPage]);
 
     const setCustomerTaskList = (list) => {
@@ -437,8 +437,40 @@ function OracleToJournal({ params }) {
         {Header: "coa5", accessor: "coa5", width: "10%"},
         {Header: "coa6", accessor: "coa6", width: "10%"},
         {Header: "coa7", accessor: "coa7", width: "10%"},
-        {Header: "debit", accessor: "debit", width: "10%"},
-        {Header: "kredit", accessor: "kredit", width: "10%"},
+        {
+            Header: "debit", 
+            accessor: "debit", 
+            width: "10%",
+            align: "right",
+            Cell: ({ value }) => {
+                return (
+                    <NumericFormat
+                    displayType="text"
+                    value={value}
+                    decimalSeparator=","
+                    prefix="Rp "
+                    thousandSeparator="."
+                    />
+                );
+            },
+        },
+        {
+            Header: "kredit", 
+            accessor: "kredit", 
+            width: "10%",
+            align: "right",
+            Cell: ({ value }) => {
+                return (
+                    <NumericFormat
+                    displayType="text"
+                    value={value}
+                    decimalSeparator=","
+                    prefix="Rp "
+                    thousandSeparator="."
+                    />
+                );
+            },
+        },
         {Header: "istransfered", accessor: "istransfered", width: "10%"},
         {Header: "groupid", accessor: "groupid", width: "10%"},
         {
