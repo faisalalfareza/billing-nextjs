@@ -746,7 +746,7 @@ export default function Invoice(props) {
                         return (
                           <Form id="invoice-filter" autoComplete="off">
                             <MDBox>
-                              <Grid container spacing={3}>
+                              <Grid container columnSpacing={3}>
                                 <Grid item xs={12} sm={6}>
                                   <Field
                                     id="period-invoicet"
@@ -990,6 +990,7 @@ export default function Invoice(props) {
                                     display="flex"
                                     flexDirection={{ xs: "column", sm: "row" }}
                                     justifyContent="flex-end"
+                                    mt={2}
                                   >
                                     <MDBox
                                       ml={{ xs: 0, sm: 1 }}
@@ -1022,7 +1023,7 @@ export default function Invoice(props) {
         </Grid>
       </MDBox>
 
-      <MDBox mt={5} id="invoice">
+      <MDBox mt={3.5} id="invoice">
         <MDBox
           display="flex"
           justifyContent="flex-end"

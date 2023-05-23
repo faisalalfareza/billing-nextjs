@@ -174,7 +174,7 @@ export default function MasterPeriod(props) {
         </Grid>
       </MDBox>
 
-      <MDBox mt={5}>
+      <MDBox mt={3.5}>
         <MDBox
           display="flex"
           justifyContent="flex-end"

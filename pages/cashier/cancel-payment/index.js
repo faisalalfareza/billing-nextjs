@@ -414,7 +414,7 @@ function CancelPayment() {
                             role="form"
                             onSubmit={(e) => handleCustomerSubmit(e)}
                           >
-                            <Grid container spacing={3}>
+                            <Grid container columnSpacing={3}>
                               <Grid item xs={12} sm={10}>
                                 <FormField
                                   type={customerName.type}

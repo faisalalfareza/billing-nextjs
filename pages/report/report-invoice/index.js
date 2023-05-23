@@ -273,7 +273,7 @@ function ReportInvoice() {
                         return (
                           <Form id="payment-detail" autoComplete="off" fullWidth>
                             <MDBox>
-                              <Grid container spacing={3}>
+                              <Grid container columnSpacing={3}>
                                 <Grid item xs={6} sm={6}>
                                   <Field
                                     id="period-invoice"
@@ -437,6 +437,7 @@ function ReportInvoice() {
                                     display="flex"
                                     flexDirection={{ xs: "column", sm: "row" }}
                                     justifyContent="flex-end"
+                                    mt={2}
                                   >
                                     <MDButton
                                       type="submit"

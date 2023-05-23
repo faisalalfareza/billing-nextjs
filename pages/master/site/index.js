@@ -218,7 +218,7 @@ export default function MasterSite(props) {
     <DashboardLayout>
       <DashboardNavbar />
 
-      <MDBox mt={3}>
+      <MDBox>
         <MDBox
           display="flex"
           justifyContent="flex-end"

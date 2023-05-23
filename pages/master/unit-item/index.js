@@ -119,7 +119,7 @@ export default function UnitItem(props) {
       },
     },
     {
-      Header: "action",
+      Header: "Action",
       accessor: "action",
       align: "center",
       sorted: true,
@@ -257,7 +257,7 @@ export default function UnitItem(props) {
         </Grid>
       </MDBox>
 
-      <MDBox mt={5}>
+      <MDBox mt={3.5}>
         <MDBox
           display="flex"
           justifyContent="flex-end"
