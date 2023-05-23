@@ -149,6 +149,11 @@ function RePrintOR() {
           response.totalCount / customerRequest.recordsPerPage
         ),
       }));
+      setTimeout(() => {
+        const element = document.createElement("a");
+        element.href = "#customer";
+        element.click();
+      }, 0);
     }
     Block.remove(`.${customerBlockLoadingName}`), setLoadingCustomer(false);
   };
@@ -362,7 +367,7 @@ function RePrintOR() {
         </Grid>
       </MDBox>
 
-      <MDBox mt={2}>
+      <MDBox mt={2} id="customer">
         <Grid container spacing={2}>
           <Grid item xs={12}>
             <Card className={customerBlockLoadingName}>
