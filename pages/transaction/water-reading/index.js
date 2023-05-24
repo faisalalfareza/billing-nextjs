@@ -49,7 +49,8 @@ export default function WaterReading(props) {
 
   useEffect(() => {
     let currentSite = JSON.parse(localStorage.getItem("site"));
-    if (currentSite == null) alertService.info({ title: "Please choose site first." });
+    if (currentSite == null)
+      alertService.info({ title: "Please choose site first." });
     else setSite(currentSite);
 
     getProject();
@@ -104,8 +105,9 @@ export default function WaterReading(props) {
     );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    
-    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+
+    if (response.error)
+      alertService.error({ title: "Error", text: response.error.message });
     else setDataProject(response.result);
 
     Block.remove(`.${projectBlockLoadingName}`);
@@ -127,7 +129,7 @@ export default function WaterReading(props) {
       totalRows: undefined,
       totalPages: undefined,
     }));
-    
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [site]);
   useEffect(() => {
@@ -185,6 +187,7 @@ export default function WaterReading(props) {
 
   const columns = [
     { Header: "No", accessor: "no", width: "5%" },
+    { Header: "Period", accessor: "period" },
     { Header: "Project", accessor: "project", width: "25%" },
     { Header: "Cluster", accessor: "cluster" },
     { Header: "Unit Code", accessor: "unitcode", width: "7%" },
@@ -213,7 +216,10 @@ export default function WaterReading(props) {
 
   const waterReadingBlockLoadingName = "block-water-reading";
   const fetchData = async (data) => {
-    Block.standard(`.${waterReadingBlockLoadingName}`, `Getting Water Reading Data`),
+    Block.standard(
+      `.${waterReadingBlockLoadingName}`,
+      `Getting Water Reading Data`
+    ),
       setLoading(true);
 
     const { scheme, keywords, recordsPerPage, skipCount } = customerRequest;
@@ -234,7 +240,8 @@ export default function WaterReading(props) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+    if (response.error)
+      alertService.error({ title: "Error", text: response.error.message });
     else {
       let data = response.result;
 
@@ -248,6 +255,7 @@ export default function WaterReading(props) {
           unitno: e.unitNo,
           prev: e.prevRead,
           curr: e.currentRead,
+          period: e.period,
           action: e,
         });
       });
@@ -264,8 +272,7 @@ export default function WaterReading(props) {
       }, 0);
     }
 
-    Block.remove(`.${waterReadingBlockLoadingName}`),
-      setLoading(false);
+    Block.remove(`.${waterReadingBlockLoadingName}`), setLoading(false);
   };
 
   const setCustomerTaskList = (list) => {
@@ -319,7 +326,8 @@ export default function WaterReading(props) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+    if (response.error)
+      alertService.error({ title: "Error", text: response.error.message });
     else setDataCluster(response.result);
 
     Block.remove(`.${clusterBlockLoadingName}`);
@@ -387,7 +395,11 @@ export default function WaterReading(props) {
                       </a>
                     </MDBox>
                   </Grid>
-                  <Grid item xs={12} style={{ display: isExpandedFilter ? "initial" : "none" }}>
+                  <Grid
+                    item
+                    xs={12}
+                    style={{ display: isExpandedFilter ? "initial" : "none" }}
+                  >
                     <Formik
                       innerRef={formikRef}
                       initialValues={initialValues}
@@ -610,7 +622,7 @@ export default function WaterReading(props) {
           isOpen={openUpload}
           onModalChanged={(isChanged) => {
             setOpenUpload(!openUpload);
-            (isChanged === true) && fetchData();
+            isChanged === true && fetchData();
           }}
         />
       )}
@@ -621,7 +633,7 @@ export default function WaterReading(props) {
           params={modalParams}
           onModalChanged={(isChanged) => {
             setOpenEdit(!openEdit);
-            (isChanged === true) && fetchData();
+            isChanged === true && fetchData();
           }}
         />
       )}
