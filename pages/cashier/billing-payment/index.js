@@ -6,7 +6,7 @@ import Grid from "@mui/material/Grid";
 import { Autocomplete, TextField, Radio } from "@mui/material";
 import MDButton from "/components/MDButton";
 import MDInput from "/components/MDInput";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Card from "@mui/material/Card";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import FormField from "/pagesComponents/FormField";
@@ -33,7 +33,6 @@ export default function BillingPayment(props) {
   const [openDetail, setOpenDetail] = useState(false);
   const [isDetail, setIsDetail] = useState(false);
   const [params, setParams] = useState(undefined);
-  const [filterText, setFilterText] = useState("");
   const [selectedPSCode, setSelectedPSCode] = useState(undefined);
   const [detail, setDetail] = useState({});
   const [user, setUser] = useState(undefined);
@@ -60,7 +59,14 @@ export default function BillingPayment(props) {
       totalRows: undefined,
       totalPages: undefined,
     }));
-    setFilterText("");
+    if (formikRef.current) {
+      formikRef.current.setFieldValue("customerName", "");
+      formikRef.current.setFieldValue("unitCode", "");
+      formikRef.current.setFieldValue("unitNo", "");
+    }
+    setIsDetail(false);
+    setSelectedPSCode(undefined);
+    setformValues(initialValues);
   }, [site]);
 
   const [customerRequest, setCustomerRequest] = useState({
@@ -102,7 +108,8 @@ export default function BillingPayment(props) {
     getBank();
 
     let currentSite = JSON.parse(localStorage.getItem("site"));
-    if (currentSite == null) alertService.info({ title: "Please choose site first." });
+    if (currentSite == null)
+      alertService.info({ title: "Please choose site first." });
     else {
       setSite(currentSite);
       let currentUser = JSON.parse(localStorage.getItem("informations"));
@@ -173,6 +180,23 @@ export default function BillingPayment(props) {
     isAddSignee: true,
   };
 
+  let filterValidationsSchema = Yup.object().shape({
+    customerName: Yup.string()
+      .required("Customer Name is required.")
+      .typeError("Customer Name is required."),
+    unitCode: Yup.string().nullable(),
+    unitNo: Yup.string().nullable(),
+  });
+  const filterInitialValues = {
+    customerName: null,
+    unitCode: null,
+    unitNo: null,
+  };
+
+  const [filterValues, setFilterValues] = useState(filterInitialValues);
+
+  const formikRef = useRef();
+
   const [formValues, setformValues] = useState(initialValues);
 
   const getFormData = (values) => {};
@@ -232,7 +256,7 @@ export default function BillingPayment(props) {
         let data = response.result;
         if (data != null) window.open(data, "_blank");
       });
-      setFilterText("");
+      setFilterValues(filterInitialValues);
       setCustomerRequest((prevState) => ({
         ...prevState,
         keywords: "",
@@ -434,7 +458,9 @@ export default function BillingPayment(props) {
         accessToken: accessToken,
         params: {
           SiteId: site?.siteId,
-          Search: filterText,
+          Search: keywords,
+          UnitCode: filterValues.unitCode,
+          UnitNo: filterValues.unitNo,
           MaxResultCount: recordsPerPage,
           SkipCount: skipCount,
         },
@@ -564,11 +590,17 @@ export default function BillingPayment(props) {
     localStorage.setItem("site", JSON.stringify(siteVal));
   };
 
-  const keyPress = (e) => {
-    if (e.keyCode == 13) {
-      console.log("value", e.target.value);
-      fetchData();
-    }
+  const handleCustomerSubmit = async (e) => {
+    e != undefined && e.preventDefault();
+
+    setBillingList({
+      rowData: [],
+      totalRows: undefined,
+      totalPages: undefined,
+    }),
+      setSelectedPSCode();
+
+    fetchData();
   };
   //sampai sini
 
@@ -595,45 +627,116 @@ export default function BillingPayment(props) {
         <Card>
           <MDBox p={3} lineHeight={1}>
             <Grid container alignItems="center">
-              <Grid item xs={12} md={8}>
+              <Grid item xs={12} md={12}>
                 <MDBox>
                   <MDTypography variant="h5">Filter</MDTypography>
                 </MDBox>
-                <MDBox mb={2}>
-                  <MDInput
-                    variant="standard"
-                    value={filterText}
-                    required
-                    label="Customer Name / ID Client"
-                    onChange={(e) => {
-                      setFilterText(e.target.value);
-                      setCustomerRequest((prevState) => ({
-                        ...prevState,
-                        keywords: e.target.value,
-                      }));
-                    }}
-                    onKeyDown={keyPress}
-                    error={filterText == ""}
-                    fullWidth
-                  />
-                </MDBox>
-              </Grid>
-              <Grid item xs={12} md={4} sx={{ textAlign: "right" }}>
-                <Grid container alignItems="right" spacing={1}>
-                  <Grid item xs={12} md={12}>
-                    <MDButton
-                      variant="gradient"
-                      color="primary"
-                      disabled={filterText == "" || isLoadingSearch}
-                      onClick={() => {
-                        fetchData();
-                      }}
-                    >
-                      <Icon>search</Icon>&nbsp;{" "}
-                      {isLoadingSearch ? "Searching.." : "Search"}
-                    </MDButton>
-                  </Grid>
-                </Grid>
+                <Formik
+                  initialValues={filterInitialValues}
+                  validationSchema={filterValidationsSchema}
+                  innerRef={formikRef}
+                >
+                  {({
+                    errors,
+                    touched,
+                    isSubmitting,
+                    setFieldValue,
+                    resetForm,
+                    values,
+                  }) => {
+                    setFilterValues(values);
+                    const isValifForm = () =>
+                      checkingSuccessInput(
+                        values.customerName,
+                        errors.customerName
+                      );
+
+                    return (
+                      <MDBox
+                        component="form"
+                        role="form"
+                        onSubmit={(e) => handleCustomerSubmit(e)}
+                      >
+                        <Grid container columnSpacing={3}>
+                          <Grid item xs={12} sm={3}>
+                            <FormField
+                              type="text"
+                              required
+                              label="Customer Name / ID Client"
+                              name="customerName"
+                              value={filterValues.customerName}
+                              placeholder="Type Customer Name / ID Client"
+                              error={
+                                errors.customerName && touched.customerName
+                              }
+                              success={checkingSuccessInput(
+                                filterValues.customerName,
+                                errors.customerName
+                              )}
+                              onKeyUp={(e) =>
+                                setCustomerRequest((prevState) => ({
+                                  ...prevState,
+                                  keywords: e.target.value,
+                                }))
+                              }
+                            />
+                          </Grid>
+                          <Grid item xs={12} sm={3}>
+                            <FormField
+                              type="text"
+                              label="Unit Code"
+                              name="unitCode"
+                              value={filterValues.unitCode}
+                              placeholder="Type Unit Code"
+                              error={errors.unitCode && touched.unitCode}
+                              success={checkingSuccessInput(
+                                filterValues.unitCode,
+                                errors.unitCode
+                              )}
+                            />
+                          </Grid>
+                          <Grid item xs={12} sm={3}>
+                            <FormField
+                              type="text"
+                              label="Unit No"
+                              name="unitNo"
+                              value={filterValues.unitNo}
+                              placeholder="Type Unit No"
+                              error={errors.unitNo && touched.unitNo}
+                              success={checkingSuccessInput(
+                                filterValues.unitNo,
+                                errors.unitNo
+                              )}
+                            />
+                          </Grid>
+                          <Grid item xs={12} sm={3}>
+                            <MDBox
+                              display="flex"
+                              flexDirection={{ xs: "column", sm: "row" }}
+                              justifyContent="flex-end"
+                            >
+                              <MDBox
+                                ml={{ xs: 0, sm: 1 }}
+                                mt={{ xs: 1, sm: 0 }}
+                              >
+                                <MDButton
+                                  type="submit"
+                                  variant="gradient"
+                                  color="primary"
+                                  sx={{ height: "100%" }}
+                                  disabled={!isValifForm() || isLoadingSearch}
+                                >
+                                  <Icon>search</Icon>&nbsp;{" "}
+                                  {isLoadingSearch ? "Searching.." : "Search"}
+                                </MDButton>
+                              </MDBox>
+                            </MDBox>
+                          </Grid>
+                        </Grid>
+                      </MDBox>
+                    );
+                  }}
+                </Formik>
               </Grid>
             </Grid>
           </MDBox>

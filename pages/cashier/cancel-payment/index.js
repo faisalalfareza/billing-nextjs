@@ -40,7 +40,21 @@ function CancelPayment() {
     }));
     if (formikRef.current) {
       formikRef.current.setFieldValue("customerName", "");
+      formikRef.current.setFieldValue("unitCode", "");
+      formikRef.current.setFieldValue("unitNo", "");
     }
+    setCancelPaymentData({
+      rowData: [],
+      totalRows: undefined,
+      totalPages: undefined,
+    }),
+      setSelectedUnit();
+    setCustomerRequest((prevState) => ({
+      ...prevState,
+      unitCode: "",
+      unitNo: "",
+      keywords: "",
+    }));
   }, [site]);
 
   const schemeModels = {
@@ -55,22 +69,49 @@ function CancelPayment() {
         errorMsg: "Customer Name or ID Client is required.",
         defaultValue: "",
       },
+      unitCode: {
+        name: "unitCode",
+        label: "Unit Code",
+        placeholder: "Type Unit Code",
+        type: "text",
+        isRequired: false,
+        errorMsg: "Unit Code is required.",
+        defaultValue: "",
+      },
+      unitNo: {
+        name: "unitNo",
+        label: "Unit No",
+        placeholder: "Type Unit No",
+        type: "text",
+        isRequired: false,
+        errorMsg: "Unit No is required.",
+        defaultValue: "",
+      },
     },
   };
-  let { customerName } = schemeModels.formField;
+  let { customerName, unitCode, unitNo } = schemeModels.formField;
   let schemeValidations = Yup.object().shape({
     [customerName.name]: customerName.isRequired
       ? Yup.string().required(customerName.errorMsg)
       : Yup.string().notRequired(),
+    [unitCode.name]: unitCode.isRequired
+      ? Yup.string().required(unitCode.errorMsg)
+      : Yup.string().notRequired(),
+    [unitNo.name]: unitNo.isRequired
+      ? Yup.string().required(unitNo.errorMsg)
+      : Yup.string().notRequired(),
   });
   const schemeInitialValues = {
     [customerName.name]: customerName.defaultValue,
+    [unitCode.name]: unitCode.defaultValue,
+    [unitNo.name]: unitNo.defaultValue,
   };
   useEffect(() => {
     document.getElementsByName(customerName.name)[0]?.focus();
 
     let currentSite = typeNormalization(localStorage.getItem("site"));
-    if (currentSite == null) Swal.fire({ title: "Please choose site first.", icon: "info" });
+    if (currentSite == null)
+      Swal.fire({ title: "Please choose site first.", icon: "info" });
     else setSite(currentSite);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -82,6 +123,8 @@ function CancelPayment() {
   const [isLoadingCustomer, setLoadingCustomer] = useState(false);
   const [customerRequest, setCustomerRequest] = useState({
     scheme: site?.siteId,
+    unitCode: "",
+    unitNo: "",
     keywords: "",
     recordsPerPage: 5,
     skipCount: 0,
@@ -119,13 +162,16 @@ function CancelPayment() {
     Block.standard(`.${customerBlockLoadingName}`, `Searching for Customer`),
       setLoadingCustomer(true);
 
-    const { scheme, keywords, recordsPerPage, skipCount } = customerRequest;
+    const { scheme, keywords, unitCode, unitNo, recordsPerPage, skipCount } =
+      customerRequest;
     let response = await fetch("/api/cashier/cancel-payment/getcustomerlist", {
       method: "POST",
       body: JSON.stringify({
         params: {
           SiteId: site?.siteId,
           Search: keywords,
+          UnitCode: unitCode,
+          UnitNo: unitNo,
           MaxResultCount: recordsPerPage, // Rows Per Page (Fixed). Start From 1
           SkipCount: skipCount, // Increments Based On Page (Flexible). Start From 0
         },
@@ -266,10 +312,11 @@ function CancelPayment() {
         element.click();
       }, 0);
 
-      (response.totalCount == 0) && Swal.fire({
-        title: "There is no payment billing for this unit.",
-        icon: "info",
-      });
+      response.totalCount == 0 &&
+        Swal.fire({
+          title: "There is no payment billing for this unit.",
+          icon: "info",
+        });
     }
     Block.remove(`.${cancelPaymentBlockLoadingName}`),
       setLoadingCancelPayment(false);
@@ -401,7 +448,11 @@ function CancelPayment() {
                       innerRef={formikRef}
                     >
                       {({ values, errors, touched }) => {
-                        let { customerName: customerNameV } = values;
+                        let {
+                          customerName: customerNameV,
+                          unitCode: unitCodeV,
+                          unitNo: unitNoV,
+                        } = values;
                         const isValifForm = () =>
                           checkingSuccessInput(
                             customerName.isRequired,
@@ -416,7 +467,7 @@ function CancelPayment() {
                             onSubmit={(e) => handleCustomerSubmit(e)}
                           >
                             <Grid container columnSpacing={3}>
-                              <Grid item xs={12} sm={10}>
+                              <Grid item xs={12} sm={3}>
                                 <FormField
                                   type={customerName.type}
                                   required={customerName.isRequired}
@@ -443,7 +494,57 @@ function CancelPayment() {
                                   }
                                 />
                               </Grid>
-                              <Grid item xs={12} sm={2}>
+                              <Grid item xs={12} sm={3}>
+                                <FormField
+                                  type={unitCode.type}
+                                  required={unitCode.isRequired}
+                                  label={unitCode.label}
+                                  name={unitCode.name}
+                                  value={unitCodeV}
+                                  placeholder={unitCode.placeholder}
+                                  error={errors.unitCode && touched.unitCode}
+                                  success={
+                                    unitCode.isRequired &&
+                                    checkingSuccessInput(
+                                      unitCode.isRequired,
+                                      unitCodeV,
+                                      errors.unitCode
+                                    )
+                                  }
+                                  onKeyUp={(e) =>
+                                    setCustomerRequest((prevState) => ({
+                                      ...prevState,
+                                      unitCode: e.target.value,
+                                    }))
+                                  }
+                                />
+                              </Grid>
+                              <Grid item xs={12} sm={3}>
+                                <FormField
+                                  type={unitNo.type}
+                                  required={unitNo.isRequired}
+                                  label={unitNo.label}
+                                  name={unitNo.name}
+                                  value={unitNoV}
+                                  placeholder={unitNo.placeholder}
+                                  error={errors.unitNo && touched.unitNo}
+                                  success={
+                                    unitNo.isRequired &&
+                                    checkingSuccessInput(
+                                      unitNo.isRequired,
+                                      unitNoV,
+                                      errors.unitNo
+                                    )
+                                  }
+                                  onKeyUp={(e) =>
+                                    setCustomerRequest((prevState) => ({
+                                      ...prevState,
+                                      unitNo: e.target.value,
+                                    }))
+                                  }
+                                />
+                              </Grid>
+                              <Grid item xs={12} sm={3}>
                                 <MDBox
                                   display="flex"
                                   flexDirection={{ xs: "column", sm: "row" }}
