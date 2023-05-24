@@ -74,6 +74,10 @@ export default styled(Drawer)(({ theme, ownerState }) => {
         duration: transitions.duration.enteringScreen,
       }),
     },
+    "&::-webkit-scrollbar": {
+      width: 0,
+      background: "transparent"
+    },
   });
 
   // styles for the sidenav when miniSidenav={true}
@@ -96,6 +100,10 @@ export default styled(Drawer)(({ theme, ownerState }) => {
         easing: transitions.easing.sharp,
         duration: transitions.duration.shorter,
       }),
+    },
+    "&::-webkit-scrollbar": {
+      width: 0,
+      background: "transparent"
     },
   });
 

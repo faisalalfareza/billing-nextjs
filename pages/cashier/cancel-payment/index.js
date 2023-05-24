@@ -70,13 +70,9 @@ function CancelPayment() {
     document.getElementsByName(customerName.name)[0]?.focus();
 
     let currentSite = typeNormalization(localStorage.getItem("site"));
-    if (currentSite == null) {
-      Swal.fire({
-        title: "Info!",
-        text: "Please choose Site first",
-        icon: "info",
-      });
-    } else setSite(currentSite);
+    if (currentSite == null) Swal.fire({ title: "Please choose site first.", icon: "info" });
+    else setSite(currentSite);
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
