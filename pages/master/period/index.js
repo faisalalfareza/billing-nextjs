@@ -36,8 +36,9 @@ export default function MasterPeriod(props) {
 
   useEffect(() => {
     let currentSite = typeNormalization(localStorage.getItem("site"));
-    if (currentSite == null) alertService.info({ title: "Info", text: "Please choose Site first" });
+    if (currentSite == null) alertService.info({ title: "Please choose site first." });
     else setSite(currentSite);
+    
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => {

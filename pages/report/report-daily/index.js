@@ -108,11 +108,9 @@ function ReportDaily() {
 
   useEffect(() => {
     let currentSite = JSON.parse(localStorage.getItem("site"));
-    if (currentSite == null) {
-      alertService.info({ title: "Info", text: "Please choose Site first" });
-    } else {
-      setSite(currentSite);
-    }
+    if (currentSite == null) alertService.info({ title: "Please choose site first." });
+    else setSite(currentSite);
+
     getPaymentMethod();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps

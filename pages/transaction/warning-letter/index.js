@@ -56,16 +56,13 @@ export default function WarningLetter(props) {
 
   useEffect(() => {
     let currentSite = JSON.parse(localStorage.getItem("site"));
-    if (currentSite == null) {
-      alertService.info({
-        title: "Info!",
-        text: "Please choose Site first",
-      });
-    } else {
-      setSite(currentSite);
-    }
-    //getPeriode();
+    if (currentSite == null) alertService.info({ title: "Please choose site first." });
+    else setSite(currentSite);
+
+    // getPeriode();
     // getProject();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSite = (siteVal) => {

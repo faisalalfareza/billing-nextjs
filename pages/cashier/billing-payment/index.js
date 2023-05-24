@@ -102,9 +102,8 @@ export default function BillingPayment(props) {
     getBank();
 
     let currentSite = JSON.parse(localStorage.getItem("site"));
-    if (currentSite == null) {
-      alertService.info({ title: "Info", text: "Please choose Site first" });
-    } else {
+    if (currentSite == null) alertService.info({ title: "Please choose site first." });
+    else {
       setSite(currentSite);
       let currentUser = JSON.parse(localStorage.getItem("informations"));
       setUser(currentUser);
