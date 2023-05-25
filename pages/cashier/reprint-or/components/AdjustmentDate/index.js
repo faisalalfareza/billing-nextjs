@@ -42,7 +42,7 @@ export default function AdjustmentDate(props) {
           accessToken: accessToken,
           params: {
             BillingHeaderId: params.billingHeaderId,
-            newTransactionDate: addDate(values.transactionDate),
+            newTransactionDate: values.transactionDate,
           },
         }),
       }
