@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useCookies } from "react-cookie";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import Swal from "sweetalert2";
+
+import { Block } from "notiflix/build/notiflix-block-aio";
 
 import { Card, Grid, Icon, Autocomplete, FormControl, FormLabel, RadioGroup } from "@mui/material";
 
@@ -31,8 +33,10 @@ import { downloadTempFile } from "/helpers/utils";
 import DataTable from "/layout/Tables/DataTable";
 
 function OracleToJournal({ params }) {
+    const [isLoading, setLoading] = useState(false);
     const [{ accessToken, encryptedAccessToken }] = useCookies();
     const [ site, setSite ] = useState(null);
+    
     const handleSite = (siteVal) => {
         setSite(siteVal);
         localStorage.setItem("site", JSON.stringify(siteVal));
@@ -48,7 +52,7 @@ function OracleToJournal({ params }) {
                 type: "text",
                 isRequired: true,
                 errorMsg: "Period is required",
-                defaultValue: undefined
+                defaultValue: ""
             },
             paymentMethod: {
                 name: "paymentMethod",
@@ -57,7 +61,7 @@ function OracleToJournal({ params }) {
                 type: "text",
                 isRequired: true,
                 errorMsg: "Payment Type is required",
-                defaultValue: undefined
+                defaultValue: ""
             },
             paymentStartDate: {
                 name: "paymentStartDate",
@@ -98,33 +102,43 @@ function OracleToJournal({ params }) {
     } = schemaModels.formField;
 
     let schemeValidations = Yup.object().shape({
-        [periodMethod.name]: periodMethod.isRequired ? Yup.object().required(periodMethod.errorMsg).nullable() : Yup.object().notRequired(),
-        [paymentMethod.name]: paymentMethod.isRequired ? Yup.object().required(paymentMethod.errorMsg).nullable() : Yup.object().notRequired(),
-        [paymentStartDate.name]: paymentStartDate.isRequired
-        ? Yup.date().required(paymentStartDate.errorMsg).nullable()
-        : Yup.date().notRequired(),
-        [accountingDate.name]: accountingDate.isRequired
-        ? Yup.date().required(accountingDate.errorMsg).nullable()
-        : Yup.date().notRequired(),
-        [paymentEndDate.name]: paymentEndDate.isRequired
-        ? Yup.date().required(paymentEndDate.errorMsg).nullable()
-        : Yup.date().notRequired(),
+        [periodMethod.name]: Yup.object()
+            .required(periodMethod.errorMsg)
+            .typeError(periodMethod.errorMsg),
+        [paymentMethod.name]: Yup.object()
+            .required(paymentMethod.errorMsg)
+            .typeError(paymentMethod.errorMsg),
+        [paymentStartDate.name]: Yup.date()
+            .required(paymentStartDate.errorMsg)
+            .typeError(paymentStartDate.errorMsg),
+        [accountingDate.name]: Yup.date()
+            .required(accountingDate.errorMsg)
+            .typeError(accountingDate.errorMsg),
+        [paymentEndDate.name]: Yup.date()
+            .required(paymentEndDate.errorMsg)
+            .typeError(paymentEndDate.errorMsg),
     });
 
     const schemeInitialValues = {
-        [periodMethod.name]: params ? periodMethod.defaultValue : null,
-        [paymentMethod.name]: params ? paymentMethod.defaultValue : null,
-        [paymentStartDate.name]: params
-        ? dayjs(params.paymentStartDate).format("YYYY-MM-DD")
-        : null,
-        [accountingDate.name]: params
-        ? dayjs(params.accountingDate).format("YYYY-MM-DD")
-        : null,
-        [paymentEndDate.name]: params
-        ? dayjs(params.paymentEndDate).format("YYYY-MM-DD")
-        : null,
+        [periodMethod.name]: null,
+        [paymentMethod.name]: null,
+        [paymentStartDate.name]: null,
+        [accountingDate.name]: null,
+        [paymentEndDate.name]: null,
         
     };
+
+    function mandatoryComp(param, paramReq) {
+        return (
+        <>
+            <div style={{ display: "flex", gap: "2px" }}>
+            <div>{param}</div>
+            <span style={{ color: "red" }}>{paramReq ? "*" : ""}</span>
+            </div>
+              
+        </>
+        );
+    }
 
     useEffect(() => {
         document.getElementsByName(periodMethod.name)[0].focus();
@@ -139,7 +153,7 @@ function OracleToJournal({ params }) {
             } 
         else {
             setSite(currentSite);
-            setformValues({});
+            //setformValues({});
         }
             // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -147,7 +161,9 @@ function OracleToJournal({ params }) {
     const [ periodMethodList, setPeriodMethodList ] = useState([]);
     const [ paymentMethodList, setPaymentMethodList ] = useState([]);
 
-    const getDropdownPeriodMethod = async () => {
+    const getDropdownPeriodMethod = async (data) => {
+        Block.dots(`.${periodMethodBlockLoadingName}`);
+
         let response = await fetch("/api/report/dropdownperiod", {
             method: "POST",
             body: JSON.stringify({
@@ -162,14 +178,32 @@ function OracleToJournal({ params }) {
     
         if (response.error) alertService.error({ title: "Error", text: response.error.message });
         else setPeriodMethodList(response.result);
-        console.log(response);
+        
+        Block.remove(`.${periodMethodBlockLoadingName}`);
     };
 
     useEffect(() => {
         getDropdownPeriodMethod();
+        setformValues((prevState) => ({
+            ...prevState,
+            periodMethod: null,
+            paymentMethod: null,
+            paymentStartDate: null,
+            paymentEndDate: null,
+            accountingDate: null
+        }));
+        if(formikRef.current) {
+            formikRef.current.setFieldValue("periodMethod", null);
+            formikRef.current.setFieldValue("paymentMethod", null);
+            formikRef.current.setFieldValue("paymentStartDate", null);
+            formikRef.current.setFieldValue("paymentEndDate", null);
+            formikRef.current.setFieldValue("accountingDate", null);
+        }
     }, [site]);
 
     const getDropdownPaymentMethod = async () => { 
+        Block.dots(`.${paymentMethodBlockLoadingName}`);
+
         let response = await fetch("/api/master/payment_type/getdropdownpaymenttype", {
           method: "POST",
           body: JSON.stringify({
@@ -181,15 +215,18 @@ function OracleToJournal({ params }) {
     
         if (response.error) alertService.error({ title: "Error", text: response.error.message });
         else setPaymentMethodList(response.result);
-        console.log(response);
-      };
-      useEffect(() => {
+        // console.log(response);
+        
+        Block.remove(`.${paymentMethodBlockLoadingName}`);
+    };
+      
+    useEffect(() => {
         getDropdownPaymentMethod();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [site]);
 
     const checkingSuccessInput = (value, error) => {
-        return value != undefined && value != "" && value.length > 0 && !error;
+        return value != undefined && value != "" && !error;
         //return (!isRequired && true) || (isRequired && value != undefined && value != "" && !error);
     };
 
@@ -311,6 +348,10 @@ function OracleToJournal({ params }) {
     })
 
     const searchData = async (data) => {
+
+        Block.standard(`.${journalToOracleBlockLoadingName}`, `Getting Journal Data`),
+        setLoading(true);
+
         const { skipCount, recordsPerPage } = customerRequest;
         const body = {
             siteId: site?.siteId,
@@ -384,6 +425,8 @@ function OracleToJournal({ params }) {
             }));
             // console.log(customerResponse);
         }
+        Block.remove(`.${journalToOracleBlockLoadingName}`),
+        setLoading(false);
     };
 
     useEffect(() => {
@@ -492,6 +535,13 @@ function OracleToJournal({ params }) {
 
     const [tasklist, setTasklist] = useState({ columns: columns, rows: [] });
 
+    const periodMethodBlockLoadingName = "block-period";
+    const paymentMethodBlockLoadingName = "block-period";
+    const journalToOracleBlockLoadingName = "block-warning-oracle";
+
+    const formikRef = useRef();
+
+
     return (
         <DashboardLayout>
             <DashboardNavbar/>
@@ -534,6 +584,7 @@ function OracleToJournal({ params }) {
                                     </Grid>
                                     <Grid item xs={12}>
                                         <Formik
+                                            innerRef={formikRef}
                                             initialValues={schemeInitialValues}
                                             validationSchema={schemeValidations}
                                             
@@ -552,11 +603,11 @@ function OracleToJournal({ params }) {
                                                 getFormData(values);
 
                                                 const isValifForm = () => (
-                                                checkingSuccessInput(periodMethod.isRequired, values.periodMethodV, errors.periodMethod) &&
-                                                checkingSuccessInput(paymentMethod.isRequired, values.paymentMethodV, errors.paymentMethod) 
-                                                // checkingSuccessInput(formValues.accountingDate, values.accountingDate, errors.accountingDate) &&
-                                                // checkingSuccessInput(formValues.paymentStartDate, values.paymentStartDate, errors.paymentStartDate ) &&
-                                                // checkingSuccessInput(formValues.paymentEndDate, values.paymentEndDate, errors.paymentStartDate)
+                                                    checkingSuccessInput(values.periodMethod, errors.periodMethod) &&
+                                                    checkingSuccessInput(values.paymentMethod, errors.paymentMethod) &&
+                                                    checkingSuccessInput(values.paymentStartDate, errors.paymentStartDate) &&
+                                                    checkingSuccessInput(values.paymentEndDate, errors.paymentEndDate) &&
+                                                    checkingSuccessInput(values.accountingDate, errors.accountingDate)
                                                 );
 
                                                 return (
@@ -569,12 +620,17 @@ function OracleToJournal({ params }) {
                                                                     options={periodMethodList}
                                                                     key={periodMethod.name}
                                                                     value={values.periodMethod}
-                                                                    getOptionLabel={(option) => option.periodName}
+                                                                    getOptionLabel={(option) => 
+                                                                        values.periodName != {} 
+                                                                            ? option.periodName
+                                                                            : "Nothing Selected"
+                                                                    }
                                                                     onChange={(e, value) => {
-                                                                        setFieldValue(periodMethod.name, 
+                                                                        setFieldValue(
+                                                                            periodMethod.name, 
                                                                             value !== null 
-                                                                            ? value 
-                                                                            : initialValues[periodMethod.name]
+                                                                                ? value 
+                                                                                : initialValues[periodMethod.name]
                                                                         );
                                                                     }}
                                                                     noOptionsText="No results"
@@ -582,18 +638,19 @@ function OracleToJournal({ params }) {
                                                                     <FormField
                                                                         {...params}
                                                                         type={periodMethod.type}
-                                                                        label={
-                                                                        periodMethod.label +
-                                                                        (periodMethod.isRequired ? " ⁽*⁾" : "")
-                                                                        }
+                                                                        label={periodMethod.label}
                                                                         name={periodMethod.name}
                                                                         placeholder={periodMethod.placeholder}
                                                                         InputLabelProps={{ shrink: true }}
-                                                                        error={errors.periodMethod && touched.periodMethod}
-                                                                        success={
-                                                                            periodMethod.isRequired && 
-                                                                            checkingSuccessInput(periodMethod.isRequired, values.periodMethod, errors.periodMethod)
+                                                                        error={
+                                                                            errors.periodMethod && touched.periodMethod
                                                                         }
+                                                                        success={
+                                                                            checkingSuccessInput(
+                                                                                periodMethod, 
+                                                                                errors.periodMethod)
+                                                                        }
+                                                                        className={periodMethodBlockLoadingName}
                                                                     /> 
                                                                     )}
                                                                 />
@@ -625,12 +682,17 @@ function OracleToJournal({ params }) {
                                                                     options={paymentMethodList}
                                                                     key={paymentMethod.name}
                                                                     value={values.paymentMethod}
-                                                                    getOptionLabel={(option) => option.paymentTypeName}
+                                                                    getOptionLabel={(option) => 
+                                                                        values.paymentMethod != {}
+                                                                        ? option.paymentTypeName
+                                                                        : "Nothing Selected"
+                                                                    }
                                                                     onChange={(e, value) => {
-                                                                        setFieldValue(paymentMethod.name, 
+                                                                        setFieldValue(
+                                                                            paymentMethod.name, 
                                                                             value !== null 
-                                                                            ? value 
-                                                                            : initialValues[paymentMethod.name]
+                                                                                ? value 
+                                                                                : initialValues[paymentMethod.name]
                                                                         );
                                                                     }}
                                                                     noOptionsText="No results"
@@ -647,9 +709,11 @@ function OracleToJournal({ params }) {
                                                                         InputLabelProps={{ shrink: true }}
                                                                         error={errors.paymentMethod && touched.paymentMethod}
                                                                         success={
-                                                                            paymentMethod.isRequired && 
-                                                                            checkingSuccessInput(paymentMethod.isRequired, values.paymentMethod, errors.paymentMethod)
+                                                                            checkingSuccessInput(
+                                                                                paymentMethod, 
+                                                                                errors.paymentMethod)
                                                                         }
+                                                                        className={paymentMethodBlockLoadingName}
                                                                     /> 
                                                                     )}
                                                                 />
@@ -734,8 +798,14 @@ function OracleToJournal({ params }) {
                                                                 style={{ marginRight : 20}}
                                                                 variant="outlined" 
                                                                 color="dark"
-                                                                onClick={searchData}>
-                                                                <Icon>search_outlined</Icon>&nbsp; search
+                                                                onClick={searchData}
+                                                                disabled={isLoading || !isValifForm()}
+                                                            >
+                                                                <Icon>search_outlined</Icon>&nbsp;{" "} 
+                                                                    {isLoading ? 
+                                                                        "Searching..." : 
+                                                                        "Search"
+                                                                    }
                                                             </MDButton>
                                                             <MDButton 
                                                                 type="submit"
@@ -758,9 +828,9 @@ function OracleToJournal({ params }) {
                                                                 variant="gradient"
                                                                 color="primary"
                                                                 sx={{ height: "100%" }}
-                                                                disabled={isLoadingUploadToOracle || !isValifForm()}
+                                                                // disabled={isLoadingUploadToOracle || !isValifForm()}
                                                             >
-                                                                <Icon>upload</Icon>&nbsp; { isLoadingUploadToOracle ? "Uploading To Oracle.." : "Upload To Oracle" }
+                                                                <Icon>upload</Icon>&nbsp; Upload To Oracle
                                                             </MDButton>
                                                         </Grid>
                                                     </MDBox>
@@ -776,7 +846,8 @@ function OracleToJournal({ params }) {
                     </Grid>
                 </Grid>
             </MDBox>
-            <MDBox>
+            <Card className={journalToOracleBlockLoadingName}>
+                <MDBox>
                 <Grid container alignItems="center">
                     <Grid item xs={12}>
                         <DataTable 
@@ -797,7 +868,8 @@ function OracleToJournal({ params }) {
                         />
                     </Grid>
                 </Grid>
-            </MDBox>
+                </MDBox>
+            </Card>
         </DashboardLayout>
     )
 }
