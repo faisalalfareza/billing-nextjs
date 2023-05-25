@@ -20,16 +20,24 @@ import DataTable from "/layout/Tables/DataTable";
 
 import FormField from "/pagesComponents/FormField";
 import SiteDropdown from "../../../pagesComponents/dropdown/Site";
+import AdjustmentDate from "./components/AdjustmentDate";
 
 function RePrintOR() {
   const [{ accessToken, encryptedAccessToken }] = useCookies();
-
+  const [openAdjust, setOpenAdjust] = useState(false);
   const [site, setSite] = useState(null);
+  const [modalParams, setModalParams] = useState(undefined);
+
   const handleSite = (siteVal) => {
     setSite(siteVal);
     localStorage.setItem("site", JSON.stringify(siteVal));
   };
   const formikRef = useRef();
+
+  const handleAdjust = () => {
+    setOpenAdjust(!openAdjust);
+    getOfficialReceiptList(selectedUnit.unitDataId);
+  };
 
   useEffect(() => {
     setCustomerResponse((prevState) => ({
@@ -337,6 +345,29 @@ function RePrintOR() {
         { Header: "Method", accessor: "method" },
         { Header: "Total Amount", accessor: "totalAmount", align: "right" },
         { Header: "Remarks", accessor: "remarks" },
+        {
+          Header: "EDIT TRANSACTION DATE",
+          accessor: "actions",
+          Cell: ({ value, row }) => {
+            return (
+              <MDTypography
+                variant="button"
+                style={{
+                  color: "#1A73E7",
+                  cursor: "pointer",
+                  textDecoration: "underline",
+                }}
+                onClick={() => {
+                  console.log("valueeee", row);
+                  setModalParams(row.original);
+                  handleAdjust();
+                }}
+              >
+                Change
+              </MDTypography>
+            );
+          },
+        },
         {
           Header: "Actions",
           accessor: "action",
@@ -670,6 +701,13 @@ function RePrintOR() {
           )}
         </Grid>
       </MDBox>
+      {openAdjust && (
+        <AdjustmentDate
+          isOpen={openAdjust}
+          close={handleAdjust}
+          params={modalParams}
+        />
+      )}
     </DashboardLayout>
   );
 }
