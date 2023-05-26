@@ -59,7 +59,7 @@ function BillingPayment() {
       customerName: {
         name: "customerName",
         label: "Customer Name / ID Client",
-        placeholder: "Entry the Customer Name or ID Client",
+        placeholder: "Type Customer Name or ID Client",
         type: "text",
         isRequired: false,
         errorMsg: "Customer Name or ID Client is required.",
@@ -68,7 +68,7 @@ function BillingPayment() {
       unitCode: {
         name: "unitCode",
         label: "Unit Code",
-        placeholder: "Entry the Unit Code",
+        placeholder: "Type Unit Code",
         type: "text",
         isRequired: false,
         errorMsg: "Unit Code is required.",
@@ -77,7 +77,7 @@ function BillingPayment() {
       unitNo: {
         name: "unitNo",
         label: "Unit No",
-        placeholder: "Entry the Unit No",
+        placeholder: "Type Unit No",
         type: "text",
         isRequired: false,
         errorMsg: "Unit No is required.",

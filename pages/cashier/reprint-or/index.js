@@ -71,7 +71,7 @@ function RePrintOR() {
       customerName: {
         name: "customerName",
         label: "Customer Name / ID Client",
-        placeholder: "Entry the Customer Name or ID Client",
+        placeholder: "Type Customer Name or ID Client",
         type: "text",
         isRequired: false,
         errorMsg: "Customer Name or ID Client is required.",
@@ -503,7 +503,7 @@ function RePrintOR() {
                             onSubmit={(e) => handleCustomerSubmit(e)}
                           >
                             <Grid container columnSpacing={3}>
-                              <Grid item xs={12} sm={3}>
+                              <Grid item xs={12} sm={4}>
                                 <FormField
                                   type={customerName.type}
                                   required={customerName.isRequired}
@@ -580,7 +580,7 @@ function RePrintOR() {
                                   }
                                 />
                               </Grid>
-                              <Grid item xs={12} sm={3}>
+                              <Grid item xs={12} sm={2}>
                                 <MDBox
                                   display="flex"
                                   flexDirection={{ xs: "column", sm: "row" }}
