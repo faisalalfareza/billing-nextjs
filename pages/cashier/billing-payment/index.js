@@ -40,17 +40,28 @@ function BillingPayment() {
   const formikRef = useRef();
 
   useEffect(() => {
-    setCustomerResponse((prevState) => ({
+    setCustomerRequest((prevState) => ({
       ...prevState,
-      rowData: [],
-      totalRows: undefined,
-      totalPages: undefined,
+      scheme: site?.siteId,
+      keywords: "",
+      unitCode: "",
+      unitNo: "",
+      recordsPerPage: 5,
+      skipCount: 0,
     }));
     if (formikRef.current) {
       formikRef.current.setFieldValue("customerName", "");
       formikRef.current.setFieldValue("unitCode", "");
       formikRef.current.setFieldValue("unitNo", "");
     }
+    setCustomerResponse((prevState) => ({
+      ...prevState,
+      rowData: [],
+      totalRows: undefined,
+      totalPages: undefined,
+    }));
+    setSelectedUnit();
+    setDetailPaymentData([]);
   }, [site]);
 
   const schemeModels = {
@@ -890,15 +901,15 @@ function BillingPayment() {
                   <Grid container spacing={3}>
                     <Grid item xs={4}>
                       <MDTypography variant="h6" color="light">CUSTOMER NAME</MDTypography>
-                      <MDTypography variant="body2" color="light">{selectedUnit.customerName}</MDTypography>
+                      <MDTypography variant="body2" color="light">{selectedUnit?.customerName}</MDTypography>
                     </Grid>
                     <Grid item xs={4}>
                       <MDTypography variant="h6" color="light">UNIT CODE</MDTypography>
-                      <MDTypography variant="body2" color="light">{selectedUnit.unitCode}</MDTypography>
+                      <MDTypography variant="body2" color="light">{selectedUnit?.unitCode}</MDTypography>
                     </Grid>
                     <Grid item xs={4}>
                       <MDTypography variant="h6" color="light">UNIT NO</MDTypography>
-                      <MDTypography variant="body2" color="light">{selectedUnit.unitNo}</MDTypography>
+                      <MDTypography variant="body2" color="light">{selectedUnit?.unitNo}</MDTypography>
                     </Grid>
                   </Grid>
                 </MDBox>
