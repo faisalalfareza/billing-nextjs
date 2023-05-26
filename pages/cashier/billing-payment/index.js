@@ -48,6 +48,8 @@ function BillingPayment() {
     }));
     if (formikRef.current) {
       formikRef.current.setFieldValue("customerName", "");
+      formikRef.current.setFieldValue("unitCode", "");
+      formikRef.current.setFieldValue("unitNo", "");
     }
   }, [site]);
 
@@ -59,20 +61,46 @@ function BillingPayment() {
         label: "Customer Name / ID Client",
         placeholder: "Entry the Customer Name or ID Client",
         type: "text",
-        isRequired: true,
+        isRequired: false,
         errorMsg: "Customer Name or ID Client is required.",
+        defaultValue: "",
+      },
+      unitCode: {
+        name: "unitCode",
+        label: "Unit Code",
+        placeholder: "Entry the Unit Code",
+        type: "text",
+        isRequired: false,
+        errorMsg: "Unit Code is required.",
+        defaultValue: "",
+      },
+      unitNo: {
+        name: "unitNo",
+        label: "Unit No",
+        placeholder: "Entry the Unit No",
+        type: "text",
+        isRequired: false,
+        errorMsg: "Unit No is required.",
         defaultValue: "",
       },
     },
   };
-  let { customerName } = schemeModels.formField;
+  let { customerName, unitCode, unitNo } = schemeModels.formField;
   let schemeValidations = Yup.object().shape({
     [customerName.name]: customerName.isRequired
       ? Yup.string().required(customerName.errorMsg)
       : Yup.string().notRequired(),
+    [unitCode.name]: unitCode.isRequired
+      ? Yup.string().required(unitCode.errorMsg)
+      : Yup.string().notRequired(),
+    [unitNo.name]: unitNo.isRequired
+      ? Yup.string().required(unitNo.errorMsg)
+      : Yup.string().notRequired(),
   });
   const schemeInitialValues = {
     [customerName.name]: customerName.defaultValue,
+    [unitCode.name]: unitCode.defaultValue,
+    [unitNo.name]: customerName.defaultValue,
   };
 
   const [user, setUser] = useState(undefined);
@@ -100,6 +128,8 @@ function BillingPayment() {
   const [customerRequest, setCustomerRequest] = useState({
     scheme: site?.siteId,
     keywords: "",
+    unitCode: "",
+    unitNo: "",
     recordsPerPage: 5,
     skipCount: 0,
   });
@@ -136,7 +166,7 @@ function BillingPayment() {
     Block.standard(`.${customerBlockLoadingName}`, `Searching for Customer`),
       setLoadingCustomer(true);
 
-    const { scheme, keywords, recordsPerPage, skipCount } = customerRequest;
+    const { scheme, keywords, unitCode, unitNo, recordsPerPage, skipCount } = customerRequest;
     let response = await fetch("/api/cashier/reprintor/getcustomerlist", {
       method: "POST",
       body: JSON.stringify({
@@ -144,6 +174,8 @@ function BillingPayment() {
         params: {
           SiteId: site?.siteId,
           Search: keywords,
+          UnitCode: unitCode,
+          UnitNo: unitNo,
           MaxResultCount: recordsPerPage, // Rows Per Page (Fixed). Start From 1
           SkipCount: skipCount, // Increments Based On Page (Flexible). Start From 0
         },
@@ -215,6 +247,12 @@ function BillingPayment() {
 
   const checkingSuccessInput = (value, error) => {
     return value != undefined && value != "" && value != null && !error;
+  };
+  const checkingSuccessInputWithRequired = (isRequired, value, error) => {
+    return (
+      (!isRequired && true) ||
+      (isRequired && value != undefined && value != "" && !error)
+    );
   };
   const handleCustomerSubmit = async (e) => {
     e != undefined && e.preventDefault();
@@ -639,12 +677,15 @@ function BillingPayment() {
                       validationSchema={schemeValidations}
                     >
                       {({ values, errors, touched }) => {
-                        let { customerName: customerNameV } = values;
+                        let { 
+                          customerName: customerNameV,
+                          unitCode: unitCodeV,
+                          unitNo: unitNoV 
+                        } = values;
                         const isValifForm = () =>
-                          checkingSuccessInput(
-                            customerNameV,
-                            errors.customerName
-                          );
+                          checkingSuccessInputWithRequired(customerName.isRequired, customerNameV, errors.customerName); //&&
+                          checkingSuccessInputWithRequired(unitCode.isRequired, unitCodeV, errors.unitCode) &&
+                          checkingSuccessInputWithRequired(unitNo.isRequired, unitNoV, errors.unitNo);
 
                         return (
                           <MDBox
@@ -653,7 +694,7 @@ function BillingPayment() {
                             onSubmit={(e) => handleCustomerSubmit(e)}
                           >
                             <Grid container columnSpacing={3}>
-                              <Grid item xs={12} sm={10}>
+                              <Grid item xs={12} sm={4}>
                                 <FormField
                                   type={customerName.type}
                                   required={customerName.isRequired}
@@ -666,7 +707,8 @@ function BillingPayment() {
                                   }
                                   success={
                                     customerName.isRequired &&
-                                    checkingSuccessInput(
+                                    checkingSuccessInputWithRequired(
+                                      customerName.isRequired,
                                       customerNameV,
                                       errors.customerName
                                     )
@@ -675,6 +717,60 @@ function BillingPayment() {
                                     setCustomerRequest((prevState) => ({
                                       ...prevState,
                                       keywords: e.target.value,
+                                    }))
+                                  }
+                                />
+                              </Grid>
+                              <Grid item xs={12} sm={3}>
+                                <FormField
+                                  type={unitCode.type}
+                                  required={unitCode.isRequired}
+                                  label={unitCode.label}
+                                  name={unitCode.name}
+                                  value={unitCodeV}
+                                  placeholder={unitCode.placeholder}
+                                  error={
+                                    errors.unitCode && touched.unitCode
+                                  }
+                                  success={
+                                    unitCode.isRequired &&
+                                    checkingSuccessInputWithRequired(
+                                      unitCode.isRequired,
+                                      unitCodeV,
+                                      errors.unitCode
+                                    )
+                                  }
+                                  onKeyUp={(e) =>
+                                    setCustomerRequest((prevState) => ({
+                                      ...prevState,
+                                      unitCode: e.target.value,
+                                    }))
+                                  }
+                                />
+                              </Grid>
+                              <Grid item xs={12} sm={3}>
+                                <FormField
+                                  type={unitNo.type}
+                                  required={unitNo.isRequired}
+                                  label={unitNo.label}
+                                  name={unitNo.name}
+                                  value={unitNoV}
+                                  placeholder={unitNo.placeholder}
+                                  error={
+                                    errors.unitNo && touched.unitNo
+                                  }
+                                  success={
+                                    unitNo.isRequired &&
+                                    checkingSuccessInputWithRequired(
+                                      unitNo.isRequired,
+                                      unitNoV,
+                                      errors.unitNo
+                                    )
+                                  }
+                                  onKeyUp={(e) =>
+                                    setCustomerRequest((prevState) => ({
+                                      ...prevState,
+                                      unitNo: e.target.value,
                                     }))
                                   }
                                 />
