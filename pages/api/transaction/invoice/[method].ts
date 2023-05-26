@@ -49,6 +49,9 @@ export default async function handler(
         case "sendwainvoice":
           sendWa(res, body);
           break;
+        case "uploadexcelchangeadjinvoice":
+          uploadExcelChangeAdjInvoice(res, body);
+          break;
       }
       break;
   }
@@ -385,6 +388,35 @@ async function sendWa(res: any, body: any) {
       console.log("err-----", error.response);
       res.send({
         error: error,
+      });
+    });
+}
+async function uploadExcelChangeAdjInvoice(res: any, body: any) {
+  const { accessToken, params } = body;
+
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/UploadExcelChangeAdjInvoice`;
+  const config = {
+    headers: {
+      Authorization: "Bearer " + accessToken,
+      "Access-Control-Allow-Origin": "*",
+    },
+  };
+  console.log("config----", config);
+
+  console.log("body---", params);
+
+  axios
+    .post(url, params, config)
+    .then((response) => {
+      console.log("response-----", response);
+      res.send({
+        result: response.data.result,
+      });
+    })
+    .catch((error) => {
+      console.log("err-----", error.response);
+      res.send({
+        error: error.response.data,
       });
     });
 }

@@ -181,9 +181,7 @@ export default function BillingPayment(props) {
   };
 
   let filterValidationsSchema = Yup.object().shape({
-    customerName: Yup.string()
-      .required("Customer Name is required.")
-      .typeError("Customer Name is required."),
+    customerName: Yup.string().nullable(),
     unitCode: Yup.string().nullable(),
     unitNo: Yup.string().nullable(),
   });
@@ -661,7 +659,6 @@ export default function BillingPayment(props) {
                           <Grid item xs={12} sm={3}>
                             <FormField
                               type="text"
-                              required
                               label="Customer Name / ID Client"
                               name="customerName"
                               value={filterValues.customerName}
@@ -724,7 +721,7 @@ export default function BillingPayment(props) {
                                   variant="gradient"
                                   color="primary"
                                   sx={{ height: "100%" }}
-                                  disabled={!isValifForm() || isLoadingSearch}
+                                  disabled={isLoadingSearch}
                                 >
                                   <Icon>search</Icon>&nbsp;{" "}
                                   {isLoadingSearch ? "Searching.." : "Search"}
