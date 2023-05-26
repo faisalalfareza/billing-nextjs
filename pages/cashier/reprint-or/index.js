@@ -73,7 +73,7 @@ function RePrintOR() {
         label: "Customer Name / ID Client",
         placeholder: "Entry the Customer Name or ID Client",
         type: "text",
-        isRequired: true,
+        isRequired: false,
         errorMsg: "Customer Name or ID Client is required.",
         defaultValue: "",
       },
@@ -595,9 +595,7 @@ function RePrintOR() {
                                       variant="gradient"
                                       color="primary"
                                       sx={{ height: "100%" }}
-                                      disabled={
-                                        !isValifForm() || isLoadingCustomer
-                                      }
+                                      disabled={isLoadingCustomer}
                                     >
                                       <Icon>search</Icon>&nbsp;{" "}
                                       {isLoadingCustomer
