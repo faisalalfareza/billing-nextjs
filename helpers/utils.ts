@@ -10,7 +10,11 @@ export function typeNormalization(value: any) {
 }
 
 export function capitalizeFirstLetter(value: any) {
-  return value.charAt(0).toUpperCase() + value.slice(1);
+  try {
+    return value.charAt(0).toUpperCase() + value.slice(1);
+  } catch (e) {
+    return value;
+  }  
 }
 
 export function getExtension(filename: string) {

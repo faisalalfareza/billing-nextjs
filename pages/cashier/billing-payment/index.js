@@ -1,86 +1,156 @@
-import DashboardLayout from "/layout/LayoutContainers/DashboardLayout";
-import DashboardNavbar from "/layout/Navbars/DashboardNavbar";
+import React, { useState, useEffect, useRef } from "react";
+import { useCookies } from "react-cookie";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
+import * as dayjs from "dayjs";
+import Swal from "sweetalert2";
+import { NumericFormat } from "react-number-format";
+
+import { Card, Grid, Icon, Autocomplete, FormGroup, FormControlLabel, TextField, Radio, Checkbox } from "@mui/material";
+import { Block } from "notiflix/build/notiflix-block-aio";
+
 import MDBox from "/components/MDBox";
 import MDTypography from "/components/MDTypography";
-import Grid from "@mui/material/Grid";
-import { Autocomplete, TextField, Radio } from "@mui/material";
 import MDButton from "/components/MDButton";
 import MDInput from "/components/MDInput";
-import { useEffect, useState, useRef } from "react";
-import Card from "@mui/material/Card";
-import { Formik, Form, Field, ErrorMessage } from "formik";
-import FormField from "/pagesComponents/FormField";
-import * as Yup from "yup";
-import { typeNormalization } from "/helpers/utils";
+
+import { typeNormalization, capitalizeFirstLetter } from "/helpers/utils";
 import { alertService } from "/helpers";
+
+import DashboardLayout from "/layout/LayoutContainers/DashboardLayout";
+import DashboardNavbar from "/layout/Navbars/DashboardNavbar";
 import DataTable from "/layout/Tables/DataTable";
-import Icon from "@mui/material/Icon";
-import * as dayjs from "dayjs";
-import { FormGroup, FormControlLabel, Checkbox } from "@mui/material";
 import DataTableTotal from "/layout/Tables/DataTableTotal";
-import { useCookies } from "react-cookie";
+
+import FormField from "/pagesComponents/FormField";
 import SiteDropdown from "/pagesComponents/dropdown/Site";
 import NumberInput from "/pagesComponents/dropdown/NumberInput";
 import TotalDisable from "/pagesComponents/dropdown/TotalDisable";
-import { NumericFormat } from "react-number-format";
-import DetailBalance from "./detail-balance";
-import Swal from "sweetalert2";
 
-export default function BillingPayment(props) {
-  const [listBilling, setListBilling] = useState([]);
-  const [listInvoice, setListInvoice] = useState([]);
-  const [site, setSite] = useState(null);
-  const [openDetail, setOpenDetail] = useState(false);
-  const [isDetail, setIsDetail] = useState(false);
-  const [params, setParams] = useState(undefined);
-  const [selectedPSCode, setSelectedPSCode] = useState(undefined);
-  const [detail, setDetail] = useState({});
-  const [user, setUser] = useState(undefined);
+import DetailBalance from "./detail-balance";
+
+function BillingPayment() {
   const [{ accessToken, encryptedAccessToken }] = useCookies();
-  const [dataPaymentMethod, setDataPaymentMethod] = useState([]);
-  const [dataBank, setDataBank] = useState([]);
-  const [totalFooter, setTotalFooter] = useState({});
-  const [totalAc, setTotalAc] = useState(0);
-  const [charge, setCharge] = useState(0);
-  const [totalPay, setTotalPay] = useState(0);
-  const [isCard, setIsCard] = useState({});
-  const [hasNote, setHasNote] = useState(false);
-  const [invoiceId, setInvoiceId] = useState(undefined);
-  const [customerResponse, setCustomerResponse] = useState({
-    rowData: [],
-    totalRows: undefined,
-    totalPages: undefined,
-  });
+
+  const [site, setSite] = useState(null);
+  const handleSite = (siteVal) => {
+    setSite(siteVal);
+    localStorage.setItem("site", JSON.stringify(siteVal));
+  };
+  const formikRef = useRef();
 
   useEffect(() => {
-    setCustomerResponse((prevState) => ({
+    setCustomerRequest((prevState) => ({
       ...prevState,
-      rowData: [],
-      totalRows: undefined,
-      totalPages: undefined,
+      scheme: site?.siteId,
+      keywords: "",
+      unitCode: "",
+      unitNo: "",
+      recordsPerPage: 5,
+      skipCount: 0,
     }));
     if (formikRef.current) {
       formikRef.current.setFieldValue("customerName", "");
       formikRef.current.setFieldValue("unitCode", "");
       formikRef.current.setFieldValue("unitNo", "");
     }
-    setIsDetail(false);
-    setSelectedPSCode(undefined);
-    setformValues(initialValues);
+    setCustomerResponse((prevState) => ({
+      ...prevState,
+      rowData: [],
+      totalRows: undefined,
+      totalPages: undefined,
+    }));
+    setSelectedUnit();
+    setDetailPaymentData([]);
   }, [site]);
 
+  const schemeModels = {
+    formId: "billing-payment-form",
+    formField: {
+      customerName: {
+        name: "customerName",
+        label: "Customer Name / ID Client",
+        placeholder: "Type Customer Name or ID Client",
+        type: "text",
+        isRequired: false,
+        errorMsg: "Customer Name or ID Client is required.",
+        defaultValue: "",
+      },
+      unitCode: {
+        name: "unitCode",
+        label: "Unit Code",
+        placeholder: "Type Unit Code",
+        type: "text",
+        isRequired: false,
+        errorMsg: "Unit Code is required.",
+        defaultValue: "",
+      },
+      unitNo: {
+        name: "unitNo",
+        label: "Unit No",
+        placeholder: "Type Unit No",
+        type: "text",
+        isRequired: false,
+        errorMsg: "Unit No is required.",
+        defaultValue: "",
+      },
+    },
+  };
+  let { customerName, unitCode, unitNo } = schemeModels.formField;
+  let schemeValidations = Yup.object().shape({
+    [customerName.name]: customerName.isRequired
+      ? Yup.string().required(customerName.errorMsg)
+      : Yup.string().notRequired(),
+    [unitCode.name]: unitCode.isRequired
+      ? Yup.string().required(unitCode.errorMsg)
+      : Yup.string().notRequired(),
+    [unitNo.name]: unitNo.isRequired
+      ? Yup.string().required(unitNo.errorMsg)
+      : Yup.string().notRequired(),
+  });
+  const schemeInitialValues = {
+    [customerName.name]: customerName.defaultValue,
+    [unitCode.name]: unitCode.defaultValue,
+    [unitNo.name]: customerName.defaultValue,
+  };
+
+  const [user, setUser] = useState(undefined);
+  useEffect(() => {
+    document.getElementsByName(customerName.name)[0].focus();
+
+    let currentSite = typeNormalization(localStorage.getItem("site"));
+    if (currentSite == null) alertService.info({ title: "Please choose site first." });
+    else {
+      setSite(currentSite);
+      let currentUser = typeNormalization(localStorage.getItem("informations"));
+      setUser(currentUser);
+    }
+
+    getPaymentMethod();
+    getBank();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const [isExpandedFilter, setExpandFilter] = useState(true);
+
+  const customerBlockLoadingName = "block-customer";
+  const [isLoadingCustomer, setLoadingCustomer] = useState(false);
   const [customerRequest, setCustomerRequest] = useState({
     scheme: site?.siteId,
     keywords: "",
-    recordsPerPage: 10,
+    unitCode: "",
+    unitNo: "",
+    recordsPerPage: 5,
     skipCount: 0,
   });
-
-  useEffect(() => {
-    customerRequest.keywords != "" && fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [customerRequest.skipCount, customerRequest.recordsPerPage]);
-
+  const [customerResponse, setCustomerResponse] = useState({
+    rowData: [],
+    totalRows: undefined,
+    totalPages: undefined,
+  });
+  const [selectedUnit, setSelectedUnit] = useState();
+  
   const skipCountChangeHandler = (e) => {
     customerRequest.skipCount = e;
     setCustomerRequest((prevState) => ({
@@ -103,45 +173,296 @@ export default function BillingPayment(props) {
     }));
   };
 
-  useEffect(() => {
-    getPaymentMethod();
-    getBank();
+  const getCustomerList = async () => {
+    Block.standard(`.${customerBlockLoadingName}`, `Searching for Customer`),
+      setLoadingCustomer(true);
 
-    let currentSite = JSON.parse(localStorage.getItem("site"));
-    if (currentSite == null)
-      alertService.info({ title: "Please choose site first." });
+    const { scheme, keywords, unitCode, unitNo, recordsPerPage, skipCount } = customerRequest;
+    let response = await fetch("/api/cashier/reprintor/getcustomerlist", {
+      method: "POST",
+      body: JSON.stringify({
+        accessToken: accessToken,
+        params: {
+          SiteId: site?.siteId,
+          Search: keywords,
+          UnitCode: unitCode,
+          UnitNo: unitNo,
+          MaxResultCount: recordsPerPage, // Rows Per Page (Fixed). Start From 1
+          SkipCount: skipCount, // Increments Based On Page (Flexible). Start From 0
+        },
+      }),
+    });
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
+
+    if (response.error)
+      alertService.error({ title: "Error", text: response.error.message });
     else {
-      setSite(currentSite);
-      let currentUser = JSON.parse(localStorage.getItem("informations"));
-      setUser(currentUser);
+      setCustomerResponse((prevState) => ({
+        ...prevState,
+        rowData: response.items,
+        totalRows: response.totalCount,
+        totalPages: Math.ceil(
+          response.totalCount / customerRequest.recordsPerPage
+        ),
+      }));
+      setTimeout(() => {
+        const element = document.createElement("a");
+        element.href = "#customer";
+        element.click();
+      }, 0);
+    }
+    Block.remove(`.${customerBlockLoadingName}`), setLoadingCustomer(false);
+  };
+  const setCustomerTaskList = (rows) => {
+    return {
+      columns: [
+        {
+          Header: "Choose",
+          Cell: ({ row }) => {
+            return (
+              <Radio
+                checked={row.original == selectedUnit}
+                name="radio-buttons"
+                value={row.original}
+                onChange={(changed) => {
+                  if (row.original != selectedUnit) {
+                    setDetailPaymentData([]);
+                  }
+                  setSelectedUnit(row.original);
+                }}
+              />
+            );
+          },
+          // align: "center",
+        },
+        {
+          Header: "No",
+          Cell: ({ row }) => row.index + 1,
+          align: "center",
+        },
+        { Header: "Project", accessor: "projectName" },
+        { Header: "Cluster", accessor: "clusterName" },
+        { Header: "Unit Name", accessor: "unitName" },
+        { Header: "Unit Code", accessor: "unitCode" },
+        { Header: "Unit No", accessor: "unitNo" },
+        { Header: "Customer Name", accessor: "customerName" },
+      ],
+      rows: rows,
+    };
+  };
+  useEffect(() => {
+    customerRequest.keywords != "" && getCustomerList();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [customerRequest.skipCount, customerRequest.recordsPerPage]);
+
+  const checkingSuccessInput = (value, error) => {
+    return value != undefined && value != "" && value != null && !error;
+  };
+  const checkingSuccessInputWithRequired = (isRequired, value, error) => {
+    return (
+      (!isRequired && true) ||
+      (isRequired && value != undefined && value != "" && !error)
+    );
+  };
+  const handleCustomerSubmit = async (e) => {
+    e != undefined && e.preventDefault();
+
+    setDetailPaymentData([]),
+      setSelectedUnit();
+
+    getCustomerList();
+  };
+
+  const detailPaymentLoadingName = "block-detail-payment";
+  const [isLoadingDetailPayment, setLoadingDetailPayment] = useState(false);
+  const [detailPaymentData, setDetailPaymentData] = useState([]);
+  const [invoiceId, setInvoiceId] = useState(undefined);
+
+  const getPaymentDetail = async (unitDataID, psCode) => {
+    Block.standard(`.${detailPaymentLoadingName}`, `Getting Payment Detail Data`),
+      setLoadingDetailPayment(true);
+
+    const body = {
+      PsCode: psCode,
+      unitDataId: unitDataID,
+    };
+    let response = await fetch(
+      "/api/cashier/billing/getpaymentdetailbypscode",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          accessToken: accessToken,
+          params: body,
+        }),
+      }
+    );
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
+
+    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+    else {
+      const result = response.result.listInvoicePayment;
+      result.map((e) => e["paymentTemp"] = e.paymentAmount);
+      setDetailPaymentData(result);
+      setTimeout(() => {
+        const element = document.createElement("a");
+        element.href = "#detail-payment";
+        element.click();
+      }, 0);
+
+      let newState = { ...formValues };
+      newState.cluster = selectedUnit.clusterName;
+      setformValues(newState);
+      let tb = result.reduce((acc, o) => acc + parseInt(o.balance), 0);
+      let te = result.reduce((acc, o) => acc + parseInt(o.endBalance), 0);
+      let tp = result.reduce((acc, o) => acc + parseInt(o.paymentAmount), 0);
+      setTotalFooter((prevState) => {
+        return {
+          ...prevState,
+          balance: tb,
+          endBalance: te,
+          payment: tp,
+        };
+      });
     }
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-  useEffect(() => {
-    console.log("iscard---", isCard);
-    if (isCard?.paymentType == 2 || isCard?.paymentType == 3) {
-      setHasNote(true);
-    } else setHasNote(false);
-  }, [isCard]);
+    Block.remove(`.${detailPaymentLoadingName}`), setLoadingDetailPayment(false);
+  };
+  const setPaymentDetail = (rows) => {
+    return {
+      columns: [
+        { Header: "Invoice Number", accessor: "invoiceNo", customWidth: "110px" },
+        { Header: "Invoice Name", accessor: "invoiceName", customWidth: "50px" },
+        {
+          Header: "Balance",
+          accessor: "balance",
+          align: "right",
+          Cell: ({ value, row }) => {
+            return (
+              <NumericFormat
+                displayType="text"
+                value={value}
+                decimalSeparator=","
+                prefix="Rp "
+                thousandSeparator="."
+                renderText={(value) => (
+                  <u
+                    onClick={() => {
+                      setInvoiceId(row.original.invoiceId);
+                      handleDetail();
+                    }}
+                    style={{ color: "#4593C4", cursor: "pointer" }}
+                  >
+                    {value}
+                  </u>
+                )}
+              />
+            );
+          },
+          customWidth: "180px"
+        },
+        {
+          Header: "End Balance",
+          accessor: "endBalance",
+          align: "right",
+          Cell: ({ value }) => {
+            return (
+              <NumericFormat
+                displayType="text"
+                value={value}
+                decimalSeparator=","
+                prefix="Rp "
+                thousandSeparator="."
+              />
+            );
+          },
+          customWidth: "210px"
+        },
+        {
+          Header: "Payment Amount",
+          accessor: "paymentAmount",
+          align: "right",
+          Cell: ({ value, row }) => {
+            return (
+              <NumberInput
+                inputProps={{
+                  style: { textAlign: "right" },
+                  onBlur: (e) => {
+                    paymentAmountChange(e.target.value, row.index);
+                  },
+                }}
+                placeholder="Type Amount Payment"
+                value={value}
+              />
+            );
+          },
+          customWidth: "180px"
+        },
+      ],
+      rows: rows,
+    };
+  };
 
-  function NumberField({ field }) {
-    return (
-      <NumericFormat
-        {...field}
-        customInput="TextField"
-        decimalScale={0}
-        allowNegative={false}
-      />
+  const paymentMethodBlockLoadingName = "block-payment-method";
+  const [paymentMethodList, setPaymentMethodList] = useState([]);
+  const getPaymentMethod = async () => {
+    Block.dots(`.${paymentMethodBlockLoadingName}`);
+
+    let response = await fetch(
+      "/api/cashier/billing/getdropdownpaymentmethod",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          accessToken: accessToken,
+        }),
+      }
     );
-  }
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
 
-  //dari sini
+    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+    else setPaymentMethodList(response.result);
+
+    Block.remove(`.${paymentMethodBlockLoadingName}`);
+  };
+
+  const bankBlockLoadingName = "block-bank";
+  const [bankList, setBankList] = useState([]);
+  const getBank = async () => {
+    Block.dots(`.${bankBlockLoadingName}`);
+
+    let response = await fetch("/api/cashier/billing/getdropdownbank", {
+      method: "POST",
+      body: JSON.stringify({
+        accessToken: accessToken,
+      }),
+    });
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
+
+    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+    else setBankList(response.result);
+
+    Block.remove(`.${bankBlockLoadingName}`);
+  };
+
+
   const [isLoading, setLoading] = useState(false);
-  const [isLoadingSearch, setLoadingSearch] = useState(false);
-  const [isLoadingShow, setLoadingShow] = useState(false);
+  const [totalFooter, setTotalFooter] = useState({});
+  const [totalAc, setTotalAc] = useState(0);
+  const [charge, setCharge] = useState(0);
+  const [totalPay, setTotalPay] = useState(0);
+  // const [isCard, setIsCard] = useState({});
+  // const [hasNote, setHasNote] = useState(false);
+  // useEffect(() => {
+  //   if (isCard?.paymentType == 2 || isCard?.paymentType == 3) {
+  //     setHasNote(true);
+  //   } else setHasNote(false);
+  // }, [isCard]);
+  const [openDetail, setOpenDetail] = useState(false);
 
-  let schemeValidations = Yup.object().shape({
+  let schemeValidationsPaymentDetail = Yup.object().shape({
     cluster: Yup.string(),
     paymentMethod: Yup.object()
       .required("Payment Method is required.")
@@ -163,12 +484,10 @@ export default function BillingPayment(props) {
     remarks: Yup.string(),
     charge: Yup.string(),
   });
-
   var customParseFormat = require("dayjs/plugin/customParseFormat");
   dayjs.extend(customParseFormat);
-
   const initialValues = {
-    cluster: detail?.clusterName,
+    cluster: selectedUnit?.clusterName,
     paymentMethod: null,
     cardNumber: undefined,
     amountPayment: null,
@@ -179,59 +498,26 @@ export default function BillingPayment(props) {
     isPrintOR: true,
     isAddSignee: true,
   };
-
-  let filterValidationsSchema = Yup.object().shape({
-    customerName: Yup.string().nullable(),
-    unitCode: Yup.string().nullable(),
-    unitNo: Yup.string().nullable(),
-  });
-  const filterInitialValues = {
-    customerName: null,
-    unitCode: null,
-    unitNo: null,
-  };
-
-  const [filterValues, setFilterValues] = useState(filterInitialValues);
-
-  const formikRef = useRef();
-
   const [formValues, setformValues] = useState(initialValues);
 
-  const getFormData = (values) => {};
-
-  const submitForm = async (values, actions) => {
-    if (values.amountPayment != totalFooter.payment) {
-      alertService.warn({
-        title: "Warning",
-        text: "Amount payment and Total payment should be balanced",
-      });
-    } else {
-      paymentProcess(values, actions);
-    }
-  };
-
-  const checkingSuccessInput = (value, error) => {
-    return value != undefined && value != "" && !error;
-  };
-
   const paymentProcess = async (fields, actions) => {
-    setLoading(true);
-    console.log("save----", detail);
-    console.log("save----", fields);
+    Block.standard(`.${detailPaymentLoadingName}`, `Process Payments`),
+      setLoading(true);
+
     const body = {
       siteId: site?.siteId,
-      projectId: detail.projectId,
+      projectId: selectedUnit.projectId,
       paymentType: fields.paymentMethod.paymentType,
       cardNumber: fields.cardNumber,
       totalPayment: fields.amountPayment,
       charge: fields.charge,
-      unitDataId: detail.unitDataId,
-      unitCode: detail.unitCode,
-      unitNo: detail.unitNo,
-      psCode: detail.psCode,
+      unitDataId: selectedUnit.unitDataId,
+      unitCode: selectedUnit.unitCode,
+      unitNo: selectedUnit.unitNo,
+      psCode: selectedUnit.psCode,
       bankId: fields.bank?.bankID,
       remarks: fields.remarks,
-      listInvoicePayment: listInvoice,
+      listInvoicePayment: detailPaymentData,
     };
 
     let response = await fetch("/api/cashier/billing/paymentproses", {
@@ -243,18 +529,17 @@ export default function BillingPayment(props) {
     });
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    if (response.error) {
-      alertService.error({ title: "Error", text: response.error.message });
-    } else {
+    
+    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+    else {
       Swal.fire({
         icon: "success",
         title: "Input Payment Successfull",
         text: "Official receipt document will be displayed and will be sent to the customer via email",
       }).then(() => {
         let data = response.result;
-        if (data != null) window.open(data, "_blank");
+        (data != null) && window.open(data, "_blank");
       });
-      setFilterValues(filterInitialValues);
       setCustomerRequest((prevState) => ({
         ...prevState,
         keywords: "",
@@ -265,67 +550,35 @@ export default function BillingPayment(props) {
         totalRows: undefined,
         totalPages: undefined,
       }));
-      setSelectedPSCode(undefined);
 
       cancel();
     }
-    actions.setSubmitting(false);
-    setLoading(false);
+
+    Block.remove(`.${detailPaymentLoadingName}`),
+    actions.setSubmitting(false),
+      setLoading(false);
+  };
+
+  const submitForm = async (values, actions) => {
+    if (values.amountPayment != totalFooter.payment) alertService.warn({ title: "Amount payment and total payment should be balanced." });
+    else paymentProcess(values, actions);
   };
 
   const cancel = () => {
-    setListInvoice([]);
-    setIsDetail(false);
+    setDetailPaymentData([]);
     setformValues(initialValues);
     setTotalFooter({});
     setTotalAc(0);
   };
 
-  const handleCheck = (val) => {
-    setSelectedPSCode(val.unitDataId);
-    setDetail(val);
-  };
-
-  const setBillingList = (list) => {
-    return {
-      columns: [
-        {
-          Header: "Choose",
-          accessor: "e",
-          Cell: ({ value }) => {
-            return (
-              <Radio
-                onChange={(e) => {
-                  handleCheck(value);
-                }}
-                value={value}
-                name="radio-buttons"
-                inputProps={{ "aria-label": "A" }}
-                checked={value.unitDataId == selectedPSCode}
-              />
-            );
-          },
-        },
-        { Header: "No", accessor: "no" },
-        { Header: "Project", accessor: "projectName" },
-        { Header: "Cluster", accessor: "clusterName" },
-
-        { Header: "Unit Name", accessor: "unitName" },
-        { Header: "Unit Code", accessor: "unitCode" },
-        { Header: "Unit No", accessor: "unitNo" },
-        { Header: "Customer Name", accessor: "customerName" },
-      ],
-      rows: list,
-    };
-  };
   const paymentAmountChange = (value, index) => {
-    const newData = [...listInvoice];
+    const newData = [...detailPaymentData];
     let a = value.replaceAll("Rp. ", "").replaceAll(".", "").replace(",", ".");
     let valFloat = parseFloat(a);
     newData[index].paymentAmount = valFloat;
     newData[index].paymentAmount = valFloat;
 
-    setListInvoice(newData);
+    setDetailPaymentData(newData);
   };
 
   useEffect(() => {
@@ -334,10 +587,9 @@ export default function BillingPayment(props) {
   }, [totalPay, charge]);
 
   useEffect(() => {
-    let newState = [...listInvoice];
+    let newState = [...detailPaymentData];
     let temp = totalPay;
     newState.map((e, index) => {
-      console.log("temp----", temp);
       if (index + 1 === newState.length) {
         e.paymentAmount = temp;
       } else {
@@ -350,7 +602,7 @@ export default function BillingPayment(props) {
         }
       }
     });
-    setListInvoice(newState);
+    setDetailPaymentData(newState);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [totalPay]);
@@ -361,250 +613,22 @@ export default function BillingPayment(props) {
   };
 
   useEffect(() => {
-    let tp = listInvoice.reduce((acc, o) => acc + parseInt(o.paymentAmount), 0);
+    let tp = detailPaymentData.reduce((acc, o) => acc + parseInt(o.paymentAmount), 0);
     let n = Object.assign({}, totalFooter);
     n.payment = tp;
     setTotalFooter(n);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [listInvoice]);
+  }, [detailPaymentData]);
 
   const handleDetail = () => {
     setOpenDetail(!openDetail);
   };
-  const setInvoiceList = () => {
-    return {
-      columns: [
-        { Header: "Invoice Number", accessor: "invoiceNo" },
-        { Header: "Invoice Name", accessor: "invoiceName" },
-        {
-          Header: "Balance",
-          accessor: "balance",
-          align: "right",
-          Cell: ({ value, row }) => {
-            return (
-              <NumericFormat
-                displayType="text"
-                value={value}
-                decimalSeparator=","
-                prefix="Rp "
-                thousandSeparator="."
-                renderText={(value) => (
-                  <u
-                    onClick={() => {
-                      console.log("valueeee", row);
-                      setInvoiceId(row.original.invoiceId);
-                      handleDetail();
-                    }}
-                    style={{ color: "#4593C4", cursor: "pointer" }}
-                  >
-                    {value}
-                  </u>
-                )}
-              />
-            );
-          },
-        },
-
-        {
-          Header: "End Balance",
-          accessor: "endBalance",
-          align: "right",
-          Cell: ({ value }) => {
-            return (
-              <NumericFormat
-                displayType="text"
-                value={value}
-                decimalSeparator=","
-                prefix="Rp "
-                thousandSeparator="."
-              />
-            );
-          },
-        },
-        {
-          Header: "Payment Amount",
-          accessor: "paymentAmount",
-          align: "right",
-          Cell: ({ value, row }) => {
-            return (
-              <NumberInput
-                inputProps={{
-                  style: { textAlign: "right" },
-                  onBlur: (e) => {
-                    console.log("foo bar", e.target.value);
-                    paymentAmountChange(e.target.value, row.index);
-                  },
-                }}
-                placeholder="Type Amount Payment"
-                value={value}
-              />
-            );
-          },
-        },
-      ],
-      rows: listInvoice,
-    };
-  };
-
-  const fetchData = async (data) => {
-    setLoadingSearch(true);
-    const { scheme, keywords, recordsPerPage, skipCount } = customerRequest;
-    let response = await fetch("/api/cashier/billing/getcustomerlist", {
-      method: "POST",
-      body: JSON.stringify({
-        accessToken: accessToken,
-        params: {
-          SiteId: site?.siteId,
-          Search: keywords,
-          UnitCode: filterValues.unitCode,
-          UnitNo: filterValues.unitNo,
-          MaxResultCount: recordsPerPage,
-          SkipCount: skipCount,
-        },
-      }),
-    });
-    if (!response.ok) throw new Error(`Error: ${response.status}`);
-    response = typeNormalization(await response.json());
-
-    if (response.error) setLoadingSearch(false);
-    else {
-      const list = [];
-      let data = response.result;
-      data.items.map((e, i) => {
-        list.push({
-          no: skipCount + i + 1,
-          projectName: e.projectName,
-          clusterName: e.clusterName,
-          customerName: e.customerName,
-          unitName: e.unitName,
-          unitCode: e.unitCode,
-          unitNo: e.unitNo,
-          e,
-        });
-      });
-      setCustomerResponse((prevState) => ({
-        ...prevState,
-        rowData: list,
-        totalRows: data.totalCount,
-        totalPages: Math.ceil(data.totalCount / customerRequest.recordsPerPage),
-      }));
-      setLoadingSearch(false);
-    }
-  };
-
-  const getPaymentMethod = async () => {
-    let response = await fetch(
-      "/api/cashier/billing/getdropdownpaymentmethod",
-      {
-        method: "POST",
-        body: JSON.stringify({
-          accessToken: accessToken,
-        }),
-      }
-    );
-    if (!response.ok) throw new Error(`Error: ${response.status}`);
-    response = typeNormalization(await response.json());
-
-    if (response.error) {
-      setLoading(false);
-      alertService.error({ title: "Error", text: response.error.message });
-    } else {
-      setDataPaymentMethod(response.result);
-    }
-  };
-
-  const getBank = async () => {
-    let response = await fetch("/api/cashier/billing/getdropdownbank", {
-      method: "POST",
-      body: JSON.stringify({
-        accessToken: accessToken,
-      }),
-    });
-    if (!response.ok) throw new Error(`Error: ${response.status}`);
-    response = typeNormalization(await response.json());
-
-    if (response.error) {
-      setLoading(false);
-      alertService.error({ title: "Error", text: response.error.message });
-    } else {
-      setDataBank(response.result);
-    }
-  };
-
-  const getDetail = async (data) => {
-    setLoadingShow(true);
-    let response = await fetch(
-      "/api/cashier/billing/getpaymentdetailbypscode",
-      {
-        method: "POST",
-        body: JSON.stringify({
-          accessToken: accessToken,
-          params: {
-            PsCode: detail.psCode,
-            unitDataId: detail.unitDataId,
-          },
-        }),
-      }
-    );
-    if (!response.ok) throw new Error(`Error: ${response.status}`);
-    response = typeNormalization(await response.json());
-
-    if (response.error) {
-      const error = response.error;
-      setLoadingShow(false);
-      alertService.info({
-        title: "Info",
-        text: error.error.message,
-      });
-      cancel();
-    } else {
-      const result = response.result.listInvoicePayment;
-      result.map((e) => {
-        e["paymentTemp"] = e.paymentAmount;
-      });
-      setListInvoice(result);
-      setIsDetail(true);
-      let newState = { ...formValues };
-      newState.cluster = detail.clusterName;
-      setformValues(newState);
-      let tb = result.reduce((acc, o) => acc + parseInt(o.balance), 0);
-      let te = result.reduce((acc, o) => acc + parseInt(o.endBalance), 0);
-      let tp = result.reduce((acc, o) => acc + parseInt(o.paymentAmount), 0);
-      setTotalFooter((prevState) => {
-        return {
-          ...prevState,
-          balance: tb,
-          endBalance: te,
-          payment: tp,
-        };
-      });
-      setLoadingShow(false);
-    }
-  };
-
-  const handleSite = (siteVal) => {
-    setSite(siteVal);
-    localStorage.setItem("site", JSON.stringify(siteVal));
-  };
-
-  const handleCustomerSubmit = async (e) => {
-    e != undefined && e.preventDefault();
-
-    setBillingList({
-      rowData: [],
-      totalRows: undefined,
-      totalPages: undefined,
-    }),
-      setSelectedPSCode();
-
-    fetchData();
-  };
-  //sampai sini
 
   return (
     <DashboardLayout>
       <DashboardNavbar />
+
       <MDBox
         p={3}
         color="light"
@@ -613,179 +637,260 @@ export default function BillingPayment(props) {
         borderRadius="lg"
         shadow="lg"
         opacity={1}
-        mb={2}
+        mt={2}
       >
-        <Grid container spacing={3}>
-          <Grid item xs={12} sm={12}>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
             <SiteDropdown onSelectSite={handleSite} site={site} />
           </Grid>
         </Grid>
       </MDBox>
-      <MDBox pb={3}>
-        <Card>
-          <MDBox p={3} lineHeight={1}>
-            <Grid container alignItems="center">
-              <Grid item xs={12} md={12}>
-                <MDBox>
-                  <MDTypography variant="h5">Filter</MDTypography>
-                </MDBox>
-                <Formik
-                  initialValues={filterInitialValues}
-                  validationSchema={filterValidationsSchema}
-                  innerRef={formikRef}
-                >
-                  {({
-                    errors,
-                    touched,
-                    isSubmitting,
-                    setFieldValue,
-                    resetForm,
-                    values,
-                  }) => {
-                    setFilterValues(values);
-                    const isValifForm = () =>
-                      checkingSuccessInput(
-                        values.customerName,
-                        errors.customerName
-                      );
 
-                    return (
-                      <MDBox
-                        component="form"
-                        role="form"
-                        onSubmit={(e) => handleCustomerSubmit(e)}
+      <MDBox mt={2} id="customer">
+        <Grid container rowSpacing={5}>
+          <Grid item xs={12}>
+            <Card>
+              <MDBox px={3} pt={3} pb={2} lineHeight={1}>
+                <Grid container alignItems="center" spacing={2}>
+                  <Grid item xs={12} sm={11}>
+                    <MDBox>
+                      <MDTypography variant="h5">Filter</MDTypography>
+                    </MDBox>
+                  </Grid>
+                  <Grid item xs={12} sm={1}>
+                    <MDBox display="flex" justifyContent="flex-end">
+                      <a
+                        onClick={() => setExpandFilter(!isExpandedFilter)}
+                        style={{ cursor: "pointer" }}
                       >
-                        <Grid container columnSpacing={3}>
-                          <Grid item xs={12} sm={3}>
-                            <FormField
-                              type="text"
-                              label="Customer Name / ID Client"
-                              name="customerName"
-                              value={filterValues.customerName}
-                              placeholder="Type Customer Name / ID Client"
-                              error={
-                                errors.customerName && touched.customerName
-                              }
-                              success={checkingSuccessInput(
-                                filterValues.customerName,
-                                errors.customerName
-                              )}
-                              onKeyUp={(e) =>
-                                setCustomerRequest((prevState) => ({
-                                  ...prevState,
-                                  keywords: e.target.value,
-                                }))
-                              }
-                            />
-                          </Grid>
-                          <Grid item xs={12} sm={3}>
-                            <FormField
-                              type="text"
-                              label="Unit Code"
-                              name="unitCode"
-                              value={filterValues.unitCode}
-                              placeholder="Type Unit Code"
-                              error={errors.unitCode && touched.unitCode}
-                              success={checkingSuccessInput(
-                                filterValues.unitCode,
-                                errors.unitCode
-                              )}
-                            />
-                          </Grid>
-                          <Grid item xs={12} sm={3}>
-                            <FormField
-                              type="text"
-                              label="Unit No"
-                              name="unitNo"
-                              value={filterValues.unitNo}
-                              placeholder="Type Unit No"
-                              error={errors.unitNo && touched.unitNo}
-                              success={checkingSuccessInput(
-                                filterValues.unitNo,
-                                errors.unitNo
-                              )}
-                            />
-                          </Grid>
-                          <Grid item xs={12} sm={3}>
-                            <MDBox
-                              display="flex"
-                              flexDirection={{ xs: "column", sm: "row" }}
-                              justifyContent="flex-end"
-                            >
-                              <MDBox
-                                ml={{ xs: 0, sm: 1 }}
-                                mt={{ xs: 1, sm: 0 }}
-                              >
-                                <MDButton
-                                  type="submit"
-                                  variant="gradient"
-                                  color="primary"
-                                  sx={{ height: "100%" }}
-                                  disabled={isLoadingSearch}
+                        <MDTypography
+                          variant="button"
+                          color="text"
+                          sx={{ lineHeight: 0 }}
+                        >
+                          {isExpandedFilter ? (
+                            <Icon fontSize="small">expand_less</Icon>
+                          ) : (
+                            <Icon fontSize="small">expand_more</Icon>
+                          )}
+                        </MDTypography>
+                      </a>
+                    </MDBox>
+                  </Grid>
+                  <Grid
+                    item
+                    xs={12}
+                    style={{ display: isExpandedFilter ? "initial" : "none" }}
+                  >
+                    <Formik
+                      innerRef={formikRef}
+                      initialValues={schemeInitialValues}
+                      validationSchema={schemeValidations}
+                    >
+                      {({ values, errors, touched }) => {
+                        let { 
+                          customerName: customerNameV,
+                          unitCode: unitCodeV,
+                          unitNo: unitNoV 
+                        } = values;
+                        const isValifForm = () =>
+                          checkingSuccessInputWithRequired(customerName.isRequired, customerNameV, errors.customerName); //&&
+                          checkingSuccessInputWithRequired(unitCode.isRequired, unitCodeV, errors.unitCode) &&
+                          checkingSuccessInputWithRequired(unitNo.isRequired, unitNoV, errors.unitNo);
+
+                        return (
+                          <MDBox
+                            component="form"
+                            role="form"
+                            onSubmit={(e) => handleCustomerSubmit(e)}
+                          >
+                            <Grid container columnSpacing={3}>
+                              <Grid item xs={12} sm={4}>
+                                <FormField
+                                  type={customerName.type}
+                                  required={customerName.isRequired}
+                                  label={customerName.label}
+                                  name={customerName.name}
+                                  value={customerNameV}
+                                  placeholder={customerName.placeholder}
+                                  error={
+                                    errors.customerName && touched.customerName
+                                  }
+                                  success={
+                                    customerName.isRequired &&
+                                    checkingSuccessInputWithRequired(
+                                      customerName.isRequired,
+                                      customerNameV,
+                                      errors.customerName
+                                    )
+                                  }
+                                  onKeyUp={(e) =>
+                                    setCustomerRequest((prevState) => ({
+                                      ...prevState,
+                                      keywords: e.target.value,
+                                    }))
+                                  }
+                                />
+                              </Grid>
+                              <Grid item xs={12} sm={3}>
+                                <FormField
+                                  type={unitCode.type}
+                                  required={unitCode.isRequired}
+                                  label={unitCode.label}
+                                  name={unitCode.name}
+                                  value={unitCodeV}
+                                  placeholder={unitCode.placeholder}
+                                  error={
+                                    errors.unitCode && touched.unitCode
+                                  }
+                                  success={
+                                    unitCode.isRequired &&
+                                    checkingSuccessInputWithRequired(
+                                      unitCode.isRequired,
+                                      unitCodeV,
+                                      errors.unitCode
+                                    )
+                                  }
+                                  onKeyUp={(e) =>
+                                    setCustomerRequest((prevState) => ({
+                                      ...prevState,
+                                      unitCode: e.target.value,
+                                    }))
+                                  }
+                                />
+                              </Grid>
+                              <Grid item xs={12} sm={3}>
+                                <FormField
+                                  type={unitNo.type}
+                                  required={unitNo.isRequired}
+                                  label={unitNo.label}
+                                  name={unitNo.name}
+                                  value={unitNoV}
+                                  placeholder={unitNo.placeholder}
+                                  error={
+                                    errors.unitNo && touched.unitNo
+                                  }
+                                  success={
+                                    unitNo.isRequired &&
+                                    checkingSuccessInputWithRequired(
+                                      unitNo.isRequired,
+                                      unitNoV,
+                                      errors.unitNo
+                                    )
+                                  }
+                                  onKeyUp={(e) =>
+                                    setCustomerRequest((prevState) => ({
+                                      ...prevState,
+                                      unitNo: e.target.value,
+                                    }))
+                                  }
+                                />
+                              </Grid>
+                              <Grid item xs={12} sm={2}>
+                                <MDBox
+                                  display="flex"
+                                  flexDirection={{ xs: "column", sm: "row" }}
+                                  justifyContent="flex-end"
                                 >
-                                  <Icon>search</Icon>&nbsp;{" "}
-                                  {isLoadingSearch ? "Searching.." : "Search"}
-                                </MDButton>
-                              </MDBox>
-                            </MDBox>
-                          </Grid>
-                        </Grid>
-                      </MDBox>
-                    );
-                  }}
-                </Formik>
-              </Grid>
-            </Grid>
-          </MDBox>
-          {customerResponse.rowData.length > 0 && (
-            <MDBox>
-              <MDBox pl={3}>
-                <MDTypography variant="h5">Search Result</MDTypography>
+                                  <MDBox
+                                    ml={{ xs: 0, sm: 1 }}
+                                    mt={{ xs: 1, sm: 0 }}
+                                  >
+                                    <MDButton
+                                      type="submit"
+                                      variant="gradient"
+                                      color="primary"
+                                      sx={{ height: "100%" }}
+                                      disabled={
+                                        !isValifForm() || isLoadingCustomer
+                                      }
+                                    >
+                                      <Icon>search</Icon>&nbsp;{" "}
+                                      {isLoadingCustomer
+                                        ? "Searching.."
+                                        : "Search"}
+                                    </MDButton>
+                                  </MDBox>
+                                </MDBox>
+                              </Grid>
+                            </Grid>
+                          </MDBox>
+                        );
+                      }}
+                    </Formik>
+                  </Grid>
+                </Grid>
               </MDBox>
-              <DataTable
-                table={setBillingList(customerResponse.rowData)}
-                manualPagination={true}
-                totalRows={customerResponse.totalRows}
-                totalPages={customerResponse.totalPages}
-                recordsPerPage={customerRequest.recordsPerPage}
-                skipCount={customerRequest.skipCount}
-                pageChangeHandler={skipCountChangeHandler}
-                recordsPerPageChangeHandler={recordsPerPageChangeHandler}
-                keywordsChangeHandler={keywordsChangeHandler}
-                entriesPerPage={{
-                  defaultValue: customerRequest.recordsPerPage,
-                }}
-                pagination={{ variant: "gradient", color: "primary" }}
-              />
-              <MDBox p={3} alignItems="center" textAlign="center">
-                <MDButton
-                  disabled={
-                    selectedPSCode == undefined ||
-                    selectedPSCode == null ||
-                    isLoadingShow
-                  }
-                  variant="gradient"
-                  color="primary"
-                  onClick={() => {
-                    getDetail();
-                  }}
+              {customerResponse.rowData.length > 0 && (
+                <MDBox
+                  style={{ display: isExpandedFilter ? "initial" : "none" }}
                 >
-                  <Icon>search</Icon>&nbsp;{" "}
-                  {isLoadingShow ? "Showing This Unit..." : "Show This Unit"}
-                </MDButton>
-              </MDBox>
-            </MDBox>
-          )}
-        </Card>
-      </MDBox>
-      {isDetail && (
-        <MDBox mt={5} mb={9}>
-          <Grid container justifyContent="center">
-            <Grid item xs={12} lg={12}>
-              <Card>
+                  <Grid container alignItems="center">
+                    <Grid item xs={12}>
+                      <MDBox pl={3}>
+                        <MDTypography variant="h5">Search Result</MDTypography>
+                      </MDBox>
+                    </Grid>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <DataTable
+                      table={setCustomerTaskList(customerResponse.rowData)}
+                      manualPagination={true}
+                      totalRows={customerResponse.totalRows}
+                      totalPages={customerResponse.totalPages}
+                      recordsPerPage={customerRequest.recordsPerPage}
+                      skipCount={customerRequest.skipCount}
+                      pageChangeHandler={skipCountChangeHandler}
+                      recordsPerPageChangeHandler={
+                        recordsPerPageChangeHandler
+                      }
+                      keywordsChangeHandler={keywordsChangeHandler}
+                      entriesPerPage={{
+                        defaultValue: customerRequest.recordsPerPage,
+                      }}
+                      pagination={{ variant: "gradient", color: "primary" }}
+                    />
+                    <MDBox p={3} pt={0}>
+                      <Grid item xs={12}>
+                        <MDBox
+                          display="flex"
+                          flexDirection={{ xs: "column", sm: "row" }}
+                          justifyContent="center"
+                        >
+                          <MDBox ml={{ xs: 0, sm: 1 }} mt={{ xs: 1, sm: 0 }}>
+                            <MDButton
+                              type="button"
+                              variant="gradient"
+                              color="primary"
+                              sx={{ height: "100%" }}
+                              onClick={() =>
+                                getPaymentDetail(
+                                  selectedUnit.unitDataId,
+                                  selectedUnit.psCode
+                                )
+                              }
+                              disabled={!selectedUnit}
+                            >
+                              {isLoadingDetailPayment
+                                ? "Showing this Unit.."
+                                : "Show this Unit"}
+                            </MDButton>
+                          </MDBox>
+                        </MDBox>
+                      </Grid>
+                    </MDBox>
+                  </Grid>
+                </MDBox>
+              )}
+            </Card>
+          </Grid>
+
+          {detailPaymentData.length > 0 && (
+            <Grid item xs={12} id="detail-payment">
+              <Card className={detailPaymentLoadingName}>
                 <MDBox
                   mt={-3}
-                  mb={-1}
+                  mb={-2}
                   mx={4}
                   textAlign="center"
                   bgColor="primary"
@@ -795,31 +900,18 @@ export default function BillingPayment(props) {
                 >
                   <Grid container spacing={3}>
                     <Grid item xs={4}>
-                      <MDTypography variant="h6" color="light">
-                        CUSTOMER NAME
-                      </MDTypography>
-                      <MDTypography variant="body2" color="light">
-                        {detail.customerName}
-                      </MDTypography>
+                      <MDTypography variant="h6" color="light">CUSTOMER NAME</MDTypography>
+                      <MDTypography variant="body2" color="light">{selectedUnit?.customerName}</MDTypography>
                     </Grid>
                     <Grid item xs={4}>
-                      <MDTypography variant="h6" color="light">
-                        UNIT CODE
-                      </MDTypography>
-                      <MDTypography variant="body2" color="light">
-                        {detail.unitCode}
-                      </MDTypography>
+                      <MDTypography variant="h6" color="light">UNIT CODE</MDTypography>
+                      <MDTypography variant="body2" color="light">{selectedUnit?.unitCode}</MDTypography>
                     </Grid>
                     <Grid item xs={4}>
-                      <MDTypography variant="h6" color="light">
-                        UNIT NO
-                      </MDTypography>
-                      <MDTypography variant="body2" color="light">
-                        {detail.unitNo}
-                      </MDTypography>
+                      <MDTypography variant="h6" color="light">UNIT NO</MDTypography>
+                      <MDTypography variant="body2" color="light">{selectedUnit?.unitNo}</MDTypography>
                     </Grid>
                   </Grid>
-                  <MDBox mb={1} textAlign="center"></MDBox>
                 </MDBox>
                 <MDBox p={2}>
                   <MDBox
@@ -829,16 +921,16 @@ export default function BillingPayment(props) {
                     display="flex"
                     justifyContent="space-between"
                   >
-                    <Grid container spacing={3}>
+                    <Grid container alignItems="center" spacing={2}>
                       <Grid item xs={12}>
-                        <MDTypography variant="h5">
-                          Payment Detail{" "}
-                        </MDTypography>
+                        <MDBox>
+                          <MDTypography variant="h5">Payment Detail</MDTypography>
+                        </MDBox>
                       </Grid>
                       <Grid item xs={12}>
                         <Formik
                           initialValues={initialValues}
-                          validationSchema={schemeValidations}
+                          validationSchema={schemeValidationsPaymentDetail}
                           onSubmit={submitForm}
                         >
                           {({
@@ -853,33 +945,15 @@ export default function BillingPayment(props) {
                             const isValifForm = () => {
                               if (values.paymentMethod?.paymentType == 1) {
                                 return (
-                                  checkingSuccessInput(
-                                    values.paymentMethod,
-                                    errors.paymentMethod
-                                  ) &&
-                                  checkingSuccessInput(
-                                    values.amountPayment,
-                                    errors.amountPayment
-                                  )
+                                  checkingSuccessInput(values.paymentMethod, errors.paymentMethod) &&
+                                  checkingSuccessInput(values.amountPayment, errors.amountPayment)
                                 );
                               } else {
                                 return (
-                                  checkingSuccessInput(
-                                    values.paymentMethod,
-                                    errors.paymentMethod
-                                  ) &&
-                                  checkingSuccessInput(
-                                    values.amountPayment,
-                                    errors.amountPayment
-                                  ) &&
-                                  checkingSuccessInput(
-                                    values.bank,
-                                    errors.bank
-                                  ) &&
-                                  checkingSuccessInput(
-                                    values.cardNumber,
-                                    errors.cardNumber
-                                  )
+                                  checkingSuccessInput(values.paymentMethod, errors.paymentMethod) &&
+                                  checkingSuccessInput(values.amountPayment, errors.amountPayment) &&
+                                  checkingSuccessInput(values.bank, errors.bank) &&
+                                  checkingSuccessInput(values.cardNumber, errors.cardNumber)
                                 );
                               }
                             };
@@ -889,8 +963,8 @@ export default function BillingPayment(props) {
                                 autoComplete="off"
                                 fullWidth
                               >
-                                <MDBox pb={3}>
-                                  <Grid container spacing={3}>
+                                <MDBox>
+                                  <Grid container columnSpacing={3}>
                                     <Grid item xs={6}>
                                       <FormField
                                         type="text"
@@ -926,11 +1000,12 @@ export default function BillingPayment(props) {
                                         )}
                                       />
                                     </Grid>
+
                                     <Grid item xs={6}>
                                       <Field
                                         name="paymentMethod"
                                         component={Autocomplete}
-                                        options={dataPaymentMethod}
+                                        options={paymentMethodList}
                                         getOptionLabel={(option) =>
                                           option.paymentName
                                         }
@@ -941,7 +1016,7 @@ export default function BillingPayment(props) {
                                               ? value
                                               : initialValues["paymentMethod"]
                                           );
-                                          setIsCard(value);
+                                          // setIsCard(value);
                                         }}
                                         isOptionEqualToValue={(option, value) =>
                                           option.paymentType ===
@@ -964,6 +1039,7 @@ export default function BillingPayment(props) {
                                               formValues.paymentMethod,
                                               errors.paymentMethod
                                             )}
+                                            className={paymentMethodBlockLoadingName}
                                           />
                                         )}
                                       />
@@ -972,7 +1048,7 @@ export default function BillingPayment(props) {
                                       <Field
                                         name="bank"
                                         component={Autocomplete}
-                                        options={dataBank}
+                                        options={bankList}
                                         getOptionLabel={(option) =>
                                           option.bankName
                                         }
@@ -1004,10 +1080,12 @@ export default function BillingPayment(props) {
                                               formValues.bank,
                                               errors.bank
                                             )}
+                                            className={bankBlockLoadingName}
                                           />
                                         )}
                                       />
                                     </Grid>
+
                                     <Grid item xs={6}>
                                       <FormField
                                         type="text"
@@ -1043,6 +1121,7 @@ export default function BillingPayment(props) {
                                         )}
                                       />
                                     </Grid>
+
                                     <Grid item xs={4}>
                                       <NumberInput
                                         required
@@ -1050,7 +1129,6 @@ export default function BillingPayment(props) {
                                         placeholder="Type Amount Payment"
                                         value={formValues.amountPayment}
                                         onValueChange={(val) => {
-                                          console.log("val-------", val);
                                           setFieldValue(
                                             "amountPayment",
                                             val.floatValue
@@ -1086,13 +1164,11 @@ export default function BillingPayment(props) {
                                         placeholder="Type Charge"
                                         value={formValues.charge}
                                         onValueChange={(val) => {
-                                          console.log("val-------", val);
                                           setFieldValue(
                                             "charge",
                                             val.floatValue
                                           );
-                                          if (val.floatValue != undefined)
-                                            setCharge(val.floatValue);
+                                          if (val.floatValue != undefined) setCharge(val.floatValue);
                                           else setCharge(0);
                                         }}
                                         error={errors.charge && touched.charge}
@@ -1118,27 +1194,27 @@ export default function BillingPayment(props) {
                                         value={totalAc}
                                       />
                                     </Grid>
-                                    <Grid item xs={12}>
+
+                                    <Grid item xs={12} py={3}>
                                       <MDBox
                                         color="dark"
                                         bgColor="white"
                                         borderRadius="lg"
+                                        border={"1px solid lightgrey"}
                                         shadow="lg"
-                                        opacity={1}
-                                        p={2}
+                                        // opacity={1}
+                                        py={2}
                                       >
-                                        Allocation
-                                        <DetailBalance
-                                          isOpen={openDetail}
-                                          params={invoiceId}
-                                          close={handleDetail}
-                                        />
+                                        <MDBox pb={1}>
+                                          <MDTypography variant="body" ml={3}>Allocation</MDTypography>
+                                        </MDBox>
                                         <DataTableTotal
-                                          table={setInvoiceList()}
+                                          table={setPaymentDetail(detailPaymentData)}
                                           showTotalEntries={false}
                                           isSorted={false}
                                           totalFooter={totalFooter}
                                           entriesPerPage={false}
+                                          noEndBorder={true}
                                         />
                                       </MDBox>
                                     </Grid>
@@ -1182,11 +1258,37 @@ export default function BillingPayment(props) {
                                           }}
                                         />
                                       }
-                                      label={"Add Signee : " + user?.user.name}
+                                      // label={"Add Signee : " + user?.user.name}
+                                      label={
+                                        <MDBox 
+                                          display="flex"
+                                          justifyContent="space-between"
+                                          alignItems={{ xs: "flex-start", sm: "center" }}
+                                          flexDirection={{ xs: "column", sm: "row" }}
+                                        >
+                                          <MDTypography variant="body" pr={2}>Add Signee</MDTypography>
+                                          <MDBox
+                                            bgColor={"grey-100"}
+                                            borderRadius="lg"
+                                            // display="flex"
+                                            // justifyContent="space-between"
+                                            // alignItems={{ xs: "flex-start", sm: "center" }}
+                                            // flexDirection={{ xs: "column", sm: "row" }}
+                                            // my={3}
+                                            py={1}
+                                            pl={{ xs: 1, sm: 12 }}
+                                            pr={1}
+                                          >
+                                            <MDTypography variant="button" fontWeight="medium" color="text">
+                                              {capitalizeFirstLetter(user?.user.name)}
+                                            </MDTypography>
+                                          </MDBox>
+                                        </MDBox>
+                                      }
                                     />
                                   </FormGroup>
                                 </Grid>
-                                <Grid item xs={12} mt={3}>
+                                <Grid item xs={12} mt={2}>
                                   <MDBox
                                     display="flex"
                                     flexDirection={{ xs: "column", sm: "row" }}
@@ -1226,9 +1328,19 @@ export default function BillingPayment(props) {
                 </MDBox>
               </Card>
             </Grid>
-          </Grid>
-        </MDBox>
+          )}
+        </Grid>
+      </MDBox>
+
+      {openDetail && (
+        <DetailBalance
+          isOpen={openDetail}
+          params={invoiceId}
+          close={handleDetail}
+        />
       )}
     </DashboardLayout>
   );
 }
+
+export default BillingPayment;
