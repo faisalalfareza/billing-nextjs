@@ -86,3 +86,7 @@ body {
   top: -50rem;
   background: transparent;
 }
+
+.modal-backdrop {
+  opacity: 0.5 !important;
+}
