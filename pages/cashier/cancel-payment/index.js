@@ -149,6 +149,11 @@ function CancelPayment() {
           response.totalCount / customerRequest.recordsPerPage
         ),
       }));
+      setTimeout(() => {
+        const element = document.createElement("a");
+        element.href = "#customer";
+        element.click();
+      }, 0);
     }
     Block.remove(`.${customerBlockLoadingName}`), setLoadingCustomer(false);
   };
@@ -358,7 +363,7 @@ function CancelPayment() {
         </Grid>
       </MDBox>
 
-      <MDBox mt={2}>
+      <MDBox mt={2} id="customer">
         <Grid container spacing={2}>
           <Grid item xs={12}>
             <Card className={customerBlockLoadingName}>
@@ -414,7 +419,7 @@ function CancelPayment() {
                             role="form"
                             onSubmit={(e) => handleCustomerSubmit(e)}
                           >
-                            <Grid container spacing={3}>
+                            <Grid container columnSpacing={3}>
                               <Grid item xs={12} sm={10}>
                                 <FormField
                                   type={customerName.type}

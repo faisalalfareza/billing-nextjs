@@ -419,7 +419,7 @@ export default function WaterReading(props) {
                         return (
                           <Form id={form.formId} autoComplete="off">
                             <MDBox>
-                              <Grid container spacing={3}>
+                              <Grid container columnSpacing={3}>
                                 <Grid item xs={12} sm={6}>
                                   <Autocomplete
                                     // disableCloseOnSelect
@@ -516,6 +516,7 @@ export default function WaterReading(props) {
                                     display="flex"
                                     flexDirection={{ xs: "column", sm: "row" }}
                                     justifyContent="flex-end"
+                                    mt={2}
                                   >
                                     <MDBox
                                       ml={{ xs: 0, sm: 1 }}
@@ -548,7 +549,7 @@ export default function WaterReading(props) {
         </Grid>
       </MDBox>
 
-      <MDBox mt={5} id="water-reading">
+      <MDBox mt={3.5} id="water-reading">
         <MDBox
           display="flex"
           justifyContent="flex-end"

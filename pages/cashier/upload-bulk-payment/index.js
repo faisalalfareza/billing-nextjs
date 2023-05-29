@@ -401,7 +401,7 @@ function UploadBulkPayment() {
                         return (
                           <Form id={schemeModels.formId} autoComplete="off">
                             <MDBox>
-                              <Grid container spacing={3}>
+                              <Grid container columnSpacing={3}>
                                 <Grid item xs={12} sm={6}>
                                   <Autocomplete
                                     options={paymentMethodList}
@@ -479,6 +479,7 @@ function UploadBulkPayment() {
                                     display="flex"
                                     flexDirection={{ xs: "column", sm: "row" }}
                                     justifyContent="flex-end"
+                                    mt={2}
                                   >
                                     <MDButton
                                       type="submit"

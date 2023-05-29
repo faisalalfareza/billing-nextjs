@@ -838,7 +838,7 @@ export default function WarningLetter(props) {
                         return (
                           <Form id={form.formId} autoComplete="off">
                             <MDBox>
-                              <Grid container spacing={3}>
+                              <Grid container columnSpacing={3}>
                                 <Grid item xs={12} sm={12}>
                                   <Autocomplete
                                     options={dataPeriode}
@@ -1119,6 +1119,7 @@ export default function WarningLetter(props) {
                                     display="flex"
                                     flexDirection={{ xs: "column", sm: "row" }}
                                     justifyContent="flex-end"
+                                    mt={2}
                                   >
                                     <MDBox
                                       ml={{ xs: 0, sm: 1 }}
@@ -1154,7 +1155,7 @@ export default function WarningLetter(props) {
         </Grid>
       </MDBox>
 
-      <MDBox mt={5} id="warning-letter">
+      <MDBox mt={3.5} id="warning-letter">
         <MDBox
           display="flex"
           justifyContent="flex-end"

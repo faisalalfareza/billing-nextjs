@@ -332,7 +332,7 @@ function ReportDaily() {
                             fullWidth
                           >
                             <MDBox>
-                              <Grid container spacing={3}>
+                              <Grid container columnSpacing={3}>
                                 <Grid item xs={6} sm={6}>
                                   <Field
                                     options={dataProject}
@@ -403,7 +403,8 @@ function ReportDaily() {
                                       <FormField
                                         {...params}
                                         type="text"
-                                        label="Cluster *"
+                                        required
+                                        label="Cluster"
                                         name="cluster"
                                         placeholder="Choose Cluster"
                                         InputLabelProps={{ shrink: true }}
@@ -582,6 +583,7 @@ function ReportDaily() {
                                     display="flex"
                                     flexDirection={{ xs: "column", sm: "row" }}
                                     justifyContent="flex-end"
+                                    mt={2}
                                   >
                                     <MDButton
                                       type="submit"
