@@ -235,10 +235,48 @@ function OracleToJournal({ params }) {
     };
 
     const [formValues, setformValues] = useState(schemeInitialValues);
-    const [isLoadingUploadToOracle, setLoadingUploadToOracle] = useState(false);
 
-    const [isloadingGeneratePaymentJournal, setLoadingPaymentJournal] = useState(false);
-    
+    const uploadJournalToOracle = async(values, actions) =>
+    {
+        setLoadingUpload(true);
+
+        const body = {
+            siteId: site?.siteId,
+            period: formValues.periodMethod?.periodId,
+            paymentType: formValues.paymentMethod?.paymentTypeId,
+            accountingDate: addDate(formValues.accountingDate),
+            bankPayment: bnkPayment,
+            paymentStartDate: addDate(formValues.paymentStartDate),
+            paymentEndDate: addDate(formValues.paymentEndDate),
+        };
+
+        let response = await fetch("/api/transaction/oracletojournal/UploadJournalToOracle", {
+            method: "POST",
+            body: JSON.stringify({
+                accessToken: accessToken,
+                params: body,
+            }),
+        });
+
+        if(!response.ok) throw new Error(`Error: ${response.status}`);
+        response = typeNormalization(await response.json());
+
+        if(response.error) alertService.error({ title: "Error", text: response.error.message});
+        else{
+            if(response.success){
+                Swal.fire({
+                    title: 'Payment Journal Upload',
+                    html: `Payment Journal Successfully Uploaded to Oracle `,
+                    icon: "success",
+                    timerProgressBar: true,
+                    timer:  3000,
+                });
+            } 
+        } 
+
+        setLoadingUpload(false);
+    }
+
     const generatePaymentJournal = async(values, actions) => 
     {
         setLoadingGenerate(true);
@@ -844,7 +882,6 @@ function OracleToJournal({ params }) {
                                                                 
                                                             </MDButton>
                                                             <MDButton
-                                                                type="submit"
                                                                 variant="gradient"
                                                                 color="primary"
                                                                 sx={{ height: "100%" }}
