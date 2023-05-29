@@ -238,6 +238,7 @@ function OracleToJournal({ params }) {
 
     const uploadJournalToOracle = async(values, actions) =>
     {
+        
         setLoadingUpload(true);
 
         const body = {
@@ -882,9 +883,10 @@ function OracleToJournal({ params }) {
                                                                 
                                                             </MDButton>
                                                             <MDButton
-                                                                variant="gradient"
-                                                                color="primary"
-                                                                sx={{ height: "100%" }}
+                                                                tyle={{ marginRight : 20}}
+                                                                variant="outlined" 
+                                                                color="dark"
+                                                                onClick={uploadJournalToOracle}
                                                                 disabled={isLoadingUpload || !isValifForm()}
                                                             >
                                                                 <Icon>upload</Icon>&nbsp;{" "} 
