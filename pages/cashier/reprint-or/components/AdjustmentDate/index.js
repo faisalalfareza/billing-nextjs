@@ -89,6 +89,9 @@ export default function AdjustmentDate(props) {
   const checkingSuccessInput = (value, error) => {
     return value != undefined && value != "" && value.length > 0 && !error;
   };
+  const onKeyDown = (e) => {
+    e.preventDefault();
+  };
 
   return (
     <Modal
@@ -138,6 +141,7 @@ export default function AdjustmentDate(props) {
                             label="Transaction Date"
                             name="transactionDate"
                             required
+                            onKeyDown={onKeyDown}
                             placeholder="Transaction Date"
                             error={
                               errors.transactionDate && touched.transactionDate
