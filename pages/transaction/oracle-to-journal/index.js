@@ -34,6 +34,10 @@ import DataTable from "/layout/Tables/DataTable";
 
 function OracleToJournal({ params }) {
     const [isLoading, setLoading] = useState(false);
+    const [isLoadingGenerate, setLoadingGenerate] = useState(false);
+    const [isLoadingExport, setLoadingExport] = useState(false);
+    const [isLoadingUpload, setLoadingUpload] = useState(false);
+
     const [{ accessToken, encryptedAccessToken }] = useCookies();
     const [ site, setSite ] = useState(null);
     
@@ -237,6 +241,8 @@ function OracleToJournal({ params }) {
     
     const generatePaymentJournal = async(values, actions) => 
     {
+        setLoadingGenerate(true);
+
         const body = {
             siteId: site?.siteId,
             period: formValues.periodMethod?.periodId,
@@ -250,7 +256,7 @@ function OracleToJournal({ params }) {
         //console.log(formValues.paymentMethod);
     
         //console.log(body);
-        setLoadingPaymentJournal(true);
+        //setLoadingPaymentJournal(true);
 
         let response = await fetch("/api/transaction/oracletojournal/GeneratePaymentJournal", {
             method: "POST",
@@ -274,7 +280,8 @@ function OracleToJournal({ params }) {
                 });
             } 
         } 
-        setLoadingPaymentJournal(false);
+        setLoadingGenerate(false);
+        //setLoadingPaymentJournal(false);
     };
 
     const getFormData = (values) => {};
@@ -295,6 +302,8 @@ function OracleToJournal({ params }) {
     const handlePeriod = (event, value) => setPeriod(value);
 
     const handleExportToExcel = async (values, actions) => {
+        setLoadingExport(true);
+
         const body = {
             siteId: site?.siteId,
             period: formValues.periodMethod?.periodId,
@@ -330,7 +339,7 @@ function OracleToJournal({ params }) {
             else
                 alertService.info({title: "No Data", text: "No data in this filter" });
         }
-        
+        setLoadingExport(false);
     }
 
     const [customerResponse, setCustomerResponse] = useState({
@@ -808,29 +817,44 @@ function OracleToJournal({ params }) {
                                                                     }
                                                             </MDButton>
                                                             <MDButton 
-                                                                type="submit"
                                                                 style={{ marginRight : 20}}
                                                                 variant="outlined" 
                                                                 color="dark"
                                                                 onClick={generatePaymentJournal}
+                                                                disabled={isLoadingGenerate || !isValifForm()}
                                                             >
-                                                                <Icon>add_outlined</Icon>&nbsp; generate payment journal
+                                                                <Icon>add_outlined</Icon>&nbsp;{" "}
+                                                                    {isLoadingGenerate ?
+                                                                        "Generate Payment Journal..." :
+                                                                        "Generate Payment Journal"
+                                                                    }
                                                             </MDButton>
                                                             <MDButton 
                                                                 style={{ marginRight : 20}}
                                                                 variant="outlined" 
                                                                 color="dark"
-                                                                onClick = {handleExportToExcel}>
-                                                                <Icon>article_outlined</Icon>&nbsp; EXPORT TO EXCEL
+                                                                onClick = {handleExportToExcel}
+                                                                disabled={isLoadingExport || !isValifForm()}
+                                                            >
+                                                                <Icon>article_outlined</Icon>&nbsp;{" "} 
+                                                                    {isLoadingExport ?
+                                                                        "Export to Excel..." :
+                                                                        "Export to Excel"
+                                                                    }
+                                                                
                                                             </MDButton>
                                                             <MDButton
                                                                 type="submit"
                                                                 variant="gradient"
                                                                 color="primary"
                                                                 sx={{ height: "100%" }}
-                                                                // disabled={isLoadingUploadToOracle || !isValifForm()}
+                                                                disabled={isLoadingUpload || !isValifForm()}
                                                             >
-                                                                <Icon>upload</Icon>&nbsp; Upload To Oracle
+                                                                <Icon>upload</Icon>&nbsp;{" "} 
+                                                                    {isLoadingUpload ?
+                                                                        "Upload to Oracle..." :
+                                                                        "Upload to Oracle"
+                                                                    }
                                                             </MDButton>
                                                         </Grid>
                                                     </MDBox>
