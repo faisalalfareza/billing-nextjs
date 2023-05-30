@@ -883,9 +883,9 @@ function OracleToJournal({ params }) {
                                                                 
                                                             </MDButton>
                                                             <MDButton
-                                                                tyle={{ marginRight : 20}}
-                                                                variant="outlined" 
-                                                                color="dark"
+                                                                variant="gradient"
+                                                                color="primary"
+                                                                sx={{ height: "100%" }}
                                                                 onClick={uploadJournalToOracle}
                                                                 disabled={isLoadingUpload || !isValifForm()}
                                                             >
