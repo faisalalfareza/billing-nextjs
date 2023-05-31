@@ -502,7 +502,7 @@ export default function WaterReading(props) {
                                   />
                                 </Grid>
                                 <Grid item xs={12} sm={6}>
-                                  <ClusterMultiSelect
+                                  {/* <ClusterMultiSelect
                                     items={dataCluster}
                                     getOptionLabel={getOptionLabel}
                                     getOptionDisabled={getOptionDisabled}
@@ -513,7 +513,7 @@ export default function WaterReading(props) {
                                     onToggleOption={handleToggleOption}
                                     onClearOptions={handleClearOptions}
                                     onSelectAll={handleSelectAll}
-                                  />
+                                  /> */}
                                   <Autocomplete
                                     // disableCloseOnSelect
                                     isOptionEqualToValue={(option, value) =>
