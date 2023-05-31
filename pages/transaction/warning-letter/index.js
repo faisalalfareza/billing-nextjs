@@ -26,7 +26,6 @@ import * as React from "react";
 import { typeNormalization, downloadTempFile } from "/helpers/utils";
 import { alertService } from "/helpers";
 import Swal from "sweetalert2";
-// import PuffLoader from "react-spinners/PuffLoader";
 import { Block } from "notiflix/build/notiflix-block-aio";
 
 // Data
@@ -57,16 +56,13 @@ export default function WarningLetter(props) {
 
   useEffect(() => {
     let currentSite = JSON.parse(localStorage.getItem("site"));
-    if (currentSite == null) {
-      alertService.info({
-        title: "Info!",
-        text: "Please choose Site first",
-      });
-    } else {
-      setSite(currentSite);
-    }
-    //getPeriode();
+    if (currentSite == null) alertService.info({ title: "Please choose site first." });
+    else setSite(currentSite);
+
+    // getPeriode();
     // getProject();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSite = (siteVal) => {
@@ -772,16 +768,6 @@ export default function WarningLetter(props) {
           </Grid>
         </Grid>
       </MDBox>
-
-      {/* <PuffLoader
-        cssOverride={override}
-        size={250}
-        color={"#10569E"}
-        loading={isLoadingSend}
-        speedMultiplier={1}
-        aria-label="Loading Spinner"
-        data-testid="loader"
-      /> */}
 
       <MDBox mt={2}>
         <Grid container spacing={2}>

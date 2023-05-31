@@ -13,6 +13,7 @@ import Icon from "@mui/material/Icon";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import { Document, Page, pdfjs } from "react-pdf";
+import DOMPurify from "dompurify";
 
 export default function DetailTemplate(props) {
   const { isOpen, params, close, templateName } = props;
@@ -81,9 +82,9 @@ export default function DetailTemplate(props) {
       </ModalHeader>
       <ModalBody>
         <MDBox
-          dangerouslySetInnerHTML={{
-            __html: htmlData,
-          }}
+          sx={{ overflow: "scroll" }}
+          className="template-display"
+          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(htmlData) }}
         />
       </ModalBody>
       <ModalFooter>

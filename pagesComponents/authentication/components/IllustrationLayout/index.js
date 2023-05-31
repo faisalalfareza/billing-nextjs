@@ -162,9 +162,8 @@ function IllustrationLayout({
           component="img"
           src={brandBuilding.src}
           width={"100%"}
-          position="absolute"
-          alignSelf="flex-end"
-          opacity={0.2}
+          position="fixed"
+          opacity={0.5}
         />
       </Grid>
       {/* <Footer dark /> */}

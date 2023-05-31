@@ -69,5 +69,24 @@ body {
     url("/bg-login.svg");
   background-size: cover;
   background-attachment: fixed;
-  background-position: center;
+  background-position: top;
+}
+
+.template-display::-webkit-scrollbar {
+  width: 16px;
+}
+.template-display::-webkit-scrollbar-thumb {
+  background-color: #7b7d7f;
+  border: 5px solid #fff;
+  border-radius: 10rem;
+}
+.template-display::-webkit-scrollbar-track {
+  position: absolute;
+  right: -3rem;
+  top: -50rem;
+  background: transparent;
+}
+
+.modal-backdrop {
+  opacity: 0.5 !important;
 }

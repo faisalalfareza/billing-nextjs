@@ -65,10 +65,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
       key: "username",
       // icon: <MDAvatar src={profilePicture.src} size="sm" />,
       icon: profiles ? (
-        <MDAvatar
-          src={`data:image/png;base64, ${profiles}`}
-          size="sm"
-        />
+        <MDAvatar src={`data:image/png;base64, ${profiles}`} size="sm" />
       ) : (
         <AccountCircle fontSize="medium" />
       ),
@@ -296,13 +293,13 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           icon: <Today fontSize="medium" />,
         },
 
-        // {
-        //   name: "Report Detail Statement",
-        //   nameOnHeader: "Report Detail Statement",
-        //   key: "report-detail-statement",
-        //   route: "/report/report-detail-statement",
-        //   icon: <TableView fontSize="medium" />,
-        // },
+        {
+          name: "Report Detail Statement",
+          nameOnHeader: "Report Detail Statement",
+          key: "report-detail-statement",
+          route: "/report/report-detail-statement",
+          icon: <TableView fontSize="medium" />,
+        },
         // {
         //   name: "Report Water Reading",
         //   nameOnHeader: "Report Water Reading",

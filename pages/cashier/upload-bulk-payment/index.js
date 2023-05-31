@@ -78,11 +78,11 @@ function UploadBulkPayment() {
     let currentSite = typeNormalization(localStorage.getItem("site"));
     if (currentSite == null) {
       Swal.fire({
-        title: "Info!",
-        text: "Please choose Site first",
+        title: "Please choose site first.",
         icon: "info",
       });
     } else setSite(currentSite);
+    
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

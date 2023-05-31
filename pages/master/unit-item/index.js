@@ -45,12 +45,12 @@ export default function UnitItem(props) {
 
   useEffect(() => {
     let currentSite = JSON.parse(localStorage.getItem("site"));
-    if (currentSite == null) {
-      alertService.info({ title: "Info", text: "Please choose Site first" });
-    } else {
-      setSite(currentSite);
-    }
+    if (currentSite == null) alertService.info({ title: "Please choose site first."});
+    else setSite(currentSite);
+
     getBank();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const [customerRequest, setCustomerRequest] = useState({

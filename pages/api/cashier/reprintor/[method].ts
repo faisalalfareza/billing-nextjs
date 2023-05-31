@@ -33,6 +33,8 @@ export default async function handler(
     case "reprintofficialreceipt":
       reprintOfficialReceipt(res, body);
       break;
+    case "prosesupdatetransactiondateor":
+      prosesUpdateTransactionDateOr(res, body);
   }
 }
 
@@ -75,6 +77,27 @@ async function reprintOfficialReceipt(res: any, body: any) {
   const { accessToken, params } = body;
 
   const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/ReprintOfficialReceipt`;
+  const config = {
+    headers: {
+      Authorization: "Bearer " + accessToken,
+      "Access-Control-Allow-Origin": "*",
+    },
+    params: params,
+  };
+
+  axios
+    .post(url, params, config)
+    .then((response) => {
+      console.log("res---", response.data);
+      res.send(response.data);
+    })
+    .catch((error) => res.send({ error: error }));
+}
+
+async function prosesUpdateTransactionDateOr(res: any, body: any) {
+  const { accessToken, params } = body;
+
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/CashierSystem/ProsesUpdateTransactionDateOR`;
   const config = {
     headers: {
       Authorization: "Bearer " + accessToken,

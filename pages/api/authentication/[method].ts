@@ -175,7 +175,7 @@ function getCurrentLoginInformations(res: NextApiResponse, body: any, key?: any)
         );
       }
 
-      res.send({
+      return res.send({
         isCached: false,
         result: informationsResult
       })
@@ -239,14 +239,15 @@ async function gatewayOfUserProfile(res: NextApiResponse, body: any) {
   }
 }
 function getUserProfilePicture(res: NextApiResponse, body: any, key?: any) {
-  const { accessToken, expireInSeconds } = body;
+  const { accessToken, expireInSeconds, userId } = body;
 
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/Profile/GetProfilePicture`;
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/MasterBilling/GetLoginUserInfo`;
   const config = {
     headers: {
       Authorization: "Bearer " + accessToken,
       "Access-Control-Allow-Origin": "*",
     },
+    params: { UserId: userId }
   };
 
   axios
@@ -268,7 +269,7 @@ function getUserProfilePicture(res: NextApiResponse, body: any, key?: any) {
         );
       }
 
-      res.send({
+      return res.send({
         isCached: false,
         result: profilesResult
       })

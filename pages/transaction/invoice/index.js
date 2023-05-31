@@ -33,8 +33,8 @@ import fileCheck from "/assets/images/file-check.svg";
 import FindName from "./components/FindName";
 import Swal from "sweetalert2";
 import Adjustment from "./components/Adjustment";
-// import PuffLoader from "react-spinners/PuffLoader";
 import { Block } from "notiflix/build/notiflix-block-aio";
+import UploadAdjustment from "./components/UploadAdjustment";
 
 export default function Invoice(props) {
   const [controller] = useMaterialUIController();
@@ -67,11 +67,10 @@ export default function Invoice(props) {
 
   useEffect(() => {
     let currentSite = JSON.parse(localStorage.getItem("site"));
-    if (currentSite == null) {
-      alertService.info({ title: "Info", text: "Please choose Site first" });
-    } else {
-      setSite(currentSite);
-    }
+    if (currentSite == null)
+      alertService.info({ title: "Please choose site first." });
+    else setSite(currentSite);
+
     getProject();
     getPeriod();
 
@@ -222,6 +221,10 @@ export default function Invoice(props) {
     return value != undefined && value != "" && value != null && !error;
   };
 
+  const checkingSuccessValue = (value) => {
+    return value != undefined && value != "" && value != null;
+  };
+
   const swalWithBootstrapButtons = Swal.mixin({
     customClass: {
       confirmButton: "btn btn-success",
@@ -299,7 +302,12 @@ export default function Invoice(props) {
     { Header: "Period", accessor: "period", width: "25%" },
     { Header: "Project", accessor: "project", width: "25%" },
     { Header: "Cluster", accessor: "cluster" },
-    { Header: "Unit Code", accessor: "unitCode", width: "7%", customWidth: "60px" },
+    {
+      Header: "Unit Code",
+      accessor: "unitCode",
+      width: "7%",
+      customWidth: "60px",
+    },
     { Header: "Unit No", accessor: "unitNo", customWidth: "60px" },
     { Header: "ID Client", accessor: "psCode" },
     { Header: "Name", accessor: "name" },
@@ -554,6 +562,10 @@ export default function Invoice(props) {
     fetchData();
   };
 
+  const handleUpload = () => {
+    setOpenUpload(!openUpload);
+  };
+
   const handlePSCode = (val) => {
     setCustomer(val);
     if (formikRef.current) {
@@ -678,16 +690,6 @@ export default function Invoice(props) {
         </Grid>
       </MDBox>
 
-      {/* <PuffLoader
-        cssOverride={override}
-        size={250}
-        color={"#10569E"}
-        loading={isLoadingSend}
-        speedMultiplier={1}
-        aria-label="Loading Spinner"
-        data-testid="loader"
-      /> */}
-
       <MDBox mt={2}>
         <Grid container spacing={2}>
           <Grid item xs={12}>
@@ -719,7 +721,11 @@ export default function Invoice(props) {
                       </a>
                     </MDBox>
                   </Grid>
-                  <Grid item xs={12} style={{ display: isExpandedFilter ? "initial" : "none" }}>
+                  <Grid
+                    item
+                    xs={12}
+                    style={{ display: isExpandedFilter ? "initial" : "none" }}
+                  >
                     <Formik
                       innerRef={formikRef}
                       initialValues={initialValues}
@@ -1070,6 +1076,21 @@ export default function Invoice(props) {
                   : "Send Whatsapp"}
               </MDButton>
             </MDBox>
+            <MDBox ml={1}>
+              <MDButton
+                variant="gradient"
+                color="primary"
+                onClick={() => handleUpload()}
+                disabled={
+                  !(
+                    checkingSuccessValue(site) &&
+                    checkingSuccessValue(formValues.period)
+                  )
+                }
+              >
+                UPLOAD ADJUSTMENT
+              </MDButton>
+            </MDBox>
           </MDBox>
         </MDBox>
         <Card className={invoiceBlockLoadingName}>
@@ -1115,6 +1136,18 @@ export default function Invoice(props) {
           close={handleAdjust}
           params={modalParams}
           handlePSCode={handlePSCode}
+        />
+      )}
+      {openUpload && (
+        <UploadAdjustment
+          isOpen={openUpload}
+          close={handleUpload}
+          site={site}
+          period={formValues.period}
+          onModalChanged={(isChanged) => {
+            setOpenUpload(!openUpload);
+            isChanged === true && fetchData();
+          }}
         />
       )}
     </DashboardLayout>
