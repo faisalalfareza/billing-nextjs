@@ -27,7 +27,6 @@ import WaterRowActions from "./components/WaterRowActions";
 import EditDataWater from "./components/EditDataWater";
 import SiteDropdown from "../../../pagesComponents/dropdown/Site";
 import { Block } from "notiflix/build/notiflix-block-aio";
-import ClusterMultiSelect from "../../../pagesComponents/dropdown/ClusterMultiSelect";
 
 export default function WaterReading(props) {
   const [controller] = useMaterialUIController();
