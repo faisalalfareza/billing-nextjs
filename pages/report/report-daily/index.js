@@ -108,7 +108,8 @@ function ReportDaily() {
 
   useEffect(() => {
     let currentSite = JSON.parse(localStorage.getItem("site"));
-    if (currentSite == null) alertService.info({ title: "Please choose site first." });
+    if (currentSite == null)
+      alertService.info({ title: "Please choose site first." });
     else setSite(currentSite);
 
     getPaymentMethod();
@@ -401,8 +402,7 @@ function ReportDaily() {
                                       <FormField
                                         {...params}
                                         type="text"
-                                        required
-                                        label="Cluster"
+                                        label="Cluster *"
                                         name="cluster"
                                         placeholder="Choose Cluster"
                                         InputLabelProps={{ shrink: true }}

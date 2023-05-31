@@ -6,7 +6,17 @@ import * as dayjs from "dayjs";
 import Swal from "sweetalert2";
 import { NumericFormat } from "react-number-format";
 
-import { Card, Grid, Icon, Autocomplete, FormGroup, FormControlLabel, TextField, Radio, Checkbox } from "@mui/material";
+import {
+  Card,
+  Grid,
+  Icon,
+  Autocomplete,
+  FormGroup,
+  FormControlLabel,
+  TextField,
+  Radio,
+  Checkbox,
+} from "@mui/material";
 import { Block } from "notiflix/build/notiflix-block-aio";
 
 import MDBox from "/components/MDBox";
@@ -119,7 +129,8 @@ function BillingPayment() {
     document.getElementsByName(customerName.name)[0].focus();
 
     let currentSite = typeNormalization(localStorage.getItem("site"));
-    if (currentSite == null) alertService.info({ title: "Please choose site first." });
+    if (currentSite == null)
+      alertService.info({ title: "Please choose site first." });
     else {
       setSite(currentSite);
       let currentUser = typeNormalization(localStorage.getItem("informations"));
@@ -150,7 +161,7 @@ function BillingPayment() {
     totalPages: undefined,
   });
   const [selectedUnit, setSelectedUnit] = useState();
-  
+
   const skipCountChangeHandler = (e) => {
     customerRequest.skipCount = e;
     setCustomerRequest((prevState) => ({
@@ -177,7 +188,8 @@ function BillingPayment() {
     Block.standard(`.${customerBlockLoadingName}`, `Searching for Customer`),
       setLoadingCustomer(true);
 
-    const { scheme, keywords, unitCode, unitNo, recordsPerPage, skipCount } = customerRequest;
+    const { scheme, keywords, unitCode, unitNo, recordsPerPage, skipCount } =
+      customerRequest;
     let response = await fetch("/api/cashier/reprintor/getcustomerlist", {
       method: "POST",
       body: JSON.stringify({
@@ -268,8 +280,7 @@ function BillingPayment() {
   const handleCustomerSubmit = async (e) => {
     e != undefined && e.preventDefault();
 
-    setDetailPaymentData([]),
-      setSelectedUnit();
+    setDetailPaymentData([]), setSelectedUnit();
 
     getCustomerList();
   };
@@ -280,7 +291,10 @@ function BillingPayment() {
   const [invoiceId, setInvoiceId] = useState(undefined);
 
   const getPaymentDetail = async (unitDataID, psCode) => {
-    Block.standard(`.${detailPaymentLoadingName}`, `Getting Payment Detail Data`),
+    Block.standard(
+      `.${detailPaymentLoadingName}`,
+      `Getting Payment Detail Data`
+    ),
       setLoadingDetailPayment(true);
 
     const body = {
@@ -300,10 +314,11 @@ function BillingPayment() {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+    if (response.error)
+      alertService.info({ title: response.error.error.message });
     else {
       const result = response.result.listInvoicePayment;
-      result.map((e) => e["paymentTemp"] = e.paymentAmount);
+      result.map((e) => (e["paymentTemp"] = e.paymentAmount));
       setDetailPaymentData(result);
       setTimeout(() => {
         const element = document.createElement("a");
@@ -327,13 +342,22 @@ function BillingPayment() {
       });
     }
 
-    Block.remove(`.${detailPaymentLoadingName}`), setLoadingDetailPayment(false);
+    Block.remove(`.${detailPaymentLoadingName}`),
+      setLoadingDetailPayment(false);
   };
   const setPaymentDetail = (rows) => {
     return {
       columns: [
-        { Header: "Invoice Number", accessor: "invoiceNo", customWidth: "110px" },
-        { Header: "Invoice Name", accessor: "invoiceName", customWidth: "50px" },
+        {
+          Header: "Invoice Number",
+          accessor: "invoiceNo",
+          customWidth: "110px",
+        },
+        {
+          Header: "Invoice Name",
+          accessor: "invoiceName",
+          customWidth: "50px",
+        },
         {
           Header: "Balance",
           accessor: "balance",
@@ -360,7 +384,7 @@ function BillingPayment() {
               />
             );
           },
-          customWidth: "180px"
+          customWidth: "180px",
         },
         {
           Header: "End Balance",
@@ -377,7 +401,7 @@ function BillingPayment() {
               />
             );
           },
-          customWidth: "210px"
+          customWidth: "210px",
         },
         {
           Header: "Payment Amount",
@@ -397,7 +421,7 @@ function BillingPayment() {
               />
             );
           },
-          customWidth: "180px"
+          customWidth: "180px",
         },
       ],
       rows: rows,
@@ -421,7 +445,8 @@ function BillingPayment() {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+    if (response.error)
+      alertService.error({ title: "Error", text: response.error.message });
     else setPaymentMethodList(response.result);
 
     Block.remove(`.${paymentMethodBlockLoadingName}`);
@@ -441,12 +466,12 @@ function BillingPayment() {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+    if (response.error)
+      alertService.error({ title: "Error", text: response.error.message });
     else setBankList(response.result);
 
     Block.remove(`.${bankBlockLoadingName}`);
   };
-
 
   const [isLoading, setLoading] = useState(false);
   const [totalFooter, setTotalFooter] = useState({});
@@ -529,8 +554,9 @@ function BillingPayment() {
     });
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    
-    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+
+    if (response.error)
+      alertService.error({ title: "Error", text: response.error.message });
     else {
       Swal.fire({
         icon: "success",
@@ -538,7 +564,7 @@ function BillingPayment() {
         text: "Official receipt document will be displayed and will be sent to the customer via email",
       }).then(() => {
         let data = response.result;
-        (data != null) && window.open(data, "_blank");
+        data != null && window.open(data, "_blank");
       });
       setCustomerRequest((prevState) => ({
         ...prevState,
@@ -555,12 +581,15 @@ function BillingPayment() {
     }
 
     Block.remove(`.${detailPaymentLoadingName}`),
-    actions.setSubmitting(false),
+      actions.setSubmitting(false),
       setLoading(false);
   };
 
   const submitForm = async (values, actions) => {
-    if (values.amountPayment != totalFooter.payment) alertService.warn({ title: "Amount payment and total payment should be balanced." });
+    if (values.amountPayment != totalFooter.payment)
+      alertService.warn({
+        title: "Amount payment and total payment should be balanced.",
+      });
     else paymentProcess(values, actions);
   };
 
@@ -613,7 +642,10 @@ function BillingPayment() {
   };
 
   useEffect(() => {
-    let tp = detailPaymentData.reduce((acc, o) => acc + parseInt(o.paymentAmount), 0);
+    let tp = detailPaymentData.reduce(
+      (acc, o) => acc + parseInt(o.paymentAmount),
+      0
+    );
     let n = Object.assign({}, totalFooter);
     n.payment = tp;
     setTotalFooter(n);
@@ -688,15 +720,27 @@ function BillingPayment() {
                       validationSchema={schemeValidations}
                     >
                       {({ values, errors, touched }) => {
-                        let { 
+                        let {
                           customerName: customerNameV,
                           unitCode: unitCodeV,
-                          unitNo: unitNoV 
+                          unitNo: unitNoV,
                         } = values;
                         const isValifForm = () =>
-                          checkingSuccessInputWithRequired(customerName.isRequired, customerNameV, errors.customerName); //&&
-                          checkingSuccessInputWithRequired(unitCode.isRequired, unitCodeV, errors.unitCode) &&
-                          checkingSuccessInputWithRequired(unitNo.isRequired, unitNoV, errors.unitNo);
+                          checkingSuccessInputWithRequired(
+                            customerName.isRequired,
+                            customerNameV,
+                            errors.customerName
+                          ); //&&
+                        checkingSuccessInputWithRequired(
+                          unitCode.isRequired,
+                          unitCodeV,
+                          errors.unitCode
+                        ) &&
+                          checkingSuccessInputWithRequired(
+                            unitNo.isRequired,
+                            unitNoV,
+                            errors.unitNo
+                          );
 
                         return (
                           <MDBox
@@ -740,9 +784,7 @@ function BillingPayment() {
                                   name={unitCode.name}
                                   value={unitCodeV}
                                   placeholder={unitCode.placeholder}
-                                  error={
-                                    errors.unitCode && touched.unitCode
-                                  }
+                                  error={errors.unitCode && touched.unitCode}
                                   success={
                                     unitCode.isRequired &&
                                     checkingSuccessInputWithRequired(
@@ -767,9 +809,7 @@ function BillingPayment() {
                                   name={unitNo.name}
                                   value={unitNoV}
                                   placeholder={unitNo.placeholder}
-                                  error={
-                                    errors.unitNo && touched.unitNo
-                                  }
+                                  error={errors.unitNo && touched.unitNo}
                                   success={
                                     unitNo.isRequired &&
                                     checkingSuccessInputWithRequired(
@@ -841,9 +881,7 @@ function BillingPayment() {
                       recordsPerPage={customerRequest.recordsPerPage}
                       skipCount={customerRequest.skipCount}
                       pageChangeHandler={skipCountChangeHandler}
-                      recordsPerPageChangeHandler={
-                        recordsPerPageChangeHandler
-                      }
+                      recordsPerPageChangeHandler={recordsPerPageChangeHandler}
                       keywordsChangeHandler={keywordsChangeHandler}
                       entriesPerPage={{
                         defaultValue: customerRequest.recordsPerPage,
@@ -900,16 +938,28 @@ function BillingPayment() {
                 >
                   <Grid container spacing={3}>
                     <Grid item xs={4}>
-                      <MDTypography variant="h6" color="light">CUSTOMER NAME</MDTypography>
-                      <MDTypography variant="body2" color="light">{selectedUnit?.customerName}</MDTypography>
+                      <MDTypography variant="h6" color="light">
+                        CUSTOMER NAME
+                      </MDTypography>
+                      <MDTypography variant="body2" color="light">
+                        {selectedUnit?.customerName}
+                      </MDTypography>
                     </Grid>
                     <Grid item xs={4}>
-                      <MDTypography variant="h6" color="light">UNIT CODE</MDTypography>
-                      <MDTypography variant="body2" color="light">{selectedUnit?.unitCode}</MDTypography>
+                      <MDTypography variant="h6" color="light">
+                        UNIT CODE
+                      </MDTypography>
+                      <MDTypography variant="body2" color="light">
+                        {selectedUnit?.unitCode}
+                      </MDTypography>
                     </Grid>
                     <Grid item xs={4}>
-                      <MDTypography variant="h6" color="light">UNIT NO</MDTypography>
-                      <MDTypography variant="body2" color="light">{selectedUnit?.unitNo}</MDTypography>
+                      <MDTypography variant="h6" color="light">
+                        UNIT NO
+                      </MDTypography>
+                      <MDTypography variant="body2" color="light">
+                        {selectedUnit?.unitNo}
+                      </MDTypography>
                     </Grid>
                   </Grid>
                 </MDBox>
@@ -924,7 +974,9 @@ function BillingPayment() {
                     <Grid container alignItems="center" spacing={2}>
                       <Grid item xs={12}>
                         <MDBox>
-                          <MDTypography variant="h5">Payment Detail</MDTypography>
+                          <MDTypography variant="h5">
+                            Payment Detail
+                          </MDTypography>
                         </MDBox>
                       </Grid>
                       <Grid item xs={12}>
@@ -945,15 +997,33 @@ function BillingPayment() {
                             const isValifForm = () => {
                               if (values.paymentMethod?.paymentType == 1) {
                                 return (
-                                  checkingSuccessInput(values.paymentMethod, errors.paymentMethod) &&
-                                  checkingSuccessInput(values.amountPayment, errors.amountPayment)
+                                  checkingSuccessInput(
+                                    values.paymentMethod,
+                                    errors.paymentMethod
+                                  ) &&
+                                  checkingSuccessInput(
+                                    values.amountPayment,
+                                    errors.amountPayment
+                                  )
                                 );
                               } else {
                                 return (
-                                  checkingSuccessInput(values.paymentMethod, errors.paymentMethod) &&
-                                  checkingSuccessInput(values.amountPayment, errors.amountPayment) &&
-                                  checkingSuccessInput(values.bank, errors.bank) &&
-                                  checkingSuccessInput(values.cardNumber, errors.cardNumber)
+                                  checkingSuccessInput(
+                                    values.paymentMethod,
+                                    errors.paymentMethod
+                                  ) &&
+                                  checkingSuccessInput(
+                                    values.amountPayment,
+                                    errors.amountPayment
+                                  ) &&
+                                  checkingSuccessInput(
+                                    values.bank,
+                                    errors.bank
+                                  ) &&
+                                  checkingSuccessInput(
+                                    values.cardNumber,
+                                    errors.cardNumber
+                                  )
                                 );
                               }
                             };
@@ -1039,7 +1109,9 @@ function BillingPayment() {
                                               formValues.paymentMethod,
                                               errors.paymentMethod
                                             )}
-                                            className={paymentMethodBlockLoadingName}
+                                            className={
+                                              paymentMethodBlockLoadingName
+                                            }
                                           />
                                         )}
                                       />
@@ -1168,7 +1240,8 @@ function BillingPayment() {
                                             "charge",
                                             val.floatValue
                                           );
-                                          if (val.floatValue != undefined) setCharge(val.floatValue);
+                                          if (val.floatValue != undefined)
+                                            setCharge(val.floatValue);
                                           else setCharge(0);
                                         }}
                                         error={errors.charge && touched.charge}
@@ -1206,10 +1279,14 @@ function BillingPayment() {
                                         py={2}
                                       >
                                         <MDBox pb={1}>
-                                          <MDTypography variant="body" ml={3}>Allocation</MDTypography>
+                                          <MDTypography variant="body" ml={3}>
+                                            Allocation
+                                          </MDTypography>
                                         </MDBox>
                                         <DataTableTotal
-                                          table={setPaymentDetail(detailPaymentData)}
+                                          table={setPaymentDetail(
+                                            detailPaymentData
+                                          )}
                                           showTotalEntries={false}
                                           isSorted={false}
                                           totalFooter={totalFooter}
@@ -1260,13 +1337,21 @@ function BillingPayment() {
                                       }
                                       // label={"Add Signee : " + user?.user.name}
                                       label={
-                                        <MDBox 
+                                        <MDBox
                                           display="flex"
                                           justifyContent="space-between"
-                                          alignItems={{ xs: "flex-start", sm: "center" }}
-                                          flexDirection={{ xs: "column", sm: "row" }}
+                                          alignItems={{
+                                            xs: "flex-start",
+                                            sm: "center",
+                                          }}
+                                          flexDirection={{
+                                            xs: "column",
+                                            sm: "row",
+                                          }}
                                         >
-                                          <MDTypography variant="body" pr={2}>Add Signee</MDTypography>
+                                          <MDTypography variant="body" pr={2}>
+                                            Add Signee
+                                          </MDTypography>
                                           <MDBox
                                             bgColor={"grey-100"}
                                             borderRadius="lg"
@@ -1279,8 +1364,14 @@ function BillingPayment() {
                                             pl={{ xs: 1, sm: 12 }}
                                             pr={1}
                                           >
-                                            <MDTypography variant="button" fontWeight="medium" color="text">
-                                              {capitalizeFirstLetter(user?.user.name)}
+                                            <MDTypography
+                                              variant="button"
+                                              fontWeight="medium"
+                                              color="text"
+                                            >
+                                              {capitalizeFirstLetter(
+                                                user?.user.name
+                                              )}
                                             </MDTypography>
                                           </MDBox>
                                         </MDBox>

@@ -27,6 +27,7 @@ import WaterRowActions from "./components/WaterRowActions";
 import EditDataWater from "./components/EditDataWater";
 import SiteDropdown from "../../../pagesComponents/dropdown/Site";
 import { Block } from "notiflix/build/notiflix-block-aio";
+import ClusterMultiSelect from "../../../pagesComponents/dropdown/ClusterMultiSelect";
 
 export default function WaterReading(props) {
   const [controller] = useMaterialUIController();
@@ -343,6 +344,28 @@ export default function WaterReading(props) {
     localStorage.setItem("site", JSON.stringify(siteVal));
   };
 
+  const optionsME = [
+    { label: "foo", value: "foo" },
+    { label: "bar", value: "bar" },
+    { label: "jar", value: "jar" },
+    { label: "nar", value: "nar" },
+    { label: "mar", value: "mar" },
+    { label: "far", value: "far" },
+  ];
+  const [selectedOptions, setSelectedOptions] = useState([]);
+  const getOptionLabel = (option) => `${option.clusterName}`;
+  const getOptionDisabled = (option) => option.value === "foo";
+  const handleToggleOption = (selectedOptions) =>
+    setSelectedOptions(selectedOptions);
+  const handleClearOptions = () => setSelectedOptions([]);
+  const handleSelectAll = (isSelected) => {
+    if (isSelected) {
+      setSelectedOptions(options);
+    } else {
+      handleClearOptions();
+    }
+  };
+
   return (
     <DashboardLayout>
       <DashboardNavbar />
@@ -479,6 +502,18 @@ export default function WaterReading(props) {
                                   />
                                 </Grid>
                                 <Grid item xs={12} sm={6}>
+                                  <ClusterMultiSelect
+                                    items={dataCluster}
+                                    getOptionLabel={getOptionLabel}
+                                    getOptionDisabled={getOptionDisabled}
+                                    selectedValues={selectedOptions}
+                                    label="Cluster"
+                                    placeholder="Choose Cluster"
+                                    selectAllLabel="Select all"
+                                    onToggleOption={handleToggleOption}
+                                    onClearOptions={handleClearOptions}
+                                    onSelectAll={handleSelectAll}
+                                  />
                                   <Autocomplete
                                     // disableCloseOnSelect
                                     isOptionEqualToValue={(option, value) =>
