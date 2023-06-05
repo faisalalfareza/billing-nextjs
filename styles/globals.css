@@ -90,3 +90,5 @@ body {
 .modal-backdrop {
   opacity: 0.5 !important;
 }
+
+div#__next-build-watcher { display: none; }
