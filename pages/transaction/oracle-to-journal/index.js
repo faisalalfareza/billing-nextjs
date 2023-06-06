@@ -262,17 +262,17 @@ function OracleToJournal({ params }) {
         if(!response.ok) throw new Error(`Error: ${response.status}`);
         response = typeNormalization(await response.json());
 
-        if(response.error) alertService.error({ title: "Error", text: response.error.message});
+        if(!response.status == 'success') alertService.error({ title: "Error", text: response.errorMessage});
         else{
-            if(response.success){
+            //if(response.success){
                 Swal.fire({
-                    title: 'Payment Journal Upload',
-                    html: `Payment Journal Successfully Uploaded to Oracle `,
+                    title: 'Upload Success',
+                    html: `Upload to Oracle Successfully Generated`,
                     icon: "success",
                     timerProgressBar: true,
                     timer:  3000,
                 });
-            } 
+            //} 
         } 
 
         setLoadingUpload(false);
