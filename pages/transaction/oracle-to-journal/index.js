@@ -306,10 +306,10 @@ function OracleToJournal({ params }) {
         });
         if(!response.ok) throw new Error(`Error: ${response.status}`);
         response = typeNormalization(await response.json());
-
-        if(response.error) alertService.error({ title: "Error", text: response.error.message});
+        console.log(response);
+        if(!response.status == 'success') alertService.error({ title: "Error", text: response.errorMessage});
         else{
-            if(response.success){
+            //if(response.success){
                 Swal.fire({
                     title: 'Payment Journal Generated',
                     html: `Payment Journal Successfully Generated`,
@@ -317,7 +317,7 @@ function OracleToJournal({ params }) {
                     timerProgressBar: true,
                     timer:  3000,
                 });
-            } 
+            //} 
         } 
         setLoadingGenerate(false);
         //setLoadingPaymentJournal(false);
@@ -447,6 +447,7 @@ function OracleToJournal({ params }) {
                     journaldate: e.journalDate.substring(0, 10),
                     oracledesc: e.oracleDesc,
                     accountingdate: e.accountingDate.substring(0, 10),
+                    paymentdate: e.paymentDate.substring(0, 10),
                     periodname: e.periodName,
                     coa1: e.coA1,
                     coa2: e.coA2,
@@ -521,6 +522,7 @@ function OracleToJournal({ params }) {
         {Header: "periodname", accessor: "periodname", width: "20%"},
         {Header: "oracledesc", accessor: "oracledesc", width: "25%"},
         {Header: "accountingdate", accessor: "accountingdate", width: "15%"},
+        {Header: "paymentdate", accessor: "paymentdate", width: "15%"},
         {Header: "coa1", accessor: "coa1", width: "10%"},
         {Header: "coa2", accessor: "coa2", width: "10%"},
         {Header: "coa3", accessor: "coa3", width: "10%"},
@@ -564,21 +566,21 @@ function OracleToJournal({ params }) {
         },
         {Header: "istransfered", accessor: "istransfered", width: "10%"},
         {Header: "groupid", accessor: "groupid", width: "10%"},
-        {
-            Header: "action",
-            accessor: "action",
-            align: "center",
-            sorted: true,
-            // Cell: ({ value }) => {
-            //   return (
-            //     <WaterRowActions
-            //       record={value}
-            //       openModalonEdit={openModalEdit}
-            //       onDeleted={fetchData}
-            //     />
-            //   );
-            // },
-        },
+        // {
+        //     Header: "action",
+        //     accessor: "action",
+        //     align: "center",
+        //     sorted: true,
+        //     Cell: ({ value }) => {
+        //       return (
+        //         <WaterRowActions
+        //           record={value}
+        //           openModalonEdit={openModalEdit}
+        //           onDeleted={fetchData}
+        //         />
+        //       );
+        //     },
+        // },
     ];
 
     const [tasklist, setTasklist] = useState({ columns: columns, rows: [] });
