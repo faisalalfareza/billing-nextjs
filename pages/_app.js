@@ -55,6 +55,8 @@ import appleIcon from "../assets/images/apple-icon.png";
 import brandWhite from "../assets/images/app-logo-on-dark.png";
 import brandDark from "../assets/images/app-logo-on-light.png";
 
+import { Loading  } from "notiflix/build/notiflix-loading-aio";
+
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createCache({ key: "css", prepend: true });
 
@@ -192,6 +194,26 @@ function MyApp({
   pageProps,
   emotionCache = clientSideEmotionCache,
 }) {
+  const router = useRouter();
+
+  useEffect(() => {
+    const handleStart = () => Loading.hourglass({
+      svgColor: "rgba(27, 156, 252,1.0)",
+      backgroundColor: "rgba(0, 0, 0, 0.6)"
+    });
+    const handleComplete = () => Loading.remove();
+
+    router.events.on('routeChangeStart', handleStart);
+    router.events.on('routeChangeComplete', handleComplete);
+    router.events.on('routeChangeError', handleComplete);
+
+    return () => {
+      router.events.off('routeChangeStart', handleStart);
+      router.events.off('routeChangeComplete', handleComplete);
+      router.events.off('routeChangeError', handleComplete);
+    };
+  }, [router]);
+
   return (
     <>
       <MaterialUIControllerProvider>
