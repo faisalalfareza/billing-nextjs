@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useCookies } from "react-cookie";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
@@ -38,6 +38,7 @@ import NumberInput from "/pagesComponents/dropdown/NumberInput";
 import TotalDisable from "/pagesComponents/dropdown/TotalDisable";
 
 import DetailBalance from "./detail-balance";
+import debounce from "lodash.debounce";
 
 function BillingPayment() {
   const [{ accessToken, encryptedAccessToken }] = useCookies();
@@ -412,8 +413,11 @@ function BillingPayment() {
               <NumberInput
                 inputProps={{
                   style: { textAlign: "right" },
-                  onBlur: (e) => {
-                    paymentAmountChange(e.target.value, row.index);
+                  // onBlur: (e) => {
+                  //   paymentAmountChange(e.target.value, row.index);
+                  // },
+                  onChange: (e) => {
+                    debouncedChangeHandler(e.target.value, row.index);
                   },
                 }}
                 placeholder="Type Amount Payment"
@@ -609,6 +613,10 @@ function BillingPayment() {
 
     setDetailPaymentData(newData);
   };
+
+  const debouncedChangeHandler = useMemo(() => {
+    return debounce(paymentAmountChange, 1000);
+  }, []);
 
   useEffect(() => {
     totalChange();
