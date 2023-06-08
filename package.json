@@ -59,7 +59,7 @@
     "ioredis": "^5.0.4",
     "js-cookie": "^3.0.1",
     "jsvectormap": "1.4.5",
-    "next": "latest",
+    "next": "^12.3.1",
     "next-pwa": "5.5.4",
     "next-transpile-modules": "^9.1.0",
     "notiflix": "^3.2.6",
