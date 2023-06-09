@@ -2,17 +2,6 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 let alreadyLoggedIn: boolean = false;
-let onAlreadyLoggedInChangeCallback: ((loggedIn: boolean) => void) | null = null;
-export function setAlreadyLoggedIn(loggedIn: boolean) {
-  alreadyLoggedIn = loggedIn;
-  if (onAlreadyLoggedInChangeCallback) {
-    onAlreadyLoggedInChangeCallback(loggedIn);
-  }
-}
-export function onAlreadyLoggedInChange(callback: (loggedIn: boolean) => void) {
-  onAlreadyLoggedInChangeCallback = callback;
-}
-
 export const config = {
   matcher: [
     /*
@@ -26,6 +15,7 @@ export const config = {
     "/((?!api|_next/static|_next/image|favicon.ico).*)",
   ]
 };
+
 
 // Fungsi untuk pengecekan pengguna belum terautentikasi
 function handleNotAuthenticated(request: NextRequest) {
@@ -59,25 +49,15 @@ function middleware(request: NextRequest) {
     alreadyLoggedIn && console.log("————————————————————ALREADY LOGGED IN");
 
     // Cek jika pengguna terautentikasi, tetapi mencoba mengakses halaman awal atau halaman autentikasi sign-in
-    if (nextUrl.pathname.includes("/authentication/sign-in") && alreadyLoggedIn) {
+    if ((
+      nextUrl.pathname === "/authentication/sign-in" ||
+      nextUrl.pathname.includes("/authentication/sign-in")
+    ) && alreadyLoggedIn) {
       return isAuthenticated 
         ? NextResponse.redirect(`${nextUrl.origin}/dashboards`) 
-        : handleNotAuthenticated(request);
+        : handleNotAuthenticated(request); // Logout or redirect to sign-in
     }
     else {
-      const refererUrl = headers.get("referer");
-      const requestUrl = nextUrl.href;
-      
-      // Cek jika pengguna baru pertama kali login dan mencoba mengakses halaman dashboard
-      if (
-        (!alreadyLoggedIn) &&
-        (refererUrl && !refererUrl.includes("/authentication/sign-in")) &&
-        ((refererUrl !== requestUrl) && requestUrl.includes("/dashboards"))
-      ) {
-        // Arahkan pengguna kembali ke halaman referer sebelumnya
-        return NextResponse.redirect(refererUrl);
-      }
-
       // Set status alreadyLoggedIn menjadi true setelah autentikasi yang valid
       !alreadyLoggedIn && console.log("————————————————————LOGGED IN");
       alreadyLoggedIn = true; 
