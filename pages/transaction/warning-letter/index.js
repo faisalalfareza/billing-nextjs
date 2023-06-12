@@ -517,29 +517,20 @@ export default function WarningLetter(props) {
             periodId: formValues.periode?.periodId,
             projectId: formValues.project?.projectId,
             clusterId: formValues.cluster?.clusterId,
-            cluster: formValues.cluster?.clusterCode,
+            cluster: formValues.cluster?.clusterName,
             unitCode: formValues.unitCode?.unitCode,
             unitNo: formValues.unitNo?.unitNo,
             /* invoiceName: formValues.invoiceName?.invoiceName, */
             search: undefined,
-            sp: formValues.sp?.sp,
-            /* 
-              "projectId": 0,
-              "clusterId": 0,
-              "cluster": "string",
-              "unitCode": "string",
-              "unitNo": "string",
-              "invoiceName": "string",
-              "search": "string",
-              "sp": 0 
-            */
+            sp: formValues.sp?.spId,
+            
           },
         }),
       }
     );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    console.log(response.result.uri);
+    //console.log(response.result.uri);
     if(response.result.uri != null){
       if (response.error) alertService.error({ text: response.error.message, title: "Error" });
       else downloadTempFile(response.result.uri);
@@ -656,7 +647,7 @@ export default function WarningLetter(props) {
       alertService.error({ title: "Error", text: response.error.message });
     else {
       let data = response.result;
-      console.log("viewDetailWarLett = ", data);
+      //console.log("viewDetailWarLett = ", data);
       setModalParams(response);
       setOpenModal({
         isOpen: !openModal.isOpen,

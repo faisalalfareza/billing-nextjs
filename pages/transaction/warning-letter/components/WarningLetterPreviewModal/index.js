@@ -31,7 +31,7 @@ function WarningLetterPreviewModal({ isOpen, params, onModalChanged }) {
     <button
       type="button"
       className="close"
-      style={{ position: "absolute", top: "115px", right: "135px" }}
+      style={{ position: "absolute", top: "21px", right: "125px" }}
       onClick={() => closeModal()}
     >
       &times;
@@ -87,7 +87,7 @@ if(isOpen){
               <CardText>
                 Surat ini merupakan{" "}
                 <b>&ldquo;Surat Peringatan {peringatanNo}&rdquo;</b> yang di
-                kirim secara otomatis melalu sistem sehubungan dengan belum
+                kirim secara otomatis melalui sistem sehubungan dengan belum
                 diterimanya pembayaran billing Perode <strong>{periodName}</strong>{" "}
                 yang saat ini sudah jatuh tempo.
               </CardText>
