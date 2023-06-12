@@ -44,6 +44,7 @@ function BillingPayment() {
   const [{ accessToken, encryptedAccessToken }] = useCookies();
 
   const [site, setSite] = useState(null);
+  const [detailPaymentData, setDetailPaymentData] = useState([]);
   const handleSite = (siteVal) => {
     setSite(siteVal);
     localStorage.setItem("site", JSON.stringify(siteVal));
@@ -269,6 +270,10 @@ function BillingPayment() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [customerRequest.skipCount, customerRequest.recordsPerPage]);
 
+  useEffect(() => {
+    console.log("detailpaymentdata----", detailPaymentData);
+  }, [detailPaymentData]);
+
   const checkingSuccessInput = (value, error) => {
     return value != undefined && value != "" && value != null && !error;
   };
@@ -281,14 +286,14 @@ function BillingPayment() {
   const handleCustomerSubmit = async (e) => {
     e != undefined && e.preventDefault();
 
-    setDetailPaymentData([]), setSelectedUnit();
+    setDetailPaymentData([]);
+    setSelectedUnit();
 
     getCustomerList();
   };
 
   const detailPaymentLoadingName = "block-detail-payment";
   const [isLoadingDetailPayment, setLoadingDetailPayment] = useState(false);
-  const [detailPaymentData, setDetailPaymentData] = useState([]);
   const [invoiceId, setInvoiceId] = useState(undefined);
 
   const getPaymentDetail = async (unitDataID, psCode) => {
@@ -329,6 +334,7 @@ function BillingPayment() {
 
       let newState = { ...formValues };
       newState.cluster = selectedUnit.clusterName;
+      newState.amountPayment = 0;
       setformValues(newState);
       let tb = result.reduce((acc, o) => acc + parseInt(o.balance), 0);
       let te = result.reduce((acc, o) => acc + parseInt(o.endBalance), 0);
@@ -605,10 +611,10 @@ function BillingPayment() {
   };
 
   const paymentAmountChange = (value, index) => {
-    const newData = [...detailPaymentData];
+    let newData = detailPaymentData.slice();
     let a = value.replaceAll("Rp. ", "").replaceAll(".", "").replace(",", ".");
     let valFloat = parseFloat(a);
-    newData[index].paymentAmount = valFloat;
+    console.log("----", detailPaymentData, newData, value, index);
     newData[index].paymentAmount = valFloat;
 
     setDetailPaymentData(newData);
@@ -616,7 +622,7 @@ function BillingPayment() {
 
   const debouncedChangeHandler = useMemo(() => {
     return debounce(paymentAmountChange, 1000);
-  }, []);
+  }, [detailPaymentData]);
 
   useEffect(() => {
     totalChange();
