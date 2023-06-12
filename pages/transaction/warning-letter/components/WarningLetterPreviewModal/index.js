@@ -55,6 +55,8 @@ if(isOpen){
   const {siteEmail} = params
   const {siteName} = params
   const {siteAddress} = params
+  const {periodName} = params
+  const {invoiceType} = params
   const {invoiceNo} = params
 
   return (
@@ -86,7 +88,7 @@ if(isOpen){
                 Surat ini merupakan{" "}
                 <b>&ldquo;Surat Peringatan {peringatanNo}&rdquo;</b> yang di
                 kirim secara otomatis melalu sistem sehubungan dengan belum
-                diterimanya pembayaran billing bulan <b>{jatuhtempoDate}</b>{" "}
+                diterimanya pembayaran billing Perode <strong>{periodName}</strong>{" "}
                 yang saat ini sudah jatuh tempo.
               </CardText>
               <CardText>
@@ -119,8 +121,8 @@ if(isOpen){
                   </thead>
                   <tbody>
                     <tr>
-                      <td>{refNo}</td>
-                      <td>descriptions</td>
+                      <td>{invoiceNo}</td>
+                      <td>{invoiceType}</td>
                       <td>{totalPembayaran}</td>
                       <td>{bank}</td>
                       <td>{vaNo}</td>
@@ -179,19 +181,5 @@ WarningLetterPreviewModal.defaultProps = {
   isOpen: false,
   params: undefined,
 };
-
-const rawHTML = `
-<div>
-  <h1>The Second Example</h1>
-  <p>The <strong>rat</strong> hates the <strong>cat</strong></p>
-  <p><i>This is something special</i></p>
-  <hr/>  
-  <div>
-    <img src="https://www.kindacode.com/wp-content/uploads/2021/06/pi-2.jpeg" width="500"/>
-  </div>
-  <hr/>  
-  <h4>Just Another Heading</h4>
-</div>
-`;
 
 export default WarningLetterPreviewModal;
