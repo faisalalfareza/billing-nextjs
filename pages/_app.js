@@ -117,6 +117,9 @@ function Main({ Component, pageProps, routes = setRoutes() }) {
     document.scrollingElement.scrollTop = 0;
   }, [pathname]);
 
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => { setHydrated(true) }, []);
+
   const brandIcon =
     (transparentSidenav && !darkMode) || whiteSidenav ? brandDark : brandWhite;
 
@@ -171,24 +174,20 @@ function Main({ Component, pageProps, routes = setRoutes() }) {
     <ThemeProvider theme={darkMode ? themeDark : theme}>
       <CssBaseline />
       <Component {...pageProps} />
-      {
-        (layout === "dashboard") && 
-        // (routes.filteredMain.length > 0) && 
-        (
-          <>
-            <Sidenav
-              color={sidenavColor}
-              brand={brandIcon}
-              brandName={appInfo.appName}
-              routes={routes.main}
-              onMouseEnter={handleOnMouseEnter}
-              onMouseLeave={handleOnMouseLeave}
-            />
-            {/* <Configurator /> */}
-            {/* {configsButton} */}
-          </>
-        )
-      }
+      {layout === "dashboard" && hydrated && (
+        <>
+          <Sidenav
+            color={sidenavColor}
+            brand={brandIcon}
+            brandName={appInfo.appName}
+            routes={routes.main}
+            onMouseEnter={handleOnMouseEnter}
+            onMouseLeave={handleOnMouseLeave}
+          />
+          {/* <Configurator /> */}
+          {/* {configsButton} */}
+        </>
+      )}
       {/* {layout === "vr" && <Configurator />} */}
     </ThemeProvider>
   );
