@@ -281,8 +281,8 @@ function SignIn(props) {
         "grantedPermissions",
         JSON.stringify(grantedPermissions)
       );
-
-      Router.replace(redirectUrl, Router.asPath);
+      
+      Router.replace(redirectUrl, (Router.asPath !== Router.pathname) && Router.asPath);
       // window.open(redirectUrl, "_self");
     }
   }
