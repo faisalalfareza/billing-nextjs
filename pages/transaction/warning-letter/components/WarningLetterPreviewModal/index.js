@@ -88,7 +88,7 @@ if(isOpen){
                 Surat ini merupakan{" "}
                 <b>&ldquo;Surat Peringatan {peringatanNo}&rdquo;</b> yang di
                 kirim secara otomatis melalui sistem sehubungan dengan belum
-                diterimanya pembayaran billing Perode <strong>{periodName}</strong>{" "}
+                diterimanya pembayaran billing period <strong>{periodName}</strong>{" "}
                 yang saat ini sudah jatuh tempo.
               </CardText>
               <CardText>
