@@ -514,7 +514,7 @@ export default function WarningLetter(props) {
             /* maxResultCount: 1000,
             skipCount: 0, */
             siteId: site?.siteId,
-            periodId: periodId,
+            periodId: formValues.periode?.periodId,
             projectId: formValues.project?.projectId,
             clusterId: formValues.cluster?.clusterId,
             cluster: formValues.cluster?.clusterCode,
@@ -539,10 +539,13 @@ export default function WarningLetter(props) {
     );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
+    console.log(response.result.uri);
+    if(response.result.uri != null){
+      if (response.error) alertService.error({ text: response.error.message, title: "Error" });
+      else downloadTempFile(response.result.uri);
+    }
 
-    if (response.error) alertService.error({ text: response.error.message, title: "Error" });
-    else downloadTempFile(response.result.uri);
-
+    
     Block.remove(`.${warningLetterBlockLoadingName}`);
   };
   /* end export excel */
