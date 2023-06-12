@@ -21,10 +21,10 @@ export const config = {
 function handleNotAuthenticated(request: NextRequest) {
   const { nextUrl } = request;
 
-  console.log("————————————————————NOT AUTHENTICATED");
+  // console.log("————————————————————NOT AUTHENTICATED");
   
   // Reset status alreadyLoggedIn
-  alreadyLoggedIn && console.log("————————————————————LOGGED OUT");
+  // alreadyLoggedIn && console.log("————————————————————LOGGED OUT");
   alreadyLoggedIn = false;
   // Arahkan ke halaman masuk atau autentikasi
   return NextResponse.rewrite(new URL("/authentication/sign-in", nextUrl.origin));
@@ -34,10 +34,10 @@ function middleware(request: NextRequest) {
   const { nextUrl, cookies, headers } = request;
   const isAuthenticated = cookies.has("accessToken");
   
-  console.log("\n\n\n");
-  console.log("IS AUTHENTICATED (HAS): ", cookies.has("accessToken"));
-  console.log("IS AUTHENTICATED (GET): ", cookies.get("accessToken"));
-  console.log("IS LOGGED IN: ", alreadyLoggedIn);
+  // console.log("\n\n\n");
+  // console.log("IS AUTHENTICATED (HAS): ", cookies.has("accessToken"));
+  // console.log("IS AUTHENTICATED (GET): ", cookies.get("accessToken"));
+  // console.log("IS LOGGED IN: ", alreadyLoggedIn);
   
   // Cek jika pengguna belum terautentikasi
   if (!alreadyLoggedIn && !isAuthenticated) {
@@ -45,8 +45,8 @@ function middleware(request: NextRequest) {
   }
   // Cek jika pengguna terautentikasi, dan normal
   else if (alreadyLoggedIn || isAuthenticated) {
-    isAuthenticated && console.log("————————————————————AUTHENTICATED");
-    alreadyLoggedIn && console.log("————————————————————ALREADY LOGGED IN");
+    // isAuthenticated && console.log("————————————————————AUTHENTICATED");
+    // alreadyLoggedIn && console.log("————————————————————ALREADY LOGGED IN");
 
     // Cek jika pengguna terautentikasi, tetapi mencoba mengakses halaman awal atau halaman autentikasi sign-in
     if ((
@@ -59,7 +59,7 @@ function middleware(request: NextRequest) {
     }
     else {
       // Set status alreadyLoggedIn menjadi true setelah autentikasi yang valid
-      !alreadyLoggedIn && console.log("————————————————————LOGGED IN");
+      // !alreadyLoggedIn && console.log("————————————————————LOGGED IN");
       alreadyLoggedIn = true; 
 
       // Jika semua kondisi terpenuhi, lanjutkan dengan pemrosesan berikutnya
