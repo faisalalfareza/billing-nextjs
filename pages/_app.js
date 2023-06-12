@@ -173,7 +173,7 @@ function Main({ Component, pageProps, routes = setRoutes() }) {
       <Component {...pageProps} />
       {
         (layout === "dashboard") && 
-        (routes.filteredMain.length > 0) && 
+        // (routes.filteredMain.length > 0) && 
         (
           <>
             <Sidenav
