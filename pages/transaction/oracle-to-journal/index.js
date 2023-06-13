@@ -397,6 +397,83 @@ function OracleToJournal({ params }) {
     
     const [isDtBilling, setDtBilling] = useState([]);
 
+    const fetchBillingJournal = async (data) => {
+
+        Block.standard(`.${journalToOracleBlockLoadingName}`, `Getting Billing Journal Data`),
+        setLoading(true);
+
+        const { skipCount, recordsPerPage } = customerRequest;
+        const body = {
+            siteId: site?.siteId,
+            period: formValues.periodMethod?.periodId,
+            paymentType: formValues.paymentMethod?.paymentTypeId,
+            accountingDate: addDate(formValues.accountingDate),
+            bankPayment: bnkPayment,
+            paymentStartDate: addDate(formValues.paymentStartDate),
+            paymentEndDate: addDate(formValues.paymentEndDate)
+        };
+
+        let response = await fetch(
+            "/api/transaction/oracletojournal/FetchBillingJournalTaskList",
+            {
+                method: "POST",
+                body: JSON.stringify({
+                    accessToken: accessToken,
+                    params: body,
+                })
+            },
+        );
+
+        if(!response.ok) throw new Error(`Error: ${response.status}`);
+        response = typeNormalization(await response.json());
+
+        console.log(response.result);
+
+        if(response.error)  {
+            alertService.error({
+                title: "Error",
+                text: response.error.message,
+            });
+        } else {
+            let data = response.result;
+
+            setDtBilling = data;
+            
+            const list = [];
+            data.items?.map((e, i) => {
+                list.push({
+                    no: i + 1,
+                    projectname: e.projectName,
+                    clustername: e.clusterName,
+                    unitid: e.unitId,
+                    unitcode: e.unitCode,
+                    invoiceno: e.invoiceNo,
+                    receiptnumber: e.receiptNumber,
+                    pscode: e.psCode,
+                    billingdate: e.billingDate.substring(0, 10),
+                    invoicedate: e.invoiceDate.substring(0, 10),
+                    periodid: e.periodId,
+                    remarks: e.remarks,
+                    billingpaymentamount: e.billingPaymentAmount,
+                    generatedjournal: e.generatedJournal,
+                });
+            });
+            console.log(list);
+            // setlistDataJournal(list);
+            // console.log(list);
+            // console.log(list);
+            // setCustomerResponse((prevState) => ({
+            //     ...prevState,
+            //     rowData: list,
+            //     totalRows: data.totalCount,
+            //     totalPages: Math.ceil(data.totalCount / customerRequest.recordsPerPage),
+            // }));
+            // console.log(customerResponse);
+        }
+        Block.remove(`.${journalToOracleBlockLoadingName}`),
+        setLoading(false);
+    };
+
     const searchData = async (data) => {
 
         Block.standard(`.${journalToOracleBlockLoadingName}`, `Getting Journal Data`),
@@ -518,26 +595,35 @@ function OracleToJournal({ params }) {
       };
     
     const columns = [
+                    // no: i + 1,
+                    // projectname: e.projectName,
+                    // clustername: e.clusterName,
+                    // unitid: e.unitId,
+                    // unitcode: e.unitCode,
+                    // invoiceno: e.invoiceNo,
+                    // receiptnumber: e.receiptNumber,
+                    // pscode: e.psCode,
+                    // billingdate: e.billingDate.substring(0, 10),
+                    // invoicedate: e.invoiceDate.substring(0, 10),
+                    // periodid: e.periodId,
+                    // remarks: e.remarks,
+                    // billingpaymentamount: e.billingPaymentAmount
         {Header: "no", accessor: "no", width: "5%"},
-        {Header: "journalid", accessor: "journalid", width: "10%"},
-        {Header: "project", accessor: "project", width: "15%"},
-        {Header: "cluster", accessor: "cluster", width: "15%"},
-        {Header: "journaldate", accessor: "journaldate", width: "15%"},
-        {Header: "periodname", accessor: "periodname", width: "20%"},
-        {Header: "oracledesc", accessor: "oracledesc", width: "25%"},
-        {Header: "accountingdate", accessor: "accountingdate", width: "15%"},
-        {Header: "paymentdate", accessor: "paymentdate", width: "15%"},
-        {Header: "coa1", accessor: "coa1", width: "10%"},
-        {Header: "coa2", accessor: "coa2", width: "10%"},
-        {Header: "coa3", accessor: "coa3", width: "10%"},
-        {Header: "coa4", accessor: "coa4", width: "10%"},
-        {Header: "coa5", accessor: "coa5", width: "10%"},
-        {Header: "coa6", accessor: "coa6", width: "10%"},
-        {Header: "coa7", accessor: "coa7", width: "10%"},
+        {Header: "projectname", accessor: "projectname", width: "15%"},
+        {Header: "clustername", accessor: "clustername", width: "15%"},
+        {Header: "unitid", accessor: "unitid", width: "5%"},
+        {Header: "unitcode", accessor: "code", width: "5%"},
+        {Header: "invoiceno", accessor: "invoiceno", width: "10%"},
+        {Header: "receiptnumber", accessor: "receiptnumber", width: "10%"},
+        {Header: "pscode", accessor: "pscode", width: "5%"},
+        {Header: "billingdate", accessor: "billingdate", width: "5%"},
+        {Header: "invoicedate", accessor: "invoicedate", width: "10%"},
+        {Header: "periodid", accessor: "periodid", width: "5%"},
+        {Header: "remarks", accessor: "remarks", width: "5%"},
         {
-            Header: "debit", 
-            accessor: "debit", 
-            width: "10%",
+            Header: "billingpaymentamount", 
+            accessor: "billingpaymentamount", 
+            width: "15%",
             align: "right",
             Cell: ({ value }) => {
                 return (
@@ -551,40 +637,59 @@ function OracleToJournal({ params }) {
                 );
             },
         },
-        {
-            Header: "kredit", 
-            accessor: "kredit", 
-            width: "10%",
-            align: "right",
-            Cell: ({ value }) => {
-                return (
-                    <NumericFormat
-                    displayType="text"
-                    value={value}
-                    decimalSeparator=","
-                    prefix="Rp "
-                    thousandSeparator="."
-                    />
-                );
-            },
-        },
-        {Header: "istransfered", accessor: "istransfered", width: "10%"},
-        {Header: "groupid", accessor: "groupid", width: "10%"},
+        {Header: "generatedjournal", accessor: "generatedjournal", width: "10%"},
+        // {Header: "no", accessor: "no", width: "5%"},
+        // {Header: "journalid", accessor: "journalid", width: "10%"},
+        // {Header: "project", accessor: "project", width: "15%"},
+        // {Header: "cluster", accessor: "cluster", width: "15%"},
+        // {Header: "journaldate", accessor: "journaldate", width: "15%"},
+        // {Header: "periodname", accessor: "periodname", width: "20%"},
+        // {Header: "oracledesc", accessor: "oracledesc", width: "25%"},
+        // {Header: "accountingdate", accessor: "accountingdate", width: "15%"},
+        // {Header: "paymentdate", accessor: "paymentdate", width: "15%"},
+        // {Header: "coa1", accessor: "coa1", width: "10%"},
+        // {Header: "coa2", accessor: "coa2", width: "10%"},
+        // {Header: "coa3", accessor: "coa3", width: "10%"},
+        // {Header: "coa4", accessor: "coa4", width: "10%"},
+        // {Header: "coa5", accessor: "coa5", width: "10%"},
+        // {Header: "coa6", accessor: "coa6", width: "10%"},
+        // {Header: "coa7", accessor: "coa7", width: "10%"},
         // {
-        //     Header: "action",
-        //     accessor: "action",
-        //     align: "center",
-        //     sorted: true,
+        //     Header: "debit", 
+        //     accessor: "debit", 
+        //     width: "10%",
+        //     align: "right",
         //     Cell: ({ value }) => {
-        //       return (
-        //         <WaterRowActions
-        //           record={value}
-        //           openModalonEdit={openModalEdit}
-        //           onDeleted={fetchData}
-        //         />
-        //       );
+        //         return (
+        //             <NumericFormat
+        //             displayType="text"
+        //             value={value}
+        //             decimalSeparator=","
+        //             prefix="Rp "
+        //             thousandSeparator="."
+        //             />
+        //         );
         //     },
         // },
+        // {
+        //     Header: "kredit", 
+        //     accessor: "kredit", 
+        //     width: "10%",
+        //     align: "right",
+        //     Cell: ({ value }) => {
+        //         return (
+        //             <NumericFormat
+        //             displayType="text"
+        //             value={value}
+        //             decimalSeparator=","
+        //             prefix="Rp "
+        //             thousandSeparator="."
+        //             />
+        //         );
+        //     },
+        // },
+        // {Header: "istransfered", accessor: "istransfered", width: "10%"},
+        // {Header: "groupid", accessor: "groupid", width: "10%"},
     ];
 
     const [tasklist, setTasklist] = useState({ columns: columns, rows: [] });
@@ -855,7 +960,7 @@ function OracleToJournal({ params }) {
                                                                 style={{ marginRight : 20}}
                                                                 variant="outlined" 
                                                                 color="dark"
-                                                                onClick={searchData}
+                                                                onClick={fetchBillingJournal}
                                                                 disabled={isLoading || !isValifForm()}
                                                             >
                                                                 <Icon>search_outlined</Icon>&nbsp;{" "} 
