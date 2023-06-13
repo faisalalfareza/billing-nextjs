@@ -333,7 +333,7 @@ export default function WarningLetter(props) {
         errorMsg: "SP is required.",
         defaultValue: "",
       },
-      invoiceName: {
+      /* invoiceName: {
         name: "invoiceName",
         label: "Invoice Name",
         placeholder: "Type Invoice Name",
@@ -341,7 +341,7 @@ export default function WarningLetter(props) {
         isRequired: true,
         errorMsg: "Invoice Name is required.",
         defaultValue: "",
-      },
+      }, */
       txtSearch: {
         name: "txtSearch",
         placeholder: "Search Here",
@@ -359,7 +359,7 @@ export default function WarningLetter(props) {
     unitCode,
     unitNo,
     sp,
-    invoiceName,
+    /* invoiceName, */
     /* txtSearch, */
   } = form.formField;
 
@@ -370,7 +370,7 @@ export default function WarningLetter(props) {
     [unitCode.name]: null,
     [unitNo.name]: null,
     [sp.name]: null,
-    [invoiceName.name]: null,
+    /* [invoiceName.name]: null, */
     /* [txtSearch.name]: null, */
   };
 
@@ -395,9 +395,9 @@ export default function WarningLetter(props) {
       .required(unitNo.errorMsg)
       .typeError(unitNo.errorMsg),
     [sp.name]: Yup.object().required(sp.errorMsg).typeError(sp.errorMsg),
-    [invoiceName.name]: Yup.object()
+    /* [invoiceName.name]: Yup.object()
       .required(invoiceName.errorMsg)
-      .typeError(invoiceName.errorMsg),
+      .typeError(invoiceName.errorMsg), */
   });
 
   const checkingSuccessInput = (value, error) => {
@@ -511,37 +511,32 @@ export default function WarningLetter(props) {
         body: JSON.stringify({
           accessToken: accessToken,
           params: {
-            maxResultCount: 1000,
-            skipCount: 0,
+            /* maxResultCount: 1000,
+            skipCount: 0, */
             siteId: site?.siteId,
+            periodId: formValues.periode?.periodId,
             projectId: formValues.project?.projectId,
             clusterId: formValues.cluster?.clusterId,
-            cluster: formValues.cluster?.clusterCode,
+            cluster: formValues.cluster?.clusterName,
             unitCode: formValues.unitCode?.unitCode,
             unitNo: formValues.unitNo?.unitNo,
-            invoiceName: formValues.invoiceName?.invoiceName,
+            /* invoiceName: formValues.invoiceName?.invoiceName, */
             search: undefined,
-            sp: formValues.sp?.sp,
-            /* 
-              "projectId": 0,
-              "clusterId": 0,
-              "cluster": "string",
-              "unitCode": "string",
-              "unitNo": "string",
-              "invoiceName": "string",
-              "search": "string",
-              "sp": 0 
-            */
+            sp: formValues.sp?.spId,
+            
           },
         }),
       }
     );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
+    //console.log(response.result.uri);
+    if(response.result.uri != null){
+      if (response.error) alertService.error({ text: response.error.message, title: "Error" });
+      else downloadTempFile(response.result.uri);
+    }
 
-    if (response.error) alertService.error({ text: response.error.message, title: "Error" });
-    else downloadTempFile(response.result.uri);
-
+    
     Block.remove(`.${warningLetterBlockLoadingName}`);
   };
   /* end export excel */
@@ -652,12 +647,14 @@ export default function WarningLetter(props) {
       alertService.error({ title: "Error", text: response.error.message });
     else {
       let data = response.result;
+      //console.log("viewDetailWarLett = ", data);
+      setModalParams(response);
+      setOpenModal({
+        isOpen: !openModal.isOpen,
+        params: response.result,
+      });
     }
-    setModalParams(response);
-    setOpenModal({
-      isOpen: !openModal.isOpen,
-      params: response.result,
-    });
+    
   };
 
   const setCustomerTaskList = (list) => {
@@ -1060,46 +1057,7 @@ export default function WarningLetter(props) {
                                     )}
                                   />
                                 </Grid>
-                                <Grid item xs={12} sm={6}>
-                                  <Autocomplete
-                                    // disableCloseOnSelect
-                                    key={invoiceName.name}
-                                    options={dataInvoiceName}
-                                    value={values.invoiceName}
-                                    getOptionLabel={(option) =>
-                                      /* option.templateHeaderId +
-                                      " - " + */
-                                      option.invoiceName
-                                    }
-                                    onChange={(e, value) =>
-                                      setFieldValue(
-                                        invoiceName.name,
-                                        value !== null
-                                          ? value
-                                          : initialValues[invoiceName.name]
-                                      )
-                                    }
-                                    renderInput={(params) => (
-                                      <FormField
-                                        {...params}
-                                        type={invoiceName.type}
-                                        label={invoiceName.label} required
-                                        name={invoiceName.name}
-                                        placeholder={invoiceName.placeholder}
-                                        InputLabelProps={{ shrink: true }}
-                                        error={
-                                          errors.invoiceName &&
-                                          touched.invoiceName
-                                        }
-                                        success={checkingSuccessInput(
-                                          invoiceName,
-                                          errors.invoiceName
-                                        )}
-                                        className={invoiceBlockLoadingName}
-                                      />
-                                    )}
-                                  />
-                                </Grid>
+                                
                                 <Grid item xs={12}>
                                   <MDBox
                                     display="flex"
