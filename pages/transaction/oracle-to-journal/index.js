@@ -427,20 +427,23 @@ function OracleToJournal({ params }) {
         if(!response.ok) throw new Error(`Error: ${response.status}`);
         response = typeNormalization(await response.json());
 
-        console.log(response.result);
+        console.log("result", response.result);
 
-        if(response.error)  {
-            alertService.error({
-                title: "Error",
-                text: response.error.message,
+        if(response.result.length == 0)
+        {
+            alertService.info({
+                title: "Information",
+                text: "There is no row on your data filter",
             });
-        } else {
+        }
+        else
+        {
             let data = response.result;
-
+            console.log("data", data);
             setDtBilling = data;
             
             const list = [];
-            data.items?.map((e, i) => {
+            data.map((e, i) => {
                 list.push({
                     no: i + 1,
                     projectname: e.projectName,
@@ -458,18 +461,15 @@ function OracleToJournal({ params }) {
                     generatedjournal: e.generatedJournal,
                 });
             });
-            console.log(list);
-            // setlistDataJournal(list);
-            // console.log(list);
-            // console.log(list);
-            // setCustomerResponse((prevState) => ({
-            //     ...prevState,
-            //     rowData: list,
-            //     totalRows: data.totalCount,
-            //     totalPages: Math.ceil(data.totalCount / customerRequest.recordsPerPage),
-            // }));
-            // console.log(customerResponse);
+            console.log("list", list);
+            setCustomerResponse((prevState) => ({
+                ...prevState,
+                rowData: list,
+                totalRows: 1,
+                totalPages: 1,
+            }));
         }
+        
         Block.remove(`.${journalToOracleBlockLoadingName}`),
         setLoading(false);
     };
@@ -612,7 +612,7 @@ function OracleToJournal({ params }) {
         {Header: "projectname", accessor: "projectname", width: "15%"},
         {Header: "clustername", accessor: "clustername", width: "15%"},
         {Header: "unitid", accessor: "unitid", width: "5%"},
-        {Header: "unitcode", accessor: "code", width: "5%"},
+        {Header: "unitcode", accessor: "unitcode", width: "5%"},
         {Header: "invoiceno", accessor: "invoiceno", width: "10%"},
         {Header: "receiptnumber", accessor: "receiptnumber", width: "10%"},
         {Header: "pscode", accessor: "pscode", width: "5%"},
