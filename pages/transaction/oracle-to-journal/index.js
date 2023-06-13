@@ -394,6 +394,8 @@ function OracleToJournal({ params }) {
         recordsPerPage: 10,
         skipCount: 1,
     })
+    
+    const [isDtBilling, setDtBilling] = useState([]);
 
     const searchData = async (data) => {
 
@@ -436,6 +438,8 @@ function OracleToJournal({ params }) {
             });
         } else {
             let data = response.result;
+
+            setDtBilling = data;
             
             const list = [];
             data.items.map((e, i) => {
@@ -611,8 +615,8 @@ function OracleToJournal({ params }) {
                     </Grid>
                 </Grid>
             </MDBox>
-            <MDBox py={3}>
-                <Grid container spacing={3}>
+            <MDBox mt={2}>
+                <Grid container spacing={2}>
                     <Grid item xs={12}>
                         <Card>
                             <MDBox p={3} lineHeight={1}>
@@ -688,7 +692,10 @@ function OracleToJournal({ params }) {
                                                                     <FormField
                                                                         {...params}
                                                                         type={periodMethod.type}
-                                                                        label={periodMethod.label}
+                                                                        label={
+                                                                            periodMethod.label +
+                                                                            (periodMethod.isRequired ? " ⁽*⁾" : "")
+                                                                        }
                                                                         name={periodMethod.name}
                                                                         placeholder={periodMethod.placeholder}
                                                                         InputLabelProps={{ shrink: true }}
@@ -857,46 +864,6 @@ function OracleToJournal({ params }) {
                                                                         "Search"
                                                                     }
                                                             </MDButton>
-                                                            <MDButton 
-                                                                style={{ marginRight : 20}}
-                                                                variant="outlined" 
-                                                                color="dark"
-                                                                onClick={generatePaymentJournal}
-                                                                disabled={isLoadingGenerate || !isValifForm()}
-                                                            >
-                                                                <Icon>add_outlined</Icon>&nbsp;{" "}
-                                                                    {isLoadingGenerate ?
-                                                                        "Generate Payment Journal..." :
-                                                                        "Generate Payment Journal"
-                                                                    }
-                                                            </MDButton>
-                                                            <MDButton 
-                                                                style={{ marginRight : 20}}
-                                                                variant="outlined" 
-                                                                color="dark"
-                                                                onClick = {handleExportToExcel}
-                                                                disabled={isLoadingExport || !isValifForm()}
-                                                            >
-                                                                <Icon>article_outlined</Icon>&nbsp;{" "} 
-                                                                    {isLoadingExport ?
-                                                                        "Export to Excel..." :
-                                                                        "Export to Excel"
-                                                                    }
-                                                                
-                                                            </MDButton>
-                                                            <MDButton
-                                                                variant="gradient"
-                                                                color="primary"
-                                                                sx={{ height: "100%" }}
-                                                                onClick={uploadJournalToOracle}
-                                                                disabled={isLoadingUpload || !isValifForm()}
-                                                            >
-                                                                <Icon>upload</Icon>&nbsp;{" "} 
-                                                                    {isLoadingUpload ?
-                                                                        "Upload to Oracle..." :
-                                                                        "Upload to Oracle"
-                                                                    }
-                                                            </MDButton>
                                                         </Grid>
                                                     </MDBox>
                                                 </Form>
@@ -911,30 +878,81 @@ function OracleToJournal({ params }) {
                     </Grid>
                 </Grid>
             </MDBox>
-            <Card className={journalToOracleBlockLoadingName}>
-                <MDBox>
-                <Grid container alignItems="center">
-                    <Grid item xs={12}>
-                        <DataTable 
-                            title="Oracle To Journal"
-                            description="Generated Journal for transfer to Oracle"
-                            table={setCustomerTaskList(customerResponse.rowData)}
-                            manualPagination={true}
-                            totalRows={customerResponse.totalRows}
-                            totalPages={customerResponse.totalPages}
-                            recordsPerPage={customerResponse.recordsPerPage}
-                            skipCount={customerRequest.skipCount}
-                            pageChangeHandler={skipCountChangeHandler}
-                            recordsPerPageChangeHandler={recordsPerPageChangeHandler}
-                            entriesPerPage={{ 
-                                defaultValue: customerRequest.recordsPerPage,
-                            }}
-                            pagination={{ variant: "gradient", color: "primary" }}
-                        />
-                    </Grid>
-                </Grid>
+            <MDBox mt={3.5} id="oracle">
+                <MDBox
+                    display="flex"
+                    justifyContent="flex-end"
+                    alignItems="flex-start"
+                    mb={2}
+                >
+                    <MDBox display="flex">
+                        <MDButton 
+                        style={{ marginRight : 20}}
+                        variant="outlined" 
+                        color="dark"
+                        onClick={generatePaymentJournal}
+                        disabled={isDtBilling.length == 0 || isLoadingGenerate}
+                    >
+                        <Icon>add_outlined</Icon>&nbsp;{" "}
+                            {isLoadingGenerate ?
+                                "Generate Payment Journal..." :
+                                "Generate Payment Journal"
+                            }
+                    </MDButton>
+                    <MDButton 
+                        style={{ marginRight : 20}}
+                        variant="outlined" 
+                        color="dark"
+                        onClick = {handleExportToExcel}
+                        disabled={isDtBilling.length == 0 || isLoadingExport}
+                    >
+                        <Icon>article_outlined</Icon>&nbsp;{" "} 
+                            {isLoadingExport ?
+                                "Export to Excel..." :
+                                "Export to Excel"
+                            }
+                        
+                    </MDButton>
+                    <MDButton
+                        variant="gradient"
+                        color="primary"
+                        sx={{ height: "100%" }}
+                        onClick={uploadJournalToOracle}
+                        disabled={isDtBilling.length == 0 || isLoadingUpload}
+                    >
+                        <Icon>upload</Icon>&nbsp;{" "} 
+                            {isLoadingUpload ?
+                                "Upload to Oracle..." :
+                                "Upload to Oracle"
+                            }
+                    </MDButton>                  
+                    </MDBox>
                 </MDBox>
-            </Card>
+                <Card className={journalToOracleBlockLoadingName}>
+                    <MDBox>
+                    <Grid container alignItems="center">
+                        <Grid item xs={12}>
+                            <DataTable 
+                                title="Oracle To Journal"
+                                description="List of Billing Payment"
+                                table={setCustomerTaskList(customerResponse.rowData)}
+                                manualPagination={true}
+                                totalRows={customerResponse.totalRows}
+                                totalPages={customerResponse.totalPages}
+                                recordsPerPage={customerResponse.recordsPerPage}
+                                skipCount={customerRequest.skipCount}
+                                pageChangeHandler={skipCountChangeHandler}
+                                recordsPerPageChangeHandler={recordsPerPageChangeHandler}
+                                entriesPerPage={{ 
+                                    defaultValue: customerRequest.recordsPerPage,
+                                }}
+                                pagination={{ variant: "gradient", color: "primary" }}
+                            />
+                        </Grid>
+                    </Grid>
+                    </MDBox>
+                </Card>
+            </MDBox>        
         </DashboardLayout>
     )
 }
