@@ -442,7 +442,7 @@ export default function WarningLetter(props) {
       setLoading(true);
 
     const { scheme, keywords, recordsPerPage, skipCount } = customerRequest;
-    let response = await fetch("/api/transaction/warningletter/list", {
+    let response = await fetch("/api/transaction/warningletter/GetWarningLetterList", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
@@ -452,6 +452,8 @@ export default function WarningLetter(props) {
           ProjectId: formValues.project?.projectId,
           ClusterId: formValues.cluster?.clusterId,
           UnitNo: formValues.unitNo?.unitNo,
+          UnitCode: formValues.unitNo?.unitCode,
+          Cluster: formValues.cluster?.clusterName,
           sp: formValues.sp?.spId,
           MaxResultCount: recordsPerPage,
           SkipCount: skipCount,

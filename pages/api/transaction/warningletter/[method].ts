@@ -12,7 +12,7 @@ export default async function handler(
     switch (method) {
         case "POST":
           switch (query.method) {
-            case "list":
+            case "GetWarningLetterList":
               getList(res, body);
               break;
             case "dropdownperiod":
