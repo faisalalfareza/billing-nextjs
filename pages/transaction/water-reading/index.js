@@ -27,6 +27,7 @@ import WaterRowActions from "./components/WaterRowActions";
 import EditDataWater from "./components/EditDataWater";
 import SiteDropdown from "../../../pagesComponents/dropdown/Site";
 import { Block } from "notiflix/build/notiflix-block-aio";
+import ClusterMultiSelect from "../../../pagesComponents/dropdown/ClusterMultiSelect";
 
 export default function WaterReading(props) {
   const [controller] = useMaterialUIController();
@@ -512,6 +513,33 @@ export default function WaterReading(props) {
                                     onToggleOption={handleToggleOption}
                                     onClearOptions={handleClearOptions}
                                     onSelectAll={handleSelectAll}
+                                    onChange={(e, value) =>
+                                      setFieldValue(
+                                        cluster.name,
+                                        value !== null
+                                          ? value
+                                          : initialValues[cluster.name]
+                                      )
+                                    }
+                                    renderInput={(params) => (
+                                      <FormField
+                                        required={cluster.isRequired}
+                                        {...params}
+                                        type={cluster.type}
+                                        label={cluster.label}
+                                        name={cluster.name}
+                                        placeholder={cluster.placeholder}
+                                        InputLabelProps={{ shrink: true }}
+                                        error={
+                                          errors.cluster && touched.cluster
+                                        }
+                                        success={checkingSuccessInput(
+                                          formValues.cluster,
+                                          errors.cluster
+                                        )}
+                                        className={clusterBlockLoadingName}
+                                      />
+                                    )}
                                   /> */}
                                   <Autocomplete
                                     // disableCloseOnSelect

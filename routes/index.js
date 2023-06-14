@@ -49,6 +49,7 @@ import AccountBalanceWallet from "@mui/icons-material/AccountBalanceWallet";
 import Source from "@mui/icons-material/Source";
 import Today from "@mui/icons-material/Today";
 import TableView from "@mui/icons-material/TableView";
+import HandymanIcon from "@mui/icons-material/Handyman";
 
 import MDAvatar from "../components/MDAvatar";
 import profilePicture from "../assets/images/team-3.jpg";
@@ -62,7 +63,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
       name: informations
         ? capitalizeFirstLetter(informations["user"]["userName"])
         : "~",
-      key: "username",
+      key: "profile",
       // icon: <MDAvatar src={profilePicture.src} size="sm" />,
       icon: profiles ? (
         <MDAvatar src={`data:image/png;base64, ${profiles}`} size="sm" />
@@ -70,6 +71,13 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
         <AccountCircle fontSize="medium" />
       ),
       collapse: [
+        {
+          name: "Change Password",
+          key: "change-password",
+          nameOnHeader: "Change Password",
+          route: "/profile/change-password",
+          icon: <HandymanIcon fontSize="medium" />,
+        },
         {
           name: "Logout",
           key: "logout",
