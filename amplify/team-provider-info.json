@@ -10,6 +10,14 @@
       "StackName": "amplify-billingnextjs-dev-161542",
       "StackId": "arn:aws:cloudformation:ap-southeast-1:301296042592:stack/amplify-billingnextjs-dev-161542/09b2bb90-0a94-11ee-a9b1-02cee91e39c4",
       "AmplifyAppId": "d25kbhuqk9c311"
+    },
+    "categories": {
+      "hosting": {
+        "amplifyhosting": {
+          "appId": "d25kbhuqk9c311",
+          "type": "cicd"
+        }
+      }
     }
   }
 }
