@@ -89,7 +89,6 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
       nameOnHeader: "Dashboards",
       key: "dashboards",
       route: "/dashboards",
-      // permission: "Pages.Tenant.Dashboard",
       icon: <Dashboard fontSize="medium" />,
       noCollapse: true,
     },
@@ -99,7 +98,6 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
       name: "Master",
       nameOnHeader: "Master",
       key: "master",
-      // permission: "Pages.Tenants.GenerateNoSeriFP",
       icon: <Dns fontSize="medium" />,
       collapse: [
         {
@@ -107,16 +105,16 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           nameOnHeader: "Master Site",
           key: "site",
           route: "/master/site",
-          // permission: "Pages.Tenants.GenerateNoSeriFP.Create",
           icon: <AddBusiness fontSize="medium" />,
+          permission: "Pages.Master.MasterSite"
         },
         {
           name: "Master Period",
           nameOnHeader: "Master Period",
           key: "period",
           route: "/master/period",
-          // permission: "Pages.Tenants.GenerateNoSeriFP.Create",
           icon: <CalendarToday fontSize="medium" />,
+          permission: "Pages.Master.MasterPeriod"
         },
 
         // {
@@ -160,6 +158,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           key: "unit-item",
           route: "/master/unit-item",
           icon: <FactCheck fontSize="medium" />,
+          permission: "Pages.Master.MasterUnitItem"
         },
         // {
         //   name: "Master Oracle Mapping",
@@ -176,7 +175,6 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
       name: "Transaction",
       nameOnHeader: "Transaction",
       key: "transaction",
-      // permission: "Pages.Tenants.GenerateNoSeriFP",
       icon: <MultipleStop fontSize="medium" />,
       collapse: [
         {
@@ -184,32 +182,32 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           nameOnHeader: "Water Reading",
           key: "water-reading",
           route: "/transaction/water-reading",
-          // permission: "Pages.Tenants.GenerateNoSeriFP.Create",
           icon: <WaterDamage fontSize="medium" />,
+          permission: "Pages.WaterReading"
         },
         {
           name: "Invoice",
           nameOnHeader: "Invoice",
           key: "invoice",
           route: "/transaction/invoice",
-          // permission: "Pages.Tenants.GenerateNoSeriFP.List",
           icon: <Description fontSize="medium" />,
+          permission: "Pages.Transaction.Invoice"
         },
         {
           name: "Warning Letter",
           nameOnHeader: "Warning Letter",
           key: "warning-letter",
           route: "/transaction/warning-letter",
-          // permission: "Pages.Tenants.GenerateNoSeriFP.Create",
           icon: <MarkEmailUnreadIcon fontSize="medium" />,
+          permission: "Pages.Transaction.WarningLetter"
         },
         {
           name: "Oracle To Journal",
           nameOnHeader: "Oracle To Journal",
           key: "oracle-to-journal",
           route: "/transaction/oracle-to-journal",
-          // permission: "Pages.Tenants.GenerateNoSeriFP.Create",
           icon: <Book fontSize="medium" />,
+          permission: "Pages.Transaction.OracleToJournal"
         },
 
         // {
@@ -231,8 +229,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
       type: "collapse",
       name: "Cashier System",
       nameOnHeader: "Cashier System",
-      key: "cashier",
-      // permission: "Pages.Tenants.GenerateNoSeriFP",
+      key: "cashier", 
       icon: <Payments fontSize="medium" />,
       collapse: [
         {
@@ -240,8 +237,8 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           nameOnHeader: "Billing Payment",
           key: "billing-payment",
           route: "/cashier/billing-payment",
-          // permission: "Pages.Tenants.GenerateNoSeriFP.Create",
           icon: <AttachMoney fontSize="medium" />,
+          permission: "Pages.Cashier.BillingPayment"
         },
         {
           name: "Reprint OR",
@@ -249,21 +246,23 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           key: "reprint-or",
           route: "/cashier/reprint-or",
           icon: <Receipt fontSize="medium" />,
+          permission: "Pages.Cashier.ReprintOR"
         },
         {
           name: "Cancel Payment",
           nameOnHeader: "Cancel Payment",
           key: "cancel-payment",
-          route: "/cashier/cancel-payment",
+          route: "/cashier/cancel-payment",   
           icon: <MoneyOffIcon fontSize="medium" />,
+          permission: "Pages.Cashier.CancelPayment"
         },
         {
           name: "Upload Bulk Payment",
           nameOnHeader: "Upload Bulk Payment",
           key: "upload-bulk-payment",
           route: "/cashier/upload-bulk-payment",
-          // permission: "Pages.Tenants.GenerateNoSeriFP.List",
           icon: <AccountBalanceWallet fontSize="medium" />,
+          permission: "Pages.Cashier.UploadBulk"
         },
       ],
     },
@@ -273,7 +272,6 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
       name: "Report",
       nameOnHeader: "Report",
       key: "report",
-      // permission: "Pages.Tenants.GenerateNoSeriFP",
       icon: <Source fontSize="medium" />,
       collapse: [
         {
@@ -281,16 +279,16 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           nameOnHeader: "Report Invoice",
           key: "report-invoice",
           route: "/report/report-invoice",
-          // permission: "Pages.Tenants.GenerateNoSeriFP.List",
           icon: <Description fontSize="medium" />,
+          permission: "Pages.Report.ReportInvoice"
         },
         {
           name: "Daily Report",
           nameOnHeader: "Report Daily",
           key: "report-daily",
           route: "/report/report-daily",
-          // permission: "Pages.Tenants.GenerateNoSeriFP.Create",
           icon: <Today fontSize="medium" />,
+          permission: "Pages.Report.DailyReport"
         },
 
         {
@@ -299,6 +297,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           key: "report-detail-statement",
           route: "/report/report-detail-statement",
           icon: <TableView fontSize="medium" />,
+          permission: "Pages.Report.ReportDetailStatment"
         },
         // {
         //   name: "Report Water Reading",
@@ -321,7 +320,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
         //   key: "report-customer-complaint",
         //   route: "/report/report-customer-complaint",
         //   permission: "Pages.Tenants.GenerateNoSeriFP.List",
-        // },z
+        // },
       ],
     },
   ];
@@ -331,7 +330,7 @@ function setFilteredMain(permissions = getPermission(), main = setMain()) {
   permissions &&
     main.forEach((p) => {
       if (p.type == "collapse" && p.permission != undefined) {
-        //Parent
+        // Parent
         if (checkPermission(p.permission)) {
           // Check parrent permissions
 
@@ -393,10 +392,11 @@ export default function setRoutes(
   const filteredMain = setFilteredMain(permissions, main);
   const reformatedMain = setReformatedMain(filteredMain);
 
-  // console.log("Permissions: ", permissions);
-  // ("Routes (Before): ", main);
-  // console.log("Routes (After): ", filteredMain);
-  // console.log("Routes (After - Reformated): ", reformatedMain);
+  console.log("Permissions: ", permissions);
+  console.log("Routes (Before): ", main);
+  console.log("Routes (After): ", filteredMain);
+  console.log("Routes (After - Reformated): ", reformatedMain);
+  console.log("\n\n");
 
   return {
     main,
