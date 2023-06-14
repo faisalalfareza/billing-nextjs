@@ -4,11 +4,11 @@
       "AuthRoleName": "amplify-billingnextjs-dev-112006-authRole",
       "UnauthRoleArn": "arn:aws:iam::301296042592:role/amplify-billingnextjs-dev-112006-unauthRole",
       "AuthRoleArn": "arn:aws:iam::301296042592:role/amplify-billingnextjs-dev-112006-authRole",
-      "Region": "ap-southeast-2",
+      "Region": "ap-southeast-1",
       "DeploymentBucketName": "amplify-billingnextjs-dev-112006-deployment",
       "UnauthRoleName": "amplify-billingnextjs-dev-112006-unauthRole",
       "StackName": "amplify-billingnextjs-dev-112006",
-      "StackId": "arn:aws:cloudformation:ap-southeast-2:301296042592:stack/amplify-billingnextjs-dev-112006/c0510390-0a6a-11ee-93c5-0ae4642ed2a0",
+      "StackId": "arn:aws:cloudformation:ap-southeast-1:301296042592:stack/amplify-billingnextjs-dev-112006/c0510390-0a6a-11ee-93c5-0ae4642ed2a0",
       "AmplifyAppId": "d29thwdfbeah36"
     },
     "categories": {
