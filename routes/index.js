@@ -71,13 +71,13 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
         <AccountCircle fontSize="medium" />
       ),
       collapse: [
-        {
-          name: "Change Password",
-          key: "change-password",
-          nameOnHeader: "Change Password",
-          route: "/profile/change-password",
-          icon: <HandymanIcon fontSize="medium" />,
-        },
+        // {
+        //   name: "Change Password",
+        //   key: "change-password",
+        //   nameOnHeader: "Change Password",
+        //   route: "/profile/change-password",
+        //   icon: <HandymanIcon fontSize="medium" />,
+        // },
         {
           name: "Logout",
           key: "logout",
