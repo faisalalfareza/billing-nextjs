@@ -394,7 +394,7 @@ export default function setRoutes(
   const reformatedMain = setReformatedMain(filteredMain);
 
   // console.log("Permissions: ", permissions);
-  // ("Routes (Before): ", main);
+  // console.log("Routes (Before): ", main);
   // console.log("Routes (After): ", filteredMain);
   // console.log("Routes (After - Reformated): ", reformatedMain);
 
