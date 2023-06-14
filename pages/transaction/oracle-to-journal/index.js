@@ -306,18 +306,31 @@ function OracleToJournal({ params }) {
         });
         if(!response.ok) throw new Error(`Error: ${response.status}`);
         response = typeNormalization(await response.json());
-        console.log(response);
-        if(!response.status == 'success') alertService.error({ title: "Error", text: response.errorMessage});
-        else{
-            //if(response.success){
-                Swal.fire({
-                    title: 'Payment Journal Generated',
-                    html: `Payment Journal Successfully Generated`,
-                    icon: "success",
-                    timerProgressBar: true,
-                    timer:  3000,
-                });
+
+        console.log("response generate", response);
+
+        if(response.result.status == 'success') 
+        {
+             //if(response.success){
+            Swal.fire({
+                title: 'Payment Journal Generated',
+                html: `Payment Journal Successfully Generated`,
+                icon: "success",
+                timerProgressBar: true,
+                timer:  3000,
+            });
             //} 
+            //alertService.error({ title: "Error", text: response.errorMessage});
+        }
+        else
+        {
+            Swal.fire({
+                title: 'Generate Failed',
+                html: `Payment Journal failed to generated`,
+                icon: "error",
+                timerProgressBar: true,
+                timer:  3000,
+            });
         } 
         setLoadingGenerate(false);
         //setLoadingPaymentJournal(false);
@@ -427,7 +440,7 @@ function OracleToJournal({ params }) {
         if(!response.ok) throw new Error(`Error: ${response.status}`);
         response = typeNormalization(await response.json());
 
-        console.log("result", response.result);
+        // console.log("result", response.result);
 
         if(response.result.length == 0)
         {
@@ -439,9 +452,9 @@ function OracleToJournal({ params }) {
         else
         {
             let data = response.result;
-            console.log("data", data);
-            setDtBilling = data;
-            
+            // console.log("data", data);
+            setDtBilling(data);
+
             const list = [];
             data.map((e, i) => {
                 list.push({
@@ -455,10 +468,19 @@ function OracleToJournal({ params }) {
                     pscode: e.psCode,
                     billingdate: e.billingDate.substring(0, 10),
                     invoicedate: e.invoiceDate.substring(0, 10),
-                    periodid: e.periodId,
+                    periodname: e.periodName,
                     remarks: e.remarks,
-                    billingpaymentamount: e.billingPaymentAmount,
-                    generatedjournal: e.generatedJournal,
+                    oracledesc: e.oracleDesc,
+                    debit: e.debit,
+                    kredit: e.kredit,
+                    coa1: e.coA1,
+                    coa2: e.coA2,
+                    coa3: e.coA3,
+                    coa4: e.coA4,
+                    coa5: e.coA5,
+                    coa6: e.coA6,
+                    coa7: e.coA7,
+                    groupid: e.groupId
                 });
             });
             console.log("list", list);
@@ -618,11 +640,12 @@ function OracleToJournal({ params }) {
         {Header: "pscode", accessor: "pscode", width: "5%"},
         {Header: "billingdate", accessor: "billingdate", width: "5%"},
         {Header: "invoicedate", accessor: "invoicedate", width: "10%"},
-        {Header: "periodid", accessor: "periodid", width: "5%"},
+        {Header: "periodname", accessor: "periodname", width: "5%"},
         {Header: "remarks", accessor: "remarks", width: "5%"},
+        {Header: "oracledesc", accessor: "oracledesc", width: "10%"},
         {
-            Header: "billingpaymentamount", 
-            accessor: "billingpaymentamount", 
+            Header: "debit", 
+            accessor: "debit", 
             width: "15%",
             align: "right",
             Cell: ({ value }) => {
@@ -637,7 +660,31 @@ function OracleToJournal({ params }) {
                 );
             },
         },
-        {Header: "generatedjournal", accessor: "generatedjournal", width: "10%"},
+        {
+            Header: "kredit", 
+            accessor: "kredit", 
+            width: "15%",
+            align: "right",
+            Cell: ({ value }) => {
+                return (
+                    <NumericFormat
+                    displayType="text"
+                    value={value}
+                    decimalSeparator=","
+                    prefix="Rp "
+                    thousandSeparator="."
+                    />
+                );
+            },
+        },
+        {Header: "coa1", accessor: "coa1", width: "5%"},
+        {Header: "coa2", accessor: "coa2", width: "5%"},
+        {Header: "coa3", accessor: "coa3", width: "5%"},
+        {Header: "coa4", accessor: "coa4", width: "5%"},
+        {Header: "coa5", accessor: "coa5", width: "5%"},
+        {Header: "coa6", accessor: "coa6", width: "5%"},
+        {Header: "coa7", accessor: "coa7", width: "5%"},
+        {Header: "groupid", accessor: "groupid", width: "5%"},
         // {Header: "no", accessor: "no", width: "5%"},
         // {Header: "journalid", accessor: "journalid", width: "10%"},
         // {Header: "project", accessor: "project", width: "15%"},
