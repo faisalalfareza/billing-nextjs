@@ -297,7 +297,7 @@ async function adjust(res: any, body: any) {
     )
     .catch((error) =>
       res.send({
-        error: error,
+        error: error.response.data,
       })
     );
 }

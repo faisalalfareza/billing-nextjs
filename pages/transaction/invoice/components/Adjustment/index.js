@@ -25,7 +25,10 @@ export default function Adjustment(props) {
 
   const adjustInvoiceBlockLoadingName = "block-adjust-invoice";
   const adjustData = async (values, actions) => {
-    Block.standard(`.${adjustInvoiceBlockLoadingName}`, `Adjusting & Regenerating Invoice`),
+    Block.standard(
+      `.${adjustInvoiceBlockLoadingName}`,
+      `Adjusting & Regenerating Invoice`
+    ),
       setLoading(true);
 
     let response = await fetch(
@@ -44,7 +47,10 @@ export default function Adjustment(props) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+    if (response.error)
+      alertService.info({
+        title: response.error.error.message,
+      });
     else {
       alertService.success({
         title: "Adjustment Succesfull",
@@ -53,8 +59,7 @@ export default function Adjustment(props) {
       close();
     }
 
-    Block.remove(`.${adjustInvoiceBlockLoadingName}`),
-      setLoading(false);
+    Block.remove(`.${adjustInvoiceBlockLoadingName}`), setLoading(false);
   };
   const toggle = () => setModal(!modal);
 

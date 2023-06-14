@@ -553,6 +553,8 @@ function BillingPayment() {
       bankId: fields.bank?.bankID,
       remarks: fields.remarks,
       listInvoicePayment: detailPaymentData,
+      isAddSignee: fields.isAddSignee,
+      transactionDate: fields.transactionDate,
     };
 
     let response = await fetch("/api/cashier/billing/paymentproses", {
@@ -574,7 +576,7 @@ function BillingPayment() {
         text: "Official receipt document will be displayed and will be sent to the customer via email",
       }).then(() => {
         let data = response.result;
-        data != null && window.open(data, "_blank");
+        data != null && formValues.isPrintOR && window.open(data, "_blank");
       });
       setCustomerRequest((prevState) => ({
         ...prevState,
@@ -1316,7 +1318,6 @@ function BillingPayment() {
                                     <FormControlLabel
                                       control={
                                         <Checkbox
-                                          disabled={!formValues.isPrintOR}
                                           name="print-or"
                                           color="primary"
                                           checked={formValues.isPrintOR}
@@ -1335,7 +1336,6 @@ function BillingPayment() {
                                     <FormControlLabel
                                       control={
                                         <Checkbox
-                                          disabled={!formValues.isAddSignee}
                                           name="add-signee"
                                           color="primary"
                                           checked={formValues.isAddSignee}
