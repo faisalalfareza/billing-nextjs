@@ -420,6 +420,7 @@ export function getInformation() {
 
   return;
 }
+
 export function getPermission() {
   if (typeof window !== "undefined") {
     return JSON.parse(localStorage.getItem("grantedPermissions"));
@@ -437,6 +438,7 @@ export function checkPermission(testPermission, permissions = getPermission()) {
 
   return;
 }
+
 export function getProfile() {
   if (typeof window !== "undefined") {
     return localStorage.getItem("profilePicture");
