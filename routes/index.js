@@ -430,7 +430,7 @@ export function getPermission() {
 }
 export function checkPermission(testPermission, permissions = getPermission()) {
   if (permissions != null || permissions != undefined) {
-    const checking =
+    let checking =
       permissions[testPermission] &&
       ["true", true].indexOf(permissions[testPermission]) != -1;
     return checking;
