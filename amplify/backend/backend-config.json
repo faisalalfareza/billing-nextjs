@@ -1,27 +1,9 @@
 {
   "hosting": {
     "amplifyhosting": {
-      "lastPushTimeStamp": "2023-06-14T10:01:26.149Z",
+      "lastPushTimeStamp": "2023-06-15T06:27:58.948Z",
       "service": "amplifyhosting",
       "type": "cicd"
-    }
-  },
-  "parameters": {
-    "AMPLIFY_hosting_amplifyhosting_appId": {
-      "usedBy": [
-        {
-          "category": "hosting",
-          "resourceName": "amplifyhosting"
-        }
-      ]
-    },
-    "AMPLIFY_hosting_amplifyhosting_type": {
-      "usedBy": [
-        {
-          "category": "hosting",
-          "resourceName": "amplifyhosting"
-        }
-      ]
     }
   }
 }
