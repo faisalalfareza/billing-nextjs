@@ -203,6 +203,7 @@ function OracleToJournal({ params }) {
             formikRef.current.setFieldValue("paymentEndDate", null);
             formikRef.current.setFieldValue("accountingDate", null);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [site]);
 
     const getDropdownPaymentMethod = async () => { 
