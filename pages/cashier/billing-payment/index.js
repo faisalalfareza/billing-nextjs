@@ -624,6 +624,7 @@ function BillingPayment() {
 
   const debouncedChangeHandler = useMemo(() => {
     return debounce(paymentAmountChange, 1000);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [detailPaymentData]);
 
   useEffect(() => {

@@ -37,6 +37,7 @@ export default function DetailTemplate(props) {
     if (params) {
       getContent();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params]);
   const toggle = () => setModal(!modal);
 
