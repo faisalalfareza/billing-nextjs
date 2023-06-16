@@ -185,7 +185,7 @@ async function uploadExcel(res: any, body: any) {
     })
     .catch((error) => {
       res.send({
-        error: error,
+        error: error.response.data,
       });
     });
 }
