@@ -321,7 +321,7 @@ function BillingPayment() {
     response = typeNormalization(await response.json());
 
     if (response.error)
-      alertService.info({ title: response.error.error.message });
+      alertService.warn({ title: response.error.error.message });
     else {
       const result = response.result.listInvoicePayment;
       result.map((e) => (e["paymentTemp"] = e.paymentAmount));
