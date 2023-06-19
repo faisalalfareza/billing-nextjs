@@ -535,6 +535,13 @@ function BillingPayment() {
   };
   const [formValues, setformValues] = useState(initialValues);
 
+  useEffect(() => {
+    console.log("form-----", formValues);
+    if (formValues.amountPayment != undefined)
+      setTotalPay(formValues.amountPayment);
+    else setTotalPay(0);
+  }, [formValues]);
+
   const paymentProcess = async (fields, actions) => {
     Block.standard(`.${detailPaymentLoadingName}`, `Process Payments`),
       setLoading(true);
@@ -568,7 +575,10 @@ function BillingPayment() {
     response = typeNormalization(await response.json());
 
     if (response.error)
-      alertService.error({ title: "Error", text: response.error.message });
+      alertService.error({
+        title: "Error",
+        text: response.error.error.message,
+      });
     else {
       Swal.fire({
         icon: "success",
@@ -1222,9 +1232,6 @@ function BillingPayment() {
                                             "amountPayment",
                                             val.floatValue
                                           );
-                                          if (val.floatValue != undefined)
-                                            setTotalPay(val.floatValue);
-                                          else setTotalPay(0);
                                         }}
                                         error={
                                           errors.amountPayment &&
