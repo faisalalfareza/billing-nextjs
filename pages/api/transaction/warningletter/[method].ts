@@ -15,25 +15,28 @@ export default async function handler(
             case "GetWarningLetterList":
               getList(res, body);
               break;
-            case "dropdownperiod":
+            case "GetDropdownPeriodBySiteId":
               getDropdownPeriod(res, body);
               break;
-            case "dropdownproject":
+            case "GetDropdownProjectBySiteId":
               getDropdownProject(res, body);
               break;
             case "GetDropdownClusterByProject":
               getDropdownCluster(res, body);
               break;
-            case "dropdownunitcode":
+            case "GetDropdownUnitCodeByCluster":
               getDropdownUnitCode(res, body);
               break;
-            case "dropdownunitno":
+            /* case "GetDropdownUnitInvoice":
+              getDropdownUnitNo(res, body);
+              break; */
+            case "GetDropdownUnitNoByCluster":
               getDropdownUnitNo(res, body);
               break;
-            case "dropdownsp":
+            case "GetDropdownSPWarLett":
               getDropdownSP(res, body);
               break;
-            case "dropdowninvoicename":
+            case "GetDropdownInvoiceNameWarLett":
               getDropdownInvoiceName(res, body);
               break;
             case "viewDetailWarLett":
@@ -192,7 +195,7 @@ async function getDropdownPeriod(res: any, body: any) {
   async function getDropdownUnitNo(res: any, body: any) {
     const { accessToken, params } = body;
   
-    const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetDropdownUnitInvoice`;
+    const url = `${publicRuntimeConfig.apiUrl}/api/services/app/Report/GetDropdownUnitNoByCluster`;
     const config = {
       headers: {
         Authorization: "Bearer " + accessToken,
