@@ -542,6 +542,22 @@ function BillingPayment() {
     else setTotalPay(0);
   }, [formValues]);
 
+  const handleAmountPayment = (e, setFieldValue) => {
+    console.log("e----", e);
+    if (e.key == "Enter" || e.keyCode == 9 || e.type == "blur") {
+      let a = e.target.value
+        .replaceAll("Rp. ", "")
+        .replaceAll(".", "")
+        .replace(",", ".");
+      let b = parseFloat(a);
+      setFieldValue("amountPayment", b);
+      e.preventDefault();
+      // if (formikRef.current) {
+      //   formikRef.current.setFieldValue("amountPayment", b);
+      // }
+    }
+  };
+
   const paymentProcess = async (fields, actions) => {
     Block.standard(`.${detailPaymentLoadingName}`, `Process Payments`),
       setLoading(true);
@@ -1227,11 +1243,11 @@ function BillingPayment() {
                                         label="Amount Payment"
                                         placeholder="Type Amount Payment"
                                         value={formValues.amountPayment}
-                                        onValueChange={(val) => {
-                                          setFieldValue(
-                                            "amountPayment",
-                                            val.floatValue
-                                          );
+                                        onKeyPress={(e) =>
+                                          handleAmountPayment(e, setFieldValue)
+                                        }
+                                        onBlur={(e) => {
+                                          handleAmountPayment(e, setFieldValue);
                                         }}
                                         error={
                                           errors.amountPayment &&
