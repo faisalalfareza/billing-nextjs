@@ -266,7 +266,7 @@ function BillingPayment() {
     };
   };
   useEffect(() => {
-    getCustomerList();
+    site && getCustomerList();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [customerRequest.skipCount, customerRequest.recordsPerPage]);
 
