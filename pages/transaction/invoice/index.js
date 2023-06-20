@@ -246,10 +246,15 @@ export default function Invoice(props) {
       reverseButtons: true,
     }).then((result) => {
       if (result.isConfirmed) {
+        setTimeout(() => {
+          Swal.close();
+        }, 1000);
         setModalParams(val);
         handleAdjust();
       }
     });
+    // setModalParams(val);
+    // handleAdjust();
   };
 
   const handleSelectAll = (e) => {

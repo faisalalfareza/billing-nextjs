@@ -419,7 +419,7 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
                                   required={periodName.isRequired}
                                   variant="standard"
                                   fullWidth
-                                  onClick={(e) => setOpen(true)}
+                                  onClick={(e) => setOpen(!open)}
                                   error={
                                     errors.periodName && touched.periodName
                                   }
