@@ -102,6 +102,8 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
       },
     },
   };
+  const endOfSekarang = dayjs(new Date());
+  const formatSekarang = endOfSekarang.format("DD/MM/YYYY");
   let { periodNumber, periodName, startDate, endDate, closeDate, isActive } =
     schemeModels.formField;
 
@@ -246,7 +248,8 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
     }
 
     Block.remove(`.${createPeriodBlockLoadingName}`),
-      actions.setSubmitting(false), setLoadingSubmit(false);
+      actions.setSubmitting(false),
+      setLoadingSubmit(false);
   };
   const closeModal = (isChanged = false) => {
     setNo(undefined), setformValues({});
@@ -268,7 +271,10 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
   if (isOpen) {
     let schemeValidations = Yup.object().shape({
       [startDate.name]: startDate.isRequired
-        ? Yup.date().required(startDate.errorMsg).typeError("Invalid Date")
+        ? Yup.date()
+            .required(startDate.errorMsg)
+            // .max(new Date(), "Start Date field must be at earlier than today")
+            .typeError("Invalid Date")
         : Yup.date().notRequired(),
       [periodName.name]: periodName.isRequired
         ? Yup.string()
@@ -276,10 +282,16 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
             .max(periodName.maxLength, periodName.invalidMaxLengthMsg)
         : Yup.string().notRequired(),
       [endDate.name]: endDate.isRequired
-        ? Yup.date().required(endDate.errorMsg).typeError("Invalid Date")
+        ? Yup.date()
+            .required(endDate.errorMsg)
+            // .max(new Date(), "End Date field must be at earlier than today")
+            .typeError("Invalid Date")
         : Yup.date().notRequired(),
       [closeDate.name]: closeDate.isRequired
-        ? Yup.date().required(closeDate.errorMsg).typeError("Invalid Date")
+        ? Yup.date()
+            .required(closeDate.errorMsg)
+            // .max(new Date(), "Close Date field must be at earlier than today")
+            .typeError("Invalid Date")
         : Yup.date().notRequired(),
     });
 
@@ -316,10 +328,7 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
     };
 
     return (
-      <Modal 
-        isOpen={isOpen}
-        className={createPeriodBlockLoadingName}
-      >
+      <Modal isOpen={isOpen} className={createPeriodBlockLoadingName}>
         <Formik
           initialValues={initialValues}
           validationSchema={schemeValidations}
@@ -402,6 +411,7 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
                                     : initialValues[periodName.name]
                                 );
                               }}
+                              maxDate={endOfSekarang}
                               renderInput={(params) => (
                                 <TextField
                                   {...params}

@@ -131,15 +131,18 @@ function EditDataUnitItem(props) {
     if (params) {
       getDetail();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params]);
   useEffect(() => {
     getBank();
     getTemplateInvoice();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (templateInvoiceHeaderId != null) getListItem();
     else setListItem([]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [templateInvoiceHeaderId]);
 
   const getDetail = async (data) => {

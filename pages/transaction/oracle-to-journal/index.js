@@ -203,6 +203,7 @@ function OracleToJournal({ params }) {
             formikRef.current.setFieldValue("paymentEndDate", null);
             formikRef.current.setFieldValue("accountingDate", null);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [site]);
 
     const getDropdownPaymentMethod = async () => { 
@@ -306,18 +307,31 @@ function OracleToJournal({ params }) {
         });
         if(!response.ok) throw new Error(`Error: ${response.status}`);
         response = typeNormalization(await response.json());
-        console.log(response);
-        if(!response.status == 'success') alertService.error({ title: "Error", text: response.errorMessage});
-        else{
-            //if(response.success){
-                Swal.fire({
-                    title: 'Payment Journal Generated',
-                    html: `Payment Journal Successfully Generated`,
-                    icon: "success",
-                    timerProgressBar: true,
-                    timer:  3000,
-                });
+
+        console.log("response generate", response);
+
+        if(response.result.status == 'success') 
+        {
+             //if(response.success){
+            Swal.fire({
+                title: 'Payment Journal Generated',
+                html: `Payment Journal Successfully Generated`,
+                icon: "success",
+                timerProgressBar: true,
+                timer:  3000,
+            });
             //} 
+            //alertService.error({ title: "Error", text: response.errorMessage});
+        }
+        else
+        {
+            Swal.fire({
+                title: 'Generate Failed',
+                html: `Payment Journal failed to generated`,
+                icon: "error",
+                timerProgressBar: true,
+                timer:  3000,
+            });
         } 
         setLoadingGenerate(false);
         //setLoadingPaymentJournal(false);
@@ -394,6 +408,94 @@ function OracleToJournal({ params }) {
         recordsPerPage: 10,
         skipCount: 1,
     })
+    
+    const [isDtBilling, setDtBilling] = useState([]);
+
+    const fetchBillingJournal = async (data) => {
+
+        Block.standard(`.${journalToOracleBlockLoadingName}`, `Getting Billing Journal Data`),
+        setLoading(true);
+
+        const { skipCount, recordsPerPage } = customerRequest;
+        const body = {
+            siteId: site?.siteId,
+            period: formValues.periodMethod?.periodId,
+            paymentType: formValues.paymentMethod?.paymentTypeId,
+            accountingDate: addDate(formValues.accountingDate),
+            bankPayment: bnkPayment,
+            paymentStartDate: addDate(formValues.paymentStartDate),
+            paymentEndDate: addDate(formValues.paymentEndDate)
+        };
+
+        let response = await fetch(
+            "/api/transaction/oracletojournal/FetchBillingJournalTaskList",
+            {
+                method: "POST",
+                body: JSON.stringify({
+                    accessToken: accessToken,
+                    params: body,
+                })
+            },
+        );
+
+        if(!response.ok) throw new Error(`Error: ${response.status}`);
+        response = typeNormalization(await response.json());
+
+        // console.log("result", response.result);
+
+        if(response.result.length == 0)
+        {
+            alertService.info({
+                title: "Information",
+                text: "There is no row on your data filter",
+            });
+        }
+        else
+        {
+            let data = response.result;
+            // console.log("data", data);
+            setDtBilling(data);
+
+            const list = [];
+            data.map((e, i) => {
+                list.push({
+                    no: i + 1,
+                    projectname: e.projectName,
+                    clustername: e.clusterName,
+                    unitid: e.unitId,
+                    unitcode: e.unitCode,
+                    invoiceno: e.invoiceNo,
+                    receiptnumber: e.receiptNumber,
+                    pscode: e.psCode,
+                    billingdate: e.billingDate.substring(0, 10),
+                    invoicedate: e.invoiceDate.substring(0, 10),
+                    periodname: e.periodName,
+                    remarks: e.remarks,
+                    oracledesc: e.oracleDesc,
+                    debit: e.debit,
+                    kredit: e.kredit,
+                    coa1: e.coA1,
+                    coa2: e.coA2,
+                    coa3: e.coA3,
+                    coa4: e.coA4,
+                    coa5: e.coA5,
+                    coa6: e.coA6,
+                    coa7: e.coA7,
+                    groupid: e.groupId
+                });
+            });
+            console.log("list", list);
+            setCustomerResponse((prevState) => ({
+                ...prevState,
+                rowData: list,
+                totalRows: 1,
+                totalPages: 1,
+            }));
+        }
+        
+        Block.remove(`.${journalToOracleBlockLoadingName}`),
+        setLoading(false);
+    };
 
     const searchData = async (data) => {
 
@@ -436,6 +538,8 @@ function OracleToJournal({ params }) {
             });
         } else {
             let data = response.result;
+
+            setDtBilling = data;
             
             const list = [];
             data.items.map((e, i) => {
@@ -514,26 +618,36 @@ function OracleToJournal({ params }) {
       };
     
     const columns = [
+                    // no: i + 1,
+                    // projectname: e.projectName,
+                    // clustername: e.clusterName,
+                    // unitid: e.unitId,
+                    // unitcode: e.unitCode,
+                    // invoiceno: e.invoiceNo,
+                    // receiptnumber: e.receiptNumber,
+                    // pscode: e.psCode,
+                    // billingdate: e.billingDate.substring(0, 10),
+                    // invoicedate: e.invoiceDate.substring(0, 10),
+                    // periodid: e.periodId,
+                    // remarks: e.remarks,
+                    // billingpaymentamount: e.billingPaymentAmount
         {Header: "no", accessor: "no", width: "5%"},
-        {Header: "journalid", accessor: "journalid", width: "10%"},
-        {Header: "project", accessor: "project", width: "15%"},
-        {Header: "cluster", accessor: "cluster", width: "15%"},
-        {Header: "journaldate", accessor: "journaldate", width: "15%"},
-        {Header: "periodname", accessor: "periodname", width: "20%"},
-        {Header: "oracledesc", accessor: "oracledesc", width: "25%"},
-        {Header: "accountingdate", accessor: "accountingdate", width: "15%"},
-        {Header: "paymentdate", accessor: "paymentdate", width: "15%"},
-        {Header: "coa1", accessor: "coa1", width: "10%"},
-        {Header: "coa2", accessor: "coa2", width: "10%"},
-        {Header: "coa3", accessor: "coa3", width: "10%"},
-        {Header: "coa4", accessor: "coa4", width: "10%"},
-        {Header: "coa5", accessor: "coa5", width: "10%"},
-        {Header: "coa6", accessor: "coa6", width: "10%"},
-        {Header: "coa7", accessor: "coa7", width: "10%"},
+        {Header: "projectname", accessor: "projectname", width: "15%"},
+        {Header: "clustername", accessor: "clustername", width: "15%"},
+        {Header: "unitid", accessor: "unitid", width: "5%"},
+        {Header: "unitcode", accessor: "unitcode", width: "5%"},
+        {Header: "invoiceno", accessor: "invoiceno", width: "10%"},
+        {Header: "receiptnumber", accessor: "receiptnumber", width: "10%"},
+        {Header: "pscode", accessor: "pscode", width: "5%"},
+        {Header: "billingdate", accessor: "billingdate", width: "5%"},
+        {Header: "invoicedate", accessor: "invoicedate", width: "10%"},
+        {Header: "periodname", accessor: "periodname", width: "5%"},
+        {Header: "remarks", accessor: "remarks", width: "5%"},
+        {Header: "oracledesc", accessor: "oracledesc", width: "10%"},
         {
             Header: "debit", 
             accessor: "debit", 
-            width: "10%",
+            width: "15%",
             align: "right",
             Cell: ({ value }) => {
                 return (
@@ -550,7 +664,7 @@ function OracleToJournal({ params }) {
         {
             Header: "kredit", 
             accessor: "kredit", 
-            width: "10%",
+            width: "15%",
             align: "right",
             Cell: ({ value }) => {
                 return (
@@ -564,23 +678,66 @@ function OracleToJournal({ params }) {
                 );
             },
         },
-        {Header: "istransfered", accessor: "istransfered", width: "10%"},
-        {Header: "groupid", accessor: "groupid", width: "10%"},
+        {Header: "coa1", accessor: "coa1", width: "5%"},
+        {Header: "coa2", accessor: "coa2", width: "5%"},
+        {Header: "coa3", accessor: "coa3", width: "5%"},
+        {Header: "coa4", accessor: "coa4", width: "5%"},
+        {Header: "coa5", accessor: "coa5", width: "5%"},
+        {Header: "coa6", accessor: "coa6", width: "5%"},
+        {Header: "coa7", accessor: "coa7", width: "5%"},
+        {Header: "groupid", accessor: "groupid", width: "5%"},
+        // {Header: "no", accessor: "no", width: "5%"},
+        // {Header: "journalid", accessor: "journalid", width: "10%"},
+        // {Header: "project", accessor: "project", width: "15%"},
+        // {Header: "cluster", accessor: "cluster", width: "15%"},
+        // {Header: "journaldate", accessor: "journaldate", width: "15%"},
+        // {Header: "periodname", accessor: "periodname", width: "20%"},
+        // {Header: "oracledesc", accessor: "oracledesc", width: "25%"},
+        // {Header: "accountingdate", accessor: "accountingdate", width: "15%"},
+        // {Header: "paymentdate", accessor: "paymentdate", width: "15%"},
+        // {Header: "coa1", accessor: "coa1", width: "10%"},
+        // {Header: "coa2", accessor: "coa2", width: "10%"},
+        // {Header: "coa3", accessor: "coa3", width: "10%"},
+        // {Header: "coa4", accessor: "coa4", width: "10%"},
+        // {Header: "coa5", accessor: "coa5", width: "10%"},
+        // {Header: "coa6", accessor: "coa6", width: "10%"},
+        // {Header: "coa7", accessor: "coa7", width: "10%"},
         // {
-        //     Header: "action",
-        //     accessor: "action",
-        //     align: "center",
-        //     sorted: true,
+        //     Header: "debit", 
+        //     accessor: "debit", 
+        //     width: "10%",
+        //     align: "right",
         //     Cell: ({ value }) => {
-        //       return (
-        //         <WaterRowActions
-        //           record={value}
-        //           openModalonEdit={openModalEdit}
-        //           onDeleted={fetchData}
-        //         />
-        //       );
+        //         return (
+        //             <NumericFormat
+        //             displayType="text"
+        //             value={value}
+        //             decimalSeparator=","
+        //             prefix="Rp "
+        //             thousandSeparator="."
+        //             />
+        //         );
         //     },
         // },
+        // {
+        //     Header: "kredit", 
+        //     accessor: "kredit", 
+        //     width: "10%",
+        //     align: "right",
+        //     Cell: ({ value }) => {
+        //         return (
+        //             <NumericFormat
+        //             displayType="text"
+        //             value={value}
+        //             decimalSeparator=","
+        //             prefix="Rp "
+        //             thousandSeparator="."
+        //             />
+        //         );
+        //     },
+        // },
+        // {Header: "istransfered", accessor: "istransfered", width: "10%"},
+        // {Header: "groupid", accessor: "groupid", width: "10%"},
     ];
 
     const [tasklist, setTasklist] = useState({ columns: columns, rows: [] });
@@ -611,8 +768,8 @@ function OracleToJournal({ params }) {
                     </Grid>
                 </Grid>
             </MDBox>
-            <MDBox py={3}>
-                <Grid container spacing={3}>
+            <MDBox mt={2}>
+                <Grid container spacing={2}>
                     <Grid item xs={12}>
                         <Card>
                             <MDBox p={3} lineHeight={1}>
@@ -688,7 +845,10 @@ function OracleToJournal({ params }) {
                                                                     <FormField
                                                                         {...params}
                                                                         type={periodMethod.type}
-                                                                        label={periodMethod.label}
+                                                                        label={
+                                                                            periodMethod.label +
+                                                                            (periodMethod.isRequired ? " ⁽*⁾" : "")
+                                                                        }
                                                                         name={periodMethod.name}
                                                                         placeholder={periodMethod.placeholder}
                                                                         InputLabelProps={{ shrink: true }}
@@ -848,53 +1008,13 @@ function OracleToJournal({ params }) {
                                                                 style={{ marginRight : 20}}
                                                                 variant="outlined" 
                                                                 color="dark"
-                                                                onClick={searchData}
+                                                                onClick={fetchBillingJournal}
                                                                 disabled={isLoading || !isValifForm()}
                                                             >
                                                                 <Icon>search_outlined</Icon>&nbsp;{" "} 
                                                                     {isLoading ? 
                                                                         "Searching..." : 
                                                                         "Search"
-                                                                    }
-                                                            </MDButton>
-                                                            <MDButton 
-                                                                style={{ marginRight : 20}}
-                                                                variant="outlined" 
-                                                                color="dark"
-                                                                onClick={generatePaymentJournal}
-                                                                disabled={isLoadingGenerate || !isValifForm()}
-                                                            >
-                                                                <Icon>add_outlined</Icon>&nbsp;{" "}
-                                                                    {isLoadingGenerate ?
-                                                                        "Generate Payment Journal..." :
-                                                                        "Generate Payment Journal"
-                                                                    }
-                                                            </MDButton>
-                                                            <MDButton 
-                                                                style={{ marginRight : 20}}
-                                                                variant="outlined" 
-                                                                color="dark"
-                                                                onClick = {handleExportToExcel}
-                                                                disabled={isLoadingExport || !isValifForm()}
-                                                            >
-                                                                <Icon>article_outlined</Icon>&nbsp;{" "} 
-                                                                    {isLoadingExport ?
-                                                                        "Export to Excel..." :
-                                                                        "Export to Excel"
-                                                                    }
-                                                                
-                                                            </MDButton>
-                                                            <MDButton
-                                                                variant="gradient"
-                                                                color="primary"
-                                                                sx={{ height: "100%" }}
-                                                                onClick={uploadJournalToOracle}
-                                                                disabled={isLoadingUpload || !isValifForm()}
-                                                            >
-                                                                <Icon>upload</Icon>&nbsp;{" "} 
-                                                                    {isLoadingUpload ?
-                                                                        "Upload to Oracle..." :
-                                                                        "Upload to Oracle"
                                                                     }
                                                             </MDButton>
                                                         </Grid>
@@ -911,30 +1031,81 @@ function OracleToJournal({ params }) {
                     </Grid>
                 </Grid>
             </MDBox>
-            <Card className={journalToOracleBlockLoadingName}>
-                <MDBox>
-                <Grid container alignItems="center">
-                    <Grid item xs={12}>
-                        <DataTable 
-                            title="Oracle To Journal"
-                            description="Generated Journal for transfer to Oracle"
-                            table={setCustomerTaskList(customerResponse.rowData)}
-                            manualPagination={true}
-                            totalRows={customerResponse.totalRows}
-                            totalPages={customerResponse.totalPages}
-                            recordsPerPage={customerResponse.recordsPerPage}
-                            skipCount={customerRequest.skipCount}
-                            pageChangeHandler={skipCountChangeHandler}
-                            recordsPerPageChangeHandler={recordsPerPageChangeHandler}
-                            entriesPerPage={{ 
-                                defaultValue: customerRequest.recordsPerPage,
-                            }}
-                            pagination={{ variant: "gradient", color: "primary" }}
-                        />
-                    </Grid>
-                </Grid>
+            <MDBox mt={3.5} id="oracle">
+                <MDBox
+                    display="flex"
+                    justifyContent="flex-end"
+                    alignItems="flex-start"
+                    mb={2}
+                >
+                    <MDBox display="flex">
+                        <MDButton 
+                        style={{ marginRight : 20}}
+                        variant="outlined" 
+                        color="dark"
+                        onClick={generatePaymentJournal}
+                        disabled={isDtBilling.length == 0 || isLoadingGenerate}
+                    >
+                        <Icon>add_outlined</Icon>&nbsp;{" "}
+                            {isLoadingGenerate ?
+                                "Generate Payment Journal..." :
+                                "Generate Payment Journal"
+                            }
+                    </MDButton>
+                    <MDButton 
+                        style={{ marginRight : 20}}
+                        variant="outlined" 
+                        color="dark"
+                        onClick = {handleExportToExcel}
+                        disabled={isDtBilling.length == 0 || isLoadingExport}
+                    >
+                        <Icon>article_outlined</Icon>&nbsp;{" "} 
+                            {isLoadingExport ?
+                                "Export to Excel..." :
+                                "Export to Excel"
+                            }
+                        
+                    </MDButton>
+                    <MDButton
+                        variant="gradient"
+                        color="primary"
+                        sx={{ height: "100%" }}
+                        onClick={uploadJournalToOracle}
+                        disabled={isDtBilling.length == 0 || isLoadingUpload}
+                    >
+                        <Icon>upload</Icon>&nbsp;{" "} 
+                            {isLoadingUpload ?
+                                "Upload to Oracle..." :
+                                "Upload to Oracle"
+                            }
+                    </MDButton>                  
+                    </MDBox>
                 </MDBox>
-            </Card>
+                <Card className={journalToOracleBlockLoadingName}>
+                    <MDBox>
+                    <Grid container alignItems="center">
+                        <Grid item xs={12}>
+                            <DataTable 
+                                title="Oracle To Journal"
+                                description="List of Billing Payment"
+                                table={setCustomerTaskList(customerResponse.rowData)}
+                                manualPagination={true}
+                                totalRows={customerResponse.totalRows}
+                                totalPages={customerResponse.totalPages}
+                                recordsPerPage={customerResponse.recordsPerPage}
+                                skipCount={customerRequest.skipCount}
+                                pageChangeHandler={skipCountChangeHandler}
+                                recordsPerPageChangeHandler={recordsPerPageChangeHandler}
+                                entriesPerPage={{ 
+                                    defaultValue: customerRequest.recordsPerPage,
+                                }}
+                                pagination={{ variant: "gradient", color: "primary" }}
+                            />
+                        </Grid>
+                    </Grid>
+                    </MDBox>
+                </Card>
+            </MDBox>        
         </DashboardLayout>
     )
 }

@@ -321,7 +321,7 @@ function BillingPayment() {
     response = typeNormalization(await response.json());
 
     if (response.error)
-      alertService.info({ title: response.error.error.message });
+      alertService.warn({ title: response.error.error.message });
     else {
       const result = response.result.listInvoicePayment;
       result.map((e) => (e["paymentTemp"] = e.paymentAmount));
@@ -535,6 +535,13 @@ function BillingPayment() {
   };
   const [formValues, setformValues] = useState(initialValues);
 
+  useEffect(() => {
+    console.log("form-----", formValues);
+    if (formValues.amountPayment != undefined)
+      setTotalPay(formValues.amountPayment);
+    else setTotalPay(0);
+  }, [formValues]);
+
   const paymentProcess = async (fields, actions) => {
     Block.standard(`.${detailPaymentLoadingName}`, `Process Payments`),
       setLoading(true);
@@ -553,6 +560,8 @@ function BillingPayment() {
       bankId: fields.bank?.bankID,
       remarks: fields.remarks,
       listInvoicePayment: detailPaymentData,
+      isAddSignee: fields.isAddSignee,
+      transactionDate: fields.transactionDate,
     };
 
     let response = await fetch("/api/cashier/billing/paymentproses", {
@@ -566,7 +575,10 @@ function BillingPayment() {
     response = typeNormalization(await response.json());
 
     if (response.error)
-      alertService.error({ title: "Error", text: response.error.message });
+      alertService.error({
+        title: "Error",
+        text: response.error.error.message,
+      });
     else {
       Swal.fire({
         icon: "success",
@@ -574,7 +586,7 @@ function BillingPayment() {
         text: "Official receipt document will be displayed and will be sent to the customer via email",
       }).then(() => {
         let data = response.result;
-        data != null && window.open(data, "_blank");
+        data != null && formValues.isPrintOR && window.open(data, "_blank");
       });
       setCustomerRequest((prevState) => ({
         ...prevState,
@@ -622,6 +634,7 @@ function BillingPayment() {
 
   const debouncedChangeHandler = useMemo(() => {
     return debounce(paymentAmountChange, 1000);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [detailPaymentData]);
 
   useEffect(() => {
@@ -1219,9 +1232,6 @@ function BillingPayment() {
                                             "amountPayment",
                                             val.floatValue
                                           );
-                                          if (val.floatValue != undefined)
-                                            setTotalPay(val.floatValue);
-                                          else setTotalPay(0);
                                         }}
                                         error={
                                           errors.amountPayment &&
@@ -1316,7 +1326,6 @@ function BillingPayment() {
                                     <FormControlLabel
                                       control={
                                         <Checkbox
-                                          disabled={!formValues.isPrintOR}
                                           name="print-or"
                                           color="primary"
                                           checked={formValues.isPrintOR}
@@ -1335,7 +1344,6 @@ function BillingPayment() {
                                     <FormControlLabel
                                       control={
                                         <Checkbox
-                                          disabled={!formValues.isAddSignee}
                                           name="add-signee"
                                           color="primary"
                                           checked={formValues.isAddSignee}

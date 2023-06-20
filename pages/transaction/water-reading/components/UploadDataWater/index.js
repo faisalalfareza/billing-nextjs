@@ -100,8 +100,7 @@ function UploadDataWater(props) {
 
   const [formValues, setformValues] = useState(initialValues);
 
-  const getFormData = (values) => {
-  };
+  const getFormData = (values) => {};
 
   const projectBlockLoadingName = "block-project";
   const getProject = async (val) => {
@@ -121,8 +120,9 @@ function UploadDataWater(props) {
     );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    
-    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+
+    if (response.error)
+      alertService.error({ title: "Error", text: response.error.message });
     else setDataProject(response.result);
 
     Block.remove(`.${projectBlockLoadingName}`);
@@ -140,8 +140,9 @@ function UploadDataWater(props) {
     });
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    
-    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+
+    if (response.error)
+      alertService.error({ title: "Error", text: response.error.message });
     else setPeriod(response.result);
   };
   useEffect(() => {
@@ -179,9 +180,13 @@ function UploadDataWater(props) {
     Block.remove(`.${clusterBlockLoadingName}`);
   };
 
-  const uploadExcelWaterReadingBlockLoadingName = "block-upload-excel-water-reading";
+  const uploadExcelWaterReadingBlockLoadingName =
+    "block-upload-excel-water-reading";
   const uploadExcel = async (values, actions) => {
-    Block.standard(`.${uploadExcelWaterReadingBlockLoadingName}`, `Uploading Water Reading`),
+    Block.standard(
+      `.${uploadExcelWaterReadingBlockLoadingName}`,
+      `Uploading Water Reading`
+    ),
       setLoading(true);
 
     let listCluster = [];
@@ -218,7 +223,8 @@ function UploadDataWater(props) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error) alertService.error({ text: response.error.message, title: "Error" });
+    if (response.error)
+      alertService.warn({ title: response.error.error.message });
     else {
       const isFailed = response.result.totalGagal > 0;
       // Swal.fire({
@@ -264,8 +270,7 @@ function UploadDataWater(props) {
         }
         setDataWater([]);
 
-        if (!isFailed) 
-          closeModal(true);
+        if (!isFailed) closeModal(true);
       });
     }
 
