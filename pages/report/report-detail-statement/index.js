@@ -200,7 +200,10 @@ function ReportDetailStatement() {
     cluster: Yup.object()
       .required("Cluster is required")
       .typeError("Cluster is required."),
-    periodYear: Yup.array().nullable(),
+    periodYear: Yup.array()
+      .min(1)
+      .required("Period Year is required")
+      .typeError("Period Year is required."),
     unitNo: Yup.object()
       .required("Unit No is required.")
       .typeError("Unit No is required."),
@@ -210,8 +213,12 @@ function ReportDetailStatement() {
     project: Yup.object()
       .required("Project is required")
       .typeError("Project is required."),
-    startMonth: Yup.object().nullable(),
-    endMonth: Yup.object().nullable(),
+    startMonth: Yup.object()
+      .required("Period Start Month is required")
+      .typeError("Period Start Month is required."),
+    endMonth: Yup.object()
+      .required("Period End Month is required")
+      .typeError("Period End Month is required."),
   });
 
   const initialValues = {
@@ -246,7 +253,7 @@ function ReportDetailStatement() {
     }
     Block.standard(
       `.${exportToExcelBlockLoadingName}`,
-      `Exporting Daily Report to Excel`
+      `Exporting Report Statement to PDF`
     ),
       setLoading(true);
 
@@ -645,6 +652,7 @@ function ReportDetailStatement() {
                                         }}
                                         renderInput={(params) => (
                                           <FormField
+                                            required
                                             {...params}
                                             type="text"
                                             label="Period Start Month"
@@ -689,6 +697,7 @@ function ReportDetailStatement() {
                                         renderInput={(params) => (
                                           <FormField
                                             {...params}
+                                            required
                                             type="text"
                                             label="Period End Month"
                                             name="endMonth"
@@ -731,7 +740,7 @@ function ReportDetailStatement() {
                                           <FormField
                                             {...params}
                                             type="text"
-                                            label="Period Year"
+                                            label="Period Year *"
                                             name="periodYear"
                                             placeholder="Choose Period Year"
                                             InputLabelProps={{ shrink: true }}
