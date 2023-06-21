@@ -252,7 +252,7 @@ function BillingPayment() {
         },
         {
           Header: "No",
-          Cell: ({ row }) => row.index + 1,
+          Cell: ({ row }) => row.index + 1 + customerRequest.skipCount,
           align: "center",
         },
         { Header: "Project", accessor: "projectName" },
