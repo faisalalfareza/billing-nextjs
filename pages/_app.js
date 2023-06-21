@@ -180,7 +180,7 @@ function Main({ Component, pageProps, routes = setRoutes() }) {
             color={sidenavColor}
             brand={brandIcon}
             brandName={appInfo.appName}
-            routes={routes.main}
+            routes={routes.filteredMain}
             onMouseEnter={handleOnMouseEnter}
             onMouseLeave={handleOnMouseLeave}
           />
