@@ -665,7 +665,7 @@ function BillingPayment() {
       if (index + 1 === newState.length) {
         e.paymentAmount = temp;
       } else {
-        if (temp < e.balance) {
+        if (temp <= e.balance) {
           e.paymentAmount = temp;
           temp = 0;
         } else if (temp > e.balance) {
