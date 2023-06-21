@@ -43,6 +43,8 @@ export default function WarningLetter(props) {
   const [{ accessToken, encryptedAccessToken }] = useCookies();
   /* start dropdown site */
   const [site, setSite] = useState(null);
+  const [clusterID, setCluster] = useState(null);
+  const [unitcode, setUnitCode] = useState(null);
   const [isLoadingSend, setLoadingSend] = useState(false);
   const override = {
     position: "absolute",
@@ -58,6 +60,7 @@ export default function WarningLetter(props) {
     let currentSite = JSON.parse(localStorage.getItem("site"));
     if (currentSite == null) alertService.info({ title: "Please choose site first." });
     else setSite(currentSite);
+
 
     // getPeriode();
     // getProject();
@@ -93,7 +96,7 @@ export default function WarningLetter(props) {
     Block.dots(`.${periodBlockLoadingName}`);
 
     let response = await fetch(
-      "/api/transaction/warningletter/dropdownperiod",
+      "/api/transaction/warningletter/GetDropdownPeriodBySiteId",
       {
         method: "POST",
         body: JSON.stringify({
@@ -123,7 +126,7 @@ export default function WarningLetter(props) {
     Block.dots(`.${projectBlockLoadingName}`);
 
     let resProject = await fetch(
-      "/api/transaction/warningletter/dropdownproject",
+      "/api/transaction/warningletter/GetDropdownProjectBySiteId",
       {
         method: "POST",
         body: JSON.stringify({
@@ -166,6 +169,7 @@ export default function WarningLetter(props) {
     
     if (response.error) alertService.error({ title: "Error", text: response.error.message });
     else setDataCluster(response.result);
+    //console.log(" after cluster: " + JSON.parse(getItem(response.result.cluster)));
 
     Block.remove(`.${clusterBlockLoadingName}`), 
       setLoading(false);
@@ -176,7 +180,7 @@ export default function WarningLetter(props) {
     Block.dots(`.${unitCodeBlockLoadingName}`);
 
     let response = await fetch(
-      "/api/transaction/warningletter/dropdownunitcode",
+      "/api/transaction/warningletter/GetDropdownUnitCodeByCluster",
       {
         method: "POST",
         body: JSON.stringify({
@@ -190,27 +194,28 @@ export default function WarningLetter(props) {
     );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-
+    
     if (response.error) alertService.error({ title: "Error", text: response.error.message });
     else setDataUnitCode(response.result);
-
+    
     Block.remove(`.${unitCodeBlockLoadingName}`), 
-      onUnitNo(periodeId);
+    setLoading(false);
   }
 
   const unitNoBlockLoadingName = "block-unitNo";
-  async function onUnitNo(periodeId) {
+  async function onUnitNo(val) {
     Block.dots(`.${unitNoBlockLoadingName}`);
 
     let response = await fetch(
-      "/api/transaction/warningletter/dropdownunitno",
+      "/api/transaction/warningletter/GetDropdownUnitNoByCluster",
       {
         method: "POST",
         body: JSON.stringify({
           accessToken: accessToken,
           params: {
             SiteId: site?.siteId,
-            periodId: periodeId,
+            ClusterID: formValues.cluster?.clusterId,
+            UnitCode: val.unitCode
           },
         }),
       }
@@ -222,14 +227,14 @@ export default function WarningLetter(props) {
     else setDataUnitNo(response.result);
 
     Block.remove(`.${unitNoBlockLoadingName}`), 
-      onSP(periodeId);
+    setLoading(false);
   }
 
   const spBlockLoadingName = "block-sp";
-  async function onSP(periodeId) {
+  async function onSP(val) {
     Block.dots(`.${spBlockLoadingName}`);
 
-    let response = await fetch("/api/transaction/warningletter/dropdownsp", {
+    let response = await fetch("/api/transaction/warningletter/GetDropdownSPWarLett", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
@@ -245,8 +250,7 @@ export default function WarningLetter(props) {
     if (response.error) alertService.error({ title: "Error", text: response.error.message });
     else setDataSP(response.result);
 
-    Block.remove(`.${spBlockLoadingName}`), 
-      onInvoiceName(periodeId);
+    Block.remove(`.${spBlockLoadingName}`);
   }
 
   const invoiceBlockLoadingName = "block-invoice";
@@ -254,7 +258,7 @@ export default function WarningLetter(props) {
     Block.dots(`.${invoiceBlockLoadingName}`);
 
     let response = await fetch(
-      "/api/transaction/warningletter/dropdowninvoicename",
+      "/api/transaction/warningletter/GetDropdownInvoiceNameWarLett",
       {
         method: "POST",
         body: JSON.stringify({
@@ -963,6 +967,7 @@ export default function WarningLetter(props) {
                                           ? value
                                           : initialValues[unitCode.name]
                                       );
+                                      onUnitNo(value);
                                     }}
                                     renderInput={(params) => (
                                       <FormField
@@ -1001,6 +1006,7 @@ export default function WarningLetter(props) {
                                           ? value
                                           : initialValues[unitNo.name]
                                       );
+                                      onSP(value);
                                     }}
                                     noOptionsText="No results"
                                     renderInput={(params) => (
