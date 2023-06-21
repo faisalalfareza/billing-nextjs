@@ -38,6 +38,11 @@ function middleware(request: NextRequest) {
   // console.log("IS AUTHENTICATED (HAS): ", cookies.has("accessToken"));
   // console.log("IS AUTHENTICATED (GET): ", cookies.get("accessToken"));
   // console.log("IS LOGGED IN: ", alreadyLoggedIn);
+
+  /* 
+    1. AUTENTIKASI (AUTHENTICATION): 
+    Pengecekan apakah user terautentikasi/tidak berdasarkan 1) memiliki/tidaknya sebuah token, 2) token yang valid 
+  */
   
   // Cek jika pengguna belum terautentikasi
   if (!alreadyLoggedIn && !isAuthenticated) {
@@ -61,6 +66,13 @@ function middleware(request: NextRequest) {
       // Set status alreadyLoggedIn menjadi true setelah autentikasi yang valid
       // !alreadyLoggedIn && console.log("————————————————————LOGGED IN");
       alreadyLoggedIn = true; 
+
+      /* 
+        2. AUTORISASI (AUTHORIZATION): 
+        Pengecekan apakah user memiliki hak akses ke suatu routing berdasarkan memiliki/tidaknya permission terkait
+      */
+
+      
 
       // Jika semua kondisi terpenuhi, lanjutkan dengan pemrosesan berikutnya
       return NextResponse.next();

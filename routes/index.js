@@ -107,6 +107,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
       nameOnHeader: "Master",
       key: "master",
       icon: <Dns fontSize="medium" />,
+      permission: "Pages.Master",
       collapse: [
         {
           name: "Master Site",
@@ -184,6 +185,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
       nameOnHeader: "Transaction",
       key: "transaction",
       icon: <MultipleStop fontSize="medium" />,
+      permission: "Pages.Transaction",
       collapse: [
         {
           name: "Water Reading",
@@ -191,7 +193,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           key: "water-reading",
           route: "/transaction/water-reading",
           icon: <WaterDamage fontSize="medium" />,
-          permission: "Pages.WaterReading"
+          permission: "Pages.Transaction.WaterReading"
         },
         {
           name: "Invoice",
@@ -239,6 +241,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
       nameOnHeader: "Cashier System",
       key: "cashier", 
       icon: <Payments fontSize="medium" />,
+      permission: "Pages.Cashier",
       collapse: [
         {
           name: "Billing Payment",
@@ -281,6 +284,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
       nameOnHeader: "Report",
       key: "report",
       icon: <Source fontSize="medium" />,
+      permission: "Pages.Report",
       collapse: [
         {
           name: "Report Invoice",
