@@ -56,6 +56,8 @@ function EditDataUnitItem(props) {
     bank: params ? bankE : null,
     vaNo: params ? params.vaNo : undefined,
     isPenalty: params ? params.isPenalty : false,
+    landArea: params ? params.landArea : false,
+    buildArea: params ? params.buildArea : false,
   };
 
   const [formValues, setformValues] = useState(initialValues);
@@ -77,6 +79,8 @@ function EditDataUnitItem(props) {
       templateInvoiceHeaderId: values.templateInvoice.templateInvoiceHeaderId,
       bankId: values.bank.bankID,
       vaNo: values.vaNo,
+      landArea: values.landArea,
+      buildArea: values.buildArea,
       isPenalty: values.isPenalty,
       itemDetail: listItem,
     };
@@ -180,6 +184,8 @@ function EditDataUnitItem(props) {
         unitNo: res.unitNo,
         bank: bank,
         vaNo: res.vaNo,
+        landArea: res.landArea,
+        buildArea: res.buildArea,
         templateInvoice: template,
         isPenalty: res.isPenalty,
       }));
@@ -190,6 +196,8 @@ function EditDataUnitItem(props) {
         formikRef.current.setFieldValue("unitNo", res.unitNo);
         formikRef.current.setFieldValue("bank", bank);
         formikRef.current.setFieldValue("vaNo", res.vaNo);
+        formikRef.current.setFieldValue("landArea", res.landArea);
+        formikRef.current.setFieldValue("buildArea", res.buildArea);
         formikRef.current.setFieldValue("templateInvoice", template);
         formikRef.current.setFieldValue("isPenalty", res.isPenalty);
       }
@@ -336,6 +344,8 @@ function EditDataUnitItem(props) {
         .required("Bank is required.")
         .typeError("Bank is required."),
       vaNo: Yup.number().required("Virtual Account Number is required."),
+      landArea: Yup.number().min(0).required("Land Area is required."),
+      buildArea: Yup.number().min(0).required("Build Area is required."),
     });
 
     const checkingSuccessInput = (value, error) => {
@@ -390,7 +400,9 @@ function EditDataUnitItem(props) {
                   values.templateInvoice,
                   errors.templateInvoice
                 ) &&
-                checkingSuccessInput(values.vaNo, errors.vaNo)
+                checkingSuccessInput(values.vaNo, errors.vaNo) &&
+                checkingSuccessInput(values.landArea, errors.landArea) &&
+                checkingSuccessInput(values.buildArea, errors.buildArea)
               );
             };
 
@@ -543,6 +555,38 @@ function EditDataUnitItem(props) {
                           success={checkingSuccessInput(
                             formValues.vaNo,
                             errors.vaNo
+                          )}
+                        />
+                      </Grid>
+                      <Grid item xs={12} sm={12}>
+                        <FormField
+                          InputLabelProps={{ shrink: true }}
+                          required
+                          type="number"
+                          label="Land Area"
+                          name="landArea"
+                          value={formValues.landArea}
+                          placeholder="Type Land Area"
+                          error={errors.landArea && touched.landArea}
+                          success={checkingSuccessInput(
+                            formValues.landArea,
+                            errors.landArea
+                          )}
+                        />
+                      </Grid>
+                      <Grid item xs={12} sm={12}>
+                        <FormField
+                          InputLabelProps={{ shrink: true }}
+                          required
+                          type="number"
+                          label="Build Area"
+                          name="buildArea"
+                          value={formValues.buildArea}
+                          placeholder="Type Build Area"
+                          error={errors.buildArea && touched.buildArea}
+                          success={checkingSuccessInput(
+                            formValues.buildArea,
+                            errors.buildArea
                           )}
                         />
                       </Grid>
