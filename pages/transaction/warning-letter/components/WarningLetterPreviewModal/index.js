@@ -48,7 +48,8 @@ if(isOpen){
   const {alamatKorespondensi} = params
   const {unitCode} = params
   const {unitNo} = params
-  const {totalPembayaran} = params
+  const {totalOutstanding} = params
+  const {totalTagihan} = params
   const {bank} = params
   const {vaNo} = params
   const {officePhone} = params
@@ -115,6 +116,7 @@ if(isOpen){
                       <th>Nomor Invoice</th>
                       <th>Deskripsi</th>
                       <th>Total Tagihan</th>
+                      <th>Total Outstanding</th>
                       <th>Bank</th>
                       <th>Nomor Virtual Account</th>
                     </tr>
@@ -123,7 +125,8 @@ if(isOpen){
                     <tr>
                       <td>{invoiceNo}</td>
                       <td>{invoiceType}</td>
-                      <td>{totalPembayaran}</td>
+                      <td>{totalTagihan}</td>
+                      <td>{totalOutstanding}</td>
                       <td>{bank}</td>
                       <td>{vaNo}</td>
                     </tr>

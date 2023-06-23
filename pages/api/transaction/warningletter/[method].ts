@@ -12,7 +12,7 @@ export default async function handler(
     switch (method) {
         case "POST":
           switch (query.method) {
-            case "GetWarningLetterList":
+            case "ProsesGetWarningLetterList":
               getList(res, body);
               break;
             case "GetDropdownPeriodBySiteId":
@@ -64,17 +64,17 @@ export default async function handler(
 async function getList(res: any, body: any) {
   const { accessToken, params } = body;
 
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetWarningLetterList`;
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/ProsesGetWarningLetterList`;
   const config = {
     headers: {
       Authorization: "Bearer " + accessToken,
       "Access-Control-Allow-Origin": "*",
     },
-    params: params,
+    /* params: params, */
   };
 
   axios
-    .get(url, config)
+    .post(url, params, config)
     .then((response) =>
       res.send({
         result: response.data.result,
