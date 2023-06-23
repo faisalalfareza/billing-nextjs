@@ -56,6 +56,7 @@ export default function WarningLetter(props) {
     bottom: "0",
   };
 
+
   useEffect(() => {
     let currentSite = JSON.parse(localStorage.getItem("site"));
     if (currentSite == null) alertService.info({ title: "Please choose site first." });
@@ -171,7 +172,8 @@ export default function WarningLetter(props) {
     else setDataCluster(response.result);
     //console.log(" after cluster: " + JSON.parse(getItem(response.result.cluster)));
 
-    Block.remove(`.${clusterBlockLoadingName}`), 
+    Block.remove(`.${clusterBlockLoadingName}`);
+      onSP();
       setLoading(false);
   };
 
@@ -231,7 +233,7 @@ export default function WarningLetter(props) {
   }
 
   const spBlockLoadingName = "block-sp";
-  async function onSP(val) {
+  async function onSP() {
     Block.dots(`.${spBlockLoadingName}`);
 
     let response = await fetch("/api/transaction/warningletter/GetDropdownSPWarLett", {
@@ -252,7 +254,7 @@ export default function WarningLetter(props) {
 
     Block.remove(`.${spBlockLoadingName}`);
   }
-
+/* 
   const invoiceBlockLoadingName = "block-invoice";
   async function onInvoiceName(periodeId) {
     Block.dots(`.${invoiceBlockLoadingName}`);
@@ -277,7 +279,7 @@ export default function WarningLetter(props) {
     else setDataInvoiceName(response.result);
 
     Block.remove(`.${invoiceBlockLoadingName}`);
-  }
+  } */
 
   /* start form builder  */
   const form = {
@@ -315,7 +317,7 @@ export default function WarningLetter(props) {
         label: "Unit Code",
         placeholder: "Type Unit Code",
         type: "text",
-        isRequired: true,
+        isRequired: false,
         errorMsg: "Unit Code is required.",
         defaultValue: "",
       },
@@ -324,7 +326,7 @@ export default function WarningLetter(props) {
         label: "Unit No",
         placeholder: "Type Unit No",
         type: "text",
-        isRequired: true,
+        isRequired: false,
         errorMsg: "Unit No is required.",
         defaultValue: "",
       },
@@ -333,19 +335,10 @@ export default function WarningLetter(props) {
         label: "SP",
         placeholder: "Type SP",
         type: "text",
-        isRequired: true,
+        isRequired: false,
         errorMsg: "SP is required.",
         defaultValue: "",
       },
-      /* invoiceName: {
-        name: "invoiceName",
-        label: "Invoice Name",
-        placeholder: "Type Invoice Name",
-        type: "text",
-        isRequired: true,
-        errorMsg: "Invoice Name is required.",
-        defaultValue: "",
-      }, */
       txtSearch: {
         name: "txtSearch",
         placeholder: "Search Here",
@@ -392,16 +385,14 @@ export default function WarningLetter(props) {
     [cluster.name]: Yup.object()
       .required(cluster.errorMsg)
       .typeError(cluster.errorMsg),
-    [unitCode.name]: Yup.object()
+    /* [unitCode.name]: Yup.object()
       .required(unitCode.errorMsg)
       .typeError(unitCode.errorMsg),
     [unitNo.name]: Yup.object()
       .required(unitNo.errorMsg)
-      .typeError(unitNo.errorMsg),
-    [sp.name]: Yup.object().required(sp.errorMsg).typeError(sp.errorMsg),
-    /* [invoiceName.name]: Yup.object()
-      .required(invoiceName.errorMsg)
-      .typeError(invoiceName.errorMsg), */
+      .typeError(unitNo.errorMsg), */
+    [sp.name]: Yup.array().required(sp.errorMsg)
+    .typeError(sp.errorMsg),
   });
 
   const checkingSuccessInput = (value, error) => {
@@ -413,7 +404,7 @@ export default function WarningLetter(props) {
       <>
         <div style={{ display: "flex", gap: "2px" }}>
           <div>{param}</div>
-          <span style={{ color: "red" }}>{paramReq ? "*" : ""}</span>
+          <span style={{ color: "#db3131" }}>{paramReq ? "*" : ""}</span>
         </div>
           
       </>
@@ -444,9 +435,17 @@ export default function WarningLetter(props) {
   const fetchData = async (data) => {
     Block.standard(`.${warningLetterBlockLoadingName}`, `Getting Warning Letter Data`),
       setLoading(true);
+      
+      const listSP = [];      
+      if(formValues.sp != null){
+        formValues.sp.map((e) =>{
+          listSP.push(parseInt(e.spId));
+        });  
+      }
 
+      
     const { scheme, keywords, recordsPerPage, skipCount } = customerRequest;
-    let response = await fetch("/api/transaction/warningletter/GetWarningLetterList", {
+    let response = await fetch("/api/transaction/warningletter/ProsesGetWarningLetterList", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
@@ -457,13 +456,14 @@ export default function WarningLetter(props) {
           ClusterId: formValues.cluster?.clusterId,
           UnitNo: formValues.unitNo?.unitNo,
           UnitCode: formValues.unitNo?.unitCode,
-          Cluster: formValues.cluster?.clusterName,
-          sp: formValues.sp?.spId,
+          SP: listSP,
+          Search : keywords ? keywords : null,
           MaxResultCount: recordsPerPage,
           SkipCount: skipCount,
         },
       }),
     });
+
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
@@ -502,14 +502,14 @@ export default function WarningLetter(props) {
         element.href = "#warning-letter";
         element.click();
       }, 0);
-    } Block.remove(`.${warningLetterBlockLoadingName}`),
+    } Block.remove(`.${warningLetterBlockLoadingName}`);
       setLoading(false);
   };
 
   /* start export excel */
   const handleExport = async () => {
     Block.standard(`.${warningLetterBlockLoadingName}`, `Exporting Warning Letter to Excel`);
-
+    const { scheme, keywords, recordsPerPage, skipCount } = customerRequest;
     let response = await fetch(
       "/api/transaction/warningletter/ExportToExcelWarningLetter",
       {
@@ -527,7 +527,7 @@ export default function WarningLetter(props) {
             unitCode: formValues.unitCode?.unitCode,
             unitNo: formValues.unitNo?.unitNo,
             /* invoiceName: formValues.invoiceName?.invoiceName, */
-            search: undefined,
+            search: keywords ? keywords : null,
             sp: formValues.sp?.spId,
             
           },
@@ -562,9 +562,11 @@ export default function WarningLetter(props) {
   const handleClick = (e) => {
     const { id, checked } = e.target;
     setIsCheck([...isCheck, +id]);
+    
     if (!checked) {
       setIsCheck(isCheck.filter((item) => item !== +id));
     }
+    
   };
 
   const columns = [
@@ -689,6 +691,8 @@ export default function WarningLetter(props) {
       ...prevState,
       keywords: e,
     }));
+    fetchData();
+    console.log('Table handler', e ? e : null);
   };
   /* end fungtion methode Datatable */
 
@@ -746,7 +750,7 @@ export default function WarningLetter(props) {
       });
     }
 
-    Block.remove(`.${warningLetterBlockLoadingName}`),
+    Block.remove(`.${warningLetterBlockLoadingName}`);
       setLoadingSend(false);
   };
   /* end send email */
@@ -852,7 +856,7 @@ export default function WarningLetter(props) {
                                       <FormField
                                         {...params}
                                         type={periode.type}
-                                        label={periode.label}
+                                        label={periode.label} required
                                         name={periode.name}
                                         placeholder={periode.placeholder}
                                         InputLabelProps={{ shrink: true }}
@@ -973,7 +977,7 @@ export default function WarningLetter(props) {
                                       <FormField
                                         {...params}
                                         type={unitCode.type}
-                                        label={unitCode.label} required
+                                        label={unitCode.label}
                                         name={unitCode.name}
                                         placeholder={unitCode.placeholder}
                                         InputLabelProps={{ shrink: true }}
@@ -1006,14 +1010,14 @@ export default function WarningLetter(props) {
                                           ? value
                                           : initialValues[unitNo.name]
                                       );
-                                      onSP(value);
+                                      /* onSP(value); */
                                     }}
                                     noOptionsText="No results"
                                     renderInput={(params) => (
                                       <FormField
                                         {...params}
                                         type={unitNo.type}
-                                        label={unitNo.label} required
+                                        label={unitNo.label}
                                         name={unitNo.name}
                                         placeholder={unitNo.placeholder}
                                         InputLabelProps={{ shrink: true }}
@@ -1030,12 +1034,20 @@ export default function WarningLetter(props) {
                                 <Grid item xs={12} sm={6}>
                                   <Autocomplete
                                     // disableCloseOnSelect
+                                    multiple
+                                    /* disableCloseOnSelect */
+                                    component={Autocomplete}
                                     key={sp.name}
                                     options={dataSP}
                                     value={values.spName}
-                                    getOptionLabel={(option) =>
+                                    /* getOptionLabel={(option) =>
                                       values.spId != {}
                                         ? option.spName
+                                        : "Nothing selected"
+                                    } */
+                                    getOptionLabel={(option) =>
+                                      values.spId != {}
+                                        ? option.spId + " - " + option.spName
                                         : "Nothing selected"
                                     }
                                     onChange={(e, value) => {
@@ -1051,7 +1063,7 @@ export default function WarningLetter(props) {
                                         {...params}
                                         defaultValue={params}
                                         type={sp.type}
-                                        label={sp.label} required
+                                        label={mandatoryComp(sp.label, "*")}
                                         name={sp.name}
                                         placeholder={sp.placeholder}
                                         InputLabelProps={{ shrink: true }}
