@@ -18,6 +18,8 @@
 */
 
 import React from "react";
+import Cookies from 'universal-cookie';
+const cookies = new Cookies();
 
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import Logout from "@mui/icons-material/Logout";
@@ -373,6 +375,7 @@ function setReformatedMain(filteredMain = setFilteredMain()) {
         nameOnHeader: e.nameOnHeader != undefined ? e.nameOnHeader : e.name,
         key: e.key,
         route: e.route,
+        permission: e.permission
       });
     } else {
       // Childs
@@ -383,11 +386,11 @@ function setReformatedMain(filteredMain = setFilteredMain()) {
       if (e.collapse != undefined && e.collapse.length > 0) {
         e.collapse.forEach((e_c) => {
           reformatedMain.push({
-            nameOnHeader:
-              e_c.nameOnHeader != undefined ? e_c.nameOnHeader : e_c.name,
+            nameOnHeader: e_c.nameOnHeader != undefined ? e_c.nameOnHeader : e_c.name,
             childOf: e.key,
             key: e_c.key,
             route: e_c.route,
+            permission: e_c.permission
           });
         });
       }
@@ -404,10 +407,7 @@ export default function setRoutes(
   const filteredMain = setFilteredMain(permissions, main);
   const reformatedMain = setReformatedMain(filteredMain);
 
-  // console.log("Permissions: ", permissions);
-  // console.log("Routes (Before): ", main);
-  // console.log("Routes (After): ", filteredMain);
-  // console.log("Routes (After - Reformated): ", reformatedMain);
+  cookies.set('filteredRoutes', reformatedMain, { path: '/' });
 
   return {
     main,
@@ -436,7 +436,19 @@ export function checkPermission(testPermission, permissions = getPermission()) {
     const checking =
       permissions[testPermission] &&
       ["true", true].indexOf(permissions[testPermission]) != -1;
-    return checking;
+    return checking ? true : false;
+  }
+
+  return;
+}
+
+export function checkRoute(testRoute, filteredRoutes = setReformatedMain(setMain()), isBooleanResult = true) {
+  if (filteredRoutes != null || filteredRoutes != undefined) {
+    const checking = filteredRoutes.find(e => e.route?.includes(testRoute));
+    if (checking && checking.permission) 
+      return checkPermission(checking.permission);
+
+    return undefined;
   }
 
   return;
