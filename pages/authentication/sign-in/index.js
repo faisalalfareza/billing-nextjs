@@ -271,8 +271,8 @@ function SignIn(props) {
 
       localStorage.setItem("allPermissions", JSON.stringify(allPermissions));
 
-      grantedPermissions["Pages.Cashier.CancelPayment"] && delete grantedPermissions["Pages.Cashier.CancelPayment"];
-      grantedPermissions["Pages.Report"] && delete grantedPermissions["Pages.Report"];
+      // grantedPermissions["Pages.Cashier.CancelPayment"] && delete grantedPermissions["Pages.Cashier.CancelPayment"];
+      // grantedPermissions["Pages.Report"] && delete grantedPermissions["Pages.Report"];
 
       localStorage.setItem("grantedPermissions", JSON.stringify(grantedPermissions));
       
