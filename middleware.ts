@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import Cookies from 'universal-cookie';
+const cookies = new Cookies();
 
 let alreadyLoggedIn: boolean = false;
 export const config = {
@@ -17,28 +19,10 @@ export const config = {
 };
 
 
-// Fungsi untuk pengecekan pengguna belum terautentikasi
-function handleNotAuthenticated(request: NextRequest) {
-  const { nextUrl } = request;
-
-  // console.log("————————————————————NOT AUTHENTICATED");
-  
-  // Reset status alreadyLoggedIn
-  // alreadyLoggedIn && console.log("————————————————————LOGGED OUT");
-  alreadyLoggedIn = false;
-  // Arahkan ke halaman masuk atau autentikasi
-  return NextResponse.rewrite(new URL("/authentication/sign-in", nextUrl.origin));
-}
-
-function middleware(request: NextRequest) {
+export default function middleware(request: NextRequest) {
   const { nextUrl, cookies, headers } = request;
   const isAuthenticated = cookies.has("accessToken");
   
-  // console.log("\n\n\n");
-  // console.log("IS AUTHENTICATED (HAS): ", cookies.has("accessToken"));
-  // console.log("IS AUTHENTICATED (GET): ", cookies.get("accessToken"));
-  // console.log("IS LOGGED IN: ", alreadyLoggedIn);
-
   /* 
     1. AUTENTIKASI (AUTHENTICATION): 
     Pengecekan apakah user terautentikasi/tidak berdasarkan 1) memiliki/tidaknya sebuah token, 2) token yang valid 
@@ -50,9 +34,6 @@ function middleware(request: NextRequest) {
   }
   // Cek jika pengguna terautentikasi, dan normal
   else if (alreadyLoggedIn || isAuthenticated) {
-    // isAuthenticated && console.log("————————————————————AUTHENTICATED");
-    // alreadyLoggedIn && console.log("————————————————————ALREADY LOGGED IN");
-
     // Cek jika pengguna terautentikasi, tetapi mencoba mengakses halaman awal atau halaman autentikasi sign-in
     if ((
       nextUrl.pathname === "/authentication/sign-in" ||
@@ -63,21 +44,31 @@ function middleware(request: NextRequest) {
         : handleNotAuthenticated(request); // Logout or redirect to sign-in
     }
     else {
-      // Set status alreadyLoggedIn menjadi true setelah autentikasi yang valid
-      // !alreadyLoggedIn && console.log("————————————————————LOGGED IN");
-      alreadyLoggedIn = true; 
-
       /* 
         2. AUTORISASI (AUTHORIZATION): 
         Pengecekan apakah user memiliki hak akses ke suatu routing berdasarkan memiliki/tidaknya permission terkait
       */
 
+      const filteredRoutes = JSON.parse(cookies.get("filteredRoutes") || "");
+      const getPermissionByRoute = filteredRoutes.find((e: { route: string | string[]; }) => e.route?.includes(nextUrl.pathname));
       
-
-      // Jika semua kondisi terpenuhi, lanjutkan dengan pemrosesan berikutnya
-      return NextResponse.next();
+      if ((getPermissionByRoute == undefined) && alreadyLoggedIn) {
+        return NextResponse.redirect(`${nextUrl.origin}/`);
+      } else {
+        // Set status alreadyLoggedIn menjadi true setelah autentikasi yang valid
+        alreadyLoggedIn = true; 
+        // Jika semua kondisi terpenuhi, lanjutkan dengan pemrosesan berikutnya
+        return NextResponse.next();
+      }
     }
   }
 }
 
-export default middleware;
+function handleNotAuthenticated(request: NextRequest) {
+  const { nextUrl } = request;
+
+  // Reset status alreadyLoggedIn
+  alreadyLoggedIn = false;
+  // Arahkan ke halaman masuk atau autentikasi
+  return NextResponse.rewrite(new URL("/authentication/sign-in", nextUrl.origin));
+}

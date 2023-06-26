@@ -21,6 +21,7 @@ import FormField from "/pagesComponents/FormField";
 
 import { typeNormalization } from "../../../helpers/utils";
 import appInfo from "/appinfo.json";
+import { checkRoute } from "../../../routes"
 
 function SignIn(props) {
   const {} = props;
@@ -210,17 +211,9 @@ function SignIn(props) {
     reconfiguredExpireInSeconds,
     redirectUrl
   ) {
-    const tokenExpireDate = new Date(
-      new Date().getTime() + 1000 * expireInSeconds
-    );
-    setCookie("accessToken", accessToken, {
-      path: "/",
-      expires: tokenExpireDate,
-    });
-    setCookie("encryptedAccessToken", encryptedAccessToken, {
-      path: "/",
-      expires: tokenExpireDate,
-    });
+    const tokenExpireDate = new Date(new Date().getTime() + 1000 * expireInSeconds);
+    setCookie("accessToken", accessToken, { path: "/",  expires: tokenExpireDate });
+    setCookie("encryptedAccessToken", encryptedAccessToken, { path: "/", expires: tokenExpireDate });
 
     getCurrentLoginInformations(
       {
@@ -277,12 +270,17 @@ function SignIn(props) {
       const { allPermissions, grantedPermissions } = response.result;
 
       localStorage.setItem("allPermissions", JSON.stringify(allPermissions));
-      localStorage.setItem(
-        "grantedPermissions",
-        JSON.stringify(grantedPermissions)
-      );
+
+      grantedPermissions["Pages.Cashier.CancelPayment"] && delete grantedPermissions["Pages.Cashier.CancelPayment"];
+      grantedPermissions["Pages.Report"] && delete grantedPermissions["Pages.Report"];
+
+      localStorage.setItem("grantedPermissions", JSON.stringify(grantedPermissions));
       
-      Router.replace(redirectUrl, (Router.asPath !== Router.pathname) && Router.asPath);
+      Router.replace(redirectUrl, 
+        (Router.asPath !== Router.pathname) && 
+        checkRoute(Router.asPath) && 
+        Router.asPath
+      );
       // window.open(redirectUrl, "_self");
     }
   }
