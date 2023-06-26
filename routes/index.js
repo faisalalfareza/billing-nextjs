@@ -18,7 +18,7 @@
 */
 
 import React from "react";
-import Cookies from 'universal-cookie';
+import Cookies from "universal-cookie";
 const cookies = new Cookies();
 
 import AccountCircle from "@mui/icons-material/AccountCircle";

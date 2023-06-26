@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import Cookies from 'universal-cookie';
-const cookies = new Cookies();
 
 let alreadyLoggedIn: boolean = false;
 export const config = {
