@@ -50,7 +50,7 @@ export default function middleware(request: NextRequest) {
       */
 
       const filteredRoutes = JSON.parse(cookies.get("filteredRoutes") || "");
-      const getPermissionByRoute = filteredRoutes.find((e: { route: string | string[]; }) => e.route?.includes(nextUrl.pathname));
+      const getPermissionByRoute = filteredRoutes.find((e: { route: string; }) => nextUrl.pathname.includes(e.route));
       
       if ((getPermissionByRoute == undefined) && alreadyLoggedIn) {
         return NextResponse.redirect(`${nextUrl.origin}/`);
