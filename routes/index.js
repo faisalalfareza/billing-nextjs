@@ -73,13 +73,13 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
         <AccountCircle fontSize="medium" />
       ),
       collapse: [
-        // {
-        //   name: "Change Password",
-        //   key: "change-password",
-        //   nameOnHeader: "Change Password",
-        //   route: "/profile/change-password",
-        //   icon: <HandymanIcon fontSize="medium" />,
-        // },
+        {
+          name: "Change Password",
+          key: "change-password",
+          nameOnHeader: "Change Password",
+          route: "/profile/change-password",
+          icon: <HandymanIcon fontSize="medium" />,
+        },
         {
           name: "Logout",
           key: "logout",
@@ -117,7 +117,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           key: "site",
           route: "/master/site",
           icon: <AddBusiness fontSize="medium" />,
-          permission: "Pages.Master.MasterSite"
+          permission: "Pages.Master.MasterSite",
         },
         {
           name: "Master Period",
@@ -125,7 +125,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           key: "period",
           route: "/master/period",
           icon: <CalendarToday fontSize="medium" />,
-          permission: "Pages.Master.MasterPeriod"
+          permission: "Pages.Master.MasterPeriod",
         },
 
         // {
@@ -169,7 +169,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           key: "unit-item",
           route: "/master/unit-item",
           icon: <FactCheck fontSize="medium" />,
-          permission: "Pages.Master.MasterUnitItem"
+          permission: "Pages.Master.MasterUnitItem",
         },
         // {
         //   name: "Master Oracle Mapping",
@@ -195,7 +195,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           key: "water-reading",
           route: "/transaction/water-reading",
           icon: <WaterDamage fontSize="medium" />,
-          permission: "Pages.Transaction.WaterReading"
+          permission: "Pages.Transaction.WaterReading",
         },
         {
           name: "Invoice",
@@ -203,7 +203,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           key: "invoice",
           route: "/transaction/invoice",
           icon: <Description fontSize="medium" />,
-          permission: "Pages.Transaction.Invoice"
+          permission: "Pages.Transaction.Invoice",
         },
         {
           name: "Warning Letter",
@@ -211,7 +211,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           key: "warning-letter",
           route: "/transaction/warning-letter",
           icon: <MarkEmailUnreadIcon fontSize="medium" />,
-          permission: "Pages.Transaction.WarningLetter"
+          permission: "Pages.Transaction.WarningLetter",
         },
         {
           name: "Oracle To Journal",
@@ -219,7 +219,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           key: "oracle-to-journal",
           route: "/transaction/oracle-to-journal",
           icon: <Book fontSize="medium" />,
-          permission: "Pages.Transaction.OracleToJournal"
+          permission: "Pages.Transaction.OracleToJournal",
         },
 
         // {
@@ -241,7 +241,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
       type: "collapse",
       name: "Cashier System",
       nameOnHeader: "Cashier System",
-      key: "cashier", 
+      key: "cashier",
       icon: <Payments fontSize="medium" />,
       permission: "Pages.Cashier",
       collapse: [
@@ -251,7 +251,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           key: "billing-payment",
           route: "/cashier/billing-payment",
           icon: <AttachMoney fontSize="medium" />,
-          permission: "Pages.Cashier.BillingPayment"
+          permission: "Pages.Cashier.BillingPayment",
         },
         {
           name: "Reprint OR",
@@ -259,15 +259,15 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           key: "reprint-or",
           route: "/cashier/reprint-or",
           icon: <Receipt fontSize="medium" />,
-          permission: "Pages.Cashier.ReprintOR"
+          permission: "Pages.Cashier.ReprintOR",
         },
         {
           name: "Cancel Payment",
           nameOnHeader: "Cancel Payment",
           key: "cancel-payment",
-          route: "/cashier/cancel-payment",   
+          route: "/cashier/cancel-payment",
           icon: <MoneyOffIcon fontSize="medium" />,
-          permission: "Pages.Cashier.CancelPayment"
+          permission: "Pages.Cashier.CancelPayment",
         },
         {
           name: "Upload Bulk Payment",
@@ -275,7 +275,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           key: "upload-bulk-payment",
           route: "/cashier/upload-bulk-payment",
           icon: <AccountBalanceWallet fontSize="medium" />,
-          permission: "Pages.Cashier.UploadBulk"
+          permission: "Pages.Cashier.UploadBulk",
         },
       ],
     },
@@ -294,7 +294,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           key: "report-invoice",
           route: "/report/report-invoice",
           icon: <Description fontSize="medium" />,
-          permission: "Pages.Report.ReportInvoice"
+          permission: "Pages.Report.ReportInvoice",
         },
         {
           name: "Daily Report",
@@ -302,7 +302,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           key: "report-daily",
           route: "/report/report-daily",
           icon: <Today fontSize="medium" />,
-          permission: "Pages.Report.DailyReport"
+          permission: "Pages.Report.DailyReport",
         },
 
         {
@@ -311,7 +311,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           key: "report-detail-statement",
           route: "/report/report-detail-statement",
           icon: <TableView fontSize="medium" />,
-          permission: "Pages.Report.ReportDetailStatment"
+          permission: "Pages.Report.ReportDetailStatment",
         },
         // {
         //   name: "Report Water Reading",
@@ -375,7 +375,7 @@ function setReformatedMain(filteredMain = setFilteredMain()) {
         nameOnHeader: e.nameOnHeader != undefined ? e.nameOnHeader : e.name,
         key: e.key,
         route: e.route,
-        permission: e.permission
+        permission: e.permission,
       });
     } else {
       // Childs
@@ -386,11 +386,12 @@ function setReformatedMain(filteredMain = setFilteredMain()) {
       if (e.collapse != undefined && e.collapse.length > 0) {
         e.collapse.forEach((e_c) => {
           reformatedMain.push({
-            nameOnHeader: e_c.nameOnHeader != undefined ? e_c.nameOnHeader : e_c.name,
+            nameOnHeader:
+              e_c.nameOnHeader != undefined ? e_c.nameOnHeader : e_c.name,
             childOf: e.key,
             key: e_c.key,
             route: e_c.route,
-            permission: e_c.permission
+            permission: e_c.permission,
           });
         });
       }
@@ -407,7 +408,7 @@ export default function setRoutes(
   const filteredMain = setFilteredMain(permissions, main);
   const reformatedMain = setReformatedMain(filteredMain);
 
-  cookies.set('filteredRoutes', reformatedMain, { path: '/' });
+  cookies.set("filteredRoutes", reformatedMain, { path: "/" });
 
   return {
     main,
@@ -442,10 +443,14 @@ export function checkPermission(testPermission, permissions = getPermission()) {
   return;
 }
 
-export function checkRoute(testRoute, filteredRoutes = setReformatedMain(setMain()), isBooleanResult = true) {
+export function checkRoute(
+  testRoute,
+  filteredRoutes = setReformatedMain(setMain()),
+  isBooleanResult = true
+) {
   if (filteredRoutes != null || filteredRoutes != undefined) {
-    const checking = filteredRoutes.find(e => e.route?.includes(testRoute));
-    if (checking && checking.permission) 
+    const checking = filteredRoutes.find((e) => e.route?.includes(testRoute));
+    if (checking && checking.permission)
       return checkPermission(checking.permission);
 
     return undefined;

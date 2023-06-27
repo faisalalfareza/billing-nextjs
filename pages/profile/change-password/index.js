@@ -12,6 +12,10 @@ import MDAvatar from "/components/MDAvatar";
 import { capitalizeFirstLetter } from "/helpers/utils";
 import * as Yup from "yup";
 import { Block } from "notiflix/build/notiflix-block-aio";
+import { InputAdornment, IconButton } from "@mui/material";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import Swal from "sweetalert2";
 
 // Data
 import { useCookies } from "react-cookie";
@@ -46,10 +50,19 @@ function ChangePassword(props) {
   const [{ accessToken, encryptedAccessToken }] = useCookies();
   const [formValues, setformValues] = useState(initialValues);
   const [isLoading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const handleClickShowPassword = () => setShowPassword(!showPassword);
+  const handleMouseDownPassword = () => setShowPassword(!showPassword);
+  const [showPasswordNew, setShowPasswordNew] = useState(false);
+  const handleClickShowPasswordNew = () => setShowPasswordNew(!showPasswordNew);
+  const handleMouseDownPasswordNew = () => setShowPasswordNew(!showPasswordNew);
+  const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
+  const handleClickShowPasswordConfirm = () =>
+    setShowPasswordConfirm(!showPasswordConfirm);
+  const handleMouseDownPasswordConfirm = () =>
+    setShowPasswordConfirm(!showPasswordConfirm);
 
-  const getFormData = (values) => {
-    console.log("formval----", formValues);
-  };
+  const getFormData = (values) => {};
 
   useEffect(() => {
     setUserName(
@@ -65,10 +78,17 @@ function ChangePassword(props) {
       .typeError("Current Password is required."),
     newP: Yup.string()
       .required("New Password is required.")
+      .matches(
+        /^(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{6,})/,
+        "Must Contain 6 Characters, One Number and One Special Case Character"
+      )
       .typeError("New Password is required."),
     confirmP: Yup.string()
       .required("Confirm Password is required.")
-      .typeError("Confirm Password is required."),
+      .oneOf(
+        [Yup.ref("newP"), null],
+        "Confirm Password must match New Password"
+      ),
   });
 
   const checkingSuccessInput = (value, error) => {
@@ -76,36 +96,26 @@ function ChangePassword(props) {
   };
   const submitForm = async (values, actions) => {
     // await sleep(1000);
-    updateUnitItem(values, actions);
+    processChangePassword(values, actions);
   };
 
-  const detailUnitItemBlockLoadingName = "block-detail-unit-item";
-  const updateUnitItem = async (values, actions) => {
-    Block.standard(`.${detailUnitItemBlockLoadingName}`, `Updating Unit Item`),
+  const detailPasswordBlockLoadingName = "block-change-password";
+  const processChangePassword = async (values, actions) => {
+    Block.standard(`.${detailPasswordBlockLoadingName}`, `Changing Password`),
       setLoading(true);
 
     const body = {
-      unitItemHeaderId: params.unitItemHeaderId,
-      unitDataId: params.unitDataId,
-      currentP: params.currentP,
-      newP: params.newP,
-      templateInvoiceHeaderId: values.templateInvoice.templateInvoiceHeaderId,
-      bankId: values.bank.bankID,
-      confirmP: values.confirmP,
-      isPenalty: values.isPenalty,
-      itemDetail: listItem,
+      currentPassword: values.currentP,
+      newPassword: values.newP,
     };
 
-    let response = await fetch(
-      "/api/master/unititem/prosesupdatemasterunititem",
-      {
-        method: "POST",
-        body: JSON.stringify({
-          accessToken: accessToken,
-          params: body,
-        }),
-      }
-    );
+    let response = await fetch("/api/profile/changepassword", {
+      method: "POST",
+      body: JSON.stringify({
+        accessToken: accessToken,
+        params: body,
+      }),
+    });
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
@@ -116,21 +126,16 @@ function ChangePassword(props) {
       });
     else {
       Swal.fire({
-        title: "Unit Item Updated",
-        text:
-          "Unit " +
-          params.currentP +
-          " - " +
-          params.newP +
-          " has been successfully updated.",
+        title: "Password Changed",
+        text: "Password has been successfully changed.",
         icon: "success",
       }).then((result) => {
         actions.resetForm();
-        closeModal(true);
+        setformValues(initialValues);
       });
     }
 
-    Block.remove(`.${detailUnitItemBlockLoadingName}`), setLoading(false);
+    Block.remove(`.${detailPasswordBlockLoadingName}`), setLoading(false);
   };
 
   return (
@@ -172,7 +177,12 @@ function ChangePassword(props) {
           mt: 2,
         }}
       >
-        <Grid container spacing={3} alignItems="center">
+        <Grid
+          container
+          spacing={3}
+          alignItems="center"
+          className={detailPasswordBlockLoadingName}
+        >
           <Grid item xs={12}>
             <MDTypography variant="h5" fontWeight="medium">
               Change Password
@@ -209,7 +219,7 @@ function ChangePassword(props) {
                       <Grid container spacing={3}>
                         <Grid item xs={12} sm={12}>
                           <FormField
-                            type="text"
+                            type={showPassword ? "text" : "password"}
                             label="Current Password"
                             name="currentP"
                             value={formValues.currentP}
@@ -219,11 +229,29 @@ function ChangePassword(props) {
                               formValues.currentP,
                               errors.currentP
                             )}
+                            InputProps={{
+                              // <-- This is where the toggle button is added.
+                              endAdornment: (
+                                <InputAdornment position="end">
+                                  <IconButton
+                                    aria-label="toggle password visibility"
+                                    onClick={handleClickShowPassword}
+                                    onMouseDown={handleMouseDownPassword}
+                                  >
+                                    {showPassword ? (
+                                      <VisibilityIcon />
+                                    ) : (
+                                      <VisibilityOffIcon />
+                                    )}
+                                  </IconButton>
+                                </InputAdornment>
+                              ),
+                            }}
                           />
                         </Grid>
                         <Grid item xs={12} sm={12}>
                           <FormField
-                            type="text"
+                            type={showPasswordNew ? "text" : "password"}
                             label="New Password"
                             name="newP"
                             value={formValues.newP}
@@ -233,11 +261,29 @@ function ChangePassword(props) {
                               formValues.newP,
                               errors.newP
                             )}
+                            InputProps={{
+                              // <-- This is where the toggle button is added.
+                              endAdornment: (
+                                <InputAdornment position="end">
+                                  <IconButton
+                                    aria-label="toggle password visibility"
+                                    onClick={handleClickShowPasswordNew}
+                                    onMouseDown={handleMouseDownPasswordNew}
+                                  >
+                                    {showPasswordNew ? (
+                                      <VisibilityIcon />
+                                    ) : (
+                                      <VisibilityOffIcon />
+                                    )}
+                                  </IconButton>
+                                </InputAdornment>
+                              ),
+                            }}
                           />
                         </Grid>
                         <Grid item xs={12} sm={12} md={12}>
                           <FormField
-                            type="text"
+                            type={showPasswordConfirm ? "text" : "password"}
                             label="Confirm Password"
                             name="confirmP"
                             value={formValues.confirmP}
@@ -247,6 +293,24 @@ function ChangePassword(props) {
                               formValues.confirmP,
                               errors.confirmP
                             )}
+                            InputProps={{
+                              // <-- This is where the toggle button is added.
+                              endAdornment: (
+                                <InputAdornment position="end">
+                                  <IconButton
+                                    aria-label="toggle password visibility"
+                                    onClick={handleClickShowPasswordConfirm}
+                                    onMouseDown={handleMouseDownPasswordConfirm}
+                                  >
+                                    {showPasswordConfirm ? (
+                                      <VisibilityIcon />
+                                    ) : (
+                                      <VisibilityOffIcon />
+                                    )}
+                                  </IconButton>
+                                </InputAdornment>
+                              ),
+                            }}
                           />
                         </Grid>
                         <Grid item xs={12}>
