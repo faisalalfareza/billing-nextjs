@@ -78,13 +78,11 @@ function ChangePassword(props) {
       .typeError("Current Password is required."),
     newP: Yup.string()
       .required("New Password is required.")
-      .matches(
-        /^(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{6,})/,
-        "Must Contain 6 Characters, One Number and One Special Case Character"
-      )
+      .matches(/^(?=.{6,})/, "Must Contain 6 Characters")
       .typeError("New Password is required."),
     confirmP: Yup.string()
       .required("Confirm Password is required.")
+      .typeError("Confirm Password is required.")
       .oneOf(
         [Yup.ref("newP"), null],
         "Confirm Password must match New Password"
@@ -315,7 +313,7 @@ function ChangePassword(props) {
                         </Grid>
                         <Grid item xs={12}>
                           <MDTypography variant="h5" fontWeight="medium">
-                            Password requierements
+                            Password recommendations
                           </MDTypography>
                           <MDTypography variant="body">
                             Please follow this guide for a strong password:
