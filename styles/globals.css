@@ -95,3 +95,29 @@ body {
 div#__next-build-watcher {
   display: none;
 }
+.avatar-default {
+  position: relative;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  justify-content: center;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
+  font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+  line-height: 1;
+  border-radius: 50%;
+  overflow: hidden;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  transition: all 200ms ease-in-out;
+  background: transparent;
+  color: #7b809a;
+  font-weight: 400;
+  box-shadow: 0rem 0.3125rem 0.625rem 0rem rgba(0, 0, 0, 0.12);
+  width: 4.625rem;
+  height: 4.625rem;
+  font-size: 1rem;
+}

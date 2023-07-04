@@ -16,6 +16,7 @@ import { InputAdornment, IconButton } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import Swal from "sweetalert2";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 
 // Data
 import { useCookies } from "react-cookie";
@@ -148,12 +149,19 @@ function ChangePassword(props) {
       >
         <Grid container spacing={3} alignItems="center">
           <Grid item>
-            <MDAvatar
-              src={`data:image/png;base64, ${profiles}`}
-              alt="profile-image"
-              size="xl"
-              shadow="sm"
-            />
+            {profiles ==
+              "http://18.140.60.145:1010/Assets/Upload/Image/ProfileUser/" && (
+              <AccountCircleIcon className="avatar-default" />
+            )}
+            {profiles !=
+              "http://18.140.60.145:1010/Assets/Upload/Image/ProfileUser/" && (
+              <MDAvatar
+                src={`data:image/png;base64, ${profiles}`}
+                alt="profile-image"
+                size="xl"
+                shadow="sm"
+              />
+            )}
           </Grid>
           <Grid item>
             <MDBox height="100%" mt={0.5} lineHeight={1}>
@@ -230,7 +238,13 @@ function ChangePassword(props) {
                             InputProps={{
                               // <-- This is where the toggle button is added.
                               endAdornment: (
-                                <InputAdornment position="end">
+                                <InputAdornment
+                                  position="end"
+                                  sx={{
+                                    marginRight: "30px",
+                                    marginBottom: "20px",
+                                  }}
+                                >
                                   <IconButton
                                     aria-label="toggle password visibility"
                                     onClick={handleClickShowPassword}
@@ -262,7 +276,13 @@ function ChangePassword(props) {
                             InputProps={{
                               // <-- This is where the toggle button is added.
                               endAdornment: (
-                                <InputAdornment position="end">
+                                <InputAdornment
+                                  position="end"
+                                  sx={{
+                                    marginRight: "30px",
+                                    marginBottom: "20px",
+                                  }}
+                                >
                                   <IconButton
                                     aria-label="toggle password visibility"
                                     onClick={handleClickShowPasswordNew}
@@ -294,7 +314,13 @@ function ChangePassword(props) {
                             InputProps={{
                               // <-- This is where the toggle button is added.
                               endAdornment: (
-                                <InputAdornment position="end">
+                                <InputAdornment
+                                  position="end"
+                                  sx={{
+                                    marginRight: "30px",
+                                    marginBottom: "20px",
+                                  }}
+                                >
                                   <IconButton
                                     aria-label="toggle password visibility"
                                     onClick={handleClickShowPasswordConfirm}
