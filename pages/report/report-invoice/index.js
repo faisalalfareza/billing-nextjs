@@ -3,39 +3,48 @@ import DashboardNavbar from "/layout/Navbars/DashboardNavbar";
 import MDBox from "/components/MDBox";
 import MDTypography from "/components/MDTypography";
 import Grid from "@mui/material/Grid";
-import { Autocomplete, TextField, Radio } from "@mui/material";
+import { Autocomplete, createFilterOptions } from "@mui/material";
 import MDButton from "/components/MDButton";
 import { useEffect, useState, useRef } from "react";
 import Card from "@mui/material/Card";
-import { Formik, Form, Field, ErrorMessage } from "formik";
+import { Formik, Form, Field } from "formik";
 import FormField from "/pagesComponents/FormField";
 import * as Yup from "yup";
 import { typeNormalization } from "/helpers/utils";
 import { alertService } from "/helpers";
-import Icon from "@mui/material/Icon";
 import { useCookies } from "react-cookie";
 import SiteDropdown from "/pagesComponents/dropdown/Site";
 import BorderAllIcon from "@mui/icons-material/BorderAll";
 import { Block } from "notiflix/build/notiflix-block-aio";
 
+
 function ReportInvoice() {
-  let typeDummy = [
+  const [{ accessToken }] = useCookies();
+  const [site, setSite] = useState(null);
+  const [dataPeriod, setDataPeriod] = useState([]);
+  const [dataProject, setDataProject] = useState([]);
+  const [dataCluster, setDataCluster] = useState([]);
+  const [dataType, setDataType] = useState([
     {
       id: 1,
       name: "Summary",
     },
     { id: 2, name: "Detail" },
-  ];
-  const [site, setSite] = useState(null);
-  const [{ accessToken, encryptedAccessToken }] = useCookies();
-  const [dataCluster, setDataCluster] = useState([]);
-  const [dataProject, setDataProject] = useState([]);
-  const [dataType, setDataType] = useState(typeDummy);
-  const [dataPeriod, setDataPeriod] = useState([]);
+  ]);
+  
+  const [isLoading, setLoading] = useState(false);
   const formikRef = useRef();
+  const filter = createFilterOptions();
 
   useEffect(() => {
-    getPeriod();
+    let currentSite = JSON.parse(localStorage.getItem("site"));
+    if (currentSite == null) alertService.info({ title: "Please choose site first." });
+    else setSite(currentSite);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
     setformValues((prevState) => ({
       ...prevState,
       project: null,
@@ -48,11 +57,38 @@ function ReportInvoice() {
       formikRef.current.setFieldValue("cluster", []);
     }
 
+    getPeriod();
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [site]);
+  const handleSite = (siteVal) => {
+    setSite(siteVal);
+    localStorage.setItem("site", JSON.stringify(siteVal));
+  };
+ 
+  let schemeValidations = Yup.object().shape({
+    period: Yup.object()
+      .required("Period is required.")
+      .typeError("Period is required."),
+    type: Yup.object()
+      .required("Report Type is required.")
+      .typeError("Report Type is required."),
+    project: Yup.object().nullable(),
+    cluster: Yup.array().nullable(),
+  });
+  const initialValues = {
+    cluster: [],
+    project: null,
+    type: null,
+    period: null,
+  };
+  const [formValues, setformValues] = useState(initialValues);
+  const checkingSuccessInput = (value, error) => {
+    return value != undefined && value != "" && !error;
+  };
 
   const periodBlockLoadingName = "block-period";
-  const getPeriod = async (val) => {
+  const getPeriod = async () => {
     Block.dots(`.${periodBlockLoadingName}`);
 
     let response = await fetch(
@@ -69,125 +105,12 @@ function ReportInvoice() {
     );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    if (response.error) {
-      alertService.error({ title: "Error", text: response.error.message });
-    } else setDataPeriod(response.result);
+    
+    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+    else setDataPeriod(response.result);
 
     Block.remove(`.${periodBlockLoadingName}`);
   };
-
-  useEffect(() => {
-    let currentSite = JSON.parse(localStorage.getItem("site"));
-    if (currentSite == null) alertService.info({ title: "Please choose site first." });
-    else setSite(currentSite);
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  //dari sini
-  const [isLoading, setLoading] = useState(false);
-  let schemeValidations = Yup.object().shape({
-    cluster: Yup.array().nullable(),
-    type: Yup.object()
-      .required("Report Type is required.")
-      .typeError("Report Type is required."),
-    period: Yup.object()
-      .required("Period is required.")
-      .typeError("Period is required."),
-    project: Yup.object().nullable(),
-  });
-
-  const initialValues = {
-    cluster: [],
-    project: null,
-    type: null,
-    period: null,
-  };
-
-  const [formValues, setformValues] = useState(initialValues);
-
-  const getFormData = (values) => {};
-
-  const submitForm = async (values, actions) => {
-    exportExcel(values, actions);
-  };
-
-  const checkingSuccessInput = (value, error) => {
-    return value != undefined && value != "" && !error;
-  };
-
-  const exportToExcelBlockLoadingName = "block-export-to-excel";
-  const exportExcel = async (fields, actions) => {
-    Block.standard(`.${exportToExcelBlockLoadingName}`, `Exporting Invoice Report to Excel`),
-      setLoading(true);
-
-    let listCluster = [];
-    if (fields.cluster != null)
-      fields.cluster.map((e) => {
-        listCluster.push(e.clusterId);
-      });
-
-    const body = {
-      siteId: site?.siteId,
-      projectId: fields.project?.projectId,
-      clusterId: listCluster.length == 0 ? undefined : listCluster,
-      periodId: fields.period.periodId,
-      reportType: fields.type.id,
-    };
-
-    let response = await fetch("/api/report/invoice/reportinvoice", {
-      method: "POST",
-      body: JSON.stringify({
-        accessToken: accessToken,
-        params: body,
-      }),
-    });
-    if (!response.ok) throw new Error(`Error: ${response.status}`);
-    response = typeNormalization(await response.json());
-    
-    if (response.error) {
-      let err = response.error;
-      alertService.error({
-        title: "Error",
-        text: err.error.message,
-      });
-    } else {
-      let data = response.result.uri;
-      if (data != null) window.open(data, "_blank");
-      else alertService.info({ title: "No Data", text: "No data in this filter" });
-    }
-
-    actions.setSubmitting(false);
-    Block.remove(`.${exportToExcelBlockLoadingName}`),
-      setLoading(false);
-  };
-
-  const clusterBlockLoadingName = "block-cluster";
-  const getCluster = async (val) => {
-    Block.dots(`.${clusterBlockLoadingName}`);
-
-    let response = await fetch(
-      "/api/transaction/invoice/getdropdownclusterinvoice",
-      {
-        method: "POST",
-        body: JSON.stringify({
-          accessToken: accessToken,
-          params: {
-            SiteId: site?.siteId,
-            periodId: val?.periodId,
-          },
-        }),
-      }
-    );
-    if (!response.ok) throw new Error(`Error: ${response.status}`);
-    response = typeNormalization(await response.json());
-    if (response.error) {
-      alertService.error({ title: "Error", text: response.error.message });
-    } else setDataCluster(response.result);
-
-    Block.remove(`.${clusterBlockLoadingName}`);
-  };
-
   const projectBlockLoadingName = "block-project";
   const getProject = async (val) => {
     Block.dots(`.${projectBlockLoadingName}`);
@@ -207,18 +130,81 @@ function ReportInvoice() {
     );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    if (response.error) {
-      alertService.error({ title: "Error", text: response.error.message });
-    } else setDataProject(response.result);
+    
+    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+    else setDataProject(response.result);
 
     Block.remove(`.${projectBlockLoadingName}`);
   };
+  const clusterBlockLoadingName = "block-cluster";
+  const getCluster = async (val) => {
+    Block.dots(`.${clusterBlockLoadingName}`);
 
-  const handleSite = (siteVal) => {
-    setSite(siteVal);
-    localStorage.setItem("site", JSON.stringify(siteVal));
+    let response = await fetch(
+      "/api/transaction/invoice/getdropdownclusterinvoice",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          accessToken: accessToken,
+          params: {
+            SiteId: site?.siteId,
+            periodId: val?.periodId,
+          },
+        }),
+      }
+    );
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
+    
+    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+    else setDataCluster(response.result);
+
+    Block.remove(`.${clusterBlockLoadingName}`);
   };
-  //sampai sini
+
+  const submitForm = async (values, actions) => {
+    exportExcel(values, actions);
+  };
+  const exportToExcelBlockLoadingName = "block-export-to-excel";
+  const exportExcel = async (fields, actions) => {
+    Block.standard(`.${exportToExcelBlockLoadingName}`, `Exporting Invoice Report to Excel`),
+      setLoading(true);
+
+    let listCluster = [];
+    if (fields.cluster != null) fields.cluster.map((e) => {
+      listCluster.push(e.clusterId);
+    });
+
+    const body = {
+      siteId: site?.siteId,
+      projectId: fields.project?.projectId,
+      clusterId: listCluster.length == 0 ? undefined : listCluster,
+      periodId: fields.period.periodId,
+      reportType: fields.type.id,
+    };
+    let response = await fetch("/api/report/invoice/reportinvoice", {
+      method: "POST",
+      body: JSON.stringify({
+        accessToken: accessToken,
+        params: body,
+      }),
+    });
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
+    
+    if (response.error) alertService.error({ title: "Error", text: response.error.error.message });
+    else {
+      let data = response.result.uri;
+      if (data != null) window.open(data, "_blank");
+      else alertService.info({ title: "No Data", text: "No data in this filter" });
+    }
+
+    actions.setSubmitting(false);
+    Block.remove(`.${exportToExcelBlockLoadingName}`),
+      setLoading(false);
+  };
+  
+  
   return (
     <DashboardLayout>
       <DashboardNavbar />
@@ -260,15 +246,14 @@ function ReportInvoice() {
                       {({
                         errors,
                         touched,
-                        isSubmitting,
                         setFieldValue,
-                        resetForm,
                         values,
                       }) => {
                         setformValues(values);
                         const isValifForm = () =>
                           checkingSuccessInput(values.period, errors.period) &&
                           checkingSuccessInput(values.type, errors.type);
+
                         return (
                           <Form id="payment-detail" autoComplete="off" fullWidth>
                             <MDBox>
@@ -390,29 +375,14 @@ function ReportInvoice() {
                                 </Grid>
                                 <Grid item xs={6} sm={6}>
                                   <Field
-                                    options={dataCluster}
-                                    id="cluster-invoice"
-                                    name="cluster"
+                                    id="cluster-invoice" name="cluster"
                                     component={Autocomplete}
-                                    multiple
-                                    disableCloseOnSelect
-                                    getOptionLabel={(option) =>
-                                      option.clusterCode +
-                                      " - " +
-                                      option.clusterName
-                                    }
+
+                                    options={dataCluster}
+                                    noOptionsText="No results"
+                                    getOptionLabel={(option) => option.label || (`${option.clusterCode} - ${option.clusterName}`)}
+                                    // isOptionEqualToValue={(option, value) => option.clusterId === value.clusterId}
                                     value={formValues.cluster}
-                                    onChange={(e, value) => {
-                                      setFieldValue(
-                                        "cluster",
-                                        value !== null
-                                          ? value
-                                          : initialValues["cluster"]
-                                      );
-                                    }}
-                                    isOptionEqualToValue={(option, value) =>
-                                      option.clusterId === value.clusterId
-                                    }
                                     renderInput={(params) => (
                                       <FormField
                                         {...params}
@@ -429,6 +399,29 @@ function ReportInvoice() {
                                         className={clusterBlockLoadingName}
                                       />
                                     )}
+
+                                    multiple
+                                    disableCloseOnSelect
+                                    filterOptions={(options, params) => {
+                                      const filtered = filter(options, params);
+                                      return [
+                                        { label: "Select All", value: "select-all" },
+                                        , ...filtered
+                                      ];
+                                    }}
+                                    groupBy={(dataCluster.length > 0) && function (option) {
+                                      (option.label != undefined) ? (option.group = "Action") : (option.group = "Data");
+                                      return option.group;
+                                    }}
+                                    onChange={(event, selectedOptions, reason) => {
+                                      const allSelected = dataCluster.length === values.cluster.length;
+                                      if (reason === "selectOption" || reason === "removeOption") {
+                                        if (selectedOptions.find(option => option.value && (option.value === "select-all"))) {
+                                          if (!allSelected) setFieldValue("cluster", dataCluster), values.cluster = dataCluster;
+                                          else setFieldValue("cluster", []), values.cluster = [];     
+                                        } else setFieldValue("cluster", selectedOptions), values.cluster = selectedOptions;
+                                      } else if (reason === "clear") setFieldValue("cluster", []), values.cluster = [];
+                                    }}
                                   />
                                 </Grid>
                                 <Grid item xs={12}>

@@ -11,7 +11,7 @@ import PropTypes from "prop-types";
 
 // @mui material components
 import { Grid, Icon } from "@mui/material";
-import Autocomplete from "@mui/material/Autocomplete";
+import Autocomplete, { createFilterOptions } from "@mui/material/Autocomplete";
 
 // NextJS Material Dashboard 2 PRO components
 import MDBox from "/components/MDBox";
@@ -24,35 +24,44 @@ import { Block } from "notiflix/build/notiflix-block-aio";
 import { typeNormalization } from "/helpers/utils";
 import { alertService } from "/helpers";
 import { useCookies } from "react-cookie";
+
+
 function UploadDataWater(props) {
+  const [{ accessToken }] = useCookies();
   const { isOpen, onModalChanged, site } = props;
+  useEffect(() => {
+    if (site) {
+      getProject();
+      getPeriod();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
+
   const [modalOpen, setModalOpen] = useState(true);
-  const [{ accessToken, encryptedAccessToken }] = useCookies();
-  const [isLoading, setLoading] = useState(false);
+  const openModal = () => setModalOpen(true);
+  const toggleModal = () => setModalOpen(true);
+  const closeModal = (isChanged = false) => {
+    setModalOpen(false);
+    setTimeout(() => setDataWater([]), 1500);
+    setTimeout(() => onModalChanged(isChanged), 0);
+  };
+  
+  const [period, setPeriod] = useState(null);
   const [dataProject, setDataProject] = useState([]);
   const [dataCluster, setDataCluster] = useState([]);
   const [dataWater, setDataWater] = useState([]);
   const [cols, setCols] = useState([]);
-  const [period, setPeriod] = useState(null);
-  const SheetJSFT = ["xlsx", "xlsb", "xlsm", "xls", "xml", "csv"]
-    .map(function (x) {
-      return "." + x;
-    })
-    .join(",");
 
-  /* generate an array of column objects */
+  const [isLoading, setLoading] = useState(false);
+  const filter = createFilterOptions();
+  
+  const SheetJSFT = ["xlsx", "xlsb", "xlsm", "xls", "xml", "csv"].map(x => "." + x).join(",");
   const make_cols = (refstr) => {
     let o = [],
       C = XLSX.utils.decode_range(refstr).e.c + 1;
     for (var i = 0; i < C; ++i)
       o[i] = { name: XLSX.utils.encode_col(i), key: i };
     return o;
-  };
-  const downloadTxtFile = () => {
-    const element = document.createElement("a");
-    element.href = "/template/template-water-reading.xlsx";
-    element.download = "template-water-reading.xlsx";
-    element.click();
   };
 
   const schemeModels = {
@@ -65,7 +74,7 @@ function UploadDataWater(props) {
         type: "text",
         isRequired: true,
         errorMsg: "Project is required.",
-        defaultValue: "",
+        defaultValue: null,
       },
       cluster: {
         name: "cluster",
@@ -74,7 +83,7 @@ function UploadDataWater(props) {
         type: "text",
         isRequired: false,
         errorMsg: "Cluster is required.",
-        defaultValue: "",
+        defaultValue: [],
       },
       fileUpload: {
         name: "fileUpload",
@@ -83,27 +92,46 @@ function UploadDataWater(props) {
         type: "file",
         isRequired: true,
         errorMsg: "File is required.",
-        defaultValue: "",
+        defaultValue: null,
       },
     },
   };
   let { project, cluster, fileUpload } = schemeModels.formField;
+  const initialValues = {
+    [project.name]: project.defaultValue,
+    [cluster.name]: cluster.defaultValue,
+    [fileUpload.name]: fileUpload.defaultValue,
+  };
+  const [formValues, setformValues] = useState(initialValues);
 
   var customParseFormat = require("dayjs/plugin/customParseFormat");
   dayjs.extend(customParseFormat);
 
-  const initialValues = {
-    [project.name]: null,
-    [cluster.name]: [],
-    [fileUpload.name]: null,
+  const getPeriod = async () => {
+    let response = await fetch("/api/transaction/water/getactiveperiod", {
+      method: "POST",
+      body: JSON.stringify({
+        accessToken: accessToken,
+        params: {
+          SiteId: site?.siteId,
+        },
+      }),
+    });
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
+
+    if (response.error) alertService.error({ title: "Error", text: response.error.message });
+    else setPeriod(response.result);
+  };
+  const downloadTxtFile = () => {
+    const element = document.createElement("a");
+    element.href = "/template/template-water-reading.xlsx";
+    element.download = "template-water-reading.xlsx";
+    element.click();
   };
 
-  const [formValues, setformValues] = useState(initialValues);
-
-  const getFormData = (values) => {};
-
   const projectBlockLoadingName = "block-project";
-  const getProject = async (val) => {
+  const getProject = async () => {
     Block.dots(`.${projectBlockLoadingName}`);
 
     let response = await fetch(
@@ -121,38 +149,11 @@ function UploadDataWater(props) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error)
-      alertService.error({ title: "Error", text: response.error.message });
+    if (response.error) alertService.error({ title: "Error", text: response.error.message });
     else setDataProject(response.result);
 
     Block.remove(`.${projectBlockLoadingName}`);
   };
-
-  const getPeriod = async (val) => {
-    let response = await fetch("/api/transaction/water/getactiveperiod", {
-      method: "POST",
-      body: JSON.stringify({
-        accessToken: accessToken,
-        params: {
-          SiteId: site?.siteId,
-        },
-      }),
-    });
-    if (!response.ok) throw new Error(`Error: ${response.status}`);
-    response = typeNormalization(await response.json());
-
-    if (response.error)
-      alertService.error({ title: "Error", text: response.error.message });
-    else setPeriod(response.result);
-  };
-  useEffect(() => {
-    if (site) {
-      getProject();
-      getPeriod();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen]);
-
   const clusterBlockLoadingName = "block-cluster";
   const onProjectChange = async (val) => {
     Block.dots(`.${clusterBlockLoadingName}`);
@@ -182,18 +183,16 @@ function UploadDataWater(props) {
 
   const uploadExcelWaterReadingBlockLoadingName =
     "block-upload-excel-water-reading";
-  const uploadExcel = async (values, actions) => {
-    Block.standard(
-      `.${uploadExcelWaterReadingBlockLoadingName}`,
-      `Uploading Water Reading`
-    ),
+  const uploadExcel = async (fields, actions) => {
+    Block.standard(`.${uploadExcelWaterReadingBlockLoadingName}`, `Uploading Water Reading`),
       setLoading(true);
 
     let listCluster = [];
-    formValues.cluster.map((e) => {
+    if (formValues.cluster != null) formValues.cluster.map((e) => {
       listCluster.push(e.clusterId);
     });
-    const list = [];
+
+    let list = [];
     dataWater.map((e) => {
       list.push({
         unitNo: e.UnitNo,
@@ -202,17 +201,15 @@ function UploadDataWater(props) {
         currentRead: e.CurrRead,
       });
     });
+
     const body = {
       siteId: site.siteId,
       projectId: formValues.project.projectId,
       periodId: period.periodId,
-      clusterId: listCluster,
+      clusterId: listCluster.length == 0 ? undefined : listCluster,
       waterReadingUploadDetailList: list,
     };
-
-    let response = await fetch(
-      "/api/transaction/water/uploadexcelwaterreading",
-      {
+    let response = await fetch("/api/transaction/water/uploadexcelwaterreading", {
         method: "POST",
         body: JSON.stringify({
           accessToken: accessToken,
@@ -223,19 +220,10 @@ function UploadDataWater(props) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error)
-      alertService.warn({ title: response.error.error.message });
+    if (response.error) alertService.warn({ title: response.error.error.message });
     else {
       const isFailed = response.result.totalGagal > 0;
-      // Swal.fire({
-      //   title: "Uploading success",
-      //   text: dataWater.length + " rows data has been successfully uploaded",
-      //   icon: "success",
-      // }).then(() => {
-      //   setLoading(false);
-      //   actions.resetForm();
-      //   closeModal();
-      // });
+
       let title = "",
         icon = "";
       if (isFailed) {
@@ -278,14 +266,6 @@ function UploadDataWater(props) {
       setLoading(false);
   };
 
-  const openModal = () => setModalOpen(true);
-  const toggleModal = () => setModalOpen(true);
-  const closeModal = (isChanged = false) => {
-    setModalOpen(false);
-    setTimeout(() => setDataWater([]), 1500);
-    setTimeout(() => onModalChanged(isChanged), 0);
-  };
-
   if (isOpen) {
     let schemeValidations = Yup.object().shape({
       [project.name]: project.isRequired
@@ -296,18 +276,11 @@ function UploadDataWater(props) {
         ? Yup.mixed().required(fileUpload.errorMsg)
         : Yup.mixed().notRequired(),
     });
-
     const checkingSuccessInput = (value, error) => {
       return value != undefined && value != "" && value != null && !error;
     };
-    const sleep = (ms) =>
-      new Promise((resolve) => {
-        setTimeout(resolve, ms);
-      });
-    const submitForm = async (values, actions) => {
-      // await sleep(1000);
-      uploadExcel(values, actions);
-    };
+
+    const submitForm = async (values, actions) => uploadExcel(values, actions);
 
     const uploadedListBlockLoadingName = "block-uploaded-list";
     const handleFile = (file /*:File*/) => {
@@ -342,6 +315,7 @@ function UploadDataWater(props) {
       }
     };
 
+
     return (
       <Modal
         {...props}
@@ -361,13 +335,9 @@ function UploadDataWater(props) {
             values,
             errors,
             touched,
-            isSubmitting,
             setFieldValue,
-            resetForm,
           }) => {
             setformValues(values);
-            getFormData(values);
-
             const isValifForm = () =>
               checkingSuccessInput(values.project, errors.project) &&
               checkingSuccessInput(values.cluster, errors.cluster) &&
@@ -441,26 +411,14 @@ function UploadDataWater(props) {
                       </Grid>
                       <Grid item xs={12} sm={6}>
                         <Field
-                          multiple
-                          name={cluster.name}
-                          disableCloseOnSelect
                           component={Autocomplete}
+
                           options={dataCluster}
-                          getOptionLabel={(option) =>
-                            option.clusterCode + " - " + option.clusterName
-                          }
-                          isOptionEqualToValue={(option, value) =>
-                            option.clusterId === value.clusterId
-                          }
+                          noOptionsText="No results"
+                          getOptionLabel={(option) => option.label || (`${option.clusterCode} - ${option.clusterName}`)}
+                          // isOptionEqualToValue={(option, value) => option.clusterId === value.clusterId}
                           key={cluster.name}
-                          onChange={(e, value) => {
-                            setFieldValue(
-                              cluster.name,
-                              value !== null
-                                ? value
-                                : initialValues[cluster.name]
-                            );
-                          }}
+                          value={formValues.cluster}
                           renderInput={(params) => (
                             <FormField
                               {...params}
@@ -478,9 +436,31 @@ function UploadDataWater(props) {
                               className={clusterBlockLoadingName}
                             />
                           )}
+
+                          multiple
+                          disableCloseOnSelect
+                          filterOptions={(options, params) => {
+                            const filtered = filter(options, params);
+                            return [
+                              { label: "Select All", value: "select-all" },
+                              , ...filtered
+                            ];
+                          }}
+                          groupBy={(dataCluster.length > 0) && function (option) {
+                            (option.label != undefined) ? (option.group = "Action") : (option.group = "Data");
+                            return option.group;
+                          }}
+                          onChange={(event, selectedOptions, reason) => {
+                            const allSelected = dataCluster.length === values.cluster.length;
+                            if (reason === "selectOption" || reason === "removeOption") {
+                              if (selectedOptions.find(option => option.value && (option.value === "select-all"))) {
+                                if (!allSelected) setFieldValue(cluster.name, dataCluster), values.cluster = dataCluster;
+                                else setFieldValue(cluster.name, []), values.cluster = [];     
+                              } else setFieldValue(cluster.name, selectedOptions), values.cluster = selectedOptions;
+                            } else if (reason === "clear") setFieldValue(cluster.name, []), values.cluster = [];
+                          }}
                         />
                       </Grid>
-
                       <Grid item xs={6}>
                         <FormField
                           type={fileUpload.type}
@@ -496,7 +476,7 @@ function UploadDataWater(props) {
                           )}
                           // setFieldValue={setFieldValue}
                           accept={SheetJSFT}
-                          onChange={(e, value) => {
+                          onChange={(e) => {
                             handleChangeFile(e);
                             setFieldValue(fileUpload.name, e.target.value);
                           }}
