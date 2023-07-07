@@ -35,6 +35,7 @@ import Swal from "sweetalert2";
 import Adjustment from "./components/Adjustment";
 import { Block } from "notiflix/build/notiflix-block-aio";
 import UploadAdjustment from "./components/UploadAdjustment";
+import Adjust from "./components/Adjust";
 
 export default function Invoice(props) {
   const [controller] = useMaterialUIController();
@@ -47,6 +48,7 @@ export default function Invoice(props) {
   const [openEdit, setOpenEdit] = useState(false);
   const [openFind, setOpenFind] = useState(false);
   const [openAdjust, setOpenAdjust] = useState(false);
+  const [openAskAdjust, setOpenAskAdjust] = useState(false);
   const [dataCluster, setDataCluster] = useState([]);
   const [dataProject, setDataProject] = useState([]);
   const [dataPeriod, setDataPeriod] = useState([]);
@@ -62,6 +64,7 @@ export default function Invoice(props) {
   const [list, setList] = useState([]);
   const [{ accessToken, encrypftedAccessToken }] = useCookies();
   const [isLoadingSend, setLoadingSend] = useState(false);
+  const [isAdjust, setAdjust] = useState(false);
   const [command, setCommand] = useState(null);
   const formikRef = useRef();
 
@@ -253,8 +256,6 @@ export default function Invoice(props) {
         handleAdjust();
       }
     });
-    // setModalParams(val);
-    // handleAdjust();
   };
 
   const handleSelectAll = (e) => {
@@ -359,7 +360,10 @@ export default function Invoice(props) {
         return (
           <MDButton
             style={{ color: "#4593C4", cursor: "pointer" }}
-            onClick={() => adjust(value)}
+            onClick={() => {
+              handleAskAdjust();
+              setModalParams(value);
+            }}
           >
             Adjustment
           </MDButton>
@@ -566,6 +570,21 @@ export default function Invoice(props) {
     setOpenAdjust(!openAdjust);
     fetchData();
   };
+
+  const handleAskAdjust = (val) => {
+    setOpenAskAdjust(!openAskAdjust);
+  };
+
+  const handleCallback = (childData) => {
+    setAdjust(childData);
+  };
+
+  useEffect(() => {
+    if (isAdjust) handleAdjust();
+  }, [isAdjust]);
+  useEffect(() => {
+    console.log("modalParams", modalParams);
+  }, [modalParams]);
 
   const handleUpload = () => {
     setOpenUpload(!openUpload);
@@ -1155,6 +1174,11 @@ export default function Invoice(props) {
           }}
         />
       )}
+      <Adjust
+        isOpen={openAskAdjust}
+        close={handleAskAdjust}
+        parentCallback={handleCallback}
+      />
     </DashboardLayout>
   );
 }
