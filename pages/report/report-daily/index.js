@@ -3,11 +3,11 @@ import DashboardNavbar from "/layout/Navbars/DashboardNavbar";
 import MDBox from "/components/MDBox";
 import MDTypography from "/components/MDTypography";
 import Grid from "@mui/material/Grid";
-import { Autocomplete, TextField, Radio } from "@mui/material";
+import { Autocomplete, createFilterOptions } from "@mui/material";
 import MDButton from "/components/MDButton";
 import { useEffect, useState, useRef } from "react";
 import Card from "@mui/material/Card";
-import { Formik, Form, Field, useFormikContext } from "formik";
+import { Formik, Form, Field } from "formik";
 import FormField from "/pagesComponents/FormField";
 import * as Yup from "yup";
 import { typeNormalization } from "/helpers/utils";
@@ -19,21 +19,35 @@ import * as dayjs from "dayjs";
 import { Block } from "notiflix/build/notiflix-block-aio";
 
 function ReportDaily() {
-  let typeDummy = [
+  const [{ accessToken }] = useCookies();
+  const [site, setSite] = useState(null);
+
+  const [dataPeriod, setDataPeriod] = useState([]);
+  const [dataProject, setDataProject] = useState([]);
+  const [dataCluster, setDataCluster] = useState([]);
+  const [dataPaymentMethod, setDataPaymentMethod] = useState([]);
+  const [dataCancel, setDataCancel] = useState([
     {
       id: 1,
       name: "Yes",
     },
     { id: 0, name: "No" },
-  ];
-  const [site, setSite] = useState(null);
-  const [{ accessToken, encryptedAccessToken }] = useCookies();
-  const [dataCluster, setDataCluster] = useState([]);
-  const [dataProject, setDataProject] = useState([]);
-  const [dataCancel, setDataCancel] = useState(typeDummy);
-  const [dataPeriod, setDataPeriod] = useState([]);
-  const [dataPaymentMethod, setDataPaymentMethod] = useState([]);
+  ]);
+
+  const [isLoading, setLoading] = useState(false);
   const formikRef = useRef();
+  const filter = createFilterOptions();
+
+  useEffect(() => {
+    let currentSite = JSON.parse(localStorage.getItem("site"));
+    if (currentSite == null)
+      alertService.info({ title: "Please choose site first." });
+    else setSite(currentSite);
+
+    getPaymentMethod();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     setformValues((prevState) => ({
@@ -55,31 +69,45 @@ function ReportDaily() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [site?.siteId]);
 
-  const paymentMethodBlockLoadingName = "block-payment-method";
-  const getPaymentMethod = async () => {
-    Block.dots(`.${paymentMethodBlockLoadingName}`);
+  const handleSite = (siteVal) => {
+    setSite(siteVal);
+    localStorage.setItem("site", JSON.stringify(siteVal));
+  };
 
-    let response = await fetch(
-      "/api/cashier/billing/getdropdownpaymentmethod",
-      {
-        method: "POST",
-        body: JSON.stringify({
-          accessToken: accessToken,
-        }),
-      }
-    );
-    if (!response.ok) throw new Error(`Error: ${response.status}`);
-    response = typeNormalization(await response.json());
+  const addDate = (val) => dayjs(val).add(1, "day");
 
-    if (response.error)
-      alertService.error({ title: "Error", text: response.error.message });
-    else setDataPaymentMethod(response.result);
-
-    Block.remove(`.${paymentMethodBlockLoadingName}`);
+  let schemeValidations = Yup.object().shape({
+    period: Yup.object()
+      .required("Period is required.")
+      .typeError("Period is required."),
+    project: Yup.object()
+      .required("Project is required")
+      .typeError("Project is required."),
+    cluster: Yup.array()
+      .required("Cluster is required")
+      .min(1)
+      .typeError("Cluster is required."),
+    startDate: Yup.date().nullable(),
+    endDate: Yup.date().nullable(),
+    paymentMethod: Yup.object().nullable(),
+    cancelPayment: Yup.object().nullable(),
+  });
+  const initialValues = {
+    period: null,
+    project: null,
+    cluster: [],
+    startDate: "",
+    endDate: "",
+    paymentMethod: null,
+    cancelPayment: null,
+  };
+  const [formValues, setformValues] = useState(initialValues);
+  const checkingSuccessInput = (value, error) => {
+    return value != undefined && value != "" && !error;
   };
 
   const periodBlockLoadingName = "block-period";
-  const getPeriod = async (val) => {
+  const getPeriod = async () => {
     Block.dots(`.${periodBlockLoadingName}`);
 
     let response = await fetch(
@@ -103,63 +131,80 @@ function ReportDaily() {
 
     Block.remove(`.${periodBlockLoadingName}`);
   };
+  const projectBlockLoadingName = "block-project";
+  const getProject = async () => {
+    Block.dots(`.${projectBlockLoadingName}`);
 
-  const addDate = (val) => {
-    return dayjs(val).add(1, "day");
+    let response = await fetch(
+      "/api/transaction/water/getdropdownprojectbysiteid",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          accessToken: accessToken,
+          params: {
+            SiteId: site?.siteId,
+          },
+        }),
+      }
+    );
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
+
+    if (response.error)
+      alertService.error({ title: "Error", text: response.error.message });
+    else setDataProject(response.result);
+
+    Block.remove(`.${projectBlockLoadingName}`);
   };
+  const clusterBlockLoadingName = "block-project";
+  const getCluster = async (val) => {
+    Block.dots(`.${clusterBlockLoadingName}`);
 
-  useEffect(() => {
-    let currentSite = JSON.parse(localStorage.getItem("site"));
-    if (currentSite == null)
-      alertService.info({ title: "Please choose site first." });
-    else setSite(currentSite);
+    let response = await fetch("/api/master/site/getdropdownclusterbyproject", {
+      method: "POST",
+      body: JSON.stringify({
+        accessToken: accessToken,
+        params: {
+          SiteId: site?.siteId,
+          ProjectId: val?.projectId,
+        },
+      }),
+    });
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
 
-    getPaymentMethod();
+    if (response.error)
+      alertService.error({ title: "Error", text: response.error.message });
+    else setDataCluster(response.result);
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  //dari sini
-  const [isLoading, setLoading] = useState(false);
-  let schemeValidations = Yup.object().shape({
-    cluster: Yup.array()
-      .required("Cluster is required")
-      .min(1)
-      .typeError("Cluster is required."),
-    cancelPayment: Yup.object().nullable(),
-    paymentMethod: Yup.object().nullable(),
-    period: Yup.object()
-      .required("Period is required.")
-      .typeError("Period is required."),
-    project: Yup.object()
-      .required("Project is required")
-      .typeError("Project is required."),
-    startDate: Yup.date().nullable(),
-    endDate: Yup.date().nullable(),
-  });
-
-  const initialValues = {
-    cluster: [],
-    project: null,
-    paymentMethod: null,
-    period: null,
-    cancelPayment: null,
-    startDate: "",
-    endDate: "",
+    Block.remove(`.${clusterBlockLoadingName}`);
   };
+  const paymentMethodBlockLoadingName = "block-payment-method";
+  const getPaymentMethod = async () => {
+    Block.dots(`.${paymentMethodBlockLoadingName}`);
 
-  const [formValues, setformValues] = useState(initialValues);
+    let response = await fetch(
+      "/api/cashier/billing/getdropdownpaymentmethod",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          accessToken: accessToken,
+        }),
+      }
+    );
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
 
-  const getFormData = (values) => {};
+    if (response.error)
+      alertService.error({ title: "Error", text: response.error.message });
+    else setDataPaymentMethod(response.result);
+
+    Block.remove(`.${paymentMethodBlockLoadingName}`);
+  };
 
   const submitForm = async (values, actions) => {
     exportExcel(values, actions);
   };
-
-  const checkingSuccessInput = (value, error) => {
-    return value != undefined && value != "" && !error;
-  };
-
   const exportToExcelBlockLoadingName = "block-export-to-excel";
   const exportExcel = async (fields, actions) => {
     Block.standard(
@@ -184,7 +229,6 @@ function ReportDaily() {
       startDate: fields.startDate != "" ? addDate(fields.startDate) : undefined,
       endDate: fields.startDate != "" ? addDate(fields.endDate) : undefined,
     };
-
     let response = await fetch("/api/report/daily/repordaily", {
       method: "POST",
       body: JSON.stringify({
@@ -205,62 +249,9 @@ function ReportDaily() {
     }
 
     actions.setSubmitting(false);
-    Block.remove(`.${exportToExcelBlockLoadingName}`), setLoading(false);
-  };
-
-  const clusterBlockLoadingName = "block-project";
-  const getCluster = async (val) => {
-    Block.dots(`.${clusterBlockLoadingName}`);
-
-    let response = await fetch("/api/master/site/getdropdownclusterbyproject", {
-      method: "POST",
-      body: JSON.stringify({
-        accessToken: accessToken,
-        params: {
-          SiteId: site?.siteId,
-          ProjectId: val?.projectId,
-        },
-      }),
-    });
-    if (!response.ok) throw new Error(`Error: ${response.status}`);
-    response = typeNormalization(await response.json());
-
-    if (response.error)
-      alertService.error({ title: "Error", text: response.error.message });
-    else setDataCluster(response.result);
-
-    Block.remove(`.${clusterBlockLoadingName}`);
-  };
-
-  const projectBlockLoadingName = "block-project";
-  const getProject = async (val) => {
-    Block.dots(`.${projectBlockLoadingName}`);
-
-    let response = await fetch(
-      "/api/transaction/water/getdropdownprojectbysiteid",
-      {
-        method: "POST",
-        body: JSON.stringify({
-          accessToken: accessToken,
-          params: {
-            SiteId: site?.siteId,
-          },
-        }),
-      }
-    );
-    if (!response.ok) throw new Error(`Error: ${response.status}`);
-    response = typeNormalization(await response.json());
-
-    if (response.error)
-      alertService.error({ title: "Error", text: response.error.message });
-    else setDataProject(response.result);
-
-    Block.remove(`.${projectBlockLoadingName}`);
-  };
-
-  const handleSite = (siteVal) => {
-    setSite(siteVal);
-    localStorage.setItem("site", JSON.stringify(siteVal));
+    Block.remove(`.${exportToExcelBlockLoadingName}`),
+      setLoading(false),
+      setLoading(false);
   };
 
   return (
@@ -299,9 +290,6 @@ function ReportDaily() {
                         Generate Daily Reports
                       </MDTypography>
                     </MDBox>
-                    {/* <MDBox mb={4}>
-                      <MDTypography variant="body2" color="text">Generate Daily Reports</MDTypography>
-                    </MDBox> */}
                   </Grid>
                   <Grid item xs={12}>
                     <Formik
@@ -310,14 +298,7 @@ function ReportDaily() {
                       validationSchema={schemeValidations}
                       onSubmit={submitForm}
                     >
-                      {({
-                        errors,
-                        touched,
-                        isSubmitting,
-                        setFieldValue,
-                        resetForm,
-                        values,
-                      }) => {
+                      {({ errors, touched, setFieldValue, values }) => {
                         setformValues(values);
                         const isValifForm = () =>
                           checkingSuccessInput(values.period, errors.period) &&
@@ -326,6 +307,7 @@ function ReportDaily() {
                             errors.project
                           ) &&
                           checkingSuccessInput(values.cluster, errors.cluster);
+
                         return (
                           <Form
                             id="payment-detail"
@@ -377,29 +359,17 @@ function ReportDaily() {
                                 </Grid>
                                 <Grid item xs={6} sm={6}>
                                   <Field
-                                    options={dataCluster}
-                                    id="cluster-ddr"
+                                    id="cluster-daily"
                                     name="cluster"
                                     component={Autocomplete}
-                                    multiple
-                                    disableCloseOnSelect
+                                    options={dataCluster}
+                                    noOptionsText="No results"
                                     getOptionLabel={(option) =>
-                                      option.clusterCode +
-                                      " - " +
-                                      option.clusterName
+                                      option.label ||
+                                      `${option.clusterCode} - ${option.clusterName}`
                                     }
+                                    // isOptionEqualToValue={(option, value) => option.clusterId === value.clusterId}
                                     value={formValues.cluster}
-                                    onChange={(e, value) => {
-                                      setFieldValue(
-                                        "cluster",
-                                        value !== null
-                                          ? value
-                                          : initialValues["cluster"]
-                                      );
-                                    }}
-                                    isOptionEqualToValue={(option, value) =>
-                                      option.clusterId === value.clusterId
-                                    }
                                     renderInput={(params) => (
                                       <FormField
                                         {...params}
@@ -418,6 +388,66 @@ function ReportDaily() {
                                         className={clusterBlockLoadingName}
                                       />
                                     )}
+                                    multiple
+                                    disableCloseOnSelect
+                                    filterOptions={(options, params) => {
+                                      const filtered = filter(options, params);
+                                      return [
+                                        {
+                                          label: "Select All",
+                                          value: "select-all",
+                                        },
+                                        ,
+                                        ...filtered,
+                                      ];
+                                    }}
+                                    groupBy={
+                                      dataCluster.length > 0 &&
+                                      function (option) {
+                                        option.label != undefined
+                                          ? (option.group = "Action")
+                                          : (option.group = "Data");
+                                        return option.group;
+                                      }
+                                    }
+                                    onChange={(
+                                      event,
+                                      selectedOptions,
+                                      reason
+                                    ) => {
+                                      const allSelected =
+                                        dataCluster.length ===
+                                        values.cluster.length;
+                                      if (
+                                        reason === "selectOption" ||
+                                        reason === "removeOption"
+                                      ) {
+                                        if (
+                                          selectedOptions.find(
+                                            (option) =>
+                                              option.value &&
+                                              option.value === "select-all"
+                                          )
+                                        ) {
+                                          if (!allSelected)
+                                            setFieldValue(
+                                              "cluster",
+                                              dataCluster
+                                            ),
+                                              (values.cluster = dataCluster);
+                                          else
+                                            setFieldValue("cluster", []),
+                                              (values.cluster = []);
+                                        } else
+                                          setFieldValue(
+                                            "cluster",
+                                            selectedOptions
+                                          ),
+                                            (values.cluster = selectedOptions);
+                                      } else if (reason === "clear")
+                                        setFieldValue("cluster", []),
+                                          (values.cluster = []);
+                                    }}
                                   />
                                 </Grid>
                                 <Grid item xs={6} sm={6}>
