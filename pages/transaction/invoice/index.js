@@ -74,8 +74,10 @@ export default function Invoice(props) {
       alertService.info({ title: "Please choose site first." });
     else setSite(currentSite);
 
-    getProject();
-    getPeriod();
+    if (site?.siteId) {
+      getProject();
+      getPeriod();
+    }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -186,11 +188,13 @@ export default function Invoice(props) {
       totalPages: undefined,
     }));
     setCustomer(null);
-    getProject();
-    getPeriod();
+    if (site?.siteId) {
+      getProject();
+      getPeriod();
+    }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [site]);
+  }, [site?.siteId]);
   useEffect(() => {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -50,10 +50,12 @@ function ReportDetailStatement() {
       formikRef.current.setFieldValue("periodYear", []);
       formikRef.current.setFieldValue("cluster", null);
     }
-    getProject();
-    getMonth();
+    if (site?.siteId) {
+      getProject();
+      getMonth();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [site]);
+  }, [site?.siteId]);
 
   const onChangeProject = (val) => {
     setformValues((prevState) => ({

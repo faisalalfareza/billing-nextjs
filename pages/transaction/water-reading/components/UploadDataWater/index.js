@@ -146,7 +146,7 @@ function UploadDataWater(props) {
     else setPeriod(response.result);
   };
   useEffect(() => {
-    if (site) {
+    if (site?.siteId) {
       getProject();
       getPeriod();
     }

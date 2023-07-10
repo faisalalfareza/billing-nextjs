@@ -47,11 +47,13 @@ function ReportDaily() {
       formikRef.current.setFieldValue("period", null);
       formikRef.current.setFieldValue("cluster", []);
     }
-    getProject();
-    getPeriod();
+    if (site?.siteId) {
+      getProject();
+      getPeriod();
+    }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [site]);
+  }, [site?.siteId]);
 
   const paymentMethodBlockLoadingName = "block-payment-method";
   const getPaymentMethod = async () => {

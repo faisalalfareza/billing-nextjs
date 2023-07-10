@@ -52,8 +52,7 @@ export default function WaterReading(props) {
     if (currentSite == null)
       alertService.info({ title: "Please choose site first." });
     else setSite(currentSite);
-
-    getProject();
+    if (site?.siteId) getProject();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -113,7 +112,7 @@ export default function WaterReading(props) {
     Block.remove(`.${projectBlockLoadingName}`);
   };
   useEffect(() => {
-    getProject();
+    if (site?.siteId) getProject();
     setformValues((prevState) => ({
       ...prevState,
       project: null,
@@ -131,7 +130,7 @@ export default function WaterReading(props) {
     }));
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [site]);
+  }, [site?.siteId]);
   useEffect(() => {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
