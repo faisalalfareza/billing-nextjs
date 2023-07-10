@@ -138,17 +138,17 @@ function CancelPayment() {
 
   const skipCountChangeHandler = (e) => {
     customerRequest.skipCount = e;
-    setCustomerRequest({
+    setCustomerRequest((prevState) => ({
       ...prevState,
       skipCount: e,
-    });
+    }));
   };
   const recordsPerPageChangeHandler = (e) => {
     customerRequest.recordsPerPage = e;
-    setCustomerRequest({
+    setCustomerRequest((prevState) => ({
       ...prevState,
       recordsPerPage: e,
-    });
+    }));
   };
   const keywordsChangeHandler = (e) => {
     customerRequest.keywords = e;
@@ -200,6 +200,8 @@ function CancelPayment() {
     Block.remove(`.${customerBlockLoadingName}`), setLoadingCustomer(false);
   };
   const setCustomerTaskList = (rows) => {
+    const { skipCount } = customerRequest;
+    
     return {
       columns: [
         {
@@ -227,7 +229,7 @@ function CancelPayment() {
         },
         {
           Header: "No",
-          Cell: ({ row }) => row.index + 1,
+          Cell: ({ row }) => skipCount + row.index + 1,
           align: "center",
         },
         { Header: "Project", accessor: "projectName" },

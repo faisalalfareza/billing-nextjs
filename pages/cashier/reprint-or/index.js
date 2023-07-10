@@ -153,10 +153,10 @@ function RePrintOR() {
   };
   const recordsPerPageChangeHandler = (e) => {
     customerRequest.recordsPerPage = e;
-    setCustomerRequest({
+    setCustomerRequest((prevState) => ({
       ...prevState,
       recordsPerPage: e,
-    });
+    }));
   };
   const keywordsChangeHandler = (e) => {
     customerRequest.keywords = e;
@@ -210,6 +210,8 @@ function RePrintOR() {
   };
 
   const setCustomerTaskList = (rows) => {
+    const { skipCount } = customerRequest;
+
     return {
       columns: [
         {
@@ -237,7 +239,7 @@ function RePrintOR() {
         },
         {
           Header: "No",
-          Cell: ({ row }) => row.index + 1,
+          Cell: ({ row }) => skipCount + row.index + 1,
           align: "center",
         },
         { Header: "Project", accessor: "projectName" },
@@ -358,7 +360,6 @@ function RePrintOR() {
                   textDecoration: "underline",
                 }}
                 onClick={() => {
-                  console.log("valueeee", row);
                   setModalParams(row.original);
                   handleAdjust();
                 }}
