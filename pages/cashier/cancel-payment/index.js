@@ -201,7 +201,7 @@ function CancelPayment() {
   };
   const setCustomerTaskList = (rows) => {
     const { skipCount } = customerRequest;
-    
+
     return {
       columns: [
         {
@@ -243,7 +243,7 @@ function CancelPayment() {
     };
   };
   useEffect(() => {
-    customerRequest.keywords != "" && getCustomerList();
+    getCustomerList();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [customerRequest.skipCount, customerRequest.recordsPerPage]);
 
