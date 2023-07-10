@@ -441,7 +441,19 @@ function ReportDetailStatement() {
                             values.cluster,
                             errors.cluster
                           ) &&
-                          checkingSuccessInput(values.unitNo, errors.unitNo);
+                          checkingSuccessInput(values.unitNo, errors.unitNo) &&
+                          checkingSuccessInput(
+                            values.periodYear,
+                            errors.periodYear
+                          ) &&
+                          checkingSuccessInput(
+                            values.endMonth,
+                            errors.endMonth
+                          ) &&
+                          checkingSuccessInput(
+                            values.startMonth,
+                            errors.startMonth
+                          );
                         return (
                           <Form
                             id="detail-statement"
