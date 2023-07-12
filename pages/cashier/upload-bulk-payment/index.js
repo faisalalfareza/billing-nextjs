@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useCookies } from "react-cookie";
-import { Formik, Form } from "formik";
+import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import Swal from "sweetalert2";
 import * as XLSX from "xlsx";
@@ -26,15 +26,46 @@ import DashboardNavbar from "/layout/Navbars/DashboardNavbar";
 import FormField from "/pagesComponents/FormField";
 import SiteDropdown from "../../../pagesComponents/dropdown/Site";
 import { Notify } from "notiflix/build/notiflix-notify-aio";
+import { UploadFile } from "@mui/icons-material";
+
 
 function UploadBulkPayment() {
   const [{ accessToken, encryptedAccessToken }] = useCookies();
 
+  const formikRef = useRef();
   const [site, setSite] = useState(null);
+
+  useEffect(() => {
+    let currentSite = typeNormalization(localStorage.getItem("site"));
+    if (currentSite == null) Swal.fire({ title: "Please choose site first.", icon: "info" });
+    else setSite(currentSite);
+
+    getDropdownPaymentMethod();
+    
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleSite = (siteVal) => {
     setSite(siteVal);
     localStorage.setItem("site", JSON.stringify(siteVal));
   };
+  useEffect(() => {
+    setformValues((prevState) => ({
+      ...prevState,
+      paymentMethod: null,
+      fileUpload: null
+    }));
+    if (formikRef.current) {
+      setTimeout(() => {
+        formikRef.current.setFieldValue("paymentMethod", null), formikRef.current.values.paymentMethod = null;
+        formikRef.current.setFieldValue("fileUpload", null), formikRef.current.values.fileUpload = null;
+        formikRef.current.resetForm();
+
+        document.getElementsByName(fileUpload.name)[0].value = "";
+      }, 0);
+    }
+    setUploadedList([]);
+  }, [site]);
 
   const schemeModels = {
     formId: "upload-bulk-payment-form",
@@ -46,7 +77,7 @@ function UploadBulkPayment() {
         type: "text",
         isRequired: true,
         errorMsg: "Payment Method is required.",
-        defaultValue: undefined,
+        defaultValue: null,
       },
       fileUpload: {
         name: "fileUpload",
@@ -63,28 +94,16 @@ function UploadBulkPayment() {
   let schemeValidations = Yup.object().shape({
     [paymentMethod.name]: paymentMethod.isRequired
       ? Yup.object().required(paymentMethod.errorMsg)
-      : Yup.object().notRequired(),
+      : Yup.object().nullable(),
     [fileUpload.name]: fileUpload.isRequired
       ? Yup.mixed().required(fileUpload.errorMsg)
-      : Yup.mixed().notRequired(),
+      : Yup.mixed().nullable(),
   });
   const schemeInitialValues = {
     [paymentMethod.name]: paymentMethod.defaultValue,
     [fileUpload.name]: fileUpload.defaultValue,
   };
-  useEffect(() => {
-    document.getElementsByName(paymentMethod.name)[0].focus();
-
-    let currentSite = typeNormalization(localStorage.getItem("site"));
-    if (currentSite == null) {
-      Swal.fire({
-        title: "Please choose site first.",
-        icon: "info",
-      });
-    } else setSite(currentSite);
-    
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const [formValues, setformValues] = useState(schemeInitialValues);
 
   const paymentMethodBlockLoadingName = "block-payment-method";
   const [paymentMethodList, setPaymentMethodList] = useState([]);
@@ -103,16 +122,11 @@ function UploadBulkPayment() {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error)
-      alertService.error({ title: "Error", text: response.error.message });
+    if (response.error) alertService.error({ title: "Error", text: response.error.message });
     else setPaymentMethodList(response);
 
     Block.remove(`.${paymentMethodBlockLoadingName}`);
   };
-  useEffect(() => {
-    getDropdownPaymentMethod();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [site]);
 
   const uploadedListBlockLoadingName = "block-uploaded-list";
   const [uploadedList, setUploadedList] = useState([]);
@@ -203,7 +217,7 @@ function UploadBulkPayment() {
         }
         setUploadedList(data_formated), uploadedList = data_formated;
         if ((data_formated.length > 0) && (uploadedList.length > 0)) 
-          Notify.success(message.success), 
+          Notify.success(message.success, { position: "right-bottom" }), 
             Block.remove(`.${uploadedListBlockLoadingName}`);
       } else {
         message.failed += "file is still empty or not filled";
@@ -215,7 +229,6 @@ function UploadBulkPayment() {
     if (rABS) reader.readAsBinaryString(file);
     else reader.readAsArrayBuffer(file);
   };
-
   const parseTanggal = (date) => {
     if (typeof date == "number") {
       return excelDateToJSDate(date);
@@ -230,7 +243,6 @@ function UploadBulkPayment() {
       return date_formatted.toISOString();
     }
   };
-
   const excelDateToJSDate = (serial) => {
     var utc_days = Math.floor(serial - 25569);
     var utc_value = utc_days * 86400;
@@ -256,6 +268,7 @@ function UploadBulkPayment() {
       seconds
     ).toISOString();
   };
+
   const checkingSuccessInput = (isRequired, value, error) => {
     return (
       (!isRequired && true) ||
@@ -327,6 +340,7 @@ function UploadBulkPayment() {
       setLoadingUploadBulkPayment(false);
   };
 
+
   return (
     <DashboardLayout>
       <DashboardNavbar />
@@ -377,15 +391,23 @@ function UploadBulkPayment() {
                   </Grid>
                   <Grid item xs={12}>
                     <Formik
+                      innerRef={formikRef}
                       initialValues={schemeInitialValues}
                       validationSchema={schemeValidations}
                       onSubmit={handleUploadBulkPaymentSubmit}
                     >
-                      {({ values, errors, touched, setFieldValue }) => {
+                      {({ 
+                        values, 
+                        errors, 
+                        touched, 
+                        setFieldValue 
+                      }) => {
                         let {
                           paymentMethod: paymentMethodV,
                           fileUpload: fileUploadV,
                         } = values;
+                        setformValues(values);
+
                         const isValifForm = () =>
                           checkingSuccessInput(
                             paymentMethod.isRequired,
@@ -403,20 +425,14 @@ function UploadBulkPayment() {
                             <MDBox>
                               <Grid container columnSpacing={3}>
                                 <Grid item xs={12} sm={6}>
-                                  <Autocomplete
+                                  <Field
+                                    component={Autocomplete}
+
                                     options={paymentMethodList}
-                                    key={paymentMethod.name}
-                                    // value={values.paymentMethod}
-                                    getOptionLabel={(option) =>
-                                      option.paymentName
-                                    }
-                                    isOptionEqualToValue={(option, value) =>
-                                      option.paymentType === value.paymentType
-                                    }
-                                    onChange={(e, value) => {
-                                      setFieldValue(paymentMethod.name, value);
-                                    }}
                                     noOptionsText="No results"
+                                    getOptionLabel={(option) => option.paymentName}
+                                    isOptionEqualToValue={(option, value) => option.paymentType === value.paymentType}
+                                    value={formValues.paymentMethod}
                                     renderInput={(params) => (
                                       <FormField
                                         {...params}
@@ -440,6 +456,12 @@ function UploadBulkPayment() {
                                         }
                                         className={paymentMethodBlockLoadingName}
                                       />
+                                    )}
+                                    onChange={(e, value) => setFieldValue(
+                                      paymentMethod.name, 
+                                      value !== null
+                                        ? value
+                                        : schemeInitialValues[paymentMethod.name]
                                     )}
                                   />
                                 </Grid>
@@ -472,7 +494,6 @@ function UploadBulkPayment() {
                                     }}
                                     className={uploadedListBlockLoadingName}
                                   />
-                                  {/* <MDTypography variant="caption" color="error" fontWeight="regular">*Only file .xls/.xlsx and maximum file size 2mb</MDTypography> */}
                                 </Grid>
                                 <Grid item xs={12}>
                                   <MDBox

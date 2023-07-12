@@ -23,15 +23,24 @@ import DetailCancelPayment from "./components/DetailCancelPayment";
 import FormField from "/pagesComponents/FormField";
 import SiteDropdown from "../../../pagesComponents/dropdown/Site";
 
+
 function CancelPayment() {
+  const formikRef = useRef();
   const [site, setSite] = useState(null);
+  const [first, setFirst] = useState(false);
+
   const handleSite = (siteVal) => {
     setSite(siteVal);
     localStorage.setItem("site", JSON.stringify(siteVal));
   };
-  const formikRef = useRef();
-
   useEffect(() => {
+    setCustomerRequest((prevState) => ({
+      ...prevState,
+      unitCode: "",
+      unitNo: "",
+      keywords: "",
+      skipCount: 0,
+    }));
     setCustomerResponse((prevState) => ({
       ...prevState,
       rowData: [],
@@ -43,18 +52,13 @@ function CancelPayment() {
       formikRef.current.setFieldValue("unitCode", "");
       formikRef.current.setFieldValue("unitNo", "");
     }
+
     setCancelPaymentData({
       rowData: [],
       totalRows: undefined,
       totalPages: undefined,
     }),
       setSelectedUnit();
-    setCustomerRequest((prevState) => ({
-      ...prevState,
-      unitCode: "",
-      unitNo: "",
-      keywords: "",
-    }));
   }, [site]);
 
   const schemeModels = {
@@ -243,7 +247,7 @@ function CancelPayment() {
     };
   };
   useEffect(() => {
-    getCustomerList();
+    first && getCustomerList();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [customerRequest.skipCount, customerRequest.recordsPerPage]);
 
@@ -261,7 +265,8 @@ function CancelPayment() {
       totalRows: undefined,
       totalPages: undefined,
     }),
-      setSelectedUnit();
+      setSelectedUnit(),
+      setFirst(true);
 
     getCustomerList();
   };
@@ -387,6 +392,7 @@ function CancelPayment() {
     });
   };
 
+  
   return (
     <DashboardLayout>
       <DashboardNavbar />

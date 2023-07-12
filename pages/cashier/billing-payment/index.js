@@ -43,37 +43,38 @@ import debounce from "lodash.debounce";
 function BillingPayment() {
   const [{ accessToken, encryptedAccessToken }] = useCookies();
 
+  const formikRef = useRef();
   const [site, setSite] = useState(null);
+  const [first, setFirst] = useState(false);
   const [detailPaymentData, setDetailPaymentData] = useState([]);
+  
   const handleSite = (siteVal) => {
     setSite(siteVal);
     localStorage.setItem("site", JSON.stringify(siteVal));
   };
-  const formikRef = useRef();
-
   useEffect(() => {
     setCustomerRequest((prevState) => ({
       ...prevState,
-      scheme: site?.siteId,
-      keywords: "",
       unitCode: "",
       unitNo: "",
-      recordsPerPage: 5,
+      keywords: "",
       skipCount: 0,
     }));
-    if (formikRef.current) {
-      formikRef.current.setFieldValue("customerName", "");
-      formikRef.current.setFieldValue("unitCode", "");
-      formikRef.current.setFieldValue("unitNo", "");
-    }
     setCustomerResponse((prevState) => ({
       ...prevState,
       rowData: [],
       totalRows: undefined,
       totalPages: undefined,
     }));
-    setSelectedUnit();
-    setDetailPaymentData([]);
+    if (formikRef.current) {
+      formikRef.current.setFieldValue("customerName", "");
+      formikRef.current.setFieldValue("unitCode", "");
+      formikRef.current.setFieldValue("unitNo", "");
+    }
+    
+    
+    setDetailPaymentData([]),
+      setSelectedUnit();
   }, [site]);
 
   const schemeModels = {
@@ -173,10 +174,10 @@ function BillingPayment() {
   };
   const recordsPerPageChangeHandler = (e) => {
     customerRequest.recordsPerPage = e;
-    setCustomerRequest({
+    setCustomerRequest((prevState) => ({
       ...prevState,
       recordsPerPage: e,
-    });
+    }));
   };
   const keywordsChangeHandler = (e) => {
     customerRequest.keywords = e;
@@ -229,6 +230,8 @@ function BillingPayment() {
     Block.remove(`.${customerBlockLoadingName}`), setLoadingCustomer(false);
   };
   const setCustomerTaskList = (rows) => {
+    const { skipCount } = customerRequest;
+
     return {
       columns: [
         {
@@ -252,7 +255,7 @@ function BillingPayment() {
         },
         {
           Header: "No",
-          Cell: ({ row }) => row.index + 1 + customerRequest.skipCount,
+          Cell: ({ row }) => skipCount + row.index + 1,
           align: "center",
         },
         { Header: "Project", accessor: "projectName" },
@@ -266,12 +269,11 @@ function BillingPayment() {
     };
   };
   useEffect(() => {
-    site && getCustomerList();
+    first && getCustomerList();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [customerRequest.skipCount, customerRequest.recordsPerPage]);
 
   useEffect(() => {
-    console.log("detailpaymentdata----", detailPaymentData);
   }, [detailPaymentData]);
 
   const checkingSuccessInput = (value, error) => {
@@ -286,8 +288,9 @@ function BillingPayment() {
   const handleCustomerSubmit = async (e) => {
     e != undefined && e.preventDefault();
 
-    setDetailPaymentData([]);
-    setSelectedUnit();
+    setDetailPaymentData([]),
+      setSelectedUnit(),
+      setFirst(true);
 
     getCustomerList();
   };
@@ -536,14 +539,12 @@ function BillingPayment() {
   const [formValues, setformValues] = useState(initialValues);
 
   useEffect(() => {
-    console.log("form-----", formValues);
     if (formValues.amountPayment != undefined)
       setTotalPay(formValues.amountPayment);
     else setTotalPay(0);
   }, [formValues]);
 
   const handleAmountPayment = (e, setFieldValue) => {
-    console.log("e----", e);
     if (e.key == "Enter" || e.keyCode == 9 || e.type == "blur") {
       let a = e.target.value
         .replaceAll("Rp. ", "")

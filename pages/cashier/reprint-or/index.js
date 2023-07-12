@@ -22,24 +22,39 @@ import FormField from "/pagesComponents/FormField";
 import SiteDropdown from "../../../pagesComponents/dropdown/Site";
 import AdjustmentDate from "./components/AdjustmentDate";
 
+
 function RePrintOR() {
   const [{ accessToken, encryptedAccessToken }] = useCookies();
-  const [openAdjust, setOpenAdjust] = useState(false);
+  
+  const formikRef = useRef();
   const [site, setSite] = useState(null);
+  const [first, setFirst] = useState(false);
+  
+  const [openAdjust, setOpenAdjust] = useState(false);
   const [modalParams, setModalParams] = useState(undefined);
+  
+  useEffect(() => {
+    document.getElementsByName(customerName.name)[0].focus();
+
+    let currentSite = typeNormalization(localStorage.getItem("site"));
+    if (currentSite == null) alertService.info({ title: "Please choose site first." });
+    else setSite(currentSite);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSite = (siteVal) => {
     setSite(siteVal);
     localStorage.setItem("site", JSON.stringify(siteVal));
   };
-  const formikRef = useRef();
-
-  const handleAdjust = () => {
-    setOpenAdjust(!openAdjust);
-    getOfficialReceiptList(selectedUnit.unitDataId);
-  };
-
   useEffect(() => {
+    setCustomerRequest((prevState) => ({
+      ...prevState,
+      unitCode: "",
+      unitNo: "",
+      keywords: "",
+      skipCount: 0,
+    }));
     setCustomerResponse((prevState) => ({
       ...prevState,
       rowData: [],
@@ -51,18 +66,13 @@ function RePrintOR() {
       formikRef.current.setFieldValue("unitCode", "");
       formikRef.current.setFieldValue("unitNo", "");
     }
+
     setOfficialReceiptData({
       rowData: [],
       totalRows: undefined,
       totalPages: undefined,
     }),
       setSelectedUnit();
-    setCustomerRequest((prevState) => ({
-      ...prevState,
-      unitCode: "",
-      unitNo: "",
-      keywords: "",
-    }));
   }, [site]);
 
   const schemeModels = {
@@ -114,16 +124,6 @@ function RePrintOR() {
     [unitCode.name]: unitCode.defaultValue,
     [unitNo.name]: unitNo.defaultValue,
   };
-  useEffect(() => {
-    document.getElementsByName(customerName.name)[0].focus();
-
-    let currentSite = typeNormalization(localStorage.getItem("site"));
-    if (currentSite == null)
-      alertService.info({ title: "Please choose site first." });
-    else setSite(currentSite);
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const [isExpandedFilter, setExpandFilter] = useState(true);
 
@@ -208,7 +208,6 @@ function RePrintOR() {
     }
     Block.remove(`.${customerBlockLoadingName}`), setLoadingCustomer(false);
   };
-
   const setCustomerTaskList = (rows) => {
     const { skipCount } = customerRequest;
 
@@ -253,7 +252,7 @@ function RePrintOR() {
     };
   };
   useEffect(() => {
-    getCustomerList();
+    first && getCustomerList();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [customerRequest.skipCount, customerRequest.recordsPerPage]);
 
@@ -271,7 +270,8 @@ function RePrintOR() {
       totalRows: undefined,
       totalPages: undefined,
     }),
-      setSelectedUnit();
+      setSelectedUnit(),
+      setFirst(true);
 
     getCustomerList();
   };
@@ -393,7 +393,6 @@ function RePrintOR() {
       rows: rows,
     };
   };
-
   const reprintOfficialReceipt = async (billingHeaderId) => {
     Block.standard(`.${orBlockLoadingName}`, `Reprinting Official Receipt`),
       setLoadingOfficialReceipt(true);
@@ -421,6 +420,12 @@ function RePrintOR() {
 
     Block.remove(`.${orBlockLoadingName}`), setLoadingOfficialReceipt(false);
   };
+
+  const handleAdjust = () => {
+    setOpenAdjust(!openAdjust);
+    getOfficialReceiptList(selectedUnit.unitDataId);
+  };
+
 
   return (
     <DashboardLayout>
