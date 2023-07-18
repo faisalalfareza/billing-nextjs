@@ -40,6 +40,7 @@ import TotalDisable from "/pagesComponents/dropdown/TotalDisable";
 import DetailBalance from "./detail-balance";
 import debounce from "lodash.debounce";
 
+
 function BillingPayment() {
   const [{ accessToken, encryptedAccessToken }] = useCookies();
 
@@ -71,10 +72,11 @@ function BillingPayment() {
       formikRef.current.setFieldValue("unitCode", "");
       formikRef.current.setFieldValue("unitNo", "");
     }
-    
-    
+  
     setDetailPaymentData([]),
-      setSelectedUnit();
+    setSelectedUnit();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [site]);
 
   const schemeModels = {
@@ -139,9 +141,6 @@ function BillingPayment() {
       let currentUser = typeNormalization(localStorage.getItem("informations"));
       setUser(currentUser);
     }
-
-    getPaymentMethod();
-    getBank();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -323,8 +322,7 @@ function BillingPayment() {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error)
-      alertService.warn({ title: response.error.error.message });
+    if (response.error) alertService.warn({ title: response.error.error.message });
     else {
       const result = response.result.listInvoicePayment;
       result.map((e) => (e["paymentTemp"] = e.paymentAmount));
@@ -702,6 +700,7 @@ function BillingPayment() {
     setOpenDetail(!openDetail);
   };
 
+
   return (
     <DashboardLayout>
       <DashboardNavbar />
@@ -946,12 +945,14 @@ function BillingPayment() {
                               variant="gradient"
                               color="primary"
                               sx={{ height: "100%" }}
-                              onClick={() =>
+                              onClick={() => {
                                 getPaymentDetail(
                                   selectedUnit.unitDataId,
                                   selectedUnit.psCode
                                 )
-                              }
+                                getPaymentMethod();
+                                getBank();
+                              }}
                               disabled={!selectedUnit}
                             >
                               {isLoadingDetailPayment

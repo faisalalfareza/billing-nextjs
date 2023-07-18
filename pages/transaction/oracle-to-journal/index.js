@@ -32,6 +32,7 @@ import { resolve } from "path";
 import { downloadTempFile } from "/helpers/utils";
 import DataTable from "/layout/Tables/DataTable";
 
+
 function OracleToJournal({ params }) {
     const [isLoading, setLoading] = useState(false);
     const [isLoadingGenerate, setLoadingGenerate] = useState(false);
@@ -187,7 +188,6 @@ function OracleToJournal({ params }) {
     };
 
     useEffect(() => {
-        getDropdownPeriodMethod();
         setformValues((prevState) => ({
             ...prevState,
             periodMethod: null,
@@ -196,13 +196,19 @@ function OracleToJournal({ params }) {
             paymentEndDate: null,
             accountingDate: null
         }));
-        if(formikRef.current) {
+        if (formikRef.current) {
             formikRef.current.setFieldValue("periodMethod", null);
             formikRef.current.setFieldValue("paymentMethod", null);
             formikRef.current.setFieldValue("paymentStartDate", null);
             formikRef.current.setFieldValue("paymentEndDate", null);
             formikRef.current.setFieldValue("accountingDate", null);
         }
+
+        if (site) {
+            getDropdownPeriodMethod();
+            getDropdownPaymentMethod();
+        }
+        
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [site]);
 
@@ -224,11 +230,6 @@ function OracleToJournal({ params }) {
         
         Block.remove(`.${paymentMethodBlockLoadingName}`);
     };
-      
-    useEffect(() => {
-        getDropdownPaymentMethod();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [site]);
 
     const checkingSuccessInput = (value, error) => {
         return value != undefined && value != "" && !error;

@@ -24,10 +24,11 @@ import DataTable from "/layout/Tables/DataTable";
 function DetailCancelPayment({ isOpen, params, onModalChanged }) {
   const [modalOpen, setModalOpen] = useState(true);
   const [{ accessToken }] = useCookies();
+  let [first, setFirst] = useState(false);
   const [listDetail, setListDetail] = useState([]);
 
   const isCanceled = params?.canceled == "Yes";
-
+  
   const schemeModels = {
     formId: "cancel-payment-form",
     formField: {
@@ -93,7 +94,9 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
       setLoadingDetailCancelPayment(false);
   };
   useEffect(() => {
-    getDetailCancelPayment();
+    !first && getDetailCancelPayment();
+    setFirst(true), first = true;
+    
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
@@ -199,6 +202,7 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
       rows: listDetail,
     };
   };
+
 
   if (isOpen) {
     return (

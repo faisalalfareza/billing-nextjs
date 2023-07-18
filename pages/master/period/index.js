@@ -26,6 +26,7 @@ import SiteDropdown from "../../../pagesComponents/dropdown/Site";
 import { alertService } from "/helpers";
 import { Block } from "notiflix/build/notiflix-block-aio";
 
+
 export default function MasterPeriod(props) {
   const [listSite, setListSite] = useState([]);
   const [site, setSite] = useState(null);
@@ -42,7 +43,10 @@ export default function MasterPeriod(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => {
-    site && fetchData();
+    if (site) {
+      fetchData();
+    }
+    
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [site]);
 
@@ -153,6 +157,7 @@ export default function MasterPeriod(props) {
     setSite(siteVal);
     localStorage.setItem("site", JSON.stringify(siteVal));
   };
+
 
   return (
     <DashboardLayout>

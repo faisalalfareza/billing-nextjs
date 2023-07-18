@@ -26,10 +26,12 @@ import { alertService } from "/helpers";
 import { useCookies } from "react-cookie";
 import { Notify } from "notiflix/build/notiflix-notify-aio";
 import DetailTemplate from "../detail-template";
+
 function UploadDataUnitItem(props) {
   const { isOpen, onModalChanged, site } = props;
   const [modalOpen, setModalOpen] = useState(true);
   const [{ accessToken, encryptedAccessToken }] = useCookies();
+  let [first, setFirst] = useState(false);
   const [isLoading, setLoading] = useState(false);
   const [dataTemplateInvoice, setDataTemplateInvoice] = useState([]);
   const [dataUnitItem, setDataUnitItem] = useState([]);
@@ -122,9 +124,11 @@ function UploadDataUnitItem(props) {
   };
 
   useEffect(() => {
-    if (site) {
+    if (!first) {
       getTemplateInvoice();
     }
+    setFirst(true), first = true;
+    
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
@@ -330,6 +334,7 @@ function UploadDataUnitItem(props) {
         else handleFile(file, isPassed, message);
       }
     };
+
 
     return (
       <Modal

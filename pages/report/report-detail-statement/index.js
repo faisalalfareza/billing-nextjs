@@ -19,6 +19,7 @@ import * as dayjs from "dayjs";
 import { Block } from "notiflix/build/notiflix-block-aio";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 
+
 function ReportDetailStatement() {
   const [site, setSite] = useState(null);
   const [{ accessToken, encryptedAccessToken }] = useCookies();
@@ -50,12 +51,15 @@ function ReportDetailStatement() {
       formikRef.current.setFieldValue("periodYear", []);
       formikRef.current.setFieldValue("cluster", null);
     }
-    if (site?.siteId) {
+
+    if (site) {
       getProject();
       getMonth();
+      getYear();
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [site?.siteId]);
+  }, [site]);
 
   const onChangeProject = (val) => {
     setformValues((prevState) => ({
@@ -69,6 +73,7 @@ function ReportDetailStatement() {
       formikRef.current.setFieldValue("unitNo", null);
       formikRef.current.setFieldValue("cluster", null);
     }
+    
     getCluster(val);
   };
 
@@ -189,10 +194,9 @@ function ReportDetailStatement() {
 
   useEffect(() => {
     let currentSite = JSON.parse(localStorage.getItem("site"));
-    if (currentSite == null)
-      alertService.info({ title: "Please choose site first." });
+    if (currentSite == null) alertService.info({ title: "Please choose site first." });
     else setSite(currentSite);
-    getYear();
+    
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -334,8 +338,7 @@ function ReportDetailStatement() {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
-    if (response.error)
-      alertService.error({ title: "Error", text: response.error.message });
+    if (response.error) alertService.error({ title: "Error", text: response.error.message });
     else setDataCluster(response.result);
 
     Block.remove(`.${clusterBlockLoadingName}`);
@@ -371,6 +374,7 @@ function ReportDetailStatement() {
     setSite(siteVal);
     localStorage.setItem("site", JSON.stringify(siteVal));
   };
+
 
   return (
     <DashboardLayout>
@@ -480,7 +484,6 @@ function ReportDetailStatement() {
                                           ? value
                                           : initialValues["project"]
                                       );
-                                      getCluster(value);
                                       onChangeProject(value);
                                     }}
                                     renderInput={(params) => (

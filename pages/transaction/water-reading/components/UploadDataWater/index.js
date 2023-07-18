@@ -27,12 +27,16 @@ import { useCookies } from "react-cookie";
 
 function UploadDataWater(props) {
   const [{ accessToken }] = useCookies();
+  let [first, setFirst] = useState(false);
+
   const { isOpen, onModalChanged, site } = props;
   useEffect(() => {
-    if (site) {
-      getProject();
+    if (!first) {
       getPeriod();
+      getProject();
     }
+    setFirst(true), first = true;
+    
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
@@ -325,6 +329,7 @@ function UploadDataWater(props) {
         handleFile(files[0]);
       }
     };
+
 
     return (
       <Modal

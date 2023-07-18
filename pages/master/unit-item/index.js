@@ -24,7 +24,8 @@ import UnitItemRowActions from "./components/UnitItemRowActions";
 import EditDataUnitItem from "./components/EditDataUnitItem";
 import SiteDropdown from "../../../pagesComponents/dropdown/Site";
 
-export default function UnitItem(props) {
+
+export default function UnitItem() {
   const [controller] = useMaterialUIController();
   const [customerResponse, setCustomerResponse] = useState({
     rowData: [],
@@ -47,8 +48,6 @@ export default function UnitItem(props) {
     let currentSite = JSON.parse(localStorage.getItem("site"));
     if (currentSite == null) alertService.info({ title: "Please choose site first."});
     else setSite(currentSite);
-
-    getBank();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -89,8 +88,12 @@ export default function UnitItem(props) {
       totalRows: undefined,
       totalPages: undefined,
     }));
-    fetchData();
-    getTemplateInvoice();
+
+    if (site) {
+      getTemplateInvoice();
+      getBank();
+    }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [site]);
   useEffect(() => {
@@ -235,6 +238,7 @@ export default function UnitItem(props) {
       alertService.error({ title: "Error", text: response.error.message });
     else setDataTemplateInvoice(response.result);
   };
+
 
   return (
     <DashboardLayout>

@@ -38,11 +38,13 @@ import { async } from "regenerator-runtime";
 import WarningLetterPreviewModal from "./components/WarningLetterPreviewModal";
 import { FormatColorResetTwoTone } from "@mui/icons-material";
 
+
 export default function WarningLetter(props) {
   const [isLoading, setLoading] = useState(false);
   const [{ accessToken, encryptedAccessToken }] = useCookies();
   /* start dropdown site */
   const [site, setSite] = useState(null);
+  const [first, setFirst] = useState(false);
   const [clusterID, setCluster] = useState(null);
   const [unitcode, setUnitCode] = useState(null);
   const [isLoadingSend, setLoadingSend] = useState(false);
@@ -61,10 +63,6 @@ export default function WarningLetter(props) {
     let currentSite = JSON.parse(localStorage.getItem("site"));
     if (currentSite == null) alertService.info({ title: "Please choose site first." });
     else setSite(currentSite);
-
-
-    // getPeriode();
-    // getProject();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -118,9 +116,12 @@ export default function WarningLetter(props) {
   };
 
   useEffect(() => {
-    getPeriode();
+    if (site) {
+      getPeriode();
+    }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [site]); //fungsi untuk initial fields pada saat refresh page
+  }, [site]);
 
   const projectBlockLoadingName = "block-project";
   const onPeriodeChange = async (val) => {
@@ -417,9 +418,9 @@ export default function WarningLetter(props) {
   };
   /* end load dataTableData */
   useEffect(() => {
-    fetchData();
+    first && fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [customerRequest.skipCount, customerRequest.recordsPerPage]);
+  }, [customerRequest.skipCount, customerRequest.recordsPerPage, customerRequest.keywords]);
 
   /* start fungtions methode Datatable */
   const [customerResponse, setCustomerResponse] = useState({
@@ -432,7 +433,7 @@ export default function WarningLetter(props) {
   const [isExpandedFilter, setExpandFilter] = useState(true);
 
   const warningLetterBlockLoadingName = "block-warning-letter";
-  const fetchData = async (data) => {
+  const fetchData = async () => {
     Block.standard(`.${warningLetterBlockLoadingName}`, `Getting Warning Letter Data`),
       setLoading(true);
       
@@ -691,8 +692,6 @@ export default function WarningLetter(props) {
       ...prevState,
       keywords: e,
     }));
-    fetchData();
-    console.log('Table handler', e ? e : null);
   };
   /* end fungtion methode Datatable */
 
@@ -755,6 +754,7 @@ export default function WarningLetter(props) {
   };
   /* end send email */
 
+
   return (
     <DashboardLayout>
       <DashboardNavbar />
@@ -811,7 +811,10 @@ export default function WarningLetter(props) {
                     <Formik
                       initialValues={initialValues}
                       validationSchema={validations}
-                      onSubmit={fetchData}
+                      onSubmit={() => {
+                        setFirst(true);
+                        fetchData();
+                      }}
                     >
                       {({
                         values,

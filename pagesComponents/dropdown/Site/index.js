@@ -3,15 +3,16 @@ import { TextField } from "@mui/material";
 import { useState, useEffect } from "react";
 import { useCookies } from "react-cookie";
 import { typeNormalization } from "/helpers/utils";
-import { BorderBottom } from "@mui/icons-material";
+
 
 export default function SiteDropdown(props) {
-  const [dataSite, setDataSite] = useState([]);
-  //   const [site, setSite] = useState(null);
   const [{ accessToken, encryptedAccessToken }] = useCookies();
-
+  let [first, setFirst] = useState(false);
+  const [dataSite, setDataSite] = useState([]);
+  
   useEffect(() => {
-    getSite();
+    !first && getSite();
+    setFirst(true), first = true;
   }, []);
 
   const getSite = async () => {
@@ -26,23 +27,21 @@ export default function SiteDropdown(props) {
 
     setDataSite(response.result);
   };
-
   const handleSiteChange = (value) => {
     props.onSelectSite(value);
   };
 
+
   return (
     <Autocomplete
-      options={dataSite}
       id="site-dropdown"
-      value={props.site}
-      getOptionLabel={(option) =>
-        option.siteName ? option.siteId + " - " + option.siteName : ""
-      }
-      onChange={(e, value) => handleSiteChange(value)}
-      isOptionEqualToValue={(option, value) => option.siteId === value.siteId}
+      
+      options={dataSite}
       noOptionsText="No results"
-      key={(option) => option.siteId}
+      getOptionLabel={(option) => option.siteName ? (`${option.siteId} - ${option.siteName}`) : ""}
+      isOptionEqualToValue={(option, value) => option.siteId === value.siteId}
+      key={(option) => option.siteId} value={props.site}
+      
       renderInput={(params) => (
         <TextField
           {...params}
@@ -56,6 +55,7 @@ export default function SiteDropdown(props) {
           }}
         />
       )}
+      onChange={(e, value) => handleSiteChange(value)}
     />
   );
 }

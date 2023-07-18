@@ -36,6 +36,7 @@ import { Block } from "notiflix/build/notiflix-block-aio";
 
 function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
   const [{ accessToken, encryptedAccessToken }] = useCookies();
+  let [first, setFirst] = useState(false);
   const [isLoadingSubmit, setLoadingSubmit] = useState(false);
   const [no, setNo] = useState(null);
   const [open, setOpen] = useState(false);
@@ -152,7 +153,11 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
     Block.remove(`.${periodNoBlockLoadingName}`);
   };
   useEffect(() => {
-    if (site) getLastPeriodNo();
+    if (!first) {
+      getLastPeriodNo();
+    }
+    setFirst(true), first = true;
+    
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
@@ -327,6 +332,7 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
       e.preventDefault();
     };
 
+    
     return (
       <Modal isOpen={isOpen} className={createPeriodBlockLoadingName}>
         <Formik

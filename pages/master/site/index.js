@@ -24,12 +24,14 @@ import { useCookies } from "react-cookie";
 import { typeNormalization } from "/helpers/utils";
 import { Block } from "notiflix/build/notiflix-block-aio";
 
+
 export default function MasterSite(props) {
   const { dataProject, dataSite } = props;
   const [listSite, setListSite] = useState([]);
   const [openModal, setOpenModal] = useState(false);
   const [modalParams, setModalParams] = useState(undefined);
   const [{ accessToken, encryptedAccessToken }] = useCookies();
+  let [first, setFirst] = useState(false);
 
   const checkingSuccessInput = (value, error) => {
     return value != undefined && value != "" && value.length > 0 && !error;
@@ -210,9 +212,14 @@ export default function MasterSite(props) {
     //   });
   };
   useEffect(() => {
-    fetchData();
+    if (!first) {
+      fetchData();
+    }
+    setFirst(true), first = true;
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
 
   return (
     <DashboardLayout>

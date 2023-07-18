@@ -188,13 +188,14 @@ export default function Invoice(props) {
       totalPages: undefined,
     }));
     setCustomer(null);
-    if (site?.siteId) {
-      getProject();
+
+    if (site) {
       getPeriod();
+      getProject();
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [site?.siteId]);
+  }, [site]);
   useEffect(() => {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps

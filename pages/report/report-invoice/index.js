@@ -44,6 +44,10 @@ function ReportInvoice() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const handleSite = (siteVal) => {
+    setSite(siteVal);
+    localStorage.setItem("site", JSON.stringify(siteVal));
+  };
   useEffect(() => {
     setformValues((prevState) => ({
       ...prevState,
@@ -57,14 +61,12 @@ function ReportInvoice() {
       formikRef.current.setFieldValue("cluster", []);
     }
 
-    getPeriod();
+    if (site) {
+      getPeriod();
+    }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [site]);
-  const handleSite = (siteVal) => {
-    setSite(siteVal);
-    localStorage.setItem("site", JSON.stringify(siteVal));
-  };
  
   let schemeValidations = Yup.object().shape({
     period: Yup.object()

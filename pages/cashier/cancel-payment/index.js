@@ -59,6 +59,8 @@ function CancelPayment() {
       totalPages: undefined,
     }),
       setSelectedUnit();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [site]);
 
   const schemeModels = {

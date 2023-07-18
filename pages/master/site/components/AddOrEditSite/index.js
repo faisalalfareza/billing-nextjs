@@ -24,13 +24,16 @@ import { Block } from "notiflix/build/notiflix-block-aio";
 
 function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
   const [{ accessToken, encryptedAccessToken }] = useCookies();
+  let [first, setFirst] = useState(false);
   const [dataProject, setDataProject] = useState([]);
   const [dataCluster, setDataCluster] = useState([]);
   const [user, setUser] = useState({});
 
   useEffect(() => {
-    if (site) getLastPeriodNo();
-    getProject();
+    if (!first) {
+      getProject();
+    }
+    setFirst(true), first = true;
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
@@ -189,6 +192,7 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
     const submitForm = (fields, actions) => {
       createSite(fields, actions);
     };
+
 
     return (
       <Modal 

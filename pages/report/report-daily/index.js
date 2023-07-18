@@ -18,6 +18,7 @@ import BorderAllIcon from "@mui/icons-material/BorderAll";
 import * as dayjs from "dayjs";
 import { Block } from "notiflix/build/notiflix-block-aio";
 
+
 function ReportDaily() {
   const [{ accessToken }] = useCookies();
   const [site, setSite] = useState(null);
@@ -40,15 +41,16 @@ function ReportDaily() {
 
   useEffect(() => {
     let currentSite = JSON.parse(localStorage.getItem("site"));
-    if (currentSite == null)
-      alertService.info({ title: "Please choose site first." });
+    if (currentSite == null) alertService.info({ title: "Please choose site first." });
     else setSite(currentSite);
-
-    getPaymentMethod();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const handleSite = (siteVal) => {
+    setSite(siteVal);
+    localStorage.setItem("site", JSON.stringify(siteVal));
+  };
   useEffect(() => {
     setformValues((prevState) => ({
       ...prevState,
@@ -61,18 +63,15 @@ function ReportDaily() {
       formikRef.current.setFieldValue("period", null);
       formikRef.current.setFieldValue("cluster", []);
     }
-    if (site?.siteId) {
+
+    if (site) {
       getProject();
       getPeriod();
+      getPaymentMethod();
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [site?.siteId]);
-
-  const handleSite = (siteVal) => {
-    setSite(siteVal);
-    localStorage.setItem("site", JSON.stringify(siteVal));
-  };
+  }, [site]);
 
   const addDate = (val) => dayjs(val).add(1, "day");
 
@@ -253,6 +252,7 @@ function ReportDaily() {
       setLoading(false),
       setLoading(false);
   };
+
 
   return (
     <DashboardLayout>

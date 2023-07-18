@@ -28,7 +28,8 @@ import EditDataWater from "./components/EditDataWater";
 import SiteDropdown from "../../../pagesComponents/dropdown/Site";
 import { Block } from "notiflix/build/notiflix-block-aio";
 
-export default function WaterReading(props) {
+
+export default function WaterReading() {
   const [controller] = useMaterialUIController();
   const [customerResponse, setCustomerResponse] = useState({
     rowData: [],
@@ -40,6 +41,7 @@ export default function WaterReading(props) {
   const [dataCluster, setDataCluster] = useState([]);
   const [dataProject, setDataProject] = useState([]);
   const [site, setSite] = useState(null);
+  const [first, setFirst] = useState(false);
   const handleOpenUpload = () => setOpenUpload(true);
   const handleOpenEdit = () => setOpenEdit(true);
   const [isLoading, setLoading] = useState(false);
@@ -49,10 +51,8 @@ export default function WaterReading(props) {
 
   useEffect(() => {
     let currentSite = JSON.parse(localStorage.getItem("site"));
-    if (currentSite == null)
-      alertService.info({ title: "Please choose site first." });
+    if (currentSite == null) alertService.info({ title: "Please choose site first." });
     else setSite(currentSite);
-    if (site?.siteId) getProject();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -112,7 +112,6 @@ export default function WaterReading(props) {
     Block.remove(`.${projectBlockLoadingName}`);
   };
   useEffect(() => {
-    if (site?.siteId) getProject();
     setformValues((prevState) => ({
       ...prevState,
       project: null,
@@ -129,10 +128,14 @@ export default function WaterReading(props) {
       totalPages: undefined,
     }));
 
+    if (site) {
+      getProject();
+    }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [site?.siteId]);
+  }, [site]);
   useEffect(() => {
-    fetchData();
+    first && fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [customerRequest.skipCount, customerRequest.recordsPerPage]);
 
@@ -214,7 +217,7 @@ export default function WaterReading(props) {
   const [isExpandedFilter, setExpandFilter] = useState(true);
 
   const waterReadingBlockLoadingName = "block-water-reading";
-  const fetchData = async (data) => {
+  const fetchData = async () => {
     Block.standard(
       `.${waterReadingBlockLoadingName}`,
       `Getting Water Reading Data`
@@ -364,6 +367,7 @@ export default function WaterReading(props) {
     }
   };
 
+  
   return (
     <DashboardLayout>
       <DashboardNavbar />
@@ -425,7 +429,10 @@ export default function WaterReading(props) {
                       innerRef={formikRef}
                       initialValues={initialValues}
                       validationSchema={validations}
-                      onSubmit={fetchData}
+                      onSubmit={() => {
+                        setFirst(true);
+                        fetchData();
+                      }}
                     >
                       {({
                         values,
