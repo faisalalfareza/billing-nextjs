@@ -27,6 +27,9 @@ export default async function handler(
         case "creatmastersite":
           create(res, body);
           break;
+        case "getdropdownclusterbyprojectengine3":
+          getDropdownClusterByProjectEngine3(res, body);
+          break;
       }
       break;
   }
@@ -131,4 +134,55 @@ async function create(res: any, body: any) {
         error: error,
       });
     });
+}
+async function getDropdownClusterByProjectEngine3(res: any, body: any) {
+  const { accessToken, params } = body;
+  // const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetDropdownClusterByProjectEngine3`;
+  const url = `${
+    publicRuntimeConfig.apiUrl
+  }/api/services/app/BillingSystems/GetDropdownClusterByProjectEngine3?ProjectId=${params.ProjectId.join(
+    "&ProjectId="
+  )}`;
+  const config = {
+    headers: {
+      Authorization: "Bearer " + accessToken,
+      "Access-Control-Allow-Origin": "*",
+    },
+    // params: params,
+  };
+  console.log("config----", config);
+  axios
+    .get(url, config)
+    .then((response) =>
+      res.send({
+        result: response.data.result,
+      })
+    )
+    .catch((error) =>
+      res.send({
+        error: error,
+      })
+    );
+}
+
+function parseParams(params: { [x: string]: any[] }) {
+  const keys = Object.keys(params);
+  let options = "";
+
+  keys.forEach((key) => {
+    const isParamTypeObject = typeof params[key] === "object";
+    const isParamTypeArray = isParamTypeObject && params[key].length >= 0;
+
+    if (!isParamTypeObject) {
+      options += `${key}=${params[key]}&`;
+    }
+
+    if (isParamTypeObject && isParamTypeArray) {
+      params[key].forEach((element) => {
+        options += `${key}=${element}&`;
+      });
+    }
+  });
+
+  return options ? options.slice(0, -1) : options;
 }

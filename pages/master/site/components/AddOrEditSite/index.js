@@ -33,7 +33,7 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
     if (!first) {
       getProject();
     }
-    setFirst(true), first = true;
+    setFirst(true), (first = true);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
@@ -65,16 +65,26 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
   const clusterBlockLoadingName = "block-cluster";
   const onProjectChange = async (val) => {
     Block.dots(`.${clusterBlockLoadingName}`);
+    let listProject = [];
+    console.log(val);
+    if (val.length > 0) {
+      val.map((e) => {
+        listProject.push(e.projectId);
+      });
+    }
 
-    let response = await fetch("/api/master/site/getdropdownclusterbyproject", {
-      method: "POST",
-      body: JSON.stringify({
-        accessToken: accessToken,
-        params: {
-          ProjectId: val[0]?.projectId,
-        },
-      }),
-    });
+    let response = await fetch(
+      "/api/master/site/getdropdownclusterbyprojectengine3",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          accessToken: accessToken,
+          params: {
+            ProjectId: listProject,
+          },
+        }),
+      }
+    );
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 
@@ -178,8 +188,8 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
         .required("Email is required"),
       phone: Yup.string().required("Office Phone is required"),
       handphone: Yup.string().required("Handphone is required"),
-      project: Yup.array().required("Project is required"),
-      cluster: Yup.array().required("Cluster is required"),
+      project: Yup.array().min(1).required("Project is required"),
+      cluster: Yup.array().min(1).required("Cluster is required"),
     });
 
     const checkingSuccessInput = (value, error) => {
@@ -193,12 +203,8 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
       createSite(fields, actions);
     };
 
-
     return (
-      <Modal 
-        isOpen={isOpen}
-        className={createSiteBlockLoadingName}
-      >
+      <Modal isOpen={isOpen} className={createSiteBlockLoadingName}>
         <Formik
           initialValues={initialValues}
           validationSchema={schemeValidations}
@@ -355,7 +361,7 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
                           renderInput={(params) => (
                             <FormField
                               {...params}
-                              required
+                              // required
                               type="text"
                               label="Project"
                               name="project"
@@ -396,7 +402,7 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
                               {...params}
                               type="text"
                               label="Cluster"
-                              required
+                              // required
                               name="cluster"
                               placeholder="Type Cluster"
                               error={errors.cluster && touched.cluster}

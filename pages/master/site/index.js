@@ -23,7 +23,7 @@ import MDBadgeDot from "/components/MDBadgeDot";
 import { useCookies } from "react-cookie";
 import { typeNormalization } from "/helpers/utils";
 import { Block } from "notiflix/build/notiflix-block-aio";
-
+import ViewLogo from "./components/view-logo";
 
 export default function MasterSite(props) {
   const { dataProject, dataSite } = props;
@@ -39,7 +39,13 @@ export default function MasterSite(props) {
 
   const [dataCluster, setDataCluster] = useState([]);
   const [isLoading, setLoading] = useState(false);
-
+  const [openDetail, setOpenDetail] = useState(false);
+  const handleDetail = () => {
+    setOpenDetail(!openDetail);
+  };
+  const viewLogo = (row) => {
+    setModalParams(row.original), handleDetail();
+  };
   const setSiteList = () => {
     return {
       columns: [
@@ -48,7 +54,7 @@ export default function MasterSite(props) {
         { Header: "Site Name", accessor: "siteName" },
         {
           Header: "Project",
-          accessor: "project",
+          accessor: "projectCount",
           Cell: ({ value }) => {
             return (
               <Link
@@ -63,7 +69,7 @@ export default function MasterSite(props) {
         },
         {
           Header: "Cluster",
-          accessor: "cluster",
+          accessor: "clusterCount",
           Cell: ({ value }) => {
             return (
               <Link
@@ -79,10 +85,13 @@ export default function MasterSite(props) {
         {
           Header: "Logo",
           accessor: "logo",
-          Cell: ({ value }) => {
+          Cell: ({ value, row }) => {
             return (
               <Link
-                href="javascript:void(0)"
+                sx={{
+                  cursor: "pointer",
+                }}
+                onClick={() => viewLogo(row)}
                 underline="always"
                 color="primary"
               >
@@ -158,17 +167,19 @@ export default function MasterSite(props) {
       const row = response.result.map((e, i) => {
         list.push({
           no: i + 1,
-          project: e.siteId,
-          cluster: e.siteId,
+          projectCount: e.projectCount,
+          clusterCount: e.clusterCount,
           status: e.isActive,
           siteId: e.siteId,
           siteName: e.siteName,
+          logo: e.logo,
           action: {
-            project: e.siteId,
-            cluster: e.siteId,
+            projectCount: e.projectCount,
+            clusterCount: e.clusterCount,
             status: e.isActive,
             siteId: e.siteId,
             siteName: e.siteName,
+            logo: e.logo,
           },
         });
       });
@@ -215,16 +226,14 @@ export default function MasterSite(props) {
     if (!first) {
       fetchData();
     }
-    setFirst(true), first = true;
+    setFirst(true), (first = true);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-
   return (
     <DashboardLayout>
       <DashboardNavbar />
-
       <MDBox>
         <MDBox
           display="flex"
@@ -259,15 +268,21 @@ export default function MasterSite(props) {
           </MDBox>
         </Card>
       </MDBox>
-
       {openModal && (
         <AddOrEditSite
           isOpen={openModal}
           params={modalParams}
           onModalChanged={(isChanged) => {
             setOpenModal(!openModal);
-            (isChanged === true) && fetchData();
+            isChanged === true && fetchData();
           }}
+        />
+      )}
+      {openDetail && (
+        <ViewLogo
+          isOpen={openDetail}
+          params={modalParams}
+          close={handleDetail}
         />
       )}
     </DashboardLayout>
