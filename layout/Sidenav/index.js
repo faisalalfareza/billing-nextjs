@@ -371,7 +371,7 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
                   component="img"
                   src={brand.src}
                   alt={brandName}
-                  width={miniSidenav ? "1.75rem" : "4rem"}
+                  width={miniSidenav ? "2.7rem" : "4rem"}
                 />
               ) : (
                 brand
