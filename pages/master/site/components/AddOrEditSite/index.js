@@ -211,26 +211,26 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
           onSubmit={submitForm}
         >
           {({ errors, touched, isSubmitting, setFieldValue, resetForm }) => {
-            if (params) {
-              // get user and set form fields
+            // if (params) {
+            //   // get user and set form fields
 
-              const fields = [
-                "id",
-                "name",
-                "code",
-                "address",
-                "email",
-                "phone",
-                "handphone",
-                "project",
-                "cluster",
-                "status",
-              ];
-              fields.forEach((field) =>
-                setFieldValue(field, params[field], false)
-              );
-              setUser(user);
-            }
+            //   const fields = [
+            //     "id",
+            //     "name",
+            //     "code",
+            //     "address",
+            //     "email",
+            //     "phone",
+            //     "handphone",
+            //     "project",
+            //     "cluster",
+            //     "status",
+            //   ];
+            //   fields.forEach((field) =>
+            //     setFieldValue(field, params[field], false)
+            //   );
+            //   setUser(user);
+            // }
 
             return (
               <Form id="master-site-form" autoComplete="off">
@@ -248,7 +248,7 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
                 <ModalBody>
                   <MDBox pb={3} px={3}>
                     <Grid container spacing={3}>
-                      <Grid item xs={12} sm={12}>
+                      {/* <Grid item xs={12} sm={12}>
                         <FormField
                           type="text"
                           required
@@ -415,7 +415,7 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
                             />
                           )}
                         />
-                      </Grid>
+                      </Grid> */}
                       {/* {params && (
                         <Grid item xs={12} sm={12}>
                           <FormGroup>

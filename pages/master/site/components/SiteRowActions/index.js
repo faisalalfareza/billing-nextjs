@@ -21,9 +21,13 @@ function SiteRowActions({ record, openModalonEdit, onDeleted }) {
   const open = Boolean(menu);
 
   const openMenu = (event) => setMenu(event.currentTarget);
-  const closeMenu = () => { setMenu(null), menu = null; }
+  const closeMenu = () => {
+    setMenu(null), (menu = null);
+  };
 
-  const handleEdit = () => { closeMenu(), setTimeout(() => openModalonEdit(record), 0) };
+  const handleEdit = () => {
+    closeMenu(), setTimeout(() => openModalonEdit(record), 0);
+  };
 
   const confirmDelete = () => {
     Swal.fire({
@@ -79,7 +83,7 @@ function SiteRowActions({ record, openModalonEdit, onDeleted }) {
         size="small"
         onClick={openMenu}
         aria-haspopup="true"
-        aria-expanded={open ? 'true' : undefined}
+        aria-expanded={open ? "true" : undefined}
       >
         Actions&nbsp;
         <Icon>keyboard_arrow_down</Icon>
@@ -94,7 +98,7 @@ function SiteRowActions({ record, openModalonEdit, onDeleted }) {
           onClose={closeMenu}
           // keepMounted
         >
-          {/* <MenuItem onClick={handleEdit}>Edit</MenuItem> */}
+          <MenuItem onClick={handleEdit}>Edit</MenuItem>
         </Menu>
       )}
     </MDBox>

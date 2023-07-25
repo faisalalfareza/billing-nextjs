@@ -18,7 +18,7 @@ import NumberInput from "/pagesComponents/dropdown/NumberInput";
 import { Block } from "notiflix/build/notiflix-block-aio";
 
 export default function Adjustment(props) {
-  const { isOpen, params, close, handlePSCode } = props;
+  const { isOpen, params, close } = props;
   const [modal, setModal] = useState(isOpen);
   const [isLoading, setLoading] = useState(false);
   const [{ accessToken, encryptedAccessToken }] = useCookies();

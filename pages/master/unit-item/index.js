@@ -24,7 +24,6 @@ import UnitItemRowActions from "./components/UnitItemRowActions";
 import EditDataUnitItem from "./components/EditDataUnitItem";
 import SiteDropdown from "../../../pagesComponents/dropdown/Site";
 
-
 export default function UnitItem() {
   const [controller] = useMaterialUIController();
   const [customerResponse, setCustomerResponse] = useState({
@@ -46,7 +45,8 @@ export default function UnitItem() {
 
   useEffect(() => {
     let currentSite = JSON.parse(localStorage.getItem("site"));
-    if (currentSite == null) alertService.info({ title: "Please choose site first."});
+    if (currentSite == null)
+      alertService.info({ title: "Please choose site first." });
     else setSite(currentSite);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -93,7 +93,7 @@ export default function UnitItem() {
       getTemplateInvoice();
       getBank();
     }
-
+    fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [site]);
   useEffect(() => {
@@ -107,7 +107,12 @@ export default function UnitItem() {
     { Header: "Unit No", accessor: "unitno" },
     { Header: "Template Invoice", accessor: "templateInvoice" },
     { Header: "Bank", accessor: "bank" },
-    { Header: "Virtual Account Number", accessor: "vaNo", width: "25%", customWidth: "200px" },
+    {
+      Header: "Virtual Account Number",
+      accessor: "vaNo",
+      width: "25%",
+      customWidth: "200px",
+    },
     {
       Header: "Penalty",
       accessor: "isPenalty",
@@ -238,7 +243,6 @@ export default function UnitItem() {
       alertService.error({ title: "Error", text: response.error.message });
     else setDataTemplateInvoice(response.result);
   };
-
 
   return (
     <DashboardLayout>

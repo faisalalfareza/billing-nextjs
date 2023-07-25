@@ -171,7 +171,7 @@ function UploadAdjustment(props) {
   const closeModal = (isChanged = false) => {
     setModalOpen(false);
     setTimeout(() => setDataAdj([]), 1500);
-    setTimeout(() => onModalChanged(isChanged), 0);
+    setTimeout(() => onModalChanged(true), 0);
   };
 
   if (isOpen) {

@@ -2,7 +2,7 @@ import { TextField } from "@mui/material";
 import { useState } from "react";
 import { NumericFormat } from "react-number-format";
 
-export default function NumberInput(props) {
+function NumberInput(props) {
   const [value, setValue] = useState("");
   return (
     <NumericFormat
@@ -17,9 +17,15 @@ export default function NumberInput(props) {
       variant="standard"
       thousandSeparator="."
       decimalSeparator=","
-      allowNegative={false}
+      allowNegative={true}
       decimalScale={2}
-      prefix="Rp. "
+      prefix={props.prefix}
     />
   );
 }
+
+NumberInput.defaultProps = {
+  prefix: "Rp. ",
+};
+
+export default NumberInput;

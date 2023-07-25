@@ -64,7 +64,6 @@ export default function Invoice(props) {
   const [list, setList] = useState([]);
   const [{ accessToken, encrypftedAccessToken }] = useCookies();
   const [isLoadingSend, setLoadingSend] = useState(false);
-  const [isAdjust, setAdjust] = useState(false);
   const [command, setCommand] = useState(null);
   const formikRef = useRef();
 
@@ -581,12 +580,9 @@ export default function Invoice(props) {
   };
 
   const handleCallback = (childData) => {
-    setAdjust(childData);
+    if (childData) handleAdjust();
   };
 
-  useEffect(() => {
-    if (isAdjust) handleAdjust();
-  }, [isAdjust]);
   useEffect(() => {
     console.log("modalParams", modalParams);
   }, [modalParams]);
@@ -1164,7 +1160,7 @@ export default function Invoice(props) {
           isOpen={openAdjust}
           close={handleAdjust}
           params={modalParams}
-          handlePSCode={handlePSCode}
+          // handlePSCode={handlePSCode}
         />
       )}
       {openUpload && (
