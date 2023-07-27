@@ -38,6 +38,7 @@ import FiberManualRecordOutlined from "@mui/icons-material/FiberManualRecordOutl
 
 import MultipleStop from "@mui/icons-material/MultipleStop";
 import WaterDamage from "@mui/icons-material/WaterDamage";
+import ElectricalServicesIcon from "@mui/icons-material/ElectricalServices";
 import Description from "@mui/icons-material/Description";
 import MarkEmailUnreadIcon from "@mui/icons-material/MarkEmailUnread";
 import Book from "@mui/icons-material/Book";
@@ -195,6 +196,14 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           key: "water-reading",
           route: "/transaction/water-reading",
           icon: <WaterDamage fontSize="medium" />,
+          permission: "Pages.Transaction.WaterReading",
+        },
+        {
+          name: "Electric Reading",
+          nameOnHeader: "Electric Reading",
+          key: "electric-reading",
+          route: "/transaction/electric-reading",
+          icon: <ElectricalServicesIcon fontSize="medium" />,
           permission: "Pages.Transaction.WaterReading",
         },
         {
