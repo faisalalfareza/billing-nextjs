@@ -204,7 +204,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           key: "electric-reading",
           route: "/transaction/electric-reading",
           icon: <ElectricalServicesIcon fontSize="medium" />,
-          permission: "Pages.Transaction.WaterReading",
+          permission: "Pages.Transaction.ElectricReading",
         },
         {
           name: "Invoice",
