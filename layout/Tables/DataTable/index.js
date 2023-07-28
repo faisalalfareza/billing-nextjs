@@ -24,14 +24,14 @@ import Icon from "@mui/material/Icon";
 import Autocomplete from "@mui/material/Autocomplete";
 
 // NextJS Material Dashboard 2 PRO components
-import MDBox from "/components/MDBox";
-import MDTypography from "/components/MDTypography";
-import MDInput from "/components/MDInput";
-import MDPagination from "/components/MDPagination";
+import MDBox from "../../../components/MDBox";
+import MDTypography from "../../../components/MDTypography";
+import MDInput from "../../../components/MDInput";
+import MDPagination from "../../../components/MDPagination";
 
 // NextJS Material Dashboard 2 PRO examples
-import DataTableHeadCell from "/layout/Tables/DataTable/DataTableHeadCell";
-import DataTableBodyCell from "/layout/Tables/DataTable/DataTableBodyCell";
+import DataTableHeadCell from "./DataTableHeadCell";
+import DataTableBodyCell from "./DataTableBodyCell";
 
 function DataTable({
   title,

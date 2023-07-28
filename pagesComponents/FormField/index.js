@@ -20,9 +20,9 @@ import PropTypes from "prop-types";
 import { ErrorMessage, Field } from "formik";
 
 // NextJS Material Dashboard 2 PRO components
-import MDBox from "/components/MDBox";
-import MDTypography from "/components/MDTypography";
-import MDInput from "/components/MDInput";
+import MDBox from "../../components/MDBox";
+import MDTypography from "../../components/MDTypography";
+import MDInput from "../../components/MDInput";
 
 function FormField({ label, name, variant, ...rest }) {
   return (

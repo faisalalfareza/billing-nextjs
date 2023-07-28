@@ -20,10 +20,10 @@ import PropTypes from "prop-types";
 import Icon from "@mui/material/Icon";
 
 // NextJS Material Dashboard 2 PRO components
-import MDBox from "/components/MDBox";
+import MDBox from "../../../components/MDBox";
 
 // NextJS Material Dashboard 2 PRO contexts
-import { useMaterialUIController } from "/context";
+import { useMaterialUIController } from "../../../context";
 
 function DataTableHeadCell({ width, children, sorted, align, ...rest }) {
   const [controller] = useMaterialUIController();

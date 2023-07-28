@@ -1,6 +1,5 @@
 import getConfig from "next/config";
 
-const { publicRuntimeConfig } = getConfig();
 export function typeNormalization(value: any) {
   try {
     return JSON.parse(value);
@@ -23,6 +22,7 @@ export function getExtension(filename: string) {
 }
 
 export function downloadTempFile(uri: any) {
+  const { publicRuntimeConfig } = getConfig();
   let fileUrl = joinUrl(uri);
 
   const url = publicRuntimeConfig.apiUrl + "/" + fileUrl;

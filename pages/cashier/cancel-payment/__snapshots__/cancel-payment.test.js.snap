@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CHILD COMPONENT: TODO should renders "todo" component matches snapshot 1`] = `
+<div
+  data-testid="todo-1"
+>
+  <strike>
+    <h1>
+      Faisal Alfareza
+    </h1>
+  </strike>
+</div>
+`;

@@ -10,16 +10,16 @@ import PropTypes from "prop-types";
 import { Grid, Table, TableBody, TableCell, TableRow } from "@mui/material";
 import { Block } from "notiflix/build/notiflix-block-aio";
 
-import MDBox from "/components/MDBox";
-import MDTypography from "/components/MDTypography";
-import MDButton from "/components/MDButton";
-import MDBadge from "/components/MDBadge";
+import MDBox from "../../../../../components/MDBox";
+import MDTypography from "../../../../../components/MDTypography";
+import MDButton from "../../../../../components/MDButton";
+import MDBadge from "../../../../../components/MDBadge";
 
-import { typeNormalization } from "/helpers/utils";
-import { alertService } from "/helpers/alert.service";
+import { typeNormalization } from "../../../../../helpers/utils";
+import { alertService } from "../../../../../helpers/alert.service";
 
-import FormField from "/pagesComponents/FormField";
-import DataTable from "/layout/Tables/DataTable";
+import FormField from "../../../../../pagesComponents/FormField";
+import DataTable from "../../../../../layout/Tables/DataTable";
 
 function DetailCancelPayment({ isOpen, params, onModalChanged }) {
   const [modalOpen, setModalOpen] = useState(true);
@@ -58,7 +58,7 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
     useState(false);
   const [detailCancelPayment, setDetailCancelPayment] = useState();
   const getDetailCancelPayment = async () => {
-    Block.standard(`.${detailPaymentBlockLoadingName}`, `Getting ${isCanceled ? 'Canceled Payment' : 'Payment'} Detail`), 
+    // Block.standard(`.${detailPaymentBlockLoadingName}`, `Getting ${isCanceled ? 'Canceled Payment' : 'Payment'} Detail`), 
       setLoadingDetailCancelPayment(true);
 
     const { billingHeaderId } = params;
@@ -90,7 +90,7 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
       setListDetail(list);
     }
 
-    Block.remove(`.${detailPaymentBlockLoadingName}`), 
+    // Block.remove(`.${detailPaymentBlockLoadingName}`), 
       setLoadingDetailCancelPayment(false);
   };
   useEffect(() => {
