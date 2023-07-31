@@ -218,6 +218,7 @@ function EditDataUnitItem(props) {
         params: {
           unitItemHeaderId: unitItemHeaderId,
           templateInvoiceHeaderId: templateInvoiceHeaderId,
+          ClusterId: params.clusterId,
         },
       }),
     });
