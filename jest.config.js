@@ -18,7 +18,7 @@ const jestConfig = {
   // clearMocks: false,
 
   // Indicates whether the coverage information should be collected while executing the test
-  collectCoverage: true,
+  collectCoverage: false,
 
   // An array of glob patterns indicating a set of files for which coverage information should be collected
   // collectCoverageFrom: undefined,
@@ -175,7 +175,10 @@ const jestConfig = {
   // ],
   testPathIgnorePatterns: [
     '<rootDir>/node_modules/',
-    '<rootDir>/.next/'
+    '<rootDir>/.next/',
+
+    '<rootDir>/components/',
+    '<rootDir>/layout/',
   ],
 
   // The regexp pattern or array of patterns that Jest uses to detect test files

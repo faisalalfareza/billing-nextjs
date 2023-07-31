@@ -36,6 +36,9 @@ import DetailCancelPayment from "./components/DetailCancelPayment";
 describe("CHILD COMPONENT: DETAIL CANCEL PAYMENT", () => {
     test('should renders "detailcancelpayment" modal component', () => {
         // expect(component.find('DetailCancelPayment')).to;
+
         render(<DetailCancelPayment isOpen={true} params={{ billingHeaderId: 1 }} />);
+        const e = screen.findByTestId('modal-detailcancelpayment');
+        expect(e).toBeInTheDocument();
     });
 });
