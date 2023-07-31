@@ -62,29 +62,31 @@ export default function Adjust(props) {
           </MDTypography>
         </MDBox>
       </ModalBody>
-      <ModalFooter>
-        <MDBox
-          sx={{
-            justifyContent: "center",
-            fontFamily: "Open Sans, sans-serif",
-          }}
+      <MDBox
+        sx={{
+          justifyContent: "center",
+          fontFamily: "Open Sans, sans-serif",
+          display: "flex",
+          flexWrap: "wrap",
+          alignItems: "center",
+          p: 3,
+        }}
+      >
+        <MDButton
+          color="secondary"
+          onClick={noAction}
+          style={{ marginRight: 7, fontFamily: "Open Sans, sans-serif" }}
         >
-          <MDButton
-            color="secondary"
-            onClick={noAction}
-            style={{ marginRight: 7, fontFamily: "Open Sans, sans-serif" }}
-          >
-            No
-          </MDButton>
-          <MDButton
-            color="primary"
-            onClick={yesAction}
-            style={{ fontFamily: "Open Sans, sans-serif" }}
-          >
-            Yes
-          </MDButton>
-        </MDBox>
-      </ModalFooter>
+          No
+        </MDButton>
+        <MDButton
+          color="primary"
+          onClick={yesAction}
+          style={{ fontFamily: "Open Sans, sans-serif" }}
+        >
+          Yes
+        </MDButton>
+      </MDBox>
     </Modal>
   );
 }
