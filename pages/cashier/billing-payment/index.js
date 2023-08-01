@@ -1278,7 +1278,11 @@ function BillingPayment() {
                                         label="Charge"
                                         placeholder="Type Charge"
                                         value={formValues.charge}
-                                        onValueChange={(val) => {
+                                        onKeyPress={(e) => setFieldValue(
+                                          "charge",
+                                          e.floatValue
+                                        )}
+                                        onBlur={(val) => {
                                           setFieldValue(
                                             "charge",
                                             val.floatValue
