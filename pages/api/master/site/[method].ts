@@ -30,6 +30,9 @@ export default async function handler(
         case "getdropdownclusterbyprojectengine3":
           getDropdownClusterByProjectEngine3(res, body);
           break;
+        case "getdetailmastersite":
+          getDetailMasterSite(res, body);
+          break;
       }
       break;
   }
@@ -151,6 +154,32 @@ async function getDropdownClusterByProjectEngine3(res: any, body: any) {
     // params: params,
   };
   console.log("config----", config);
+  axios
+    .get(url, config)
+    .then((response) =>
+      res.send({
+        result: response.data.result,
+      })
+    )
+    .catch((error) =>
+      res.send({
+        error: error,
+      })
+    );
+}
+
+async function getDetailMasterSite(res: any, body: any) {
+  const { accessToken, params } = body;
+
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/MasterBilling/GetDetailMasterSite`;
+  const config = {
+    headers: {
+      Authorization: "Bearer " + accessToken,
+      "Access-Control-Allow-Origin": "*",
+    },
+    params: params,
+  };
+
   axios
     .get(url, config)
     .then((response) =>
