@@ -1213,6 +1213,12 @@ function BillingPayment() {
                                           formValues.paymentMethod
                                             ?.paymentType != 1
                                         }
+                                        onKeyUp={(e) =>
+                                          setFieldValue(
+                                            "cardNumber",
+                                            e.target.value
+                                          )
+                                        }
                                         placeholder="Type Card Number"
                                         error={
                                           errors.cardNumber &&
@@ -1230,6 +1236,12 @@ function BillingPayment() {
                                         label="Remarks"
                                         name="remarks"
                                         placeholder="Type Remarks"
+                                        onKeyUp={(e) =>
+                                          setFieldValue(
+                                            "remarks",
+                                            e.target.value
+                                          )
+                                        }
                                         error={
                                           errors.remarks && touched.remarks
                                         }
@@ -1278,11 +1290,7 @@ function BillingPayment() {
                                         label="Charge"
                                         placeholder="Type Charge"
                                         value={formValues.charge}
-                                        onKeyPress={(e) => setFieldValue(
-                                          "charge",
-                                          e.floatValue
-                                        )}
-                                        onBlur={(val) => {
+                                        onValueChange={(val) => {
                                           setFieldValue(
                                             "charge",
                                             val.floatValue
