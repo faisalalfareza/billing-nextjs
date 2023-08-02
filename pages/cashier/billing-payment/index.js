@@ -47,6 +47,7 @@ function BillingPayment() {
   const [site, setSite] = useState(null);
   const [first, setFirst] = useState(false);
   const [detailPaymentData, setDetailPaymentData] = useState([]);
+  const [OnkeyAmountPayment, setOnkeyAmountPayment] = useState(false);
 
   const handleSite = siteVal => {
     setSite(siteVal);
@@ -549,10 +550,9 @@ function BillingPayment() {
         .replace(',', '.');
       let b = parseFloat(a);
       setFieldValue('amountPayment', b);
+
+      setOnkeyAmountPayment(true);
       e.preventDefault();
-      // if (formikRef.current) {
-      //   formikRef.current.setFieldValue("amountPayment", b);
-      // }
     }
   };
 
@@ -637,6 +637,8 @@ function BillingPayment() {
   };
 
   const paymentAmountChange = (value, index) => {
+    setOnkeyAmountPayment(false);
+
     let newData = detailPaymentData.slice();
     let a = value.replaceAll('Rp. ', '').replaceAll('.', '').replace(',', '.');
     let valFloat = parseFloat(a);
@@ -644,6 +646,12 @@ function BillingPayment() {
     newData[index].paymentAmount = valFloat;
 
     setDetailPaymentData(newData);
+
+    let total = newData.reduce((acc, o) => acc + parseInt(o.paymentAmount), 0);
+    formValues.amountPayment = total;
+    if (formValues.amountPayment != undefined)
+      setTotalPay(formValues.amountPayment);
+    else setTotalPay(0);
   };
 
   const debouncedChangeHandler = useMemo(() => {
@@ -661,14 +669,16 @@ function BillingPayment() {
     let temp = totalPay;
     newState.map((e, index) => {
       if (index + 1 === newState.length) {
-        e.paymentAmount = temp;
+        if (OnkeyAmountPayment) e.paymentAmount = temp;
       } else {
-        if (temp <= e.balance) {
-          e.paymentAmount = temp;
-          temp = 0;
-        } else if (temp > e.balance) {
-          e.paymentAmount = e.balance;
-          temp -= e.balance;
+        if (OnkeyAmountPayment) {
+          if (temp <= e.balance) {
+            e.paymentAmount = temp;
+            temp = 0;
+          } else if (temp > e.balance) {
+            e.paymentAmount = e.balance;
+            temp -= e.balance;
+          }
         }
       }
     });
@@ -690,7 +700,6 @@ function BillingPayment() {
     let n = Object.assign({}, totalFooter);
     n.payment = tp;
     setTotalFooter(n);
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [detailPaymentData]);
 
@@ -699,18 +708,6 @@ function BillingPayment() {
   };
 
   const onHandleCharge = (val, setFieldValue) => {
-    // let value = val?.target?.value ? val?.target?.value : 0;
-    // let removeSeparator = value.replaceAll('.', '').replace(',', '.');
-    // let toFloat = parseFloat(removeSeparator);
-    // let currency = new Intl.NumberFormat('id-ID', {
-    //   style: 'currency',
-    //   currency: 'IDR',
-    //   currencyDisplay: 'code',
-    // })
-    //   .format(toFloat)
-    //   .replace('IDR', '')
-    //   .trim();
-
     if (val.key == 'Enter' || val.keyCode == 9 || val.type == 'blur') {
       let a = val.target.value
         .replaceAll('Rp. ', '')
@@ -1292,28 +1289,6 @@ function BillingPayment() {
                                       </MDBox>
                                     </Grid>
                                     <Grid item xs={4} marginTop={2}>
-                                      {/* <TextField
-                                        fullWidth
-                                        variant="standard"
-                                        type="text"
-                                        label="Charge"
-                                        placeholder="Type Charge"
-                                        value={formValues.charge}
-                                        onKeyUp={val => {
-                                          onHandleCharge(
-                                            val,
-                                            setFieldValue,
-                                            formValues.charge,
-                                          );
-                                        }}
-                                        onChange={e => {
-                                          onHandleCharge(
-                                            e,
-                                            setFieldValue,
-                                            formValues.charge,
-                                          );
-                                        }}
-                                      /> */}
                                       <NumberInput
                                         required
                                         label="Charge"
@@ -1341,7 +1316,7 @@ function BillingPayment() {
                                         </MDTypography>
                                       </MDBox>
                                     </Grid>
-                                    <Grid item xs={4} marginTop={2}>
+                                    <Grid item xs={4} marginTop={3}>
                                       <TotalDisable
                                         title="Total"
                                         value={totalAc}
