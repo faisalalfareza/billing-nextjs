@@ -499,13 +499,9 @@ function BillingPayment() {
     paymentMethod: Yup.object()
       .required('Payment Method is required.')
       .typeError('Payment Method is required.'),
-    cardNumber: Yup.string().when(['paymentMethod'], {
-      is: paymentMethod =>
-        paymentMethod === {paymentName: 'Credit Card', paymentType: 3} ||
-        paymentMethod === {paymentName: 'Debit Card', paymentType: 2},
-      then: Yup.string().required('Card Number is required.'),
-    }),
-    // cardNumber: Yup.string(),
+    cardNumber: Yup.string()
+      .required('Card Number is required.')
+      .typeError('Card Number is required.'),
     amountPayment: Yup.string()
       .required('Amount Payment is required.')
       .typeError('Amount Payment is required.'),
@@ -730,7 +726,6 @@ function BillingPayment() {
 
     value = isNaN(temp) || temp == '' ? 0 : temp;
     setFieldValue('charge', value);
-    // setCharge(value);
   };
 
   return (
@@ -1226,24 +1221,39 @@ function BillingPayment() {
                                         type="text"
                                         label="Card number"
                                         name="cardNumber"
+                                        onBlur={e =>
+                                          setFieldValue(
+                                            'cardNumber',
+                                            e?.target?.value,
+                                          )
+                                        }
                                         required={
                                           formValues.paymentMethod
                                             ?.paymentType != 1
                                         }
                                         placeholder="Type Card Number"
                                         error={
-                                          errors.cardNumber &&
-                                          touched.cardNumber
+                                          formValues?.paymentMethod
+                                            ?.paymentType != 1 &&
+                                          formValues?.cardNumber == ''
                                         }
                                         helperText={
-                                          checkingSuccessInput(
-                                            formValues.cardNumber,
-                                            errors.cardNumber,
-                                          )
+                                          formValues?.paymentMethod
+                                            ?.paymentType != 1 &&
+                                          formValues?.cardNumber == ''
                                             ? errors.cardNumber
                                             : ''
                                         }
                                       />
+                                      <MDBox mt={0.75}>
+                                        <MDTypography
+                                          component="div"
+                                          variant="caption"
+                                          color="error"
+                                          fontWeight="regular">
+                                          <ErrorMessage name="cardNumber" />
+                                        </MDTypography>
+                                      </MDBox>
                                     </Grid>
                                     <Grid item xs={6}>
                                       <TextField
