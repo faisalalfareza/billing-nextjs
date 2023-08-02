@@ -1263,16 +1263,11 @@ function BillingPayment() {
                                         label="Remarks"
                                         name="remarks"
                                         placeholder="Type Remarks"
-                                        error={
-                                          errors.remarks && touched.remarks
-                                        }
-                                        helperText={
-                                          checkingSuccessInput(
-                                            formValues.remarks,
-                                            errors.remarks,
+                                        onBlur={e =>
+                                          setFieldValue(
+                                            'remarks',
+                                            e?.target?.value,
                                           )
-                                            ? errors.remarks
-                                            : ''
                                         }
                                       />
                                     </Grid>
