@@ -543,17 +543,22 @@ function BillingPayment() {
   }, [formValues]);
 
   const handleAmountPayment = (e, setFieldValue) => {
+    var value = 0;
+    var temp = 0;
     if (e.key == 'Enter' || e.keyCode == 9 || e.type == 'blur') {
+      setOnkeyAmountPayment(true);
+
       let a = e.target.value
         .replaceAll('Rp. ', '')
         .replaceAll('.', '')
         .replace(',', '.');
       let b = parseFloat(a);
-      setFieldValue('amountPayment', b);
 
-      setOnkeyAmountPayment(true);
+      temp = b;
       e.preventDefault();
     }
+    value = isNaN(temp) || temp == '' ? 0 : temp;
+    setFieldValue('amountPayment', value);
   };
 
   const paymentProcess = async (fields, actions) => {
@@ -643,7 +648,8 @@ function BillingPayment() {
     let a = value.replaceAll('Rp. ', '').replaceAll('.', '').replace(',', '.');
     let valFloat = parseFloat(a);
     console.log('----', detailPaymentData, newData, value, index);
-    newData[index].paymentAmount = valFloat;
+    let val = isNaN(valFloat) || valFloat == '' ? 0 : valFloat;
+    newData[index].paymentAmount = val;
 
     setDetailPaymentData(newData);
 
@@ -657,7 +663,7 @@ function BillingPayment() {
   const debouncedChangeHandler = useMemo(() => {
     return debounce(paymentAmountChange, 1000);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [detailPaymentData]);
+  }, [detailPaymentData, formValues]);
 
   useEffect(() => {
     totalChange();
@@ -667,6 +673,7 @@ function BillingPayment() {
   useEffect(() => {
     let newState = [...detailPaymentData];
     let temp = totalPay;
+
     newState.map((e, index) => {
       if (index + 1 === newState.length) {
         if (OnkeyAmountPayment) e.paymentAmount = temp;
@@ -688,7 +695,7 @@ function BillingPayment() {
   }, [totalPay]);
 
   const totalChange = () => {
-    let t = totalPay - charge;
+    let t = totalPay + charge;
     setTotalAc(t);
   };
 
@@ -708,18 +715,22 @@ function BillingPayment() {
   };
 
   const onHandleCharge = (val, setFieldValue) => {
+    var value = 0;
+    var temp = 0;
     if (val.key == 'Enter' || val.keyCode == 9 || val.type == 'blur') {
       let a = val.target.value
         .replaceAll('Rp. ', '')
         .replaceAll('.', '')
         .replace(',', '.');
       let b = parseFloat(a);
-      setFieldValue('charge', b);
 
-      let valCharge = val?.floatValue != undefined ? val?.floatValue : 0;
-      setCharge(valCharge);
+      temp = b;
       val.preventDefault();
     }
+
+    value = isNaN(temp) || temp == '' ? 0 : temp;
+    setFieldValue('charge', value);
+    // setCharge(value);
   };
 
   return (
@@ -1290,7 +1301,6 @@ function BillingPayment() {
                                     </Grid>
                                     <Grid item xs={4} marginTop={2}>
                                       <NumberInput
-                                        required
                                         label="Charge"
                                         placeholder="Type Charge"
                                         value={formValues.charge}
