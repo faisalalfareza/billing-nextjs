@@ -57,6 +57,8 @@ import HandymanIcon from "@mui/icons-material/Handyman";
 import MDAvatar from "../components/MDAvatar";
 import profilePicture from "../assets/images/team-3.jpg";
 import { capitalizeFirstLetter } from "../helpers/utils";
+import GroupsIcon from "@mui/icons-material/Groups";
+import PeopleIcon from "@mui/icons-material/People";
 
 function setMain(informations = getInformation(), profiles = getProfile()) {
   return [
@@ -344,6 +346,24 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
         //   route: "/report/report-customer-complaint",
         //   permission: "Pages.Tenants.GenerateNoSeriFP.List",
         // },
+      ],
+    },
+    {
+      type: "collapse",
+      name: "User Management",
+      nameOnHeader: "User Management",
+      key: "user-management",
+      icon: <GroupsIcon fontSize="medium" />,
+      permission: "Pages.Report",
+      collapse: [
+        {
+          name: "Users",
+          nameOnHeader: "Users",
+          key: "users",
+          route: "/user-management/users",
+          icon: <PeopleIcon fontSize="medium" />,
+          permission: "Pages.Report.DailyReport",
+        },
       ],
     },
   ];
