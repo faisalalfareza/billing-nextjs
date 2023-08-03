@@ -17,8 +17,8 @@ export default async function handler(
           getList(res, body);
           break;
 
-        case "getdetailmasterunititem":
-          getDetailMasterUnitItem(res, body);
+        case "upload":
+          uploadImage(res, body);
           break;
 
         case "getdropdownmastertemplate":
@@ -66,20 +66,19 @@ async function getList(res: any, body: any) {
       })
     );
 }
-async function getDetailMasterUnitItem(res: any, body: any) {
+async function uploadImage(res: any, body: any) {
   const { accessToken, params } = body;
 
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/MasterBilling/GetDetailMasterUnitItem`;
+  const url = `${publicRuntimeConfig.apiUrl}/Temp/Downloads/LogoSite`;
   const config = {
     headers: {
       Authorization: "Bearer " + accessToken,
       "Access-Control-Allow-Origin": "*",
     },
-    params: params,
   };
 
   axios
-    .get(url, config)
+    .post(url, params, config)
     .then((response) =>
       res.send({
         result: response.data.result,

@@ -18,6 +18,7 @@ import MDTypography from "/components/MDTypography";
 import MDButton from "/components/MDButton";
 import FormField from "/pagesComponents/FormField";
 import DataTable from "/layout/Tables/DataTable";
+import Container from "@mui/material/Container";
 import { Block } from "notiflix/build/notiflix-block-aio";
 
 // Data
@@ -25,6 +26,10 @@ import { useCookies } from "react-cookie";
 import { typeNormalization } from "/helpers/utils";
 import { alertService } from "/helpers";
 import NumberInput from "/pagesComponents/dropdown/NumberInput";
+import Header from "../Header";
+import BasicInfo from "../BasicInfo";
+import Roles from "../Roles";
+import Site from "../Site";
 
 function EditDataUsers(props) {
   const { isOpen, params, onModalChanged, site, listBank, listTemplate } =
@@ -42,6 +47,19 @@ function EditDataUsers(props) {
   const [templateInvoiceHeaderId, setTemplateInvoiceHeaderId] = useState(null);
   const formikRef = useRef();
   const [openDetail, setOpenDetail] = useState(false);
+
+  const [tabValue, setTabValue] = useState(0);
+  const [prices, setPrices] = useState(["59", "89", "99"]);
+
+  const handleSetTabValue = (event, newValue) => {
+    setTabValue(newValue);
+
+    if (event.currentTarget.id === "annual") {
+      setPrices(["119", "159", "399"]);
+    } else {
+      setPrices(["59", "89", "99"]);
+    }
+  };
 
   let bankE = listBank.find((e) => e.bankName == params.bank);
   let templateE = listTemplate.find(
@@ -356,13 +374,18 @@ function EditDataUsers(props) {
 
     return (
       <Modal
-        size="lg"
+        size="xl"
         isOpen={isOpen}
         toggle={toggleModal}
         onOpened={openModal}
         onClosed={closeModal}
         className={detailUsersBlockLoadingName}
       >
+        <Header tabValue={tabValue} tabHandler={handleSetTabValue}>
+          {tabValue == 1 && <BasicInfo />}
+          {tabValue == 2 && <Roles />}
+          {tabValue == 3 && <Site />}
+        </Header>
         <MDBox pb={3} pt={6} px={6} lineHeight={1}>
           <Grid container alignItems="center" spacing={3}>
             <Grid item xs={12} md={12}>

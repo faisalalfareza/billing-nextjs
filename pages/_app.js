@@ -55,7 +55,12 @@ import appleIcon from "../assets/images/apple-icon.png";
 import brandWhite from "../assets/images/app-logo-on-dark.png";
 import brandDark from "../assets/images/app-logo-on-light.png";
 
-import { Loading  } from "notiflix/build/notiflix-loading-aio";
+import { Loading } from "notiflix/build/notiflix-loading-aio";
+
+import "primereact/resources/themes/lara-light-indigo/theme.css"; // theme
+import "primereact/resources/primereact.css"; // core css
+import "primeicons/primeicons.css"; // icons
+import "../styles/flags.css";
 
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createCache({ key: "css", prepend: true });
@@ -118,7 +123,9 @@ function Main({ Component, pageProps, routes = setRoutes() }) {
   }, [pathname]);
 
   const [hydrated, setHydrated] = useState(false);
-  useEffect(() => { setHydrated(true) }, []);
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
 
   const brandIcon =
     (transparentSidenav && !darkMode) || whiteSidenav ? brandDark : brandWhite;
@@ -169,7 +176,7 @@ function Main({ Component, pageProps, routes = setRoutes() }) {
   //       {layout === "vr" && <Configurator />}
   //     </ThemeProvider>
   //   </CacheProvider>
-  // ) : 
+  // ) :
   return (
     <ThemeProvider theme={darkMode ? themeDark : theme}>
       <CssBaseline />
@@ -201,20 +208,21 @@ function MyApp({
   const router = useRouter();
 
   useEffect(() => {
-    const handleStart = () => Loading.hourglass({
-      svgColor: "rgba(27, 156, 252,1.0)",
-      backgroundColor: "rgba(0, 0, 0, 0.6)"
-    });
+    const handleStart = () =>
+      Loading.hourglass({
+        svgColor: "rgba(27, 156, 252,1.0)",
+        backgroundColor: "rgba(0, 0, 0, 0.6)",
+      });
     const handleComplete = () => Loading.remove();
 
-    router.events.on('routeChangeStart', handleStart);
-    router.events.on('routeChangeComplete', handleComplete);
-    router.events.on('routeChangeError', handleComplete);
+    router.events.on("routeChangeStart", handleStart);
+    router.events.on("routeChangeComplete", handleComplete);
+    router.events.on("routeChangeError", handleComplete);
 
     return () => {
-      router.events.off('routeChangeStart', handleStart);
-      router.events.off('routeChangeComplete', handleComplete);
-      router.events.off('routeChangeError', handleComplete);
+      router.events.off("routeChangeStart", handleStart);
+      router.events.off("routeChangeComplete", handleComplete);
+      router.events.off("routeChangeError", handleComplete);
     };
   }, [router]);
 
