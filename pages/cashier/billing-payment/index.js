@@ -499,9 +499,12 @@ function BillingPayment() {
     paymentMethod: Yup.object()
       .required('Payment Method is required.')
       .typeError('Payment Method is required.'),
-    cardNumber: Yup.string()
-      .required('Card Number is required.')
-      .typeError('Card Number is required.'),
+    cardNumber: Yup.string().when(['paymentMethod'], {
+      is: paymentMethod =>
+        paymentMethod === {paymentName: 'Credit Card', paymentType: 3} ||
+        paymentMethod === {paymentName: 'Debit Card', paymentType: 2},
+      then: Yup.string().required('Card Number is required.'),
+    }),
     amountPayment: Yup.string()
       .required('Amount Payment is required.')
       .typeError('Amount Payment is required.'),
