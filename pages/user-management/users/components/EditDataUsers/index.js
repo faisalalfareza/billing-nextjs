@@ -48,7 +48,7 @@ function EditDataUsers(props) {
   const formikRef = useRef();
   const [openDetail, setOpenDetail] = useState(false);
 
-  const [tabValue, setTabValue] = useState(0);
+  const [tabValue, setTabValue] = useState(1);
   const [prices, setPrices] = useState(["59", "89", "99"]);
 
   const handleSetTabValue = (event, newValue) => {
@@ -144,16 +144,16 @@ function EditDataUsers(props) {
   };
 
   useEffect(() => {
-    getBank();
-    getTemplateInvoice();
-    if (params) {
-      getDetail();
-    }
+    // getBank();
+    // getTemplateInvoice();
+    // if (params) {
+    //   getDetail();
+    // }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params]);
   useEffect(() => {
-    getBank();
-    getTemplateInvoice();
+    // getBank();
+    // getTemplateInvoice();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -393,7 +393,7 @@ function EditDataUsers(props) {
             </Grid>
           </Grid>
         </MDBox>
-        <Formik
+        {/* <Formik
           innerRef={formikRef}
           initialValues={initialValues}
           validationSchema={schemeValidations}
@@ -671,7 +671,7 @@ function EditDataUsers(props) {
               </Form>
             );
           }}
-        </Formik>
+        </Formik> */}
       </Modal>
     );
   }
