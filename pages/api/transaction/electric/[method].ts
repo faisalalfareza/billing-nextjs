@@ -13,25 +13,23 @@ export default async function handler(
   switch (method) {
     case "POST":
       switch (query.method) {
-        case "getlistmastersite":
+        case "getelectricreadinglist":
           getList(res, body);
           break;
-
-        case "getdropdownproject":
+        case "getdropdownprojectbysiteid":
           getDropdownProject(res, body);
           break;
-
-        case "getdropdownclusterbyproject":
-          getDropdownCluster(res, body);
+        case "prosesupdatedetailelectricreading":
+          update(res, body);
           break;
-        case "creatmastersite":
-          create(res, body);
+        case "exporttoexcelelectricreading":
+          exportExcel(res, body);
           break;
-        case "getdropdownclusterbyprojectengine3":
-          getDropdownClusterByProjectEngine3(res, body);
+        case "getactiveperiod":
+          getActivePeriod(res, body);
           break;
-        case "getdetailmastersite":
-          getDetailMasterSite(res, body);
+        case "uploadexcelelectricreading":
+          uploadExcel(res, body);
           break;
       }
       break;
@@ -41,7 +39,7 @@ export default async function handler(
 async function getList(res: any, body: any) {
   const { accessToken, params } = body;
 
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/MasterBilling/GetListMasterSite`;
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetElectricReadingList`;
   const config = {
     headers: {
       Authorization: "Bearer " + accessToken,
@@ -54,7 +52,7 @@ async function getList(res: any, body: any) {
     .get(url, config)
     .then((response) =>
       res.send({
-        result: response.data.result.items,
+        result: response.data.result,
       })
     )
     .catch((error) =>
@@ -63,35 +61,11 @@ async function getList(res: any, body: any) {
       })
     );
 }
+
 async function getDropdownProject(res: any, body: any) {
   const { accessToken, params } = body;
 
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetDropdownProject`;
-  const config = {
-    headers: {
-      Authorization: "Bearer " + accessToken,
-      "Access-Control-Allow-Origin": "*",
-    },
-  };
-
-  axios
-    .get(url, config)
-    .then((response) =>
-      res.send({
-        result: response.data.result,
-      })
-    )
-    .catch((error) =>
-      res.send({
-        error: error,
-      })
-    );
-}
-
-async function getDropdownCluster(res: any, body: any) {
-  const { accessToken, params } = body;
-
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetDropdownClusterByProject`;
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetDropdownProjectBySiteId`;
   const config = {
     headers: {
       Authorization: "Bearer " + accessToken,
@@ -114,10 +88,10 @@ async function getDropdownCluster(res: any, body: any) {
     );
 }
 
-async function create(res: any, body: any) {
+async function update(res: any, body: any) {
   const { accessToken, params } = body;
 
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/MasterBilling/CreatMasterSite`;
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/ProsesUpdateDetailElectricReading`;
   const config = {
     headers: {
       Authorization: "Bearer " + accessToken,
@@ -138,29 +112,26 @@ async function create(res: any, body: any) {
       });
     });
 }
-async function getDropdownClusterByProjectEngine3(res: any, body: any) {
+
+async function exportExcel(res: any, body: any) {
   const { accessToken, params } = body;
-  // const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetDropdownClusterByProjectEngine3`;
-  const url = `${
-    publicRuntimeConfig.apiUrl
-  }/api/services/app/BillingSystems/GetDropdownClusterByProjectEngine3?ProjectId=${params.ProjectId.join(
-    "&ProjectId="
-  )}`;
+
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/ExportToExcelElectricReading`;
   const config = {
     headers: {
       Authorization: "Bearer " + accessToken,
       "Access-Control-Allow-Origin": "*",
     },
-    // params: params,
+    params: params,
   };
-  console.log("config----", config);
+
   axios
-    .get(url, config)
-    .then((response) =>
+    .post(url, params, config)
+    .then((response) => {
       res.send({
         result: response.data.result,
-      })
-    )
+      });
+    })
     .catch((error) =>
       res.send({
         error: error,
@@ -168,10 +139,10 @@ async function getDropdownClusterByProjectEngine3(res: any, body: any) {
     );
 }
 
-async function getDetailMasterSite(res: any, body: any) {
+async function getActivePeriod(res: any, body: any) {
   const { accessToken, params } = body;
 
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/MasterBilling/GetDetailMasterSite`;
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetActivePeriod`;
   const config = {
     headers: {
       Authorization: "Bearer " + accessToken,
@@ -194,24 +165,27 @@ async function getDetailMasterSite(res: any, body: any) {
     );
 }
 
-function parseParams(params: { [x: string]: any[] }) {
-  const keys = Object.keys(params);
-  let options = "";
+async function uploadExcel(res: any, body: any) {
+  const { accessToken, params } = body;
 
-  keys.forEach((key) => {
-    const isParamTypeObject = typeof params[key] === "object";
-    const isParamTypeArray = isParamTypeObject && params[key].length >= 0;
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/UploadExcelElectricReading`;
+  const config = {
+    headers: {
+      Authorization: "Bearer " + accessToken,
+      "Access-Control-Allow-Origin": "*",
+    },
+  };
 
-    if (!isParamTypeObject) {
-      options += `${key}=${params[key]}&`;
-    }
-
-    if (isParamTypeObject && isParamTypeArray) {
-      params[key].forEach((element) => {
-        options += `${key}=${element}&`;
+  axios
+    .post(url, params, config)
+    .then((response) => {
+      res.send({
+        result: response.data.result,
       });
-    }
-  });
-
-  return options ? options.slice(0, -1) : options;
+    })
+    .catch((error) => {
+      res.send({
+        error: error.response.data,
+      });
+    });
 }

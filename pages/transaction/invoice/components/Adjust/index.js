@@ -36,24 +36,57 @@ export default function Adjust(props) {
       backdrop="false"
       keyboard="true"
       size="lg"
+      sx={{
+        textAlign: "center",
+        fontFamily: "Open Sans, sans-serif",
+      }}
     >
       <ModalBody sx={{ m: 0 }}>
-        <MDBox sx={{ textAlign: "center" }}>
+        <MDBox
+          sx={{
+            textAlign: "center",
+            paddingRight: 5,
+            paddingLeft: 5,
+            paddingTop: 5,
+          }}
+        >
           <MDBox component="img" src={logoQuestion.src} width={"50%"} />
-          <MDTypography variant="h5">Are you sure?</MDTypography>
+          <MDTypography
+            variant="h5"
+            style={{ fontFamily: "Open Sans, sans-serif" }}
+          >
+            Are you sure?
+          </MDTypography>
           <MDTypography variant="body">
             Are you sure want to make another adjustment?
           </MDTypography>
         </MDBox>
       </ModalBody>
-      <ModalFooter>
-        <MDButton color="secondary" onClick={noAction}>
+      <MDBox
+        sx={{
+          justifyContent: "center",
+          fontFamily: "Open Sans, sans-serif",
+          display: "flex",
+          flexWrap: "wrap",
+          alignItems: "center",
+          p: 3,
+        }}
+      >
+        <MDButton
+          color="secondary"
+          onClick={noAction}
+          style={{ marginRight: 7, fontFamily: "Open Sans, sans-serif" }}
+        >
           No
         </MDButton>
-        <MDButton color="primary" onClick={yesAction}>
+        <MDButton
+          color="primary"
+          onClick={yesAction}
+          style={{ fontFamily: "Open Sans, sans-serif" }}
+        >
           Yes
         </MDButton>
-      </ModalFooter>
+      </MDBox>
     </Modal>
   );
 }

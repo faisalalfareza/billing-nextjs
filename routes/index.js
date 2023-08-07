@@ -14,12 +14,10 @@
   inside (nested routes), you need to pass the nested routes inside an array as a value for the `collapse` key.
   8. The `route` key is used to store the route location which is used for the react router.
   9. The `href` key is used to store the external links location.
-  10. The `title` key is only for the item with the type of `title` and its used for the title text on the Sidenav.
+  10. The `title` key is only for the item with the type of `title` and its used for the title text on thne Sidenav.
 */
 
 import React from "react";
-import Cookies from "universal-cookie";
-const cookies = new Cookies();
 
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import Logout from "@mui/icons-material/Logout";
@@ -38,6 +36,7 @@ import FiberManualRecordOutlined from "@mui/icons-material/FiberManualRecordOutl
 
 import MultipleStop from "@mui/icons-material/MultipleStop";
 import WaterDamage from "@mui/icons-material/WaterDamage";
+import ElectricalServicesIcon from "@mui/icons-material/ElectricalServices";
 import Description from "@mui/icons-material/Description";
 import MarkEmailUnreadIcon from "@mui/icons-material/MarkEmailUnread";
 import Book from "@mui/icons-material/Book";
@@ -55,7 +54,7 @@ import HandymanIcon from "@mui/icons-material/Handyman";
 
 import MDAvatar from "../components/MDAvatar";
 import profilePicture from "../assets/images/team-3.jpg";
-import { capitalizeFirstLetter } from "../helpers/utils";
+import { capitalizeFirstLetter, typeNormalization } from "../helpers/utils";
 
 function setMain(informations = getInformation(), profiles = getProfile()) {
   return [
@@ -196,6 +195,14 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           route: "/transaction/water-reading",
           icon: <WaterDamage fontSize="medium" />,
           permission: "Pages.Transaction.WaterReading",
+        },
+        {
+          name: "Electric Reading",
+          nameOnHeader: "Electric Reading",
+          key: "electric-reading",
+          route: "/transaction/electric-reading",
+          icon: <ElectricalServicesIcon fontSize="medium" />,
+          permission: "Pages.Transaction.ElectricReading",
         },
         {
           name: "Invoice",
@@ -408,11 +415,13 @@ export default function setRoutes(
   const filteredMain = setFilteredMain(permissions, main);
   const reformatedMain = setReformatedMain(filteredMain);
 
-  cookies.set("filteredRoutes", reformatedMain, { path: "/" });
+  if (typeof document !== "undefined") {
+    document.cookie = `filteredRoutes=${JSON.stringify(reformatedMain)};path=/`;
+  }
 
   return {
     main,
-    filteredMain,
+    filteredMain, 
     reformatedMain,
   };
 }

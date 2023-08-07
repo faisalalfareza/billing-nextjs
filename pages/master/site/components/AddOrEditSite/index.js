@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Swal from "sweetalert2";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
@@ -27,16 +27,66 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
   let [first, setFirst] = useState(false);
   const [dataProject, setDataProject] = useState([]);
   const [dataCluster, setDataCluster] = useState([]);
+  const [project, setProject] = useState([]);
   const [user, setUser] = useState({});
+  const formikRef = useRef();
 
   useEffect(() => {
     if (!first) {
       getProject();
+      getDetail();
     }
     setFirst(true), (first = true);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
+
+  const getDetail = async (data) => {
+    Block.standard(
+      `.${createSiteBlockLoadingName}`,
+      `Getting Unit Item Detail`
+    );
+
+    let response = await fetch("/api/master/site/getdetailmastersite", {
+      method: "POST",
+      body: JSON.stringify({
+        accessToken: accessToken,
+        params: {
+          SiteID: params.siteId,
+        },
+      }),
+    });
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
+
+    if (response.error)
+      alertService.error({ title: "Error", text: response.error.message });
+    else {
+      let res = response.result;
+      let clusterList = res.clusterDataList.map((e) => {
+        return e.clusterId;
+      });
+      let projectList = res.projectDataList.map((e) => {
+        return e.projectId;
+      });
+      setProject(projectList);
+      if (formikRef.current) {
+        formikRef.current.setFieldValue("name", res.siteName);
+        formikRef.current.setFieldValue("code", res.siteCode);
+        formikRef.current.setFieldValue("address", res.siteAddress);
+        formikRef.current.setFieldValue("id", res.siteId);
+        formikRef.current.setFieldValue("email", res.email);
+        formikRef.current.setFieldValue("phone", res.officePhone);
+        formikRef.current.setFieldValue("handphone", res.handPhone);
+        formikRef.current.setFieldValue("project", res.projectDataList);
+        formikRef.current.setFieldValue("cluster", res.clusterDataList);
+        onProjectChange(res.projectDataList);
+      }
+      console.log(formikRef.current);
+    }
+
+    Block.remove(`.${createSiteBlockLoadingName}`);
+  };
 
   const projectBlockLoadingName = "block-project";
   const getProject = async () => {
@@ -66,7 +116,6 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
   const onProjectChange = async (val) => {
     Block.dots(`.${clusterBlockLoadingName}`);
     let listProject = [];
-    console.log(val);
     if (val.length > 0) {
       val.map((e) => {
         listProject.push(e.projectId);
@@ -206,6 +255,7 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
     return (
       <Modal isOpen={isOpen} className={createSiteBlockLoadingName}>
         <Formik
+          innerRef={formikRef}
           initialValues={initialValues}
           validationSchema={schemeValidations}
           onSubmit={submitForm}
@@ -248,7 +298,7 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
                 <ModalBody>
                   <MDBox pb={3} px={3}>
                     <Grid container spacing={3}>
-                      {/* <Grid item xs={12} sm={12}>
+                      <Grid item xs={12} sm={12}>
                         <FormField
                           type="text"
                           required
@@ -345,7 +395,7 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
                           key="project-ddr"
                           component={Autocomplete}
                           isOptionEqualToValue={(option, value) =>
-                            option.projectId === value.projectId
+                            option.projectId == value.projectId
                           }
                           options={dataProject}
                           getOptionLabel={(option) =>
@@ -388,7 +438,7 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
                             option.clusterCode + " - " + option.clusterName
                           }
                           isOptionEqualToValue={(option, value) =>
-                            option.clusterId === value.clusterId
+                            option.clusterId == value.clusterId
                           }
                           key="cluster-ddr"
                           onChange={(e, value) => {
@@ -415,7 +465,7 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
                             />
                           )}
                         />
-                      </Grid> */}
+                      </Grid>
                       {/* {params && (
                         <Grid item xs={12} sm={12}>
                           <FormGroup>
