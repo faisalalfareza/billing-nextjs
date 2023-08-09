@@ -21,8 +21,8 @@ export default async function handler(
           uploadImage(res, body);
           break;
 
-        case "getdropdownmastertemplate":
-          getDropdownMasterTemplate(res, body);
+        case "getroles":
+          getRoles(res, body);
           break;
         case "uploadexcelnewunititem":
           create(res, body);
@@ -62,7 +62,7 @@ async function getList(res: any, body: any) {
     )
     .catch((error) =>
       res.send({
-        error: error,
+        error: error.response.data,
       })
     );
 }
@@ -91,10 +91,10 @@ async function uploadImage(res: any, body: any) {
     );
 }
 
-async function getDropdownMasterTemplate(res: any, body: any) {
+async function getRoles(res: any, body: any) {
   const { accessToken, params } = body;
 
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/MasterBilling/GetDropdownMasterTemplate`;
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/User/GetRoles`;
   const config = {
     headers: {
       Authorization: "Bearer " + accessToken,

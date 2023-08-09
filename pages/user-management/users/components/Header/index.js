@@ -28,6 +28,7 @@ import MDBox from "/components/MDBox";
 import MDTypography from "/components/MDTypography";
 
 function Header({ tabValue, tabHandler, children }) {
+  console.log("children: " + tabValue);
   return (
     <>
       <Grid container sx={{ px: 6, my: 8 }}>
@@ -36,7 +37,7 @@ function Header({ tabValue, tabHandler, children }) {
             <AppBar position="static">
               <Tabs value={tabValue} onChange={tabHandler}>
                 <Tab
-                  value="1"
+                  value={0}
                   id="basicInfo"
                   label={
                     <MDBox py={0.5} px={2} color="inherit">
@@ -46,7 +47,7 @@ function Header({ tabValue, tabHandler, children }) {
                 />
                 <Tab
                   id="roles"
-                  value="2"
+                  value={1}
                   label={
                     <MDBox py={0.5} px={2} color="inherit">
                       Roles
@@ -55,7 +56,7 @@ function Header({ tabValue, tabHandler, children }) {
                 />
                 <Tab
                   id="site"
-                  value="3"
+                  value={2}
                   label={
                     <MDBox py={0.5} px={2} color="inherit">
                       Site

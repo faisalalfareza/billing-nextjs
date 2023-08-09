@@ -204,6 +204,11 @@ export default function Users() {
     setOpenEdit(true);
   };
 
+  const openModalAdd = (record) => {
+    setModalParams(undefined);
+    setOpenEdit(true);
+  };
+
   const handleSite = (siteVal) => {
     setSite(siteVal);
     localStorage.setItem("site", JSON.stringify(siteVal));
@@ -298,7 +303,7 @@ export default function Users() {
                 ml={1}
                 variant="gradient"
                 color="primary"
-                onClick={handleOpenUpload}
+                onClick={openModalAdd}
               >
                 <Icon>add</Icon>&nbsp; Add New Users
               </MDButton>

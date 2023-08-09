@@ -354,7 +354,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
       nameOnHeader: "User Management",
       key: "user-management",
       icon: <GroupsIcon fontSize="medium" />,
-      permission: "Pages.Report",
+      permission: "Pages.Dashboard",
       collapse: [
         {
           name: "Users",
@@ -362,7 +362,7 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
           key: "users",
           route: "/user-management/users",
           icon: <PeopleIcon fontSize="medium" />,
-          permission: "Pages.Report.DailyReport",
+          permission: "Pages.Dashboard",
         },
       ],
     },
