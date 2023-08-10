@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import Swal from "sweetalert2";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
@@ -80,9 +80,10 @@ function EditDataUsers(props) {
     props;
   const [modalOpen, setModalOpen] = useState(true);
   const [{ accessToken, encryptedAccessToken }] = useCookies();
-  const formikRef = useRef();
   const [openDetail, setOpenDetail] = useState(false);
   const [tabValue, setTabValue] = useState(0);
+  const [roles, setRoles] = useState([]);
+  const [sites, setSites] = useState([]);
   const { formId, formField } = form;
 
   const handleSetTabValue = (event, newValue) => {
@@ -98,7 +99,7 @@ function EditDataUsers(props) {
 
   const detailUsersBlockLoadingName = "block-detail-user";
   const submitForm = async (values, actions) => {
-    await sleep(1000);
+    // await sleep(1000);
 
     // eslint-disable-next-line no-alert
     alert(JSON.stringify(values, null, 2));
@@ -108,12 +109,17 @@ function EditDataUsers(props) {
   };
 
   const handleSubmit = (values, actions) => {
-    if (isLastStep) {
-      submitForm(values, actions);
-    } else {
-      actions.setTouched({});
-      actions.setSubmitting(false);
-    }
+    // if (isLastStep) {
+    submitForm(values, actions);
+    // } else {
+    //   actions.setTouched({});
+    //   actions.setSubmitting(false);
+    // }
+  };
+
+  const handleRoles = (rolesVal) => {
+    setRoles(rolesVal);
+    console.log("roles", rolesVal);
   };
 
   const handleDetail = () => {
@@ -125,7 +131,7 @@ function EditDataUsers(props) {
       case 0:
         return <BasicInfo formData={formData} />;
       case 1:
-        return <Roles formData={formData} />;
+        return <Roles formData={formData} onSelectRoles={handleRoles} />;
       case 2:
         return <Site formData={formData} />;
       default:
@@ -167,47 +173,48 @@ function EditDataUsers(props) {
             validationSchema={validations}
             onSubmit={handleSubmit}
           >
-            {({ values, errors, touched, isSubmitting }) => (
+            {({ values, errors, touched, isSubmitting, setFieldValue }) => (
               <Form id={formId} autoComplete="off">
-                <Card sx={{ height: "100%" }}>
-                  <MDBox p={3}>
-                    <MDBox>
-                      {getStepContent(tabValue, {
-                        values,
-                        touched,
-                        formField,
-                        errors,
-                      })}
-                      <MDBox
-                        mt={2}
-                        width="100%"
-                        display="flex"
-                        justifyContent="space-between"
+                <MDBox sx={{ height: "100%" }}>
+                  <MDBox>
+                    {getStepContent(tabValue, {
+                      values,
+                      touched,
+                      formField,
+                      errors,
+                      setFieldValue,
+                    })}
+                    <MDBox
+                      mt={2}
+                      display="flex"
+                      justifyContent="flex-end"
+                      flexDirection={{ xs: "column", sm: "row" }}
+                    >
+                      <MDButton
+                        variant="outlined"
+                        color="secondary"
+                        onClick={closeModal}
                       >
+                        Cancel
+                      </MDButton>
+                      <MDBox ml={{ xs: 0, sm: 1 }} mt={{ xs: 1, sm: 0 }}>
                         <MDButton
-                          disabled={isSubmitting}
                           type="submit"
                           variant="gradient"
-                          color="dark"
+                          color="primary"
+                          sx={{ height: "100%" }}
+                          disabled={isSubmitting}
+                          // disabled={!isValifForm() || isLoading}
                         >
-                          Save
+                          {/* {isLoading ? "Saving.." : "Save"} */} Save
                         </MDButton>
                       </MDBox>
                     </MDBox>
                   </MDBox>
-                </Card>
+                </MDBox>
               </Form>
             )}
           </Formik>
-          {/* <CustomTabPanel value={tabValue} index={0}>
-            <BasicInfo />
-          </CustomTabPanel>
-          <CustomTabPanel value={tabValue} index={1}>
-            Item Two
-          </CustomTabPanel>
-          <CustomTabPanel value={tabValue} index={2}>
-            Item Three
-          </CustomTabPanel> */}
         </MDBox>
       </Modal>
     );

@@ -26,6 +26,9 @@ const {
     repeatPassword,
     roles,
     site,
+    random,
+    lockout,
+    active,
   },
 } = checkout;
 
@@ -37,8 +40,11 @@ const initialValues = {
   [phoneNumber.name]: "",
   [password.name]: "",
   [repeatPassword.name]: "",
-  [roles.name]: "",
-  [site.name]: "",
+  [roles.name]: [],
+  [site.name]: [],
+  [random.name]: true,
+  [active.name]: true,
+  [lockout.name]: true,
 };
 
 export default initialValues;

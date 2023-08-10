@@ -64,10 +64,24 @@ const form = {
     roles: {
       name: "roles",
       label: "Roles",
+      errorMsg: "Roles is required.",
     },
     site: {
       name: "site",
       label: "Site",
+      errorMsg: "Site is required.",
+    },
+    random: {
+      name: "random",
+      label: "Random Password",
+    },
+    active: {
+      name: "active",
+      label: "Active",
+    },
+    lockout: {
+      name: "lockout",
+      label: "Lockout",
     },
   },
 };

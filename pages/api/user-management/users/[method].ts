@@ -24,6 +24,9 @@ export default async function handler(
         case "getroles":
           getRoles(res, body);
           break;
+        case "getlistmastersite":
+          getListMasterSite(res, body);
+          break;
         case "uploadexcelnewunititem":
           create(res, body);
           break;
@@ -94,7 +97,7 @@ async function uploadImage(res: any, body: any) {
 async function getRoles(res: any, body: any) {
   const { accessToken, params } = body;
 
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/User/GetRoles`;
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/Role/GetRoles`;
   const config = {
     headers: {
       Authorization: "Bearer " + accessToken,
@@ -108,6 +111,32 @@ async function getRoles(res: any, body: any) {
     .then((response) =>
       res.send({
         result: response.data.result,
+      })
+    )
+    .catch((error) =>
+      res.send({
+        error: error.response.data,
+      })
+    );
+}
+
+async function getListMasterSite(res: any, body: any) {
+  const { accessToken, params } = body;
+
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/MasterBilling/GetListMasterSite`;
+  const config = {
+    headers: {
+      Authorization: "Bearer " + accessToken,
+      "Access-Control-Allow-Origin": "*",
+    },
+    params: params,
+  };
+
+  axios
+    .get(url, config)
+    .then((response) =>
+      res.send({
+        result: response.data.result.items,
       })
     )
     .catch((error) =>

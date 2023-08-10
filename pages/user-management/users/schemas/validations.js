@@ -25,6 +25,11 @@ const {
     password,
     repeatPassword,
     phoneNumber,
+    active,
+    lockout,
+    random,
+    roles,
+    site,
   },
 } = checkout;
 
@@ -32,12 +37,8 @@ const validations = Yup.object().shape({
   [nama.name]: Yup.string().required(nama.errorMsg),
   [surName.name]: Yup.string().required(surName.errorMsg),
   [email.name]: Yup.string().required(email.errorMsg).email(email.invalidMsg),
-  [userName.name]: Yup.string()
-    .required(userName.errorMsg)
-    .email(userName.invalidMsg),
-  [phoneNumber.name]: Yup.string()
-    .required(phoneNumber.errorMsg)
-    .email(phoneNumber.invalidMsg),
+  [userName.name]: Yup.string().required(userName.errorMsg),
+  [phoneNumber.name]: Yup.string().required(phoneNumber.errorMsg),
   [password.name]: Yup.string()
     .required(password.errorMsg)
     .min(6, password.invalidMsg),

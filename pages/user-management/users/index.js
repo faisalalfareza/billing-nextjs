@@ -158,7 +158,10 @@ export default function Users() {
     response = typeNormalization(await response.json());
 
     if (response.error)
-      alertService.error({ title: "Error", text: response.error.message });
+      alertService.error({
+        title: "Error",
+        text: response.error.error.message,
+      });
     else {
       let data = response.result;
       const list = [];

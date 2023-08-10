@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useState, useEffect } from "react";
 import Box from "@mui/material/Box";
 import FormLabel from "@mui/material/FormLabel";
 import FormControl from "@mui/material/FormControl";
@@ -6,140 +6,105 @@ import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormHelperText from "@mui/material/FormHelperText";
 import Checkbox from "@mui/material/Checkbox";
+import { Block } from "notiflix/build/notiflix-block-aio";
+import { typeNormalization, capitalizeFirstLetter } from "/helpers/utils";
+import { alertService } from "/helpers";
+import { useCookies } from "react-cookie";
+import MDBox from "components/MDBox";
+import Grid from "@mui/material/Grid";
+import MDTypography from "/components/MDTypography";
+import { Card } from "@mui/material";
 
-export default function Roles(props) {
-  const [state, setState] = React.useState({
-    gilad: true,
-    jason: false,
-    antoine: false,
-  });
+export default function Roles({ formData, onSelectRoles }) {
+  const [{ accessToken, encryptedAccessToken }] = useCookies();
+  const [loading, setLoading] = useState(false);
+  const [listRole, setListRoles] = useState([]);
+  const { formField, values, errors, touched, setFieldValue } = formData;
+  const { roles } = formField;
+  const { roles: rolesV } = values;
+  const [selectedRoles, setSelectedRoles] = useState(rolesV);
 
-  const handleChange = (event) => {
-    setState({
-      ...state,
-      [event.target.name]: event.target.checked,
+  useEffect(() => {
+    fetchData();
+  }, []);
+  useEffect(() => {
+    // const result = listRole.filter(role => selectedRoles.includes(role.id));
+    setFieldValue("roles", selectedRoles);
+  }, [selectedRoles]);
+  const error = selectedRoles.filter((v) => v).length < 1;
+
+  const rolesBlockLoadingName = "block-roles";
+  const fetchData = async (subs) => {
+    Block.standard(`.${rolesBlockLoadingName}`, `Getting Roles`),
+      setLoading(true);
+    let response = await fetch("/api/user-management/users/getroles", {
+      method: "POST",
+      body: JSON.stringify({
+        accessToken: accessToken,
+      }),
     });
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
+    if (response.error)
+      alertService.error({ title: "Error", text: response.error.message });
+    else {
+      let data = response.result.items;
+      setListRoles(data);
+    }
+    Block.remove(`.${rolesBlockLoadingName}`), setLoading(false);
   };
 
-  const { gilad, jason, antoine } = state;
-  const error = [gilad, jason, antoine].filter((v) => v).length !== 2;
-
-  const fetchData = async (data) => {
-    // Block.standard(`.${usersBlockLoadingName}`, `Getting Users Data`),
-    //   setLoading(true);
-    // const { scheme, keywords, recordsPerPage, skipCount } = customerRequest;
-    // let response = await fetch("/api/user-management/users/getall", {
-    //   method: "POST",
-    //   body: JSON.stringify({
-    //     accessToken: accessToken,
-    //     params: {
-    //       SiteId: site?.siteId,
-    //       MaxResultCount: recordsPerPage,
-    //       SkipCount: skipCount,
-    //       Search: keywords,
-    //     },
-    //   }),
-    // });
-    // if (!response.ok) throw new Error(`Error: ${response.status}`);
-    // response = typeNormalization(await response.json());
-    // if (response.error)
-    //   alertService.error({ title: "Error", text: response.error.message });
-    // else {
-    //   let data = response.result;
-    //   const list = [];
-    //   data.items.map((e, i) => {
-    //     list.push({
-    //       no: skipCount + i + 1,
-    //       userName: e.userName,
-    //       name: e.name,
-    //       surname: e.surname,
-    //       roles: e.roleNames.join(", "),
-    //       email: e.emailAddress,
-    //       bank: e.bank,
-    //       isActive: e.isActive,
-    //       lastLogin: e.lastLoginTime
-    //         ? dayjs(e.lastLoginTime).format("DD MMMM YYYY")
-    //         : "-",
-    //       createDate: e.creationTime
-    //         ? dayjs(e.creationTime).format("DD MMMM YYYY")
-    //         : "-",
-    //       action: e,
-    //     });
-    //   });
-    //   setCustomerResponse((prevState) => ({
-    //     ...prevState,
-    //     rowData: list,
-    //     totalRows: data.totalCount,
-    //     totalPages: Math.ceil(data.totalCount / customerRequest.recordsPerPage),
-    //   }));
-    // }
-    // Block.remove(`.${usersBlockLoadingName}`), setLoading(false);
+  const onCategoryChange = (e) => {
+    const { id, checked } = e.target;
+    console.log(`onCategoryChange`, e.target);
+    setSelectedRoles([...selectedRoles, +id]);
+    if (!checked) {
+      setSelectedRoles(selectedRoles.filter((item) => item !== +id));
+    }
   };
 
   return (
-    <Box sx={{ display: "flex" }}>
-      <FormControl sx={{ m: 3 }} component="fieldset" variant="standard">
-        <FormLabel component="legend">Assign responsibility</FormLabel>
-        <FormGroup>
-          <FormControlLabel
-            control={
-              <Checkbox checked={gilad} onChange={handleChange} name="gilad" />
-            }
-            label="Gilad Gray"
-          />
-          <FormControlLabel
-            control={
-              <Checkbox checked={jason} onChange={handleChange} name="jason" />
-            }
-            label="Jason Killian"
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={antoine}
-                onChange={handleChange}
-                name="antoine"
-              />
-            }
-            label="Antoine Llorca"
-          />
-        </FormGroup>
-        <FormHelperText>Be careful</FormHelperText>
-      </FormControl>
-      <FormControl
-        required
-        error={error}
-        component="fieldset"
-        sx={{ m: 3 }}
-        variant="standard"
-      >
-        <FormLabel component="legend">Pick two</FormLabel>
-        <FormGroup>
-          <FormControlLabel
-            control={
-              <Checkbox checked={gilad} onChange={handleChange} name="gilad" />
-            }
-            label="Gilad Gray"
-          />
-          <FormControlLabel
-            control={
-              <Checkbox checked={jason} onChange={handleChange} name="jason" />
-            }
-            label="Jason Killian"
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={antoine}
-                onChange={handleChange}
-                name="antoine"
-              />
-            }
-            label="Antoine Llorca"
-          />
-        </FormGroup>
-        <FormHelperText>You can display an error</FormHelperText>
-      </FormControl>
-    </Box>
+    <Card sx={{ p: 2, width: "100%", mt: 2 }}>
+      <Grid container alignItems="center" spacing={2}>
+        <Grid item xs={12}>
+          <MDBox>
+            <MDTypography variant="body">Create New Users</MDTypography>
+            <MDTypography variant="caption" ml={2}>
+              - Let&prime;s start with the basic information
+            </MDTypography>
+          </MDBox>
+        </Grid>
+        <FormControl
+          required
+          error={error}
+          component="fieldset"
+          sx={{ m: 3 }}
+          variant="standard"
+          name={roles.name}
+          value={rolesV}
+        >
+          <FormGroup>
+            {listRole.map((e, i) => {
+              return (
+                <FormControlLabel
+                  key={i}
+                  control={
+                    <Checkbox
+                      id={e.id.toString()}
+                      name={e.name}
+                      value={e}
+                      onChange={onCategoryChange}
+                      checked={selectedRoles.includes(e.id)}
+                    />
+                  }
+                  label={e.name}
+                />
+              );
+            })}
+          </FormGroup>
+          <FormHelperText>Choose minimal 1 role</FormHelperText>
+        </FormControl>
+      </Grid>
+    </Card>
   );
 }
