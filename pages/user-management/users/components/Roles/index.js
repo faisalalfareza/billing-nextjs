@@ -46,7 +46,10 @@ export default function Roles({ formData, onSelectRoles }) {
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
     if (response.error)
-      alertService.error({ title: "Error", text: response.error.message });
+      alertService.error({
+        title: "Error",
+        text: response.error.error.message,
+      });
     else {
       let data = response.result.items;
       setListRoles(data);
