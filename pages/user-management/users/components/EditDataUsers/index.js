@@ -30,7 +30,7 @@ import NumberInput from "/pagesComponents/dropdown/NumberInput";
 import Header from "../Header";
 import BasicInfo from "../BasicInfo";
 import Roles from "../Roles";
-import Site from "../Site";
+import Sites from "../Sites";
 
 import { Tabs, Card } from "@mui/material";
 import Tab from "@mui/material/Tab";
@@ -80,10 +80,8 @@ function EditDataUsers(props) {
     props;
   const [modalOpen, setModalOpen] = useState(true);
   const [{ accessToken, encryptedAccessToken }] = useCookies();
-  const [openDetail, setOpenDetail] = useState(false);
   const [tabValue, setTabValue] = useState(0);
-  const [roles, setRoles] = useState([]);
-  const [sites, setSites] = useState([]);
+  const [loading, setLoading] = useState(false);
   const { formId, formField } = form;
 
   const handleSetTabValue = (event, newValue) => {
@@ -97,33 +95,59 @@ function EditDataUsers(props) {
     setTimeout(() => onModalChanged(isChanged), 0);
   };
 
-  const detailUsersBlockLoadingName = "block-detail-user";
-  const submitForm = async (values, actions) => {
-    // await sleep(1000);
-
-    // eslint-disable-next-line no-alert
-    alert(JSON.stringify(values, null, 2));
-
-    actions.setSubmitting(false);
-    actions.resetForm();
-  };
-
   const handleSubmit = (values, actions) => {
-    // if (isLastStep) {
-    submitForm(values, actions);
-    // } else {
-    //   actions.setTouched({});
-    //   actions.setSubmitting(false);
-    // }
+    createUser(values, actions);
   };
 
-  const handleRoles = (rolesVal) => {
-    setRoles(rolesVal);
-    console.log("roles", rolesVal);
-  };
+  const createUserBlockLoadingName = "block-create-user";
+  const createUser = async (values, actions) => {
+    Block.standard(`.${createUserBlockLoadingName}`, `Creating User`),
+      setLoading(true);
+    const body = {
+      userName: values.userName,
+      name: values.nama,
+      surname: values.surName,
+      emailAddress: values.email,
+      phoneNumber: +values.phoneNumber,
+      siteId: values.sites,
+      photoProfile: values.photoProfile,
+      isActive: values.active,
+      roleNames: values.roles,
+      password: values.password,
+    };
 
-  const handleDetail = () => {
-    setOpenDetail(!openDetail);
+    let response = await fetch(
+      "/api/user-management/users/prosescreatenewuser",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          accessToken: accessToken,
+          params: body,
+        }),
+      }
+    );
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
+
+    if (response.error) {
+      let err = response.error.error;
+      alertService.error({
+        text: err.details,
+        title: err.message,
+      });
+      setLoading(false);
+    } else {
+      alertService.success({
+        text: "User has been successfully created",
+        title: "Success",
+      });
+      closeModal(true);
+
+      actions.resetForm();
+    }
+    actions.setSubmitting(false);
+
+    Block.remove(`.${createUserBlockLoadingName}`), setLoading(false);
   };
 
   function getStepContent(stepIndex, formData) {
@@ -131,9 +155,9 @@ function EditDataUsers(props) {
       case 0:
         return <BasicInfo formData={formData} />;
       case 1:
-        return <Roles formData={formData} onSelectRoles={handleRoles} />;
+        return <Roles formData={formData} />;
       case 2:
-        return <Site formData={formData} />;
+        return <Sites formData={formData} />;
       default:
         return null;
     }
@@ -147,7 +171,7 @@ function EditDataUsers(props) {
         toggle={toggleModal}
         onOpened={openModal}
         onClosed={closeModal}
-        className={detailUsersBlockLoadingName}
+        className={createUserBlockLoadingName}
       >
         <MDBox
           sx={{ width: "100%", bgcolor: "background.paper" }}
@@ -173,7 +197,16 @@ function EditDataUsers(props) {
             validationSchema={validations}
             onSubmit={handleSubmit}
           >
-            {({ values, errors, touched, isSubmitting, setFieldValue }) => (
+            {({
+              values,
+              errors,
+              touched,
+              isSubmitting,
+              setFieldValue,
+              setFieldTouched,
+              isValid,
+              dirty,
+            }) => (
               <Form id={formId} autoComplete="off">
                 <MDBox sx={{ height: "100%" }}>
                   <MDBox>
@@ -183,6 +216,7 @@ function EditDataUsers(props) {
                       formField,
                       errors,
                       setFieldValue,
+                      setFieldTouched,
                     })}
                     <MDBox
                       mt={2}
@@ -203,10 +237,11 @@ function EditDataUsers(props) {
                           variant="gradient"
                           color="primary"
                           sx={{ height: "100%" }}
-                          disabled={isSubmitting}
-                          // disabled={!isValifForm() || isLoading}
+                          disabled={
+                            !isValid || !dirty || loading || isSubmitting
+                          }
                         >
-                          {/* {isLoading ? "Saving.." : "Save"} */} Save
+                          {loading ? "Saving.." : "Save"}
                         </MDButton>
                       </MDBox>
                     </MDBox>

@@ -21,18 +21,21 @@ const form = {
       label: "Name",
       type: "text",
       errorMsg: "Name is required.",
+      required: true,
     },
     surName: {
       name: "surName",
       label: "Surname",
       type: "text",
       errorMsg: "Surname is required.",
+      required: true,
     },
     userName: {
       name: "userName",
       label: "UserName",
       type: "text",
       errorMsg: "Surname is required.",
+      required: true,
     },
     email: {
       name: "email",
@@ -40,12 +43,14 @@ const form = {
       type: "email",
       errorMsg: "Email address is required.",
       invalidMsg: "Your email address is invalid",
+      required: true,
     },
     phoneNumber: {
       name: "phoneNumber",
       label: "Phone Number",
       type: "tel",
       errorMsg: "Phone Number is required.",
+      required: true,
     },
     password: {
       name: "password",
@@ -65,11 +70,13 @@ const form = {
       name: "roles",
       label: "Roles",
       errorMsg: "Roles is required.",
+      required: true,
     },
-    site: {
-      name: "site",
+    sites: {
+      name: "sites",
       label: "Site",
       errorMsg: "Site is required.",
+      required: true,
     },
     random: {
       name: "random",
@@ -82,6 +89,10 @@ const form = {
     lockout: {
       name: "lockout",
       label: "Lockout",
+    },
+    photoProfile: {
+      name: "photoProfile",
+      label: "Photo Profile",
     },
   },
 };

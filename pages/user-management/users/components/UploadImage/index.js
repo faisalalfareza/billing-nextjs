@@ -7,11 +7,19 @@ import { Tooltip } from "primereact/tooltip";
 import { Tag } from "primereact/tag";
 import { useCookies } from "react-cookie";
 import { alertService } from "/helpers";
+import getConfig from "next/config";
 
-export default function UploadImage() {
+export default function UploadImage(props) {
+  const { max_file_size, pictureUrl, type, url, onSelectImage } = props;
+  const { publicRuntimeConfig } = getConfig();
+  let megaByte = max_file_size ? max_file_size / 1048576 : 0;
+  let urlC = url
+    ? publicRuntimeConfig.apiUrl + "/api/services/app/MasterBilling/" + url
+    : "";
   const [{ accessToken, encryptedAccessToken }] = useCookies();
   const toast = useRef(null);
   const [totalSize, setTotalSize] = useState(0);
+  const [imageTemp, setImageTemp] = useState("");
   const fileUploadRef = useRef(null);
 
   const onTemplateSelect = (e) => {
@@ -36,11 +44,16 @@ export default function UploadImage() {
       console.log("xhr", e.xhr.response);
       let response = JSON.parse(e.xhr.response);
       if (response.success) {
+        let urlTemp =
+          publicRuntimeConfig.apiUrl + "/" + pictureUrl + "/" + response.result;
+        onSelectImage(urlTemp);
+        setImageTemp(urlTemp);
       } else {
         alertService.error({ title: "Error", text: response.error.message });
       }
     }
     setTotalSize(_totalSize);
+
     toast.current.show({
       severity: "info",
       summary: "Success",
@@ -78,7 +91,9 @@ export default function UploadImage() {
         {uploadButton}
         {cancelButton}
         <div className="flex align-items-center gap-3 ml-auto">
-          <span>{formatedValue} / 1 MB</span>
+          <span>
+            {formatedValue} / {megaByte} MB
+          </span>
           <ProgressBar
             value={value}
             showValue={false}
@@ -122,21 +137,32 @@ export default function UploadImage() {
   const emptyTemplate = () => {
     return (
       <div className="flex align-items-center flex-column">
-        <i
-          className="pi pi-image mt-3 p-5"
-          style={{
-            fontSize: "5em",
-            borderRadius: "50%",
-            backgroundColor: "var(--surface-b)",
-            color: "var(--surface-d)",
-          }}
-        ></i>
-        <span
-          style={{ fontSize: "1.2em", color: "var(--text-color-secondary)" }}
-          className="my-5"
-        >
-          Drag and Drop Image Here
-        </span>
+        {imageTemp == "" && (
+          <>
+            <i
+              className="pi pi-image mt-3 p-5"
+              style={{
+                fontSize: "5em",
+                borderRadius: "50%",
+                backgroundColor: "var(--surface-b)",
+                color: "var(--surface-d)",
+              }}
+            ></i>
+            <span
+              style={{
+                fontSize: "1.2em",
+                color: "var(--text-color-secondary)",
+              }}
+              className="my-5"
+            >
+              <br />
+              Drag and Drop Image Here
+            </span>
+          </>
+        )}
+        {imageTemp != "" && (
+          <img role="presentation" src={imageTemp} width={100} />
+        )}
       </div>
     );
   };
@@ -173,9 +199,6 @@ export default function UploadImage() {
   };
 
   const onTemplateBeforeSend = (e) => {
-    console.log("onTemplateBeforeSend", e);
-    let at =
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjIiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiYWRtaW4iLCJBc3BOZXQuSWRlbnRpdHkuU2VjdXJpdHlTdGFtcCI6IjliOGI4ODA3LTVmNTEtNDg1OC1hMjllLTU1OTUwNTNjMThmMCIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6WyIwNDg0Yzg0MmVkODM0MTU0YjM0YzRjZmUyNjFjY2QxOSIsIjIyYWM4ZmEwMDI0NDQzOWQ4NmQwMjM0ZDFmOWFmYzA5IiwiNmM4MjI4ZTFiMjA1NDM1YThmZTY0MTIzMTY2NGVlNzYiLCJhY2RkMDEzNjA3ZjA0ZGNlODgxMGY5MTBhYWRmOGJkMSIsImI5NDYzMTM4OThmNzQxYmFiNjU1YTUyYjhlYmQwNTgyIiwiMTFiOGUzOTlhZmQxNGQwNjlmNDJmYWIwZjJmMmM1ZDQiLCJBZG1pbiIsIjM3YzBhZWUzNTY1ODQyMDNhYTQxZTc2MzhhNWNiNDFiIiwiMTQxYjFmYzcyMzEyNGI0MWEwMGI4YjVmNGExNDlkMDciXSwiaHR0cDovL3d3dy5hc3BuZXRib2lsZXJwbGF0ZS5jb20vaWRlbnRpdHkvY2xhaW1zL3RlbmFudElkIjoiMSIsInN1YiI6IjIiLCJqdGkiOiI2OTlkMjk1YS1jMGNlLTQ4ZGQtOTI0Ny00ZDYzYjgwNGJkNTgiLCJpYXQiOjE2OTExMzQ0ODUsIm5iZiI6MTY5MTEzNDQ4NSwiZXhwIjoxNjkxMjIwODg1LCJpc3MiOiJEZW1vIiwiYXVkIjoiRGVtbyJ9.HXCh3iXut6Xm5vM9-ZPUU1N684RqcEO5yH7MM2Ahpx8";
     e.xhr.setRequestHeader("Authorization", "Bearer " + accessToken);
   };
 
@@ -190,9 +213,10 @@ export default function UploadImage() {
       <FileUpload
         ref={fileUploadRef}
         name="photo"
-        url="http://18.140.60.145:1010/api/services/app/MasterBilling/ProsesUploadImage"
+        url={urlC}
         // multiple
-        accept="html/*"
+        accept={type}
+        auto
         maxFileSize={200000}
         onUpload={onTemplateUpload}
         onSelect={onTemplateSelect}
@@ -205,7 +229,6 @@ export default function UploadImage() {
         uploadOptions={uploadOptions}
         cancelOptions={cancelOptions}
         onBeforeSend={onTemplateBeforeSend}
-        // withCredentials="true"
       />
     </div>
   );

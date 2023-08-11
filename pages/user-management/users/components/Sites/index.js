@@ -15,30 +15,31 @@ import Grid from "@mui/material/Grid";
 import MDTypography from "/components/MDTypography";
 import { Card } from "@mui/material";
 
-export default function Roles({ formData }) {
+export default function Sites({ formData }) {
   const [{ accessToken, encryptedAccessToken }] = useCookies();
   const [loading, setLoading] = useState(false);
-  const [listRole, setListRoles] = useState([]);
+  const [listSite, setListSites] = useState([]);
   const { formField, values, errors, touched, setFieldValue, setFieldTouched } =
     formData;
-  const { roles } = formField;
-  const { roles: rolesV } = values;
-  const [selectedRoles, setSelectedRoles] = useState(rolesV);
+  const { sites } = formField;
+  const { sites: sitesV } = values;
+  const [selectedSites, setSelectedSites] = useState(sitesV);
 
   useEffect(() => {
     fetchData();
   }, []);
   useEffect(() => {
-    setFieldValue("roles", selectedRoles);
-    setFieldTouched("roles", true);
-  }, [selectedRoles]);
-  const error = selectedRoles.filter((v) => v).length < 1;
+    setFieldValue("sites", selectedSites);
+    setFieldTouched("sites", true);
+    console.log(selectedSites);
+  }, [selectedSites]);
+  const error = selectedSites.filter((v) => v).length < 1;
 
-  const rolesBlockLoadingName = "block-roles";
+  const sitesBlockLoadingName = "block-sites";
   const fetchData = async (subs) => {
-    Block.standard(`.${rolesBlockLoadingName}`, `Getting Roles`),
+    Block.standard(`.${sitesBlockLoadingName}`, `Getting Sites`),
       setLoading(true);
-    let response = await fetch("/api/user-management/users/getroles", {
+    let response = await fetch("/api/user-management/users/getdropdownsite", {
       method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
@@ -52,18 +53,18 @@ export default function Roles({ formData }) {
         text: response.error.error.message,
       });
     else {
-      let data = response.result.items;
-      setListRoles(data);
+      let data = response.result;
+      setListSites(data);
     }
-    Block.remove(`.${rolesBlockLoadingName}`), setLoading(false);
+    Block.remove(`.${sitesBlockLoadingName}`), setLoading(false);
   };
 
   const onCategoryChange = (e) => {
     const { id, checked, name } = e.target;
-    console.log(`onCategoryChange`, name);
-    setSelectedRoles([...selectedRoles, name]);
+    console.log(`onCategoryChange`, id);
+    setSelectedSites([...selectedSites, id]);
     if (!checked) {
-      setSelectedRoles(selectedRoles.filter((item) => item !== name));
+      setSelectedSites(selectedSites.filter((item) => item !== id));
     }
   };
 
@@ -73,13 +74,13 @@ export default function Roles({ formData }) {
         container
         alignItems="center"
         spacing={2}
-        className={rolesBlockLoadingName}
+        className={sitesBlockLoadingName}
       >
         <Grid item xs={12}>
           <MDBox>
-            <MDTypography variant="body">Create New Users</MDTypography>
+            <MDTypography variant="body">User Site</MDTypography>
             <MDTypography variant="caption" ml={2}>
-              - Assign Roles to your account
+              - Assign Site to your account
             </MDTypography>
           </MDBox>
         </Grid>
@@ -89,29 +90,30 @@ export default function Roles({ formData }) {
           component="fieldset"
           sx={{ m: 3 }}
           variant="standard"
-          name={roles.name}
-          value={rolesV}
+          name={sites.name}
+          value={sitesV}
         >
           <FormGroup>
-            {listRole.map((e, i) => {
+            {listSite.map((e, i) => {
+              let name = e.siteId + " - " + e.siteName;
               return (
                 <FormControlLabel
                   key={i}
                   control={
                     <Checkbox
-                      id={e.id.toString()}
-                      name={e.name}
+                      id={e.siteId.toString()}
+                      name={e.siteName}
                       value={e}
                       onChange={onCategoryChange}
-                      checked={selectedRoles.includes(e.name)}
+                      checked={selectedSites.includes(e.siteId.toString())}
                     />
                   }
-                  label={e.name}
+                  label={name}
                 />
               );
             })}
           </FormGroup>
-          <FormHelperText>Choose minimal 1 role</FormHelperText>
+          <FormHelperText>Choose minimal 1 site</FormHelperText>
         </FormControl>
       </Grid>
     </Card>

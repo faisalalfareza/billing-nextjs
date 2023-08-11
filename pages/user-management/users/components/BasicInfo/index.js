@@ -6,9 +6,13 @@ import UploadImage from "../UploadImage";
 import MDButton from "/components/MDButton";
 import FormField from "/pagesComponents/FormField";
 import { useState, useEffect } from "react";
+import { InputAdornment, IconButton } from "@mui/material";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 
 export default function BasicInfo({ formData }) {
-  const { formField, values, errors, touched } = formData;
+  const { formField, values, errors, touched, setFieldValue, setFieldTouched } =
+    formData;
   const {
     nama,
     surName,
@@ -31,10 +35,38 @@ export default function BasicInfo({ formData }) {
   const [random, setRandom] = useState(true);
   const [active, setActive] = useState(true);
   const [lockout, setLockout] = useState(true);
+  const [showPasswordNew, setShowPasswordNew] = useState(false);
+  const handleClickShowPasswordNew = () => setShowPasswordNew(!showPasswordNew);
+  const handleMouseDownPasswordNew = () => setShowPasswordNew(!showPasswordNew);
+  const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
+  const handleClickShowPasswordConfirm = () =>
+    setShowPasswordConfirm(!showPasswordConfirm);
+  const handleMouseDownPasswordConfirm = () =>
+    setShowPasswordConfirm(!showPasswordConfirm);
 
-  const handleSetRandom = () => setRandom(!random);
+  const handleSetRandom = () => {
+    setRandom(!random);
+    if (random) {
+      setFieldValue("password", "");
+      setFieldValue("repeatPassword", "");
+      setFieldTouched("password", false);
+      setFieldTouched("repeatPassword", false);
+    }
+  };
   const handleSetActive = () => setActive(!active);
   const handleSetLockout = () => setLockout(!lockout);
+  const optionsFile = {
+    max_file_size: 1048576,
+    type: "image/*",
+    url: "ProsesUploadImage", // Controller Name
+    pictureUrl: "Temp/Downloads/LogoSite", // Dst Folder
+  };
+
+  const handleImage = (image) => {
+    console.log("image---", image);
+    setFieldValue("photoProfile", image);
+  };
+  console.log(formData);
   return (
     <>
       <Card sx={{ p: 2, width: "100%", mt: 2 }}>
@@ -48,7 +80,7 @@ export default function BasicInfo({ formData }) {
             </MDBox>
           </Grid>
           <Grid item xs={4}>
-            <UploadImage />
+            <UploadImage {...optionsFile} onSelectImage={handleImage} />
           </Grid>
           <Grid item xs={8}>
             <Grid container spacing={3}>
@@ -58,6 +90,7 @@ export default function BasicInfo({ formData }) {
                   label={nama.label}
                   name={nama.name}
                   value={namaV}
+                  required={nama.required}
                   placeholder={nama.placeholder}
                   error={errors.nama && touched.nama}
                   success={namaV.length > 0 && !errors.nama}
@@ -68,6 +101,7 @@ export default function BasicInfo({ formData }) {
                   type={surName.type}
                   label={surName.label}
                   name={surName.name}
+                  required={surName.required}
                   value={surNameV}
                   placeholder={surName.placeholder}
                   error={errors.surName && touched.surName}
@@ -80,6 +114,7 @@ export default function BasicInfo({ formData }) {
                 <FormField
                   type={userName.type}
                   label={userName.label}
+                  required={userName.required}
                   name={userName.name}
                   value={userNameV}
                   placeholder={userName.placeholder}
@@ -90,6 +125,7 @@ export default function BasicInfo({ formData }) {
                   type={email.type}
                   label={email.label}
                   name={email.name}
+                  required={email.required}
                   value={emailV}
                   placeholder={email.placeholder}
                   error={errors.email && touched.email}
@@ -101,6 +137,7 @@ export default function BasicInfo({ formData }) {
                   type={phoneNumber.type}
                   label={phoneNumber.label}
                   name={phoneNumber.name}
+                  required={phoneNumber.required}
                   value={phoneNumberV}
                   placeholder={phoneNumber.placeholder}
                   error={errors.phoneNumber && touched.phoneNumber}
@@ -148,26 +185,74 @@ export default function BasicInfo({ formData }) {
           </Grid>
           <Grid item xs={12} sm={12}>
             <FormField
-              type={password.type}
+              type={showPasswordNew ? "text" : password.type}
               label={password.label}
               name={password.name}
               value={passwordV}
+              disabled={random}
               placeholder={password.placeholder}
               error={errors.password && touched.password}
               success={passwordV.length > 0 && !errors.password}
-              inputProps={{ autoComplete: "" }}
+              InputProps={{
+                // <-- This is where the toggle button is added.
+                endAdornment: (
+                  <InputAdornment
+                    position="end"
+                    sx={{
+                      marginRight: "30px",
+                      marginBottom: "20px",
+                    }}
+                  >
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={handleClickShowPasswordNew}
+                      onMouseDown={handleMouseDownPasswordNew}
+                    >
+                      {showPasswordNew ? (
+                        <VisibilityIcon />
+                      ) : (
+                        <VisibilityOffIcon />
+                      )}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
             />
           </Grid>
-          <Grid item xs={12} sm={12}>
+          <Grid item xs={12} sm={12} md={12}>
             <FormField
-              type={repeatPassword.type}
+              type={showPasswordConfirm ? "text" : repeatPassword.type}
               label={repeatPassword.label}
               name={repeatPassword.name}
               value={repeatPasswordV}
+              disabled={random}
               placeholder={repeatPassword.placeholder}
               error={errors.repeatPassword && touched.repeatPassword}
               success={repeatPasswordV.length > 0 && !errors.repeatPassword}
-              inputProps={{ autoComplete: "" }}
+              InputProps={{
+                // <-- This is where the toggle button is added.
+                endAdornment: (
+                  <InputAdornment
+                    position="end"
+                    sx={{
+                      marginRight: "30px",
+                      marginBottom: "20px",
+                    }}
+                  >
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={handleClickShowPasswordConfirm}
+                      onMouseDown={handleMouseDownPasswordConfirm}
+                    >
+                      {showPasswordConfirm ? (
+                        <VisibilityIcon />
+                      ) : (
+                        <VisibilityOffIcon />
+                      )}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
             />
           </Grid>
           <Grid item xs={12} sm={12}>

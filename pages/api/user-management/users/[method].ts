@@ -24,11 +24,11 @@ export default async function handler(
         case "getroles":
           getRoles(res, body);
           break;
-        case "getlistmastersite":
-          getListMasterSite(res, body);
+        case "getdropdownsite":
+          getDropdownSite(res, body);
           break;
-        case "uploadexcelnewunititem":
-          create(res, body);
+        case "prosescreatenewuser":
+          prosesCreateNewUser(res, body);
           break;
         case "prosesupdatemasterunititem":
           update(res, body);
@@ -120,10 +120,10 @@ async function getRoles(res: any, body: any) {
     );
 }
 
-async function getListMasterSite(res: any, body: any) {
+async function getDropdownSite(res: any, body: any) {
   const { accessToken, params } = body;
 
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/MasterBilling/GetListMasterSite`;
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/GetDropdownSite`;
   const config = {
     headers: {
       Authorization: "Bearer " + accessToken,
@@ -136,7 +136,7 @@ async function getListMasterSite(res: any, body: any) {
     .get(url, config)
     .then((response) =>
       res.send({
-        result: response.data.result.items,
+        result: response.data.result,
       })
     )
     .catch((error) =>
@@ -146,10 +146,10 @@ async function getListMasterSite(res: any, body: any) {
     );
 }
 
-async function create(res: any, body: any) {
+async function prosesCreateNewUser(res: any, body: any) {
   const { accessToken, params } = body;
 
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/MasterBilling/UploadExcelNewUnitItem`;
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/User/ProsesCreateNewUser`;
   const config = {
     headers: {
       Authorization: "Bearer " + accessToken,
