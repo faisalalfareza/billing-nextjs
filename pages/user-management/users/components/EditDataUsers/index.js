@@ -40,7 +40,7 @@ import UploadImage from "../UploadImage";
 
 import validations from "../../schemas/validations";
 import form from "../../schemas/form";
-import initialValues from "../../schemas/initialValues";
+// import initialValues from "../../schemas/initialValues";
 
 function CustomTabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -76,13 +76,65 @@ function a11yProps(index) {
 }
 
 function EditDataUsers(props) {
-  const { isOpen, params, onModalChanged, site, listBank, listTemplate } =
-    props;
+  console.log("EditDataUsers-----", props);
+  const { isOpen, params, onModalChanged } = props;
   const [modalOpen, setModalOpen] = useState(true);
   const [{ accessToken, encryptedAccessToken }] = useCookies();
   const [tabValue, setTabValue] = useState(0);
   const [loading, setLoading] = useState(false);
   const { formId, formField } = form;
+
+  const {
+    formField: {
+      nama,
+      surName,
+      userName,
+      email,
+      phoneNumber,
+      password,
+      repeatPassword,
+      roles,
+      sites,
+      random,
+      lockout,
+      active,
+      photoProfile,
+    },
+  } = form;
+  let initialValues = {};
+  if (params) {
+    initialValues = {
+      [nama.name]: params.name ? params.name : "",
+      [surName.name]: params.surname ? params.surname : "",
+      [userName.name]: params.userName ? params.userName : "",
+      [email.name]: params.emailAddress ? params.emailAddress : "",
+      [phoneNumber.name]: params.name ? params.name : "",
+      [password.name]: params.name ? params.name : "",
+      [repeatPassword.name]: params.name ? params.name : "",
+      [roles.name]: params.name ? params.name : [],
+      [sites.name]: params.name ? params.name : [],
+      // [random.name]: params.name ? params.name : true,
+      [active.name]: params.name ? params.name : true,
+      // [lockout.name]: params.name ? params.name : true,
+      [photoProfile.name]: params.name ? params.name : "",
+    };
+  } else {
+    initialValues = {
+      [nama.name]: "",
+      [surName.name]: "",
+      [userName.name]: "",
+      [email.name]: "",
+      [phoneNumber.name]: "",
+      [password.name]: "",
+      [repeatPassword.name]: "",
+      [roles.name]: [],
+      [sites.name]: [],
+      // [random.name]: true,
+      [active.name]: true,
+      // [lockout.name]: true,
+      [photoProfile.name]: "",
+    };
+  }
 
   const handleSetTabValue = (event, newValue) => {
     setTabValue(newValue);

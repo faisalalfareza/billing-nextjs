@@ -32,9 +32,9 @@ export default function BasicInfo({ formData }) {
     phoneNumber: phoneNumberV,
   } = values;
 
-  const [random, setRandom] = useState(true);
+  // const [random, setRandom] = useState(true);
   const [active, setActive] = useState(true);
-  const [lockout, setLockout] = useState(true);
+  // const [lockout, setLockout] = useState(true);
   const [showPasswordNew, setShowPasswordNew] = useState(false);
   const handleClickShowPasswordNew = () => setShowPasswordNew(!showPasswordNew);
   const handleMouseDownPasswordNew = () => setShowPasswordNew(!showPasswordNew);
@@ -58,8 +58,8 @@ export default function BasicInfo({ formData }) {
   const optionsFile = {
     max_file_size: 1048576,
     type: "image/*",
-    url: "ProsesUploadImage", // Controller Name
-    pictureUrl: "Temp/Downloads/LogoSite", // Dst Folder
+    url: "ProsesUploadUserProfile", // Controller Name
+    pictureUrl: "Temp/Downloads/ProfileUser", // Dst Folder
   };
 
   const handleImage = (image) => {
@@ -151,7 +151,7 @@ export default function BasicInfo({ formData }) {
 
       <Card sx={{ p: 2, width: "100%", mt: 2 }}>
         <Grid container spacing={3}>
-          <Grid item xs={12} sm={12}>
+          {/* <Grid item xs={12} sm={12}>
             <MDBox
               display="flex"
               justifyContent="space-between"
@@ -182,14 +182,14 @@ export default function BasicInfo({ formData }) {
                 </MDBox>
               </MDBox>
             </MDBox>
-          </Grid>
+          </Grid> */}
           <Grid item xs={12} sm={12}>
             <FormField
               type={showPasswordNew ? "text" : password.type}
               label={password.label}
               name={password.name}
               value={passwordV}
-              disabled={random}
+              // disabled={random}
               placeholder={password.placeholder}
               error={errors.password && touched.password}
               success={passwordV.length > 0 && !errors.password}
@@ -225,7 +225,7 @@ export default function BasicInfo({ formData }) {
               label={repeatPassword.label}
               name={repeatPassword.name}
               value={repeatPasswordV}
-              disabled={random}
+              // disabled={random}
               placeholder={repeatPassword.placeholder}
               error={errors.repeatPassword && touched.repeatPassword}
               success={repeatPasswordV.length > 0 && !errors.repeatPassword}
@@ -287,7 +287,7 @@ export default function BasicInfo({ formData }) {
               </MDBox>
             </MDBox>
           </Grid>
-          <Grid item xs={12} sm={12}>
+          {/* <Grid item xs={12} sm={12}>
             <MDBox
               display="flex"
               justifyContent="space-between"
@@ -318,7 +318,7 @@ export default function BasicInfo({ formData }) {
                 </MDBox>
               </MDBox>
             </MDBox>
-          </Grid>
+          </Grid> */}
         </Grid>
       </Card>
     </>

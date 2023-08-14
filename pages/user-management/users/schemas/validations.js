@@ -45,6 +45,8 @@ const validations = Yup.object().shape({
   [repeatPassword.name]: Yup.string()
     .required(repeatPassword.errorMsg)
     .oneOf([Yup.ref("password"), null], repeatPassword.invalidMsg),
+  [roles.name]: Yup.array().required(roles.errorMsg),
+  [sites.name]: Yup.array().required(sites.errorMsg),
 });
 
 export default validations;

@@ -176,10 +176,10 @@ export default function Users() {
           bank: e.bank,
           isActive: e.isActive,
           lastLogin: e.lastLoginTime
-            ? dayjs(e.lastLoginTime).format("DD MMMM YYYY")
+            ? dayjs(e.lastLoginTime).format("DD MMMM YYYY HH:mm")
             : "-",
           createDate: e.creationTime
-            ? dayjs(e.creationTime).format("DD MMMM YYYY")
+            ? dayjs(e.creationTime).format("DD MMMM YYYY HH:mm")
             : "-",
           action: e,
         });

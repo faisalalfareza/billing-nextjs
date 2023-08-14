@@ -46,7 +46,7 @@ export default function UploadImage(props) {
       if (response.success) {
         let urlTemp =
           publicRuntimeConfig.apiUrl + "/" + pictureUrl + "/" + response.result;
-        onSelectImage(urlTemp);
+        onSelectImage(response.result);
         setImageTemp(urlTemp);
       } else {
         alertService.error({ title: "Error", text: response.error.message });
