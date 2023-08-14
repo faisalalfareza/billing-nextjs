@@ -161,7 +161,7 @@ const nextConfig = (phase) => {
     // https://nextjs.org/docs/messages/swc-disabled
     // Ketika sebuah aplikasi memiliki konfigurasi Babel kustom Next.js akan secara otomatis memilih untuk tidak menggunakan SWC untuk mengkompilasi JavaScript/Typescript dan akan kembali menggunakan Babel dengan cara yang sama seperti yang digunakan di Next.js 11. Jika Anda ingin menggunakan SWC meskipun ada file, Anda dapat memaksanya di file Anda.
     experimental: {
-      forceSwcTransforms: true,
+      forceSwcTransforms: false,
     },
     
   

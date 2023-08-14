@@ -20,7 +20,7 @@ import { alertService } from "../../../../../helpers/alert.service";
 
 import FormField from "../../../../../pagesComponents/FormField";
 import DataTable from "../../../../../layout/Tables/DataTable";
-
+import Button from "@mui/material/Button";
 function DetailCancelPayment({ isOpen, params, onModalChanged }) {
   const [modalOpen, setModalOpen] = useState(true);
   const [{ accessToken }] = useCookies();
@@ -584,6 +584,8 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
                       >
                         {!isCanceled ? "Cancel" : "Close"}
                       </MDButton>
+                      {/* <button>LALA</button>
+                      <Button>LILI</Button> */}
                       {!isCanceled && (
                         <MDBox ml={{ xs: 0, sm: 1 }} mt={{ xs: 1, sm: 0 }}>
                           <MDButton

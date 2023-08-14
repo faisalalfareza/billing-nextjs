@@ -178,6 +178,7 @@ const jestConfig = {
     '<rootDir>/.next/',
 
     '<rootDir>/components/',
+    '<rootDir>/components/MDTypography',
     '<rootDir>/layout/',
   ],
 

@@ -39,7 +39,8 @@ const MDTypography = forwardRef(
     },
     ref
   ) => {
-    const [controller] = useMaterialUIController();
+    // const [controller] = useMaterialUIController();
+    const controller = useMaterialUIController();
     const { darkMode } = controller;
 
     return (
@@ -109,7 +110,8 @@ MDTypography.propTypes = {
     "bottom",
   ]),
   textGradient: PropTypes.bool,
-  children: PropTypes.node.isRequired,
+  // children: PropTypes.node.isRequired,
+  children: PropTypes.any,
   opacity: PropTypes.number,
 };
 

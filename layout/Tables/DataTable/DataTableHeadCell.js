@@ -26,7 +26,8 @@ import MDBox from "../../../components/MDBox";
 import { useMaterialUIController } from "../../../context";
 
 function DataTableHeadCell({ width, children, sorted, align, ...rest }) {
-  const [controller] = useMaterialUIController();
+  // const [controller] = useMaterialUIController();
+  const controller = useMaterialUIController();
   const { darkMode } = controller;
 
   return (
