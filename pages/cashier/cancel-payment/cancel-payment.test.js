@@ -127,7 +127,7 @@ describe(`COMPONENT: ${name.toUpperCase()}`, () => {
   /* PENGUJIAN DENGAN PROPERTI YANG BERBEDA [DONE - MORE DETAILS]
   ————— Uji komponen dengan memberikan properti yang berbeda.
   */
-  describe('—————PENGUJIAN DENGAN PROPERTI (PROPS/PARAMETER) YANG BERBEDA', () => { 
+  describe('—————PENGUJIAN DENGAN PROPERTI (PROPS/PARAMETER) YANG BERBEDA [DONE]', () => { 
     // MEMILIKI DEFAULT PROPS (NON-MANDATORY)
     test(`Merender modal ${name} ketika properti isOpen bernilai true`, async () => {
       const { queryByRole } = render(<DetailCancelPayment isOpen={true} params={{ billingHeaderId: 87 }} />);
@@ -184,7 +184,7 @@ describe(`COMPONENT: ${name.toUpperCase()}`, () => {
   });
 
   /* PENGUJIAN ELEMENT / STRUKTUR KOMPONEN [DONE] */
-  describe('—————PENGUJIAN ELEMENT / STRUKTUR KOMPONEN', () => { 
+  describe('—————PENGUJIAN ELEMENT / STRUKTUR KOMPONEN [DONE]', () => { 
     test(`Struktur modal ${name} sudah ¹lengkap (terpasang semua), ²benar (sesuai urutan) dan ³tidak redundan`, async () => {
       const { queryByRole } = render(<DetailCancelPayment isOpen={true} params={{billingHeaderId: 87}} />);
       await waitFor(() => {
@@ -209,7 +209,7 @@ describe(`COMPONENT: ${name.toUpperCase()}`, () => {
   /* PENGUJIAN INTERAKSI [PENDING]
   ————— Jika komponen memiliki interaksi seperti tombol atau input, dapat menguji perilaku interaksi ini. Contohnya, jika ada tombol yang memicu tutup modal, bisa menguji apakah modal ditutup ketika tombol tersebut diklik.
   */
-  describe('—————PENGUJIAN INTERAKSI', () => { 
+  describe('—————PENGUJIAN INTERAKSI [IN PROGRESS]', () => { 
     test(`Tutup modal ${name} ketika tombol tutup diklik`, async () => {
       const { getByText, queryByText, queryByRole } = render(<DetailCancelPayment isOpen={true} params={{ billingHeaderId: 87 }} onModalChanged={jest.fn()} />);
 
@@ -231,25 +231,27 @@ describe(`COMPONENT: ${name.toUpperCase()}`, () => {
   /* PENGUJIAN RESPONSIF [WAITING]
   ————— Jika komponen  memiliki perilaku yang berubah tergantung pada ukuran layar atau perangkat yang digunakan, dapat menguji responsivitasnya dengan mengubah ukuran layar selama pengujian.
   */
-  // test(`Modal ${name} responsif pada layar kecil`, async () => {
-  //   // Simulasikan lebar layar kecil
-  //   global.innerWidth = 480; // 480 (lebar layar kecil) | 120 (lebar layar besar)
+  describe('—————PENGUJIAN RESPONSIF [WAITING]', () => { 
+    // test(`Modal ${name} responsif pada layar kecil`, async () => {
+    //   // Simulasikan lebar layar kecil
+    //   global.innerWidth = 480; // 480 (lebar layar kecil) | 120 (lebar layar besar)
 
-  //   render(<DetailCancelPayment isOpen={true} params={{ billingHeaderId: 87 }} />);
+    //   render(<DetailCancelPayment isOpen={true} params={{ billingHeaderId: 87 }} />);
 
-  //   // Tunggu hingga komponen selesai merender
-  //   await screen.findByRole('dialog');
+    //   // Tunggu hingga komponen selesai merender
+    //   await screen.findByRole('dialog');
 
-  //   // Pastikan bahwa elemen-elemen tertentu hanya muncul pada layar kecil
-  //   const mobileOnlyElement = screen.queryByText('Hanya Tampil di Layar Kecil');
-  //   expect(mobileOnlyElement).toBeInTheDocument();
+    //   // Pastikan bahwa elemen-elemen tertentu hanya muncul pada layar kecil
+    //   const mobileOnlyElement = screen.queryByText('Hanya Tampil di Layar Kecil');
+    //   expect(mobileOnlyElement).toBeInTheDocument();
 
-  //   // Pastikan bahwa elemen-elemen tertentu hanya muncul pada layar besar
-  //   const desktopOnlyElement = screen.queryByText('Hanya Tampil di Layar Besar');
-  //   expect(desktopOnlyElement).not.toBeInTheDocument();
+    //   // Pastikan bahwa elemen-elemen tertentu hanya muncul pada layar besar
+    //   const desktopOnlyElement = screen.queryByText('Hanya Tampil di Layar Besar');
+    //   expect(desktopOnlyElement).not.toBeInTheDocument();
 
-  //   // Lakukan pengujian lainnya terkait perilaku komponen pada layar kecil
-  // });
+    //   // Lakukan pengujian lainnya terkait perilaku komponen pada layar kecil
+    // });
+  });
 
     /* PENGUJIAN ERROR HANDLING 
   ————— Uji bagaimana komponen merespons jika pemanggilan API fetch gagal (misalnya, dengan mengubah global.fetch menjadi mengembalikan Promise rejection).
