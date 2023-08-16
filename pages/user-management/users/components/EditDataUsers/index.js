@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Swal from "sweetalert2";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
@@ -83,6 +83,7 @@ function EditDataUsers(props) {
   const [tabValue, setTabValue] = useState(0);
   const [loading, setLoading] = useState(false);
   const { formId, formField } = form;
+  const formikRef = useRef();
 
   const {
     formField: {
@@ -101,40 +102,21 @@ function EditDataUsers(props) {
       photoProfile,
     },
   } = form;
-  let initialValues = {};
-  if (params) {
-    initialValues = {
-      [nama.name]: params.name ? params.name : "",
-      [surName.name]: params.surname ? params.surname : "",
-      [userName.name]: params.userName ? params.userName : "",
-      [email.name]: params.emailAddress ? params.emailAddress : "",
-      [phoneNumber.name]: params.name ? params.name : "",
-      [password.name]: params.name ? params.name : "",
-      [repeatPassword.name]: params.name ? params.name : "",
-      [roles.name]: params.name ? params.name : [],
-      [sites.name]: params.name ? params.name : [],
-      // [random.name]: params.name ? params.name : true,
-      [active.name]: params.name ? params.name : true,
-      // [lockout.name]: params.name ? params.name : true,
-      [photoProfile.name]: params.name ? params.name : "",
-    };
-  } else {
-    initialValues = {
-      [nama.name]: "",
-      [surName.name]: "",
-      [userName.name]: "",
-      [email.name]: "",
-      [phoneNumber.name]: "",
-      [password.name]: "",
-      [repeatPassword.name]: "",
-      [roles.name]: [],
-      [sites.name]: [],
-      // [random.name]: true,
-      [active.name]: true,
-      // [lockout.name]: true,
-      [photoProfile.name]: "",
-    };
-  }
+  let initialValues = {
+    [nama.name]: "",
+    [surName.name]: "",
+    [userName.name]: "",
+    [email.name]: "",
+    [phoneNumber.name]: "",
+    [password.name]: "",
+    [repeatPassword.name]: "",
+    [roles.name]: [],
+    [sites.name]: [],
+    // [random.name]: true,
+    [active.name]: true,
+    // [lockout.name]: true,
+    [photoProfile.name]: "",
+  };
 
   const handleSetTabValue = (event, newValue) => {
     setTabValue(newValue);
@@ -142,7 +124,8 @@ function EditDataUsers(props) {
 
   const openModal = () => setModalOpen(true);
   const toggleModal = () => setModalOpen(true);
-  const closeModal = (isChanged = false) => {
+  const closeModal = (isChanged = true) => {
+    console.log("closing modal", isChanged);
     setModalOpen(false);
     setTimeout(() => onModalChanged(isChanged), 0);
   };
@@ -153,8 +136,6 @@ function EditDataUsers(props) {
 
   const createUserBlockLoadingName = "block-create-user";
   const createUser = async (values, actions) => {
-    Block.standard(`.${createUserBlockLoadingName}`, `Creating User`),
-      setLoading(true);
     const body = {
       userName: values.userName,
       name: values.nama,
@@ -168,19 +149,93 @@ function EditDataUsers(props) {
       password: values.password,
     };
 
-    let response = await fetch(
-      "/api/user-management/users/prosescreatenewuser",
-      {
-        method: "POST",
-        body: JSON.stringify({
-          accessToken: accessToken,
-          params: body,
-        }),
+    if (!params) {
+      Block.standard(`.${createUserBlockLoadingName}`, `Creating User`),
+        setLoading(true);
+      let response = await fetch(
+        "/api/user-management/users/prosescreatenewuser",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            accessToken: accessToken,
+            params: body,
+          }),
+        }
+      );
+      if (!response.ok) throw new Error(`Error: ${response.status}`);
+      response = typeNormalization(await response.json());
+
+      if (response.error) {
+        let err = response.error.error;
+        alertService.error({
+          text: err.details,
+          title: err.message,
+        });
+        setLoading(false);
+      } else {
+        alertService.success({
+          text: "User has been successfully created",
+          title: "Success",
+        });
+        closeModal(true);
+
+        actions.resetForm();
       }
-    );
+    } else {
+      Block.standard(`.${createUserBlockLoadingName}`, `Updating User`),
+        setLoading(true);
+      delete body["password"];
+      let response = await fetch(
+        "/api/user-management/users/prosesupdateuser",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            accessToken: accessToken,
+            params: body,
+          }),
+        }
+      );
+      if (!response.ok) throw new Error(`Error: ${response.status}`);
+      response = typeNormalization(await response.json());
+
+      if (response.error) {
+        let err = response.error.error;
+        alertService.error({
+          text: err.details,
+          title: err.message,
+        });
+        setLoading(false);
+      } else {
+        alertService.success({
+          text: "User has been successfully updated",
+          title: "Success",
+        });
+        closeModal(true);
+
+        actions.resetForm();
+      }
+    }
+    actions.setSubmitting(false);
+
+    Block.remove(`.${createUserBlockLoadingName}`), setLoading(false);
+  };
+
+  const getUser = async (id) => {
+    Block.standard(`.${createUserBlockLoadingName}`, `Getting User`),
+      setLoading(true);
+
+    let response = await fetch("/api/user-management/users/get", {
+      method: "POST",
+      body: JSON.stringify({
+        accessToken: accessToken,
+        params: {
+          Id: id,
+        },
+      }),
+    });
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-
+    console.log("res----", response);
     if (response.error) {
       let err = response.error.error;
       alertService.error({
@@ -189,18 +244,35 @@ function EditDataUsers(props) {
       });
       setLoading(false);
     } else {
-      alertService.success({
-        text: "User has been successfully created",
-        title: "Success",
-      });
-      closeModal(true);
-
-      actions.resetForm();
+      let res = response.result;
+      console.log(response);
+      if (formikRef.current) {
+        let roles = res.roleNames.map((e) => {
+          return capitalizeFirstLetter(e);
+        });
+        console.log(roles);
+        formikRef.current.setFieldValue("nama", res.name);
+        formikRef.current.setFieldValue("surName", res.surname);
+        formikRef.current.setFieldValue("userName", res.userName);
+        formikRef.current.setFieldValue("email", res.emailAddress);
+        formikRef.current.setFieldValue("phoneNumber", res.phoneNumber);
+        formikRef.current.setFieldValue("roles", roles);
+        formikRef.current.setFieldValue("sites", res.siteId);
+        formikRef.current.setFieldValue("active", res.isActive);
+        formikRef.current.setFieldValue("photoProfile", res.photoProfile);
+      }
     }
-    actions.setSubmitting(false);
 
     Block.remove(`.${createUserBlockLoadingName}`), setLoading(false);
   };
+
+  const capitalizeFirstLetter = (string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+  };
+
+  useEffect(() => {
+    getUser(params.id);
+  }, [isOpen]);
 
   function getStepContent(stepIndex, formData) {
     switch (stepIndex) {
@@ -248,6 +320,7 @@ function EditDataUsers(props) {
             initialValues={initialValues}
             validationSchema={validations}
             onSubmit={handleSubmit}
+            innerRef={formikRef}
           >
             {({
               values,
@@ -290,7 +363,12 @@ function EditDataUsers(props) {
                           color="primary"
                           sx={{ height: "100%" }}
                           disabled={
-                            !isValid || !dirty || loading || isSubmitting
+                            !isValid ||
+                            !dirty ||
+                            loading ||
+                            isSubmitting ||
+                            values.roles.length == 0 ||
+                            values.sites.length == 0
                           }
                         >
                           {loading ? "Saving.." : "Save"}
@@ -299,6 +377,10 @@ function EditDataUsers(props) {
                     </MDBox>
                   </MDBox>
                 </MDBox>
+                {/* <div>
+                  isValid = {JSON.stringify(isValid)}
+                  dirty = {JSON.stringify(dirty)}
+                </div> */}
               </Form>
             )}
           </Formik>

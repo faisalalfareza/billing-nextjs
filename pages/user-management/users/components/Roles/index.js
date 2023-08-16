@@ -23,17 +23,16 @@ export default function Roles({ formData }) {
     formData;
   const { roles } = formField;
   const { roles: rolesV } = values;
-  const [selectedRoles, setSelectedRoles] = useState(rolesV);
+  const [selectedRoles, setSelectedRoles] = useState(rolesV ? rolesV : []);
 
   useEffect(() => {
     fetchData();
   }, []);
   useEffect(() => {
     setFieldValue("roles", selectedRoles);
-    setFieldTouched("roles", true);
   }, [selectedRoles]);
   const error = selectedRoles.filter((v) => v).length < 1;
-
+  console.log(formData);
   const rolesBlockLoadingName = "block-roles";
   const fetchData = async (subs) => {
     Block.standard(`.${rolesBlockLoadingName}`, `Getting Roles`),

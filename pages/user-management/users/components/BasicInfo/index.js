@@ -190,6 +190,7 @@ export default function BasicInfo({ formData }) {
               name={password.name}
               value={passwordV}
               // disabled={random}
+              required={password.required}
               placeholder={password.placeholder}
               error={errors.password && touched.password}
               success={passwordV.length > 0 && !errors.password}
@@ -225,6 +226,7 @@ export default function BasicInfo({ formData }) {
               label={repeatPassword.label}
               name={repeatPassword.name}
               value={repeatPasswordV}
+              required={repeatPassword.required}
               // disabled={random}
               placeholder={repeatPassword.placeholder}
               error={errors.repeatPassword && touched.repeatPassword}

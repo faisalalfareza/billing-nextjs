@@ -34,7 +34,7 @@ const form = {
       name: "userName",
       label: "UserName",
       type: "text",
-      errorMsg: "Surname is required.",
+      errorMsg: "Username is required.",
       required: true,
     },
     email: {
@@ -58,6 +58,7 @@ const form = {
       type: "password",
       errorMsg: "Password is required.",
       invalidMsg: "Your password should be more than 6 characters.",
+      required: true,
     },
     repeatPassword: {
       name: "repeatPassword",
@@ -65,6 +66,7 @@ const form = {
       type: "password",
       errorMsg: "Password is required.",
       invalidMsg: "Your password doesn't match.",
+      required: true,
     },
     roles: {
       name: "roles",
@@ -93,6 +95,7 @@ const form = {
     photoProfile: {
       name: "photoProfile",
       label: "Photo Profile",
+      errorMsg: "Photo Profile is Required",
     },
   },
 };

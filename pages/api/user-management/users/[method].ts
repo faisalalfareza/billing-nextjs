@@ -30,11 +30,11 @@ export default async function handler(
         case "prosescreatenewuser":
           prosesCreateNewUser(res, body);
           break;
-        case "prosesupdatemasterunititem":
+        case "prosesupdateuser":
           update(res, body);
           break;
-        case "getdetaillistmsunititem":
-          getDetailListMsUnitItem(res, body);
+        case "get":
+          getDetailUser(res, body);
           break;
         case "geturlcontent":
           getUrlContent(res, body);
@@ -174,7 +174,7 @@ async function prosesCreateNewUser(res: any, body: any) {
 async function update(res: any, body: any) {
   const { accessToken, params } = body;
 
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/MasterBilling/ProsesUpdateMasterUnitItem`;
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/User/ProsesUpdateUser`;
   const config = {
     headers: {
       Authorization: "Bearer " + accessToken,
@@ -196,10 +196,10 @@ async function update(res: any, body: any) {
     });
 }
 
-async function getDetailListMsUnitItem(res: any, body: any) {
+async function getDetailUser(res: any, body: any) {
   const { accessToken, params } = body;
 
-  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/MasterBilling/GetDetailListMsUnitItem`;
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/User/Get`;
   const config = {
     headers: {
       Authorization: "Bearer " + accessToken,
@@ -217,7 +217,7 @@ async function getDetailListMsUnitItem(res: any, body: any) {
     )
     .catch((error) =>
       res.send({
-        error: error,
+        error: error.response.data,
       })
     );
 }

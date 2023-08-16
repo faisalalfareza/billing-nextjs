@@ -23,14 +23,13 @@ export default function Sites({ formData }) {
     formData;
   const { sites } = formField;
   const { sites: sitesV } = values;
-  const [selectedSites, setSelectedSites] = useState(sitesV);
+  const [selectedSites, setSelectedSites] = useState(sitesV ? sitesV : []);
 
   useEffect(() => {
     fetchData();
   }, []);
   useEffect(() => {
     setFieldValue("sites", selectedSites);
-    setFieldTouched("sites", true);
     console.log(selectedSites);
   }, [selectedSites]);
   const error = selectedSites.filter((v) => v).length < 1;
@@ -67,7 +66,7 @@ export default function Sites({ formData }) {
       setSelectedSites(selectedSites.filter((item) => item !== id));
     }
   };
-
+  console.log(formData);
   return (
     <Card sx={{ p: 2, width: "100%", mt: 2 }}>
       <Grid
