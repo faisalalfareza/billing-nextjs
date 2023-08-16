@@ -14,61 +14,59 @@
   inside (nested routes), you need to pass the nested routes inside an array as a value for the `collapse` key.
   8. The `route` key is used to store the route location which is used for the react router.
   9. The `href` key is used to store the external links location.
-  10. The `title` key is only for the item with the type of `title` and its used for the title text on the Sidenav.
+  10. The `title` key is only for the item with the type of `title` and its used for the title text on thne Sidenav.
 */
 
-import React from "react";
-import Cookies from "universal-cookie";
-const cookies = new Cookies();
+import React from 'react';
 
-import AccountCircle from "@mui/icons-material/AccountCircle";
-import Logout from "@mui/icons-material/Logout";
+import AccountCircle from '@mui/icons-material/AccountCircle';
+import Logout from '@mui/icons-material/Logout';
 
-import Dashboard from "@mui/icons-material/Dashboard";
-import Dns from "@mui/icons-material/Dns";
-import AddBusiness from "@mui/icons-material/AddBusiness";
-import CalendarToday from "@mui/icons-material/CalendarToday";
-import CurrencyExchange from "@mui/icons-material/CurrencyExchange";
-import HomeWork from "@mui/icons-material/HomeWork";
-import CreditCard from "@mui/icons-material/CreditCard";
-import CreditScore from "@mui/icons-material/CreditScore";
-import ListAlt from "@mui/icons-material/ListAlt";
-import FactCheck from "@mui/icons-material/FactCheck";
-import FiberManualRecordOutlined from "@mui/icons-material/FiberManualRecordOutlined";
+import Dashboard from '@mui/icons-material/Dashboard';
+import Dns from '@mui/icons-material/Dns';
+import AddBusiness from '@mui/icons-material/AddBusiness';
+import CalendarToday from '@mui/icons-material/CalendarToday';
+import CurrencyExchange from '@mui/icons-material/CurrencyExchange';
+import HomeWork from '@mui/icons-material/HomeWork';
+import CreditCard from '@mui/icons-material/CreditCard';
+import CreditScore from '@mui/icons-material/CreditScore';
+import ListAlt from '@mui/icons-material/ListAlt';
+import FactCheck from '@mui/icons-material/FactCheck';
+import FiberManualRecordOutlined from '@mui/icons-material/FiberManualRecordOutlined';
 
-import MultipleStop from "@mui/icons-material/MultipleStop";
-import WaterDamage from "@mui/icons-material/WaterDamage";
-import ElectricalServicesIcon from "@mui/icons-material/ElectricalServices";
-import Description from "@mui/icons-material/Description";
-import MarkEmailUnreadIcon from "@mui/icons-material/MarkEmailUnread";
-import Book from "@mui/icons-material/Book";
+import MultipleStop from '@mui/icons-material/MultipleStop';
+import WaterDamage from '@mui/icons-material/WaterDamage';
+import ElectricalServicesIcon from '@mui/icons-material/ElectricalServices';
+import Description from '@mui/icons-material/Description';
+import MarkEmailUnreadIcon from '@mui/icons-material/MarkEmailUnread';
+import Book from '@mui/icons-material/Book';
 
-import Payments from "@mui/icons-material/Payments";
-import AttachMoney from "@mui/icons-material/AttachMoney";
-import Receipt from "@mui/icons-material/Receipt";
-import MoneyOffIcon from "@mui/icons-material/MoneyOff";
-import AccountBalanceWallet from "@mui/icons-material/AccountBalanceWallet";
+import Payments from '@mui/icons-material/Payments';
+import AttachMoney from '@mui/icons-material/AttachMoney';
+import Receipt from '@mui/icons-material/Receipt';
+import MoneyOffIcon from '@mui/icons-material/MoneyOff';
+import AccountBalanceWallet from '@mui/icons-material/AccountBalanceWallet';
 
-import Source from "@mui/icons-material/Source";
-import Today from "@mui/icons-material/Today";
-import TableView from "@mui/icons-material/TableView";
-import HandymanIcon from "@mui/icons-material/Handyman";
+import Source from '@mui/icons-material/Source';
+import Today from '@mui/icons-material/Today';
+import TableView from '@mui/icons-material/TableView';
+import HandymanIcon from '@mui/icons-material/Handyman';
 
-import MDAvatar from "../components/MDAvatar";
-import profilePicture from "../assets/images/team-3.jpg";
-import { capitalizeFirstLetter } from "../helpers/utils";
-import GroupsIcon from "@mui/icons-material/Groups";
-import PeopleIcon from "@mui/icons-material/People";
+import MDAvatar from '../components/MDAvatar';
+import profilePicture from '../assets/images/team-3.jpg';
+import GroupsIcon from '@mui/icons-material/Groups';
+import PeopleIcon from '@mui/icons-material/People';
+import {capitalizeFirstLetter, typeNormalization} from '../helpers/utils';
 
 function setMain(informations = getInformation(), profiles = getProfile()) {
   return [
     {
-      type: "collapse",
+      type: 'collapse',
       // name: "Brooklyn Alice",
       name: informations
-        ? capitalizeFirstLetter(informations["user"]["userName"])
-        : "~",
-      key: "profile",
+        ? capitalizeFirstLetter(informations['user']['userName'])
+        : '~',
+      key: 'profile',
       // icon: <MDAvatar src={profilePicture.src} size="sm" />,
       icon: profiles ? (
         <MDAvatar src={`data:image/png;base64, ${profiles}`} size="sm" />
@@ -77,16 +75,16 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
       ),
       collapse: [
         {
-          name: "Change Password",
-          key: "change-password",
-          nameOnHeader: "Change Password",
-          route: "/profile/change-password",
+          name: 'Change Password',
+          key: 'change-password',
+          nameOnHeader: 'Change Password',
+          route: '/profile/change-password',
           icon: <HandymanIcon fontSize="medium" />,
         },
         {
-          name: "Logout",
-          key: "logout",
-          route: "/authentication/sign-in",
+          name: 'Logout',
+          key: 'logout',
+          route: '/authentication/sign-in',
           icon: <Logout fontSize="medium" />,
           onClick: function () {
             return;
@@ -95,40 +93,40 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
       ],
     },
 
-    { type: "divider", key: "divider-0" },
+    {type: 'divider', key: 'divider-0'},
     {
-      type: "collapse",
-      name: "Dashboards",
-      nameOnHeader: "Dashboards",
-      key: "dashboards",
-      route: "/dashboards",
+      type: 'collapse',
+      name: 'Dashboards',
+      nameOnHeader: 'Dashboards',
+      key: 'dashboards',
+      route: '/dashboards',
       icon: <Dashboard fontSize="medium" />,
       noCollapse: true,
     },
 
     {
-      type: "collapse",
-      name: "Master",
-      nameOnHeader: "Master",
-      key: "master",
+      type: 'collapse',
+      name: 'Master',
+      nameOnHeader: 'Master',
+      key: 'master',
       icon: <Dns fontSize="medium" />,
-      permission: "Pages.Master",
+      permission: 'Pages.Master',
       collapse: [
         {
-          name: "Master Site",
-          nameOnHeader: "Master Site",
-          key: "site",
-          route: "/master/site",
+          name: 'Master Site',
+          nameOnHeader: 'Master Site',
+          key: 'site',
+          route: '/master/site',
           icon: <AddBusiness fontSize="medium" />,
-          permission: "Pages.Master.MasterSite",
+          permission: 'Pages.Master.MasterSite',
         },
         {
-          name: "Master Period",
-          nameOnHeader: "Master Period",
-          key: "period",
-          route: "/master/period",
+          name: 'Master Period',
+          nameOnHeader: 'Master Period',
+          key: 'period',
+          route: '/master/period',
           icon: <CalendarToday fontSize="medium" />,
-          permission: "Pages.Master.MasterPeriod",
+          permission: 'Pages.Master.MasterPeriod',
         },
 
         // {
@@ -167,12 +165,12 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
         //   icon: <ListAlt fontSize="medium" />,
         // },
         {
-          name: "Master Unit Item",
-          nameOnHeader: "Master Unit Item",
-          key: "unit-item",
-          route: "/master/unit-item",
+          name: 'Master Unit Item',
+          nameOnHeader: 'Master Unit Item',
+          key: 'unit-item',
+          route: '/master/unit-item',
           icon: <FactCheck fontSize="medium" />,
-          permission: "Pages.Master.MasterUnitItem",
+          permission: 'Pages.Master.MasterUnitItem',
         },
         // {
         //   name: "Master Oracle Mapping",
@@ -185,52 +183,52 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
     },
 
     {
-      type: "collapse",
-      name: "Transaction",
-      nameOnHeader: "Transaction",
-      key: "transaction",
+      type: 'collapse',
+      name: 'Transaction',
+      nameOnHeader: 'Transaction',
+      key: 'transaction',
       icon: <MultipleStop fontSize="medium" />,
-      permission: "Pages.Transaction",
+      permission: 'Pages.Transaction',
       collapse: [
         {
-          name: "Water Reading",
-          nameOnHeader: "Water Reading",
-          key: "water-reading",
-          route: "/transaction/water-reading",
+          name: 'Water Reading',
+          nameOnHeader: 'Water Reading',
+          key: 'water-reading',
+          route: '/transaction/water-reading',
           icon: <WaterDamage fontSize="medium" />,
-          permission: "Pages.Transaction.WaterReading",
+          permission: 'Pages.Transaction.WaterReading',
         },
         {
-          name: "Electric Reading",
-          nameOnHeader: "Electric Reading",
-          key: "electric-reading",
-          route: "/transaction/electric-reading",
+          name: 'Electric Reading',
+          nameOnHeader: 'Electric Reading',
+          key: 'electric-reading',
+          route: '/transaction/electric-reading',
           icon: <ElectricalServicesIcon fontSize="medium" />,
-          permission: "Pages.Transaction.ElectricReading",
+          permission: 'Pages.Transaction.ElectricReading',
         },
         {
-          name: "Invoice",
-          nameOnHeader: "Invoice",
-          key: "invoice",
-          route: "/transaction/invoice",
+          name: 'Invoice',
+          nameOnHeader: 'Invoice',
+          key: 'invoice',
+          route: '/transaction/invoice',
           icon: <Description fontSize="medium" />,
-          permission: "Pages.Transaction.Invoice",
+          permission: 'Pages.Transaction.Invoice',
         },
         {
-          name: "Warning Letter",
-          nameOnHeader: "Warning Letter",
-          key: "warning-letter",
-          route: "/transaction/warning-letter",
+          name: 'Warning Letter',
+          nameOnHeader: 'Warning Letter',
+          key: 'warning-letter',
+          route: '/transaction/warning-letter',
           icon: <MarkEmailUnreadIcon fontSize="medium" />,
-          permission: "Pages.Transaction.WarningLetter",
+          permission: 'Pages.Transaction.WarningLetter',
         },
         {
-          name: "Oracle To Journal",
-          nameOnHeader: "Oracle To Journal",
-          key: "oracle-to-journal",
-          route: "/transaction/oracle-to-journal",
+          name: 'Oracle To Journal',
+          nameOnHeader: 'Oracle To Journal',
+          key: 'oracle-to-journal',
+          route: '/transaction/oracle-to-journal',
           icon: <Book fontSize="medium" />,
-          permission: "Pages.Transaction.OracleToJournal",
+          permission: 'Pages.Transaction.OracleToJournal',
         },
 
         // {
@@ -249,80 +247,80 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
     },
 
     {
-      type: "collapse",
-      name: "Cashier System",
-      nameOnHeader: "Cashier System",
-      key: "cashier",
+      type: 'collapse',
+      name: 'Cashier System',
+      nameOnHeader: 'Cashier System',
+      key: 'cashier',
       icon: <Payments fontSize="medium" />,
-      permission: "Pages.Cashier",
+      permission: 'Pages.Cashier',
       collapse: [
         {
-          name: "Billing Payment",
-          nameOnHeader: "Billing Payment",
-          key: "billing-payment",
-          route: "/cashier/billing-payment",
+          name: 'Billing Payment',
+          nameOnHeader: 'Billing Payment',
+          key: 'billing-payment',
+          route: '/cashier/billing-payment',
           icon: <AttachMoney fontSize="medium" />,
-          permission: "Pages.Cashier.BillingPayment",
+          permission: 'Pages.Cashier.BillingPayment',
         },
         {
-          name: "Reprint OR",
-          nameOnHeader: "Reprint Official Receipt",
-          key: "reprint-or",
-          route: "/cashier/reprint-or",
+          name: 'Reprint OR',
+          nameOnHeader: 'Reprint Official Receipt',
+          key: 'reprint-or',
+          route: '/cashier/reprint-or',
           icon: <Receipt fontSize="medium" />,
-          permission: "Pages.Cashier.ReprintOR",
+          permission: 'Pages.Cashier.ReprintOR',
         },
         {
-          name: "Cancel Payment",
-          nameOnHeader: "Cancel Payment",
-          key: "cancel-payment",
-          route: "/cashier/cancel-payment",
+          name: 'Cancel Payment',
+          nameOnHeader: 'Cancel Payment',
+          key: 'cancel-payment',
+          route: '/cashier/cancel-payment',
           icon: <MoneyOffIcon fontSize="medium" />,
-          permission: "Pages.Cashier.CancelPayment",
+          permission: 'Pages.Cashier.CancelPayment',
         },
         {
-          name: "Upload Bulk Payment",
-          nameOnHeader: "Upload Bulk Payment",
-          key: "upload-bulk-payment",
-          route: "/cashier/upload-bulk-payment",
+          name: 'Upload Bulk Payment',
+          nameOnHeader: 'Upload Bulk Payment',
+          key: 'upload-bulk-payment',
+          route: '/cashier/upload-bulk-payment',
           icon: <AccountBalanceWallet fontSize="medium" />,
-          permission: "Pages.Cashier.UploadBulk",
+          permission: 'Pages.Cashier.UploadBulk',
         },
       ],
     },
 
     {
-      type: "collapse",
-      name: "Report",
-      nameOnHeader: "Report",
-      key: "report",
+      type: 'collapse',
+      name: 'Report',
+      nameOnHeader: 'Report',
+      key: 'report',
       icon: <Source fontSize="medium" />,
-      permission: "Pages.Report",
+      permission: 'Pages.Report',
       collapse: [
         {
-          name: "Report Invoice",
-          nameOnHeader: "Report Invoice",
-          key: "report-invoice",
-          route: "/report/report-invoice",
+          name: 'Report Invoice',
+          nameOnHeader: 'Report Invoice',
+          key: 'report-invoice',
+          route: '/report/report-invoice',
           icon: <Description fontSize="medium" />,
-          permission: "Pages.Report.ReportInvoice",
+          permission: 'Pages.Report.ReportInvoice',
         },
         {
-          name: "Daily Report",
-          nameOnHeader: "Report Daily",
-          key: "report-daily",
-          route: "/report/report-daily",
+          name: 'Daily Report',
+          nameOnHeader: 'Report Daily',
+          key: 'report-daily',
+          route: '/report/report-daily',
           icon: <Today fontSize="medium" />,
-          permission: "Pages.Report.DailyReport",
+          permission: 'Pages.Report.DailyReport',
         },
 
         {
-          name: "Report Detail Statement",
-          nameOnHeader: "Report Detail Statement",
-          key: "report-detail-statement",
-          route: "/report/report-detail-statement",
+          name: 'Report Detail Statement',
+          nameOnHeader: 'Report Detail Statement',
+          key: 'report-detail-statement',
+          route: '/report/report-detail-statement',
           icon: <TableView fontSize="medium" />,
-          permission: "Pages.Report.ReportDetailStatment",
+          permission: 'Pages.Report.ReportDetailStatment',
         },
         // {
         //   name: "Report Water Reading",
@@ -349,20 +347,20 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
       ],
     },
     {
-      type: "collapse",
-      name: "User Management",
-      nameOnHeader: "User Management",
-      key: "user-management",
+      type: 'collapse',
+      name: 'User Management',
+      nameOnHeader: 'User Management',
+      key: 'user-management',
       icon: <GroupsIcon fontSize="medium" />,
-      permission: "Pages.Dashboard",
+      permission: 'Pages.Dashboard',
       collapse: [
         {
-          name: "Users",
-          nameOnHeader: "Users",
-          key: "users",
-          route: "/user-management/users",
+          name: 'Users',
+          nameOnHeader: 'Users',
+          key: 'users',
+          route: '/user-management/users',
           icon: <PeopleIcon fontSize="medium" />,
-          permission: "Pages.Dashboard",
+          permission: 'Pages.Dashboard',
         },
       ],
     },
@@ -371,8 +369,8 @@ function setMain(informations = getInformation(), profiles = getProfile()) {
 function setFilteredMain(permissions = getPermission(), main = setMain()) {
   let filteredMain = [];
   permissions &&
-    main.forEach((p) => {
-      if (p.type == "collapse" && p.permission != undefined) {
+    main.forEach(p => {
+      if (p.type == 'collapse' && p.permission != undefined) {
         // Parent
         if (checkPermission(p.permission)) {
           // Check parrent permissions
@@ -380,7 +378,7 @@ function setFilteredMain(permissions = getPermission(), main = setMain()) {
           let selected_c = [];
           if (p.collapse != undefined || !p.noCollapse) {
             // Child
-            p.collapse.forEach((c) => {
+            p.collapse.forEach(c => {
               if (c.permission != undefined && checkPermission(c.permission))
                 // Check child permissions
                 selected_c.push(c);
@@ -397,7 +395,7 @@ function setFilteredMain(permissions = getPermission(), main = setMain()) {
 }
 function setReformatedMain(filteredMain = setFilteredMain()) {
   let reformatedMain = [];
-  filteredMain.forEach((e) => {
+  filteredMain.forEach(e => {
     if (e.noCollapse) {
       // No child
       reformatedMain.push({
@@ -413,7 +411,7 @@ function setReformatedMain(filteredMain = setFilteredMain()) {
         key: e.key,
       });
       if (e.collapse != undefined && e.collapse.length > 0) {
-        e.collapse.forEach((e_c) => {
+        e.collapse.forEach(e_c => {
           reformatedMain.push({
             nameOnHeader:
               e_c.nameOnHeader != undefined ? e_c.nameOnHeader : e_c.name,
@@ -432,12 +430,14 @@ function setReformatedMain(filteredMain = setFilteredMain()) {
 
 export default function setRoutes(
   permissions = getPermission(),
-  main = setMain()
+  main = setMain(),
 ) {
   const filteredMain = setFilteredMain(permissions, main);
   const reformatedMain = setReformatedMain(filteredMain);
 
-  cookies.set("filteredRoutes", reformatedMain, { path: "/" });
+  if (typeof document !== 'undefined') {
+    document.cookie = `filteredRoutes=${JSON.stringify(reformatedMain)};path=/`;
+  }
 
   return {
     main,
@@ -447,16 +447,16 @@ export default function setRoutes(
 }
 
 export function getInformation() {
-  if (typeof window !== "undefined") {
-    return JSON.parse(localStorage.getItem("informations"));
+  if (typeof window !== 'undefined') {
+    return JSON.parse(localStorage.getItem('informations'));
   }
 
   return;
 }
 
 export function getPermission() {
-  if (typeof window !== "undefined") {
-    return JSON.parse(localStorage.getItem("grantedPermissions"));
+  if (typeof window !== 'undefined') {
+    return JSON.parse(localStorage.getItem('grantedPermissions'));
   }
 
   return;
@@ -465,7 +465,7 @@ export function checkPermission(testPermission, permissions = getPermission()) {
   if (permissions != null || permissions != undefined) {
     const checking =
       permissions[testPermission] &&
-      ["true", true].indexOf(permissions[testPermission]) != -1;
+      ['true', true].indexOf(permissions[testPermission]) != -1;
     return checking ? true : false;
   }
 
@@ -475,10 +475,10 @@ export function checkPermission(testPermission, permissions = getPermission()) {
 export function checkRoute(
   testRoute,
   filteredRoutes = setReformatedMain(setMain()),
-  isBooleanResult = true
+  isBooleanResult = true,
 ) {
   if (filteredRoutes != null || filteredRoutes != undefined) {
-    const checking = filteredRoutes.find((e) => e.route?.includes(testRoute));
+    const checking = filteredRoutes.find(e => e.route?.includes(testRoute));
     if (checking && checking.permission)
       return checkPermission(checking.permission);
 
@@ -489,8 +489,8 @@ export function checkRoute(
 }
 
 export function getProfile() {
-  if (typeof window !== "undefined") {
-    return localStorage.getItem("profilePicture");
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem('profilePicture');
   }
 
   return;
