@@ -1,49 +1,49 @@
-import React, { useState, useEffect, useRef } from "react";
-import Swal from "sweetalert2";
-import { Formik, Form, Field } from "formik";
-import * as Yup from "yup";
-import { Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
-import { FormGroup, FormControlLabel, Checkbox } from "@mui/material";
+import React, {useState, useEffect, useRef} from 'react';
+import Swal from 'sweetalert2';
+import {Formik, Form, Field} from 'formik';
+import * as Yup from 'yup';
+import {Modal, ModalHeader, ModalBody, ModalFooter} from 'reactstrap';
+import {FormGroup, FormControlLabel, Checkbox} from '@mui/material';
 
 // prop-types is a library for typechecking of props
-import PropTypes from "prop-types";
+import PropTypes from 'prop-types';
 
 // @mui material components
-import Grid from "@mui/material/Grid";
-import Autocomplete from "@mui/material/Autocomplete";
+import Grid from '@mui/material/Grid';
+import Autocomplete from '@mui/material/Autocomplete';
 
 // NextJS Material Dashboard 2 PRO components
-import MDBox from "/components/MDBox";
-import MDTypography from "/components/MDTypography";
-import MDButton from "/components/MDButton";
-import FormField from "/pagesComponents/FormField";
-import DataTable from "/layout/Tables/DataTable";
-import Container from "@mui/material/Container";
-import { Block } from "notiflix/build/notiflix-block-aio";
-import AppBar from "@mui/material/AppBar";
+import MDBox from '/components/MDBox';
+import MDTypography from '/components/MDTypography';
+import MDButton from '/components/MDButton';
+import FormField from '/pagesComponents/FormField';
+import DataTable from '/layout/Tables/DataTable';
+import Container from '@mui/material/Container';
+import {Block} from 'notiflix/build/notiflix-block-aio';
+import AppBar from '@mui/material/AppBar';
 
 // Data
-import { useCookies } from "react-cookie";
-import { typeNormalization } from "/helpers/utils";
-import { alertService } from "/helpers";
-import NumberInput from "/pagesComponents/dropdown/NumberInput";
-import Header from "../Header";
-import BasicInfo from "../BasicInfo";
-import Roles from "../Roles";
-import Sites from "../Sites";
+import {useCookies} from 'react-cookie';
+import {typeNormalization} from '/helpers/utils';
+import {alertService} from '/helpers';
+import NumberInput from '/pagesComponents/dropdown/NumberInput';
+import Header from '../Header';
+import BasicInfo from '../BasicInfo';
+import Roles from '../Roles';
+import Sites from '../Sites';
 
-import { Tabs, Card } from "@mui/material";
-import Tab from "@mui/material/Tab";
-import Typography from "@mui/material/Typography";
-import Box from "@mui/material/Box";
-import UploadImage from "../UploadImage";
+import {Tabs, Card} from '@mui/material';
+import Tab from '@mui/material/Tab';
+import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
+import UploadImage from '../UploadImage';
 
-import validations from "../../schemas/validations";
-import form from "../../schemas/form";
+import validations from '../../schemas/validations';
+import form from '../../schemas/form';
 // import initialValues from "../../schemas/initialValues";
 
 function CustomTabPanel(props) {
-  const { children, value, index, ...other } = props;
+  const {children, value, index, ...other} = props;
 
   return (
     <div
@@ -51,10 +51,9 @@ function CustomTabPanel(props) {
       hidden={value !== index}
       id={`simple-tabpanel-${index}`}
       aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
+      {...other}>
       {value === index && (
-        <Box sx={{ p: 3 }}>
+        <Box sx={{p: 3}}>
           <Typography>{children}</Typography>
         </Box>
       )}
@@ -71,18 +70,18 @@ CustomTabPanel.propTypes = {
 function a11yProps(index) {
   return {
     id: `simple-tab-${index}`,
-    "aria-controls": `simple-tabpanel-${index}`,
+    'aria-controls': `simple-tabpanel-${index}`,
   };
 }
 
 function EditDataUsers(props) {
-  console.log("EditDataUsers-----", props);
-  const { isOpen, params, onModalChanged } = props;
+  console.log('EditDataUsers-----', props);
+  const {isOpen, params, onModalChanged} = props;
   const [modalOpen, setModalOpen] = useState(true);
-  const [{ accessToken, encryptedAccessToken }] = useCookies();
+  const [{accessToken, encryptedAccessToken}] = useCookies();
   const [tabValue, setTabValue] = useState(0);
   const [loading, setLoading] = useState(false);
-  const { formId, formField } = form;
+  const {formId, formField} = form;
   const formikRef = useRef();
 
   const {
@@ -103,19 +102,19 @@ function EditDataUsers(props) {
     },
   } = form;
   let initialValues = {
-    [nama.name]: "",
-    [surName.name]: "",
-    [userName.name]: "",
-    [email.name]: "",
-    [phoneNumber.name]: "",
-    [password.name]: "",
-    [repeatPassword.name]: "",
+    [nama.name]: '',
+    [surName.name]: '',
+    [userName.name]: '',
+    [email.name]: '',
+    [phoneNumber.name]: '',
+    [password.name]: '',
+    [repeatPassword.name]: '',
     [roles.name]: [],
     [sites.name]: [],
     // [random.name]: true,
     [active.name]: true,
     // [lockout.name]: true,
-    [photoProfile.name]: "",
+    [photoProfile.name]: '',
   };
 
   const handleSetTabValue = (event, newValue) => {
@@ -125,16 +124,16 @@ function EditDataUsers(props) {
   const openModal = () => setModalOpen(true);
   const toggleModal = () => setModalOpen(true);
   const closeModal = (isChanged = true) => {
-    console.log("closing modal", isChanged);
+    console.log('closing modal', isChanged);
     setModalOpen(false);
-    setTimeout(() => onModalChanged(isChanged), 0);
+    setTimeout(() => onModalChanged(true), 0);
   };
 
   const handleSubmit = (values, actions) => {
     createUser(values, actions);
   };
 
-  const createUserBlockLoadingName = "block-create-user";
+  const createUserBlockLoadingName = 'block-create-user';
   const createUser = async (values, actions) => {
     const body = {
       userName: values.userName,
@@ -153,14 +152,14 @@ function EditDataUsers(props) {
       Block.standard(`.${createUserBlockLoadingName}`, `Creating User`),
         setLoading(true);
       let response = await fetch(
-        "/api/user-management/users/prosescreatenewuser",
+        '/api/user-management/users/prosescreatenewuser',
         {
-          method: "POST",
+          method: 'POST',
           body: JSON.stringify({
             accessToken: accessToken,
             params: body,
           }),
-        }
+        },
       );
       if (!response.ok) throw new Error(`Error: ${response.status}`);
       response = typeNormalization(await response.json());
@@ -174,8 +173,8 @@ function EditDataUsers(props) {
         setLoading(false);
       } else {
         alertService.success({
-          text: "User has been successfully created",
-          title: "Success",
+          text: 'User has been successfully created',
+          title: 'Success',
         });
         closeModal(true);
 
@@ -184,16 +183,16 @@ function EditDataUsers(props) {
     } else {
       Block.standard(`.${createUserBlockLoadingName}`, `Updating User`),
         setLoading(true);
-      delete body["password"];
+      delete body['password'];
       let response = await fetch(
-        "/api/user-management/users/prosesupdateuser",
+        '/api/user-management/users/prosesupdateuser',
         {
-          method: "POST",
+          method: 'POST',
           body: JSON.stringify({
             accessToken: accessToken,
             params: body,
           }),
-        }
+        },
       );
       if (!response.ok) throw new Error(`Error: ${response.status}`);
       response = typeNormalization(await response.json());
@@ -207,8 +206,8 @@ function EditDataUsers(props) {
         setLoading(false);
       } else {
         alertService.success({
-          text: "User has been successfully updated",
-          title: "Success",
+          text: 'User has been successfully updated',
+          title: 'Success',
         });
         closeModal(true);
 
@@ -220,12 +219,12 @@ function EditDataUsers(props) {
     Block.remove(`.${createUserBlockLoadingName}`), setLoading(false);
   };
 
-  const getUser = async (id) => {
+  const getUser = async id => {
     Block.standard(`.${createUserBlockLoadingName}`, `Getting User`),
       setLoading(true);
 
-    let response = await fetch("/api/user-management/users/get", {
-      method: "POST",
+    let response = await fetch('/api/user-management/users/get', {
+      method: 'POST',
       body: JSON.stringify({
         accessToken: accessToken,
         params: {
@@ -235,7 +234,7 @@ function EditDataUsers(props) {
     });
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
-    console.log("res----", response);
+    console.log('res----', response);
     if (response.error) {
       let err = response.error.error;
       alertService.error({
@@ -247,31 +246,31 @@ function EditDataUsers(props) {
       let res = response.result;
       console.log(response);
       if (formikRef.current) {
-        let roles = res.roleNames.map((e) => {
+        let roles = res.roleNames.map(e => {
           return capitalizeFirstLetter(e);
         });
         console.log(roles);
-        formikRef.current.setFieldValue("nama", res.name);
-        formikRef.current.setFieldValue("surName", res.surname);
-        formikRef.current.setFieldValue("userName", res.userName);
-        formikRef.current.setFieldValue("email", res.emailAddress);
-        formikRef.current.setFieldValue("phoneNumber", res.phoneNumber);
-        formikRef.current.setFieldValue("roles", roles);
-        formikRef.current.setFieldValue("sites", res.siteId);
-        formikRef.current.setFieldValue("active", res.isActive);
-        formikRef.current.setFieldValue("photoProfile", res.photoProfile);
+        formikRef.current.setFieldValue('nama', res.name);
+        formikRef.current.setFieldValue('surName', res.surname);
+        formikRef.current.setFieldValue('userName', res.userName);
+        formikRef.current.setFieldValue('email', res.emailAddress);
+        formikRef.current.setFieldValue('phoneNumber', res.phoneNumber);
+        formikRef.current.setFieldValue('roles', roles);
+        formikRef.current.setFieldValue('sites', res.siteId);
+        formikRef.current.setFieldValue('active', res.isActive);
+        formikRef.current.setFieldValue('photoProfile', res.photoProfile);
       }
     }
 
     Block.remove(`.${createUserBlockLoadingName}`), setLoading(false);
   };
 
-  const capitalizeFirstLetter = (string) => {
+  const capitalizeFirstLetter = string => {
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
   };
 
   useEffect(() => {
-    getUser(params.id);
+    if (params) getUser(params.id);
   }, [isOpen]);
 
   function getStepContent(stepIndex, formData) {
@@ -295,22 +294,19 @@ function EditDataUsers(props) {
         toggle={toggleModal}
         onOpened={openModal}
         onClosed={closeModal}
-        className={createUserBlockLoadingName}
-      >
+        className={createUserBlockLoadingName}>
         <MDBox
-          sx={{ width: "100%", bgcolor: "background.paper" }}
-          minWidth={{ xs: "22rem", md: "25rem" }}
+          sx={{width: '100%', bgcolor: 'background.paper'}}
+          minWidth={{xs: '22rem', md: '25rem'}}
           mx="auto"
           mt={2}
-          p={2}
-        >
+          p={2}>
           <AppBar position="static">
             <Tabs
               value={tabValue}
               onChange={handleSetTabValue}
               aria-label="basic tabs example"
-              centered
-            >
+              centered>
               <Tab label="Basic Info" {...a11yProps(0)} />
               <Tab label="Roles" {...a11yProps(1)} />
               <Tab label="Site" {...a11yProps(2)} />
@@ -320,8 +316,7 @@ function EditDataUsers(props) {
             initialValues={initialValues}
             validationSchema={validations}
             onSubmit={handleSubmit}
-            innerRef={formikRef}
-          >
+            innerRef={formikRef}>
             {({
               values,
               errors,
@@ -333,7 +328,7 @@ function EditDataUsers(props) {
               dirty,
             }) => (
               <Form id={formId} autoComplete="off">
-                <MDBox sx={{ height: "100%" }}>
+                <MDBox sx={{height: '100%'}}>
                   <MDBox>
                     {getStepContent(tabValue, {
                       values,
@@ -347,21 +342,19 @@ function EditDataUsers(props) {
                       mt={2}
                       display="flex"
                       justifyContent="flex-end"
-                      flexDirection={{ xs: "column", sm: "row" }}
-                    >
+                      flexDirection={{xs: 'column', sm: 'row'}}>
                       <MDButton
                         variant="outlined"
                         color="secondary"
-                        onClick={closeModal}
-                      >
+                        onClick={closeModal}>
                         Cancel
                       </MDButton>
-                      <MDBox ml={{ xs: 0, sm: 1 }} mt={{ xs: 1, sm: 0 }}>
+                      <MDBox ml={{xs: 0, sm: 1}} mt={{xs: 1, sm: 0}}>
                         <MDButton
                           type="submit"
                           variant="gradient"
                           color="primary"
-                          sx={{ height: "100%" }}
+                          sx={{height: '100%'}}
                           disabled={
                             !isValid ||
                             !dirty ||
@@ -369,9 +362,8 @@ function EditDataUsers(props) {
                             isSubmitting ||
                             values.roles.length == 0 ||
                             values.sites.length == 0
-                          }
-                        >
-                          {loading ? "Saving.." : "Save"}
+                          }>
+                          {loading ? 'Saving..' : 'Save'}
                         </MDButton>
                       </MDBox>
                     </MDBox>
