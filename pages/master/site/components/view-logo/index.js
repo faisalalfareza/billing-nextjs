@@ -38,12 +38,12 @@ export default function ViewLogo(props) {
       <ModalHeader toggle={toggle} close={closeBtn}>
         <MDBox mb={1}>
           <MDTypography variant="h5">
-            View Logo `{params.siteName}`
+            View Logo `{params?.siteName}`
           </MDTypography>
         </MDBox>
       </ModalHeader>
       <ModalBody>
-        <MDBox component="img" src={params.logo} alt={params.siteName} />
+        <MDBox component="img" src={params?.logo} alt={params?.siteName} />
       </ModalBody>
       <ModalFooter>
         <MDButton variant="outlined" color="secondary" onClick={close}>

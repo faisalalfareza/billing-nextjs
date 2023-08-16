@@ -44,8 +44,8 @@ function EditDataUnitItem(props) {
   const formikRef = useRef();
   const [openDetail, setOpenDetail] = useState(false);
 
-  let bankE = listBank.find((e) => e.bankName == params.bank);
-  let templateE = listTemplate.find(
+  let bankE = listBank?.find((e) => e.bankName == params.bank);
+  let templateE = listTemplate?.find(
     (e) => e.templateName == params.templateInvoice
   );
 
@@ -172,8 +172,8 @@ function EditDataUnitItem(props) {
       alertService.error({ title: "Error", text: response.error.message });
     else {
       let res = response.result;
-      let bank = listBank.find((e) => e.bankID == res.bankId);
-      let template = listTemplate.find(
+      let bank = listBank?.find((e) => e.bankID == res.bankId);
+      let template = listTemplate?.find(
         (e) => e.templateInvoiceHeaderId == res.templateInvoiceHeaderId
       );
       setUnitItemHeaderId(res.unitItemHeaderId);
