@@ -223,10 +223,8 @@ export default function MasterSite(props) {
     //   });
   };
   useEffect(() => {
-    if (!first) {
-      fetchData();
-    }
-    setFirst(true), (first = true);
+    !first && fetchData();
+    setFirst(true) //, first = true;
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

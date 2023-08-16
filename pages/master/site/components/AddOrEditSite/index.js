@@ -36,7 +36,7 @@ function AddOrEditSite({ isOpen, params, onModalChanged, site }) {
       getProject();
       getDetail();
     }
-    setFirst(true), (first = true);
+    setFirst(true) //, first = true;
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);

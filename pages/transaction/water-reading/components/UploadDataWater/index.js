@@ -35,7 +35,7 @@ function UploadDataWater(props) {
       getPeriod();
       getProject();
     }
-    setFirst(true), first = true;
+    setFirst(true) //, first = true;
     
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);

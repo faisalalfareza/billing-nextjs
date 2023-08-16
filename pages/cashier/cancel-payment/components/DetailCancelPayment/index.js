@@ -95,7 +95,7 @@ function DetailCancelPayment({ isOpen, params, onModalChanged }) {
   };
   useEffect(() => {
     !first && getDetailCancelPayment();
-    setFirst(true), first = true;
+    setFirst(true) //, first = true;
     
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
