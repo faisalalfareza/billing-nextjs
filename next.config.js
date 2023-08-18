@@ -26,16 +26,16 @@ const nextConfig = (phase) => {
   const isDev = (phase === PHASE_DEVELOPMENT_SERVER);
   // When `next build` or `npm run build` is used
   // Staging adalah saat Anda pada dasarnya menguji kode sebelum akan masuk ke prod.
-  const isStaging = (phase === PHASE_PRODUCTION_BUILD && process.env.STAGING == 1);
+  // const isStaging = (phase === PHASE_PRODUCTION_BUILD && process.env.STAGING == 1);
   // Production berarti kode produksi yang benar-benar dilihat pengguna akhir. 
-  const isProd = (phase === PHASE_PRODUCTION_SERVER || process.env.STAGING != 1);
+  const isProd = (phase === PHASE_PRODUCTION_SERVER || phase === PHASE_PRODUCTION_BUILD);
 
   // NOTE: .env is for client & server side
   const env = {
     CURRENT_ENV: (() => {
       if (process.env.NODE_ENV) return process.env.NODE_ENV;
       else {
-        if (isDev || isStaging) return "development";
+        if (isDev /*|| isStaging*/) return "development";
         if (isProd) return "production";
       }
       return 'CURRENT_ENV:not (isDev,isProd && isStaging,isProd && !isStaging)';
@@ -43,14 +43,14 @@ const nextConfig = (phase) => {
     API_URL: (() => {
       if (process.env.HARD_URL) return process.env.HARD_URL;
       else {
-        if (isDev || isStaging) return process.env.BE_DEV_URL;
+        if (isDev /*|| isStaging*/) return process.env.BE_DEV_URL;
         if (isProd) return process.env.BE_PROD_URL;
       }
       return 'API_URL:not (isDev || (isProd && isStaging),isProd && !isStaging)';
     })()
   }
 
-  console.log(`\nDEVELOPMENT${isDev ? ' ✅' : ''} | STAGING${isStaging ? ' ✅' : ''} | PRODUCTION${isProd ? ' ✅' : ''}`);
+  console.log(`\nDEVELOPMENT${isDev ? ' ✅' : ''} | PRODUCTION${isProd ? ' ✅' : ''}`);
   console.log("API_URL", env.API_URL+"\n");
 
 
