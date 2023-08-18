@@ -44,10 +44,13 @@ export default function UploadImage(props) {
     if (e.xhr) {
       console.log('xhr', e.xhr.response);
       let response = JSON.parse(e.xhr.response);
-      if (response.success) {
+      console.log('response', response);
+      let res = response.result;
+      if (res.success) {
         let urlTemp =
-          publicRuntimeConfig.apiUrl + '/' + pictureUrl + '/' + response.result;
-        onSelectImage(response.result);
+          publicRuntimeConfig.apiUrl + '/' + pictureUrl + '/' + res.result;
+        console.log('urlTemp', urlTemp);
+        onSelectImage(res.result);
         setImageTemp(urlTemp);
         toast.current.show({
           severity: 'info',

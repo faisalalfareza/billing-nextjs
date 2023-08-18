@@ -231,13 +231,14 @@ async function prosesUploadUserProfile(res: any, req: any, body: any) {
     headers: {
       Authorization: req.headers.authorization,
       'Access-Control-Allow-Origin': '*',
+      'Content-Type': req.headers['content-type'],
     },
   };
   axios
     .post(url, body, config)
     .then(response => {
       res.send({
-        result: response.data.result,
+        result: response.data,
       });
     })
     .catch(error => {
