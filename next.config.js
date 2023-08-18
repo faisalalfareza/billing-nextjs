@@ -17,6 +17,7 @@ const runtimeCaching = require("next-pwa/cache");
 const {
   PHASE_DEVELOPMENT_SERVER,
   PHASE_PRODUCTION_BUILD,
+  PHASE_PRODUCTION_SERVER
 } = require('next/constants');
 
 const nextConfig = (phase) => {
@@ -27,15 +28,14 @@ const nextConfig = (phase) => {
   // Staging adalah saat Anda pada dasarnya menguji kode sebelum akan masuk ke prod.
   const isStaging = (phase === PHASE_PRODUCTION_BUILD && process.env.STAGING == 1);
   // Production berarti kode produksi yang benar-benar dilihat pengguna akhir. 
-  const isProd = (phase === PHASE_PRODUCTION_BUILD && process.env.STAGING != 1);
+  const isProd = (phase === PHASE_PRODUCTION_SERVER || process.env.STAGING != 1);
 
   // NOTE: .env is for client & server side
   const env = {
     CURRENT_ENV: (() => {
       if (process.env.NODE_ENV) return process.env.NODE_ENV;
       else {
-        if (isDev) return "development";
-        if (isStaging) return "staging";
+        if (isDev || isStaging) return "development";
         if (isProd) return "production";
       }
       return 'CURRENT_ENV:not (isDev,isProd && isStaging,isProd && !isStaging)';

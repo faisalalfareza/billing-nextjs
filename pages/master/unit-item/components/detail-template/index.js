@@ -85,7 +85,7 @@ export default function DetailTemplate(props) {
         <MDBox
           sx={{ overflow: "scroll" }}
           className="template-display"
-          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(htmlData) }}
+          // dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(htmlData) }}
         />
       </ModalBody>
       <ModalFooter>

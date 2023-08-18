@@ -153,10 +153,8 @@ function AddOrEditPeriod({ isOpen, params, onModalChanged, site }) {
     Block.remove(`.${periodNoBlockLoadingName}`);
   };
   useEffect(() => {
-    if (!first) {
-      getLastPeriodNo();
-    }
-    setFirst(true), first = true;
+    !first && getLastPeriodNo();
+    setFirst(true) //, first = true;
     
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);

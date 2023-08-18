@@ -124,10 +124,8 @@ function UploadDataUnitItem(props) {
   };
 
   useEffect(() => {
-    if (!first) {
-      getTemplateInvoice();
-    }
-    setFirst(true), first = true;
+    !first && getTemplateInvoice();
+    setFirst(true) //, first = true;
     
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
