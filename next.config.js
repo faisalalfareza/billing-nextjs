@@ -21,6 +21,9 @@ const {
 } = require('next/constants');
 
 const nextConfig = (phase) => {
+  console.log("phase:", phase);
+  console.log("process.env.NODE_ENV:", process.env.NODE_ENV);
+  
   // When started in development mode `next dev` or `npm run dev` regardless of the value of STAGING environment variable
   // Dev adalah tempat di mana kode berjalan yang belum tentu lokal / di mesin Anda tetapi juga belum tentu akan keluar ke situs web produksi.
   const isDev = (phase === PHASE_DEVELOPMENT_SERVER);
