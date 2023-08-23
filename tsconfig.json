@@ -1,3 +1,11 @@
+/*
+File tsconfig.json/jsconfig.json adalah berkas konfigurasi TypeScript atau JavaScript yang digunakan untuk mengatur bagaimana kode Anda dikompilasi atau ditafsirkan selama pengembangan.
+
+File tsconfig.json (atau jsconfig.json) digunakan oleh pengembang selama proses pengembangan untuk memberikan petunjuk kepada alat pengembangan (seperti TypeScript compiler) tentang bagaimana mengelola kode TypeScript atau JavaScript Anda.
+
+Ketika Anda melakukan build proyek Next.js untuk mode produksi (misalnya dengan perintah npm run build), hasil build akan mengambil kode yang sudah dikompilasi dan dikonfigurasi sesuai dengan aturan yang ada dalam tsconfig.json.
+*/
+
 {
   "compilerOptions": {
     "target": "es5",
