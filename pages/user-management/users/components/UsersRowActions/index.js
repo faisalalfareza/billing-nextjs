@@ -21,12 +21,13 @@ function UsersRowActions({ record, openModalonEdit, onDeleted }) {
     closeMenu(), setTimeout(() => openModalonEdit(record), 0);
   };
   const confirmDelete = () => {
+    closeMenu();
     Swal.fire({
       title: "Delete User",
       text:
         "Are you sure to delete " +
-        record.siteName +
-        "? this will remove it permanently from their related user.",
+        record.userName +
+        "? this will remove it permanently",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#3085d6",
@@ -34,34 +35,9 @@ function UsersRowActions({ record, openModalonEdit, onDeleted }) {
       reverseButtons: true,
     }).then((result) => {
       if (result.isConfirmed) {
-        handleDelete(record);
+        onDeleted(record);
       }
     });
-  };
-
-  const handleDelete = async (record) => {
-    let response = await fetch("/api/user-management/users/delete", {
-      method: "POST",
-      body: JSON.stringify({
-        accessToken: accessToken,
-        params: {
-          Id: record.id,
-        },
-      }),
-    });
-    if (!response.ok) throw new Error(`Error: ${response.status}`);
-    response = typeNormalization(await response.json());
-
-    if (response.error)
-      alertService.error({
-        title: "Error",
-        text: response.error.error.message,
-      });
-    else {
-      alertService.success({
-        title: "Successfully deleted",
-      });
-    }
   };
 
   return (

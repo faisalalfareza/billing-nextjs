@@ -213,6 +213,8 @@ function EditDataUsers(props) {
     } else {
       Block.standard(`.${createUserBlockLoadingName}`, `Updating User`),
         setLoading(true);
+      if (body.password == "" || body.password == null) delete body.password;
+      body.id = params.id;
       let response = await fetch(
         "/api/user-management/users/prosesupdateuser",
         {

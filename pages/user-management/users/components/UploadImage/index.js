@@ -20,8 +20,9 @@ export default function UploadImage(props) {
   const [{ accessToken, encryptedAccessToken }] = useCookies();
   const toast = useRef(null);
   const [totalSize, setTotalSize] = useState(0);
-  const [imageTemp, setImageTemp] = useState(photo ? photo : "");
+  const [imageTemp, setImageTemp] = useState(photo != "" ? photo : "");
   const fileUploadRef = useRef(null);
+  console.log("upload", imageTemp);
 
   const onTemplateSelect = (e) => {
     let _totalSize = totalSize;

@@ -128,7 +128,7 @@ export default function Users() {
           <UsersRowActions
             record={value}
             openModalonEdit={openModalEdit}
-            onDeleted={fetchData}
+            onDeleted={handleDelete}
           />
         );
       },
@@ -277,6 +277,32 @@ export default function Users() {
     else {
       downloadTempFile(response.result.uri);
     }
+  };
+
+  const handleDelete = async (record) => {
+    let response = await fetch("/api/user-management/users/delete", {
+      method: "POST",
+      body: JSON.stringify({
+        accessToken: accessToken,
+        params: {
+          Id: record.id,
+        },
+      }),
+    });
+    if (!response.ok) throw new Error(`Error: ${response.status}`);
+    response = typeNormalization(await response.json());
+
+    if (response.error)
+      alertService.error({
+        title: "Error",
+        text: response.error?.error?.message,
+      });
+    else {
+      alertService.success({
+        title: "Successfully deleted",
+      });
+    }
+    fetchData();
   };
 
   return (
