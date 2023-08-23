@@ -1,3 +1,9 @@
+/*
+File .eslintrc.json/.eslintrc.js ini adalah berkas konfigurasi yang digunakan selama proses pengembangan untuk menentukan aturan linting (pemeriksaan kode) dan konfigurasi spesifik lainnya untuk proyek Anda.
+
+ESLint adalah alat yang membantu Anda memeriksa kode JavaScript atau TypeScript Anda selama pengembangan untuk menemukan dan mencegah masalah potensial. File konfigurasi ESLint, seperti .eslintrc.json, digunakan oleh alat ini untuk menentukan aturan linting yang diterapkan pada kode Anda.
+*/
+
 {
   "extends": "next/core-web-vitals"
 }
