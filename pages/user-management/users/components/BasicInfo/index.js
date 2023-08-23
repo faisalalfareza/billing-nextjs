@@ -21,6 +21,7 @@ export default function BasicInfo({ formData }) {
     password,
     repeatPassword,
     phoneNumber,
+    photoProfile,
   } = formField;
   const {
     nama: namaV,
@@ -30,6 +31,7 @@ export default function BasicInfo({ formData }) {
     password: passwordV,
     repeatPassword: repeatPasswordV,
     phoneNumber: phoneNumberV,
+    photoProfile: photoProfileV,
   } = values;
 
   // const [random, setRandom] = useState(true);
@@ -67,6 +69,10 @@ export default function BasicInfo({ formData }) {
     setFieldValue("photoProfile", image);
   };
   console.log(formData);
+  const checkingSuccessInput = (value, error) => {
+    return value != undefined && value != "" && value.length > 0 && !error;
+  };
+
   return (
     <>
       <Card sx={{ p: 2, width: "100%", mt: 2 }}>
@@ -80,7 +86,11 @@ export default function BasicInfo({ formData }) {
             </MDBox>
           </Grid>
           <Grid item xs={4}>
-            <UploadImage {...optionsFile} onSelectImage={handleImage} />
+            <UploadImage
+              {...optionsFile}
+              onSelectImage={handleImage}
+              photo={photoProfileV}
+            />
           </Grid>
           <Grid item xs={8}>
             <Grid container spacing={3}>
@@ -141,7 +151,10 @@ export default function BasicInfo({ formData }) {
                   value={phoneNumberV}
                   placeholder={phoneNumber.placeholder}
                   error={errors.phoneNumber && touched.phoneNumber}
-                  success={phoneNumberV.length > 0 && !errors.phoneNumber}
+                  success={checkingSuccessInput(
+                    phoneNumberV.code,
+                    errors.phoneNumber
+                  )}
                 />
               </Grid>
             </Grid>

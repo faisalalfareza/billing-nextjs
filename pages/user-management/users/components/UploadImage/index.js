@@ -1,61 +1,61 @@
-import React, {useRef, useState} from 'react';
-import {Toast} from 'primereact/toast';
-import {FileUpload} from 'primereact/fileupload';
-import {ProgressBar} from 'primereact/progressbar';
-import {Button} from 'primereact/button';
-import {Tooltip} from 'primereact/tooltip';
-import {Tag} from 'primereact/tag';
-import {useCookies} from 'react-cookie';
-import {alertService} from '/helpers';
-import getConfig from 'next/config';
+import React, { useRef, useState } from "react";
+import { Toast } from "primereact/toast";
+import { FileUpload } from "primereact/fileupload";
+import { ProgressBar } from "primereact/progressbar";
+import { Button } from "primereact/button";
+import { Tooltip } from "primereact/tooltip";
+import { Tag } from "primereact/tag";
+import { useCookies } from "react-cookie";
+import { alertService } from "/helpers";
+import getConfig from "next/config";
 
 export default function UploadImage(props) {
-  const {max_file_size, pictureUrl, type, url, onSelectImage} = props;
-  const {publicRuntimeConfig} = getConfig();
+  const { max_file_size, pictureUrl, type, url, onSelectImage, photo } = props;
+  const { publicRuntimeConfig } = getConfig();
   let megaByte = max_file_size ? max_file_size / 1048576 : 0;
-  let urlC = url ? '/api/user-management/users/' + url.toLowerCase() : '';
+  let urlC = url ? "/api/user-management/users/" + url.toLowerCase() : "";
   // let urlC = url
   //   ? publicRuntimeConfig.apiUrl + '/api/services/app/MasterBilling/' + url
   //   : '';
-  const [{accessToken, encryptedAccessToken}] = useCookies();
+  const [{ accessToken, encryptedAccessToken }] = useCookies();
   const toast = useRef(null);
   const [totalSize, setTotalSize] = useState(0);
-  const [imageTemp, setImageTemp] = useState('');
+  const [imageTemp, setImageTemp] = useState(photo ? photo : "");
   const fileUploadRef = useRef(null);
 
-  const onTemplateSelect = e => {
+  const onTemplateSelect = (e) => {
     let _totalSize = totalSize;
     let files = e.files;
 
-    Object.keys(files).forEach(key => {
+    Object.keys(files).forEach((key) => {
       _totalSize += files[key].size || 0;
     });
 
     setTotalSize(_totalSize);
   };
 
-  const onTemplateUpload = e => {
-    console.log('upload', e);
+  const onTemplateUpload = (e) => {
+    console.log("upload", e);
     let _totalSize = 0;
 
-    e.files.forEach(file => {
+    e.files.forEach((file) => {
       _totalSize += file.size || 0;
     });
     if (e.xhr) {
-      console.log('xhr', e.xhr.response);
+      console.log("xhr", e.xhr.response);
       let response = JSON.parse(e.xhr.response);
-      console.log('response', response);
+      console.log("response", response);
       let res = response.result;
       if (res.success) {
         let urlTemp =
-          publicRuntimeConfig.apiUrl + '/' + pictureUrl + '/' + res.result;
-        console.log('urlTemp', urlTemp);
+          publicRuntimeConfig.apiUrl + "/" + pictureUrl + "/" + res.result;
+        console.log("urlTemp", urlTemp);
         onSelectImage(res.result);
         setImageTemp(urlTemp);
         toast.current.show({
-          severity: 'info',
-          summary: 'Success',
-          detail: 'File Uploaded',
+          severity: "info",
+          summary: "Success",
+          detail: "File Uploaded",
         });
       } else {
         let err = response.error.error;
@@ -77,22 +77,23 @@ export default function UploadImage(props) {
     setTotalSize(0);
   };
 
-  const headerTemplate = options => {
-    const {className, chooseButton, uploadButton, cancelButton} = options;
+  const headerTemplate = (options) => {
+    const { className, chooseButton, uploadButton, cancelButton } = options;
     const value = totalSize / 10000;
     const formatedValue =
       fileUploadRef && fileUploadRef.current
         ? fileUploadRef.current.formatSize(totalSize)
-        : '0 B';
+        : "0 B";
 
     return (
       <div
         className={className}
         style={{
-          backgroundColor: 'transparent',
-          display: 'flex',
-          alignItems: 'center',
-        }}>
+          backgroundColor: "transparent",
+          display: "flex",
+          alignItems: "center",
+        }}
+      >
         {chooseButton}
         {uploadButton}
         {cancelButton}
@@ -103,7 +104,8 @@ export default function UploadImage(props) {
           <ProgressBar
             value={value}
             showValue={false}
-            style={{width: '10rem', height: '12px'}}></ProgressBar>
+            style={{ width: "10rem", height: "12px" }}
+          ></ProgressBar>
         </div>
       </div>
     );
@@ -112,7 +114,7 @@ export default function UploadImage(props) {
   const itemTemplate = (file, props) => {
     return (
       <div className="flex align-items-center flex-wrap">
-        <div className="flex align-items-center" style={{width: '40%'}}>
+        <div className="flex align-items-center" style={{ width: "40%" }}>
           <img
             alt={file.name}
             role="presentation"
@@ -142,28 +144,30 @@ export default function UploadImage(props) {
   const emptyTemplate = () => {
     return (
       <div className="flex align-items-center flex-column">
-        {imageTemp == '' && (
+        {imageTemp == "" && (
           <>
             <i
               className="pi pi-image mt-3 p-5"
               style={{
-                fontSize: '5em',
-                borderRadius: '50%',
-                backgroundColor: 'var(--surface-b)',
-                color: 'var(--surface-d)',
-              }}></i>
+                fontSize: "5em",
+                borderRadius: "50%",
+                backgroundColor: "var(--surface-b)",
+                color: "var(--surface-d)",
+              }}
+            ></i>
             <span
               style={{
-                fontSize: '1.2em',
-                color: 'var(--text-color-secondary)',
+                fontSize: "1.2em",
+                color: "var(--text-color-secondary)",
               }}
-              className="my-5">
+              className="my-5"
+            >
               <br />
               Drag and Drop Image Here
             </span>
           </>
         )}
-        {imageTemp != '' && (
+        {imageTemp != "" && (
           <img role="presentation" src={imageTemp} width={100} />
         )}
       </div>
@@ -171,26 +175,26 @@ export default function UploadImage(props) {
   };
 
   const chooseOptions = {
-    icon: 'pi pi-fw pi-images',
+    icon: "pi pi-fw pi-images",
     iconOnly: true,
-    className: 'custom-choose-btn p-button-rounded p-button-outlined',
+    className: "custom-choose-btn p-button-rounded p-button-outlined",
   };
   const uploadOptions = {
-    icon: 'pi pi-fw pi-cloud-upload',
+    icon: "pi pi-fw pi-cloud-upload",
     iconOnly: true,
     className:
-      'custom-upload-btn p-button-success p-button-rounded p-button-outlined',
+      "custom-upload-btn p-button-success p-button-rounded p-button-outlined",
   };
   const cancelOptions = {
-    icon: 'pi pi-fw pi-times',
+    icon: "pi pi-fw pi-times",
     iconOnly: true,
     className:
-      'custom-cancel-btn p-button-danger p-button-rounded p-button-outlined',
+      "custom-cancel-btn p-button-danger p-button-rounded p-button-outlined",
   };
 
   const uploadHandle = async () => {
-    let response = await fetch('/api/master/site/getlistmastersite', {
-      method: 'POST',
+    let response = await fetch("/api/master/site/getlistmastersite", {
+      method: "POST",
       body: JSON.stringify({
         accessToken: accessToken,
         params: {
@@ -201,8 +205,8 @@ export default function UploadImage(props) {
     });
   };
 
-  const onTemplateBeforeSend = e => {
-    e.xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
+  const onTemplateBeforeSend = (e) => {
+    e.xhr.setRequestHeader("Authorization", "Bearer " + accessToken);
   };
 
   return (
