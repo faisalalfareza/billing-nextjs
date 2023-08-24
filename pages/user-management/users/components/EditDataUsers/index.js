@@ -215,6 +215,7 @@ function EditDataUsers(props) {
         setLoading(true);
       if (body.password == "" || body.password == null) delete body.password;
       body.id = params.id;
+      if (body.photoProfile.includes("http")) delete body.photoProfile;
       let response = await fetch(
         "/api/user-management/users/prosesupdateuser",
         {
