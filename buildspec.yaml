@@ -1,0 +1,35 @@
+version: 0.2
+
+env:
+  variables:
+    NODE_ENV: "production"
+    HARD_URL: "http://18.140.60.145:1010"
+    # Anda dapat menambahkan variabel lain sesuai kebutuhan
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 14  # Sesuaikan dengan versi Node.js yang Anda gunakan
+      docker: 18  # Sesuaikan dengan versi Docker yang Anda gunakan
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region ap-southeast-3 | docker login --username AWS --password-stdin 301296042592.dkr.ecr.ap-southeast-3.amazonaws.com
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Installing project dependencies...
+      - npm ci --force
+      - echo Building the Next.js project...
+      - npm run build
+      - echo Building the Docker image...
+      - docker build -t 301296042592.dkr.ecr.ap-southeast-3.amazonaws.com/billing-nextjs .
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing the Docker image to Amazon ECR...
+      - docker tag billing-nextjs-server 301296042592.dkr.ecr.ap-southeast-3.amazonaws.com/billing-nextjs
+      - docker push 301296042592.dkr.ecr.ap-southeast-3.amazonaws.com/billing-nextjs
+
+artifacts:
+  files: '**/*'
