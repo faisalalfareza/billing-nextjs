@@ -252,23 +252,13 @@ export default function Users() {
   };
 
   const handleExport = async () => {
-    let response = await fetch(
-      "/api/transaction/electric/exporttoexcelelectricreading",
-      {
-        method: "POST",
-        body: JSON.stringify({
-          accessToken: accessToken,
-          params: {
-            maxResultCount: 1000,
-            skipCount: 0,
-            siteId: site?.siteId,
-            projectId: formValues.project?.projectId,
-            clusterId: formValues.cluster?.clusterId,
-            search: undefined,
-          },
-        }),
-      }
-    );
+    let response = await fetch("/api/user-management/users/exporttoexceluser", {
+      method: "POST",
+      body: JSON.stringify({
+        accessToken: accessToken,
+        params: {},
+      }),
+    });
     if (!response.ok) throw new Error(`Error: ${response.status}`);
     response = typeNormalization(await response.json());
 

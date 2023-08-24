@@ -42,6 +42,9 @@ export default async function handler(
         case "delete":
           deleteUser(res, body);
           break;
+        case "exporttoexceluser":
+          exportToExcelUser(res, body);
+          break;
       }
       break;
   }
@@ -274,4 +277,30 @@ async function deleteUser(res: any, body: any) {
         error: error.response.data,
       });
     });
+}
+
+async function exportToExcelUser(res: any, body: any) {
+  const { accessToken, params } = body;
+
+  const url = `${publicRuntimeConfig.apiUrl}/api/services/app/BillingSystems/ExportToExcelUser`;
+  const config = {
+    headers: {
+      Authorization: "Bearer " + accessToken,
+      "Access-Control-Allow-Origin": "*",
+    },
+    params: params,
+  };
+
+  axios
+    .post(url, params, config)
+    .then((response) => {
+      res.send({
+        result: response.data.result,
+      });
+    })
+    .catch((error) =>
+      res.send({
+        error: error.response.data,
+      })
+    );
 }
